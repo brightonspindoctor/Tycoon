@@ -45,7 +45,6 @@ export interface Run {
   oil: number
   storage: number
   fire: number
-  firebreak: boolean
   marked: number | null
   threats: Threat[]
   modifier: ModKey | null
@@ -145,7 +144,6 @@ export const fires = (n: number) => `${n} fire${n === 1 ? '' : 's'}`
 function startFire(r: Run, count: number) {
   const bonus = r.modifier === 'drySeason' ? 1 : 0
   r.fire = Math.min(CONFIG.fireMax, r.fire + count + bonus)
-  r.firebreak = false
   say(r, `Fire! ${fires(r.fire)} burning. Pumps stopped.`)
 }
 
@@ -184,7 +182,7 @@ export function newRun(seed: number, bonus: BonusKey): Run {
     seed, rng: seed, bonus, phase: 'shop', stage: 1, round: 0, turn: 0,
     capital: CONFIG.startCapital, gold: 0, debt: bonus === 'trustFund' ? CONFIG.trustFundDebt : CONFIG.startDebt, ap: 0, cover: 0, nextId: 1,
     deck: [], draw: [], hand: [], discard: [], plots: [], oil: bonus === 'threeOil' ? 3 : 0,
-    storage: CONFIG.startStorage, fire: 0, firebreak: false, marked: null, threats: [], modifier: null,
+    storage: CONFIG.startStorage, fire: 0, marked: null, threats: [], modifier: null,
     short: 0, freight: 0, pending: { ap: 0, audit: false, refuse: false, margin: 0 }, current: { audit: false, refuse: false },
     items: [], destroyCost: CONFIG.destroyCost, prospectPrice: CONFIG.prospectPrice,
     shop: { cards: [], item: null, loanTaken: false, prospectSold: false, bucketSold: false, boon: null }, ledger: [], events: [],
@@ -315,7 +313,6 @@ function startRound(r: Run, round: number) {
   r.short = 0
   r.freight = r.threats.some(t => t.kind === 'railroad') ? 1 : 0
   r.fire = 0
-  r.firebreak = false
   r.marked = null
   r.plots.forEach(w => w && (w.unstable = false))
   r.pending = { ap: 0, audit: false, refuse: false, margin: 0 }
@@ -548,12 +545,23 @@ function capWell(r: Run) {
   hit(r, bo, CONFIG.capWellDamage)
 }
 
+/** The Well a Firebreak costs you: the lowest output, then the fewest barrels left. */
+export function weakestWell(r: Run): number {
+  let best = -1
+  r.plots.forEach((w, i) => {
+    const b = best >= 0 ? r.plots[best]! : null
+    if (w && (!b || w.output < b.output || (w.output === b.output && w.reserve < b.reserve))) best = i
+  })
+  return best
+}
+
 function firebreak(r: Run) {
-  if (!r.fire || r.ap < CONFIG.firebreakAP || r.plots.length <= CONFIG.firebreakPlot) return
+  const i = weakestWell(r)
+  if (!r.fire || r.ap < CONFIG.firebreakAP || i < 0) return
   r.ap -= CONFIG.firebreakAP
-  loseWell(r, CONFIG.firebreakPlot, 'lost')
-  r.firebreak = true
-  say(r, 'Firebreak cut at Plot 2.')
+  loseWell(r, i, 'lost')
+  r.fire = 0
+  say(r, `Firebreak: Well No. ${i + 1} sacrificed. Every fire is out.`)
 }
 
 // --------------------------------------------------------------- end turn
@@ -595,7 +603,6 @@ export function fireTarget(r: Run): string {
   if (r.oil > 0) return `Burns ${Math.min(r.oil, r.fire)} oil (${r.oil} → ${Math.max(0, r.oil - r.fire)}).`
   const i = highestWell(r)
   if (i < 0) return 'Nothing left to burn.'
-  if (r.firebreak && i <= CONFIG.firebreakPlot) return 'Reaches the firebreak and goes out.'
   return `Destroys Well No. ${i + 1}.`
 }
 
@@ -617,7 +624,6 @@ function endTurn(r: Run) {
     else {
       const i = highestWell(r)
       if (i < 0) { r.fire = 0; say(r, 'The fire burnt itself out.') }
-      else if (r.firebreak && i <= CONFIG.firebreakPlot) { r.fire = 0; r.firebreak = false; say(r, 'The firebreak held. Fire out.') }
       else { loseWell(r, i, 'burnt'); say(r, `Fire destroyed Well No. ${i + 1}.`) }
     }
   }

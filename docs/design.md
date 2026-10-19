@@ -51,7 +51,7 @@ A card is offered (weighted by rarity, like the shop): take it into your deck or
 - Enemies that move first show what they opened with on turn 1, above their next move.
 
 ### Fire (a hazard, not an enemy)
-Fire is counted as a number of fires (up to 3); new outbreaks add to it. Each end of turn every fire burns 1 oil from the stockpile; with no oil it destroys the highest-numbered Well. Pumps stop while it burns. It can't touch Capital. A Bucket of Water puts out one fire and never wears out; Fire Brigade puts out every fire. Or or cut a Firebreak at Plot 2 (2 AP, lose that Well) to save Plot 1. Sources: Claim Jumper (when beaten), Strike (round 3), Bad Blood, the Baron.
+Fire is counted as a number of fires (up to 3); new outbreaks add to it. Each end of turn every fire burns 1 oil from the stockpile; with no oil it destroys the highest-numbered Well. Pumps stop while it burns. It can't touch Capital. A Bucket of Water puts out one fire and never wears out; Fire Brigade puts out every fire. Or cut a Firebreak (2 AP): lose your weakest Well (lowest output, then fewest barrels left) and every fire goes out. Sources: Claim Jumper (when beaten), Strike (round 3), Bad Blood, the Baron.
 
 ### Enemies
 Round 1 is always a cash enemy (it drains your money), round 2 always an engine enemy (it breaks your Wells, cards or turns), round 3 one of each at once, and round 4 the boss.

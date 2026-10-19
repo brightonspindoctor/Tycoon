@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { CARDS, ITEMS, MODS, ROLE_LABEL, THREATS } from '../engine/data'
 import {
-  apCost, canPlay, damageFor, fires, debtPerTurn, fireTarget, intent, intentText, isAttack, liveThreats, netPrice, price, production, skimRate,
+  apCost, canPlay, damageFor, fires, weakestWell, debtPerTurn, fireTarget, intent, intentText, isAttack, liveThreats, netPrice, price, production, skimRate,
   type Action, type Run, type Threat,
 } from '../engine/engine'
 import { money, year } from '../engine/format'
@@ -125,7 +125,7 @@ export function MobileGame({ run, dispatch }: Props) {
               const state = !w ? 'Empty' : w.unstable ? 'Unstable' : run.fire ? 'Stopped' : `${w.output} oil`
               return (
                 <div key={i} className={`m-plot ${!w ? 'plot--empty' : ''} ${w?.unstable ? 'plot--unstable' : ''} ${marked ? 'plot--marked' : ''} ${burning ? 'plot--burning' : ''} ${run.fire && w ? 'plot--stopped' : ''}`}>
-                  <span className="m-plot__no cl-num">{i + 1}{i === CONFIG.firebreakPlot ? '·FB' : ''}</span>
+                  <span className="m-plot__no cl-num">{i + 1}</span>
                   {w ? (
                     <button type="button" className="plot__well" onClick={() => { setSelected(null); setPlotMenu(plotMenu === i ? null : i) }} aria-label={`Well No. ${i + 1}, ${state}. Tap to sell`}>
                       <img src={art('icons/derrick.png')} alt="" />
@@ -186,7 +186,7 @@ export function MobileGame({ run, dispatch }: Props) {
             <button type="button" className="cl-btn cl-btn--small m-pilebtn" onClick={() => setPile('draw')}>Draw {run.draw.length}</button>
             <button type="button" className="cl-btn cl-btn--small m-pilebtn" onClick={() => setPile('discard')}>Discard {run.discard.length}</button>
             {blowout && unstable >= 0 && <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < 1} onClick={() => dispatch({ type: 'capWell' })}>Cap No. {unstable + 1} · {CONFIG.capWellDamage} Hold</button>}
-            {run.fire > 0 && run.plots.length > CONFIG.firebreakPlot && <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · 2 AP</button>}
+            {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose No. {weakestWell(run) + 1}</button>}
             {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
           </div>
         )}

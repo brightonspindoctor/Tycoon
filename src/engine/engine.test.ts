@@ -463,3 +463,26 @@ describe('opening hand', () => {
     }
   })
 })
+
+describe('Firebreak', () => {
+  it('costs 2 AP, loses your weakest Well and puts out every fire', () => {
+    let r = newRun(9, 'threeOil')
+    r.threats = [{ id: 900, kind: 'railroad', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
+    r.plots = [{ output: 2, reserve: 8 }, { output: 1, reserve: 5 }, { output: 1, reserve: 2 }, { output: 2, reserve: 1 }]
+    r.fire = 3; r.ap = 2
+    r = act(r, { type: 'firebreak' })
+    expect(r.fire).toBe(0)
+    expect(r.ap).toBe(0)
+    expect(r.plots[2]).toBeNull() // output 1 with the fewest barrels left
+    expect(r.plots.filter(Boolean)).toHaveLength(3)
+  })
+  it("can't be cut without a fire, a Well or 2 AP", () => {
+    for (const set of [(r: Run) => { r.fire = 0 }, (r: Run) => { r.plots = [] }, (r: Run) => { r.ap = 1 }]) {
+      let r = newRun(9, 'threeOil'); r.plots = [{ output: 1, reserve: 5 }]; r.fire = 2; r.ap = 2
+      set(r)
+      const before = JSON.stringify([r.fire, r.plots, r.ap])
+      r = act(r, { type: 'firebreak' })
+      expect(JSON.stringify([r.fire, r.plots, r.ap])).toBe(before)
+    }
+  })
+})

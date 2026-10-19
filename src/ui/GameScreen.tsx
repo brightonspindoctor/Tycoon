@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { CARDS, ITEMS, MODS, THREATS } from '../engine/data'
 import {
-  apCost, canPlay, damageFor, fires, debtPerTurn, fireTarget, isAttack, liveThreats, netPrice, price, production, skimRate,
+  apCost, canPlay, damageFor, fires, weakestWell, debtPerTurn, fireTarget, isAttack, liveThreats, netPrice, price, production, skimRate,
   type Action, type Run,
 } from '../engine/engine'
 import { ERA_THEME, money, year } from '../engine/format'
@@ -83,7 +83,7 @@ export function GameScreen({ run, dispatch }: Props) {
               const state = !w ? 'Empty plot' : w.unstable ? 'Unstable' : run.fire ? 'Pump stopped' : `${w.output} oil / turn`
               return (
                 <div key={i} className={`plot ${!w ? 'plot--empty' : ''} ${w?.unstable ? 'plot--unstable' : ''} ${marked ? 'plot--marked' : ''} ${burning ? 'plot--burning' : ''} ${run.fire && w ? 'plot--stopped' : ''}`}>
-                  <span className="cl-label">Plot {i + 1}{i === CONFIG.firebreakPlot ? ' · Firebreak' : ''}</span>
+                  <span className="cl-label">Plot {i + 1}</span>
                   {w ? <button type="button" className="plot__well" onClick={() => setPlotMenu(plotMenu === i ? null : i)} aria-label={`Well No. ${i + 1}, ${state}`}>
                     <img src={`${import.meta.env.BASE_URL}art/icons/derrick.png`} alt="" />
                   </button> : <div className="plot__hole" />}
@@ -154,7 +154,7 @@ export function GameScreen({ run, dispatch }: Props) {
           {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
           <div className="action-strip__actions">
             {blowout && unstable >= 0 && <button type="button" className="cl-btn" disabled={run.ap < 1} onClick={() => dispatch({ type: 'capWell' })}>Cap Well No. {unstable + 1} · 1 AP · {CONFIG.capWellDamage} Hold</button>}
-            {run.fire > 0 && run.plots.length > CONFIG.firebreakPlot && <button type="button" className="cl-btn" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · 2 AP{run.plots[CONFIG.firebreakPlot] ? ' · lose Well No. 2' : ''}</button>}
+            {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose Well No. {weakestWell(run) + 1}, put out every fire</button>}
           </div>
         </div>
         <div className="hand-row">
