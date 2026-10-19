@@ -26,7 +26,7 @@ export function CardView({ card, apCost, playable = true, why, selected, onClick
         <div className="cl-card__name">{d.name}</div>
       </div>
       <div className="cl-card__art"><img src={`${import.meta.env.BASE_URL}art/icons/${d.icon}.png`} alt="" draggable={false} /></div>
-      <div className="cl-card__band">{d.family} · 1860s</div>
+      <div className="cl-card__band">{d.family}<span className="cl-card__era"> · 1860s</span></div>
       <div className="cl-card__effect">{d.text}</div>
       <div className="cl-card__foot">
         <div className="cl-pips" aria-hidden="true">

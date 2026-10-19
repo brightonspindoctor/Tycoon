@@ -2,7 +2,7 @@
 // drives the game screens, the tests and the balance simulator.
 import { CONFIG } from './config'
 import {
-  ALL_POOL, ATTACK_CARDS, BONUSES, CARDS, ITEMS, MODS, ROUND1_POOL, SHOP_POOL, STARTER, THREATS,
+  ALL_POOL, ATTACK_CARDS, CARDS, ITEMS, MODS, ROUND1_POOL, SHOP_POOL, STARTER, THREATS,
   type BonusKey, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
 } from './data'
 import { next, pick, sample, shuffle } from './rng'
@@ -174,8 +174,7 @@ export function newRun(seed: number, bonus: BonusKey): Run {
   if (bonus === 'extraProspect') r.deck.push(card(r, 'prospect'))
   if (bonus === 'pettyCash') r.deck.push(card(r, 'pettyCash'))
   if (bonus === 'gearGraft') r.deck.push(card(r, 'improveGear'), card(r, 'hardGraft'))
-  stockShop(r)
-  say(r, `${BONUSES[bonus].name}. The Land Office is open.`)
+  startRound(r, 1) // straight into the first fight; the Land Office opens after it
   return r
 }
 

@@ -5,6 +5,7 @@ import { saveRun } from './storage'
 import { ERA_THEME } from './engine/format'
 import { play } from './sound'
 import { GameScreen } from './ui/GameScreen'
+import { CardGallery } from './ui/CardGallery'
 import { MobileGame } from './ui/MobileGame'
 import { ShopScreen } from './ui/ShopScreen'
 import { RoundSummary } from './ui/RoundSummary'
@@ -88,8 +89,10 @@ export default function App() {
     setScreen('run')
   }
 
+  const gallery = new URLSearchParams(location.search).get('preview') === 'cards'
   let body: JSX.Element
-  if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
+  if (gallery) body = <CardGallery />
+  else if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
   else if (screen === 'bonus') body = <BonusPick onPick={start} onBack={() => setScreen('intro')} />
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />
   else if (run.phase === 'shop') body = <ShopScreen run={run} dispatch={dispatch} />

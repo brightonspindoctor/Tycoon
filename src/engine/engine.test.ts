@@ -4,16 +4,17 @@ import { CONFIG } from './config'
 import { money } from './format'
 import { botRun } from '../../tools/bot'
 
-const begin = (bonus: Parameters<typeof newRun>[1] = 'threeOil', seed = 7): Run => act(newRun(seed, bonus), { type: 'leaveShop' })
+const begin = (bonus: Parameters<typeof newRun>[1] = 'threeOil', seed = 7): Run => newRun(seed, bonus)
 
 describe('a new run', () => {
   it('starts with the agreed economy', () => {
     const r = newRun(1, 'threeOil')
-    expect(r.capital).toBe(CONFIG.startCapital)
+    expect(r.capital).toBe(CONFIG.startCapital - 1) // first turn's Bank Debt is paid
     expect(r.debt).toBe(1)
     expect(r.deck).toHaveLength(10)
     expect(r.oil).toBe(3)
-    expect(r.phase).toBe('shop')
+    expect(r.phase).toBe('turn') // no shop before the first fight
+    expect(r.round).toBe(1)
   })
 
   it('round 1 charges the debt and deals a hand of five', () => {
@@ -126,7 +127,8 @@ describe('fixes', () => {
 describe('wells and hands', () => {
   it('a Well runs dry and frees its plot', () => {
     let r = begin()
-    r.threats.forEach(t => (t.hold = 99))
+    r.threats = [{ id: 900, kind: 'inspector', hold: 99, maxHold: 99, step: 0, cycle: 0, round3: false, beaten: false }]
+    r.capital = 50
     r.plots = [{ output: 1, reserve: 2 }, null]
     r.storage = 99
     r = act(r, { type: 'endTurn' })

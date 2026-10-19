@@ -132,8 +132,12 @@ button.threat { cursor: crosshair; }
 .card { text-align: left; cursor: pointer; font: inherit; width: 166px; height: 232px; padding: 10px; gap: 6px; transition: transform .15s, box-shadow .15s, opacity .2s; }
 .card--playable:hover { transform: translateY(-10px); box-shadow: 0 10px 0 -4px var(--rule); }
 .card--dim { opacity: .55; cursor: not-allowed; }
-.card .cl-card__art { min-height: 0; }
-.card .cl-card__art img { width: 78px; height: 78px; }
+.card .cl-card__art { min-height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+/* the picture shrinks to the space left, so a two-line name never pushes it over the text */
+.card .cl-card__art img { width: auto; height: auto; max-width: 78px; max-height: 100%; aspect-ratio: 1; object-fit: contain; }
+.card .cl-card__band { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: none; }
+.cl-card__era { text-transform: none; }
+.card .cl-card__top, .card .cl-card__effect, .card .cl-card__foot { flex: none; }
 .card .cl-card__name { font-size: 16px; }
 .card .cl-card__effect { min-height: 0; font-size: 13px; line-height: 17px; }
 .card--skim { border-color: var(--personal); }
@@ -145,7 +149,8 @@ button.threat { cursor: crosshair; }
 .card--small { width: 118px; height: 160px; padding: 6px; gap: 3px; }
 .card--small .cl-card__name { font-size: 12px; line-height: 14px; }
 .card--small .cl-card__cost { width: 20px; height: 20px; font-size: 12px; }
-.card--small .cl-card__art img { width: 42px; height: 42px; }
+.card--small .cl-card__art img { max-width: 42px; }
+.card--small .cl-card__era { display: none; }
 .card--small .cl-card__effect { font-size: 10px; line-height: 13px; }
 .card--small .cl-card__band { font-size: 8px; }
 .card--small:hover { transform: translateY(-4px); }
@@ -357,7 +362,8 @@ button.m-threat { cursor: pointer; }
 .m-hand .card { width: 112px; height: 156px; padding: 7px; gap: 4px; }
 .m-hand .card .cl-card__cost { width: 22px; height: 22px; font-size: 13px; }
 .m-hand .card .cl-card__name { font-size: 13px; line-height: 15px; }
-.m-hand .card .cl-card__art img { width: 44px; height: 44px; }
+.m-hand .card .cl-card__art img { max-width: 44px; }
+.m-hand .card .cl-card__era { display: none; }
 .m-hand .card .cl-card__band { font-size: 8px; padding: 2px 0; }
 .m-hand .card .cl-card__effect { font-size: 11px; line-height: 14px; }
 .m-hand .card .card-why { font-size: 8px; text-align: right; }
@@ -441,3 +447,8 @@ button.m-threat { cursor: pointer; }
 
 @keyframes deal-up { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
 @keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+
+/* card gallery (?preview=cards) */
+.gallery { height: auto; min-height: 100%; overflow: auto; }
+.gallery__row { display: flex; flex-wrap: wrap; gap: 10px; }
+.screen.gallery .m-hand { overflow: visible; min-height: 0; padding: 0; }

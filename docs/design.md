@@ -7,7 +7,7 @@ A solo roguelike deckbuilder in the style of Slay the Spire. You are the head of
 Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidden fifth path, the **eco-warrior**, who plays against the tycoons. Only Oil exists so far.
 
 ## Structure
-- 4 stages × 4 rounds. Round 4 of each stage is a boss. A shop follows every round; the shop after a boss has a new card pool.
+- 4 stages × 4 rounds. Round 4 of each stage is a boss. A shop follows every round (there is none before round 1: picking a starting bonus goes straight into the first fight); the shop after a boss has a new card pool.
 - Rounds get harder: round 1 one threat (weaker pool); round 2 one threat and a modifier; round 3 two threats; round 4 the boss.
 - Stages are eras, and the whole look changes: Victorian (1860s–90s), Art Deco (1900s–30s), mid-century (1940s–70s), corporate greenwash (1980s–now). Cards keep the look of the era they came from.
 - Money gets a unit per stage but keeps its value: $15 → $15K → $15M → $15B.
