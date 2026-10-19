@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import type { Run } from '../engine/engine'
 import { roundsReached } from '../engine/engine'
 import { money, year } from '../engine/format'
+import { CONFIG } from '../engine/config'
 import { play } from '../sound'
 
 function Progress({ reached, dead }: { reached: number; dead: boolean }) {
@@ -31,8 +32,8 @@ export function CrashOut({ run, onAgain, onHistory }: { run: Run; onAgain: () =>
       <header className="end__head">
         <span className="cl-label">Oil · Stage {st} · Round {run.round} · {year(st, run.round)}</span>
         <h1 className="cl-display end__title">{stalled ? 'The investors lost patience' : 'The company is bankrupt'}</h1>
-        <p className="end__sub">The bank has taken your Wells. {run.fire ? 'The fire is still burning. ' : ''}Nobody remembers your name.</p>
-        <span className="stamp-big">BANKRUPT</span>
+        <p className="end__sub">{stalled ? `${CONFIG.turnLimit} turns and nothing to show for it. The board has found a new Chairman.` : 'The bank has taken your Wells.'} {run.fire ? 'The fire is still burning. ' : ''}Nobody remembers your name.</p>
+        <span className="stamp-big">{stalled ? 'REMOVED' : 'BANKRUPT'}</span>
       </header>
       <div className="end__grid">
         <div className="end__main">
@@ -48,7 +49,7 @@ export function CrashOut({ run, onAgain, onHistory }: { run: Run; onAgain: () =>
         <section className="cl-ledger ledger">
           <div className="cl-ledger__head"><span className="cl-label">Final turn</span><span className="cl-ledger__total cl-minus">{money(Math.max(0, run.capital), st)}</span></div>
           <ul className="cl-ledger__rows">{run.ledger.map((l, i) => <li key={i}><span>{l.label}</span><span className={l.label === 'Brought forward' ? '' : l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{l.label === 'Brought forward' ? money(l.amount, st) : money(l.amount, st, true)}</span></li>)}</ul>
-          <p className="res-note">Account closed by order of the bank.</p>
+          <p className="res-note">{stalled ? 'Chairman removed by order of the board.' : 'Account closed by order of the bank.'}</p>
         </section>
       </div>
     </div>

@@ -70,7 +70,7 @@ export default function App() {
       saved.current = run.seed
       saveRun({
         id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run),
-        outcome: run.phase === 'lost' ? 'Bankrupt' : 'Stage 1 complete', gold: null, completed: false, stageGold: run.gold,
+        outcome: run.phase === 'stageComplete' ? 'Stage 1 complete' : run.loss?.reason === 'stalemate' ? 'Out of time' : 'Bankrupt', gold: null, completed: false, stageGold: run.gold,
       })
     }
   }, [run])

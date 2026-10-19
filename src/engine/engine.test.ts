@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, damageFor, newRun, type Run } from './engine'
+import { act, canPlay, damageFor, newRun, type Run } from './engine'
 import { CONFIG } from './config'
 import { money } from './format'
 import { botRun } from '../../tools/bot'
@@ -86,5 +86,39 @@ describe('a whole stage played by the bot', () => {
       const r = botRun(newRun(500 + s, 'threeOil'))
       expect(['lost', 'stageComplete']).toContain(r.phase)
     }
+  })
+})
+
+describe('fixes', () => {
+  it('Prospect can refill empty plots once all land is claimed', () => {
+    let r = begin()
+    const p = r.hand.find(c => c.key === 'prospect') ?? r.draw.find(c => c.key === 'prospect')!
+    if (!r.hand.includes(p)) { r.hand.push(p); r.draw = r.draw.filter(c => c !== p) }
+    r.hand = r.hand.filter(c => c.key !== 'well')
+    r.ap = 2
+    r.plots = [{ output: 1 }, null, { output: 1 }, { output: 1 }, { output: 1 }]
+    r = act(r, { type: 'play', cardId: p.id })
+    expect(r.hand.filter(c => c.key === 'well')).toHaveLength(2)
+  })
+
+  it('Prospect is refused when every plot has a Well', () => {
+    const r = begin()
+    r.plots = Array.from({ length: CONFIG.maxPlots }, () => ({ output: 1 }))
+    const p = r.deck.find(c => c.key === 'prospect')!
+    r.hand.push(p); r.ap = 2
+    expect(canPlay(r, p).ok).toBe(false)
+  })
+
+  it('an attack aimed at an immune enemy hits one it can hurt', () => {
+    let r = begin()
+    r.threats = [
+      { id: 900, kind: 'inspector', hold: 6, maxHold: 6, step: 0, cycle: 0, round3: false, beaten: false },
+      { id: 901, kind: 'strike', hold: 8, maxHold: 8, step: 0, cycle: 0, round3: false, beaten: false },
+    ]
+    const h = r.deck.find(c => c.key === 'hiredHand')!
+    r.hand = [h]; r.ap = 2
+    r = act(r, { type: 'play', cardId: h.id, target: 900 })
+    expect(r.threats[0].hold).toBe(6)
+    expect(r.threats[1].hold).toBe(4)
   })
 })

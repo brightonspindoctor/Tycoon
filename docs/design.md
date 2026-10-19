@@ -25,7 +25,7 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 
 ## Stage 1 rules (as built)
 - Start: $15 Capital, 0 gold, 2 AP a turn, 5-card hand, Bank Debt −$1 a turn (loans raise it), storage for 3 oil.
-- Prospect (2 AP) claims 2 plots and gives 2 Well cards. Maximum 5 plots, filled in order 1–5.
+- Prospect (2 AP) claims 2 plots and gives 2 Well cards. Maximum 5 plots, filled in order 1–5. Once all 5 are claimed, Prospect still gives 2 Well cards while any plot is empty.
 - A Well card (1 AP) builds a Well on the next free plot: 1 oil a turn. Wells last the whole stage.
 - Sell oil (1 AP) sells the whole stockpile. Oil carries over between rounds. Sell a Well (1 AP) for $5.
 - Enemies have **Hold** (health). Attack cards deal Hold damage by family; enemies are weak to some families (double damage) and resist others (half).

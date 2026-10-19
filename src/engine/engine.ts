@@ -359,9 +359,10 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (forced && !d.forced) return { ok: false, why: 'Play your Must play cards first' }
   if (apCost(r, c) > r.ap) return { ok: false, why: 'Not enough AP' }
   if (d.cost && r.capital - d.cost < 1 && !d.forced) return { ok: false, why: 'Not enough Capital' }
-  if (c.key === 'prospect' && r.plots.length >= CONFIG.maxPlots && !r.hand.some(x => x.key === 'well')) return { ok: false, why: 'No land left to claim' }
+  if (c.key === 'prospect' && r.plots.length >= CONFIG.maxPlots && freePlot(r) < 0) return { ok: false, why: 'No land left to claim' }
   if ((c.key === 'well' || c.key === 'wildcat') && freePlot(r) < 0) return { ok: false, why: 'No free plot' }
   if ((c.key === 'bucket' || c.key === 'fireBrigade') && !r.fire) return { ok: false, why: 'No fire' }
+  if (c.key === 'pettyCash' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
   if (isAttack(c.key) && !liveThreats(r).some(t => damageFor(d.family, d.power, t.kind) > 0)) return { ok: false, why: 'No effect on these enemies' }
   return { ok: true }
 }
@@ -386,7 +387,9 @@ function play(r: Run, cardId: number, target?: number) {
   if (d.cost) money(r, d.name, -d.cost)
   if (isAttack(c.key)) {
     const live = liveThreats(r)
-    const t = live.find(x => x.id === target) ?? live.reduce((a, b) => (damageFor(d.family, d.power, b.kind) > damageFor(d.family, d.power, a.kind) ? b : a))
+    const best = live.reduce((a, b) => (damageFor(d.family, d.power, b.kind) > damageFor(d.family, d.power, a.kind) ? b : a))
+    const chosen = live.find(x => x.id === target)
+    const t = chosen && damageFor(d.family, d.power, chosen.kind) > 0 ? chosen : best
     const dmg = damageFor(d.family, d.power, t.kind)
     say(r, `${d.name}: ${dmg} Hold damage to ${THREATS[t.kind].name}.`)
     spendCard(r, c)
@@ -398,7 +401,7 @@ function play(r: Run, cardId: number, target?: number) {
         const add = Math.min(CONFIG.plotsPerProspect, CONFIG.maxPlots - r.plots.length)
         for (let i = 0; i < add; i++) r.plots.push(null)
         for (let i = 0; i < CONFIG.wellCardsPerProspect; i++) r.hand.push(card(r, 'well', true))
-        say(r, add ? `Claimed ${add} plot${add > 1 ? 's' : ''}.` : 'No land left to claim.')
+        say(r, add ? `Claimed ${add} plot${add > 1 ? 's' : ''}.` : 'No new land. 2 Well cards drawn.')
         break
       }
       case 'well': case 'wildcat': {

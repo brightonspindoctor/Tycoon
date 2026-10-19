@@ -4,7 +4,7 @@ import { money, year } from '../engine/format'
 import { play } from '../sound'
 
 /** Counts a number from `from` to `to` over `ms`, starting after `delay`. */
-export function useCountUp(from: number, to: number, ms = 900, delay = 0): number {
+function useCountUp(from: number, to: number, ms = 900, delay = 0): number {
   const [v, setV] = useState(from)
   useEffect(() => {
     let raf = 0

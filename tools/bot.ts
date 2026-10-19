@@ -26,6 +26,7 @@ export function botTurn(r: Run): Run {
     const building = playable.find(c => c.key === 'well' || c.key === 'wildcat')
     const prospect = find('prospect')
     const graft = find('hardGraft')
+    const petty = find('pettyCash')
     let choice: Run | null = null
     if (forced) choice = act(r, { type: 'play', cardId: forced.id })
     else if (r.fire && water) choice = act(r, { type: 'play', cardId: water.id })
@@ -35,6 +36,7 @@ export function botTurn(r: Run): Run {
     else if (attack) choice = act(r, { type: 'play', cardId: attack.id })
     else if (r.oil > 0 && netPrice(r) > 0 && !r.current.refuse) choice = act(r, { type: 'sellOil' })
     else if (liveThreats(r).some(t => t.kind === 'blowout' && intent(r, t) === 'Blow') && r.plots.some(w => w?.unstable)) choice = act(r, { type: 'capWell' })
+    else if (petty && r.capital > 10) choice = act(r, { type: 'play', cardId: petty.id })
     else if (graft && r.ap === 0 && r.hand.some(c => c.key !== 'hardGraft' && CARDS[c.key].ap === 1)) choice = act(r, { type: 'play', cardId: graft.id })
     if (!choice || choice === r || JSON.stringify(choice) === JSON.stringify(r)) break
     r = choice

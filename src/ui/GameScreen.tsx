@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { CARDS, ITEMS, MODS, THREATS } from '../engine/data'
 import {
-  apCost, canPlay, damageFor, debtPerTurn, fireTarget, isAttack, liveThreats, netPrice, production, skimRate,
+  apCost, canPlay, damageFor, debtPerTurn, fireTarget, isAttack, liveThreats, netPrice, price, production, skimRate,
   type Action, type Run,
 } from '../engine/engine'
-import { money, year } from '../engine/format'
+import { ERA_THEME, money, year } from '../engine/format'
 import { CardView } from './CardView'
 import { ThreatPanel } from './ThreatPanel'
 
@@ -24,7 +24,9 @@ export function GameScreen({ run, dispatch }: Props) {
   function clickCard(id: number) {
     const c = run.hand.find(x => x.id === id)!
     if (!canPlay(run, c).ok) return
-    if (isAttack(c.key) && live.length > 1) { setSelected(selected === id ? null : id); return }
+    // only ask for a target when more than one enemy can be hurt by this card
+    const hurtable = live.filter(t => damageFor(CARDS[c.key].family, CARDS[c.key].power, t.kind) > 0)
+    if (isAttack(c.key) && hurtable.length > 1) { setSelected(selected === id ? null : id); return }
     setSelected(null)
     dispatch({ type: 'play', cardId: id })
   }
@@ -34,7 +36,7 @@ export function GameScreen({ run, dispatch }: Props) {
   const endReady = run.ap === 0
 
   return (
-    <div className="screen game" data-theme="victorian">
+    <div className="screen game" data-theme={ERA_THEME[st] ?? 'victorian'}>
       <header className="game__head">
         <div>
           <span className="cl-label">Stage {st} · {year(st, run.round)}</span>
@@ -54,7 +56,7 @@ export function GameScreen({ run, dispatch }: Props) {
           <span className="cl-label">Opposition{targeting ? ' · Choose a target' : ''}</span>
           {run.threats.map(t => (
             <ThreatPanel key={t.id} run={run} threat={t}
-              targeting={targeting && !t.beaten}
+              targeting={targeting && !t.beaten && damageFor(CARDS[sel!.key].family, CARDS[sel!.key].power, t.kind) > 0}
               damagePreview={sel ? damageFor(CARDS[sel.key].family, CARDS[sel.key].power, t.kind) : undefined}
               onTarget={() => { dispatch({ type: 'play', cardId: sel!.id, target: t.id }); setSelected(null) }} />
           ))}
@@ -102,7 +104,7 @@ export function GameScreen({ run, dispatch }: Props) {
           </div>
 
           <div className="resources">
-            <div><span className="cl-label">Oil price</span><b className="cl-num">{money(netPrice(run), st)}</b><span className="res-note">{run.freight ? `${money(price0(run), st)} − freight ${money(run.freight, st)}` : 'per barrel'}</span></div>
+            <div><span className="cl-label">Oil price</span><b className="cl-num">{money(netPrice(run), st)}</b><span className="res-note">{run.freight ? `${money(price(run), st)} − freight ${money(run.freight, st)}` : 'per barrel'}</span></div>
             <div><span className="cl-label">Production</span><b className={`cl-num ${production(run) === 0 && run.plots.some(Boolean) ? 'cl-minus' : ''}`}>{production(run)}</b><span className="res-note">{run.fire ? 'pumps stopped' : `${run.plots.filter(Boolean).length} Wells`}</span></div>
             <div><span className="cl-label">Storage</span><b className="cl-num">{run.storage}</b><span className="res-note">barrels</span></div>
           </div>
@@ -170,5 +172,3 @@ export function GameScreen({ run, dispatch }: Props) {
     </div>
   )
 }
-
-function price0(r: Run) { return netPrice(r) + r.freight }

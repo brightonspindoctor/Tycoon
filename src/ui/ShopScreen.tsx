@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { CARDS, ITEMS } from '../engine/data'
 import { skimRate, type Action, type Run } from '../engine/engine'
-import { money } from '../engine/format'
+import { ERA_THEME, money } from '../engine/format'
 import { CONFIG } from '../engine/config'
 import { CardView } from './CardView'
 
@@ -17,7 +17,7 @@ export function ShopScreen({ run, dispatch }: Props) {
   const can = (cost: number) => run.capital - cost >= 1
 
   return (
-    <div className="screen shop" data-theme="victorian">
+    <div className="screen shop" data-theme={ERA_THEME[st] ?? 'victorian'}>
       <header className="game__head">
         <div>
           <span className="cl-label">Stage {st} · {run.round === 0 ? 'Before you start' : `After round ${run.round}`}</span>

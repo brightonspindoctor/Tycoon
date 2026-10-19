@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { BONUSES, type BonusKey } from '../engine/data'
-import { bestScore, completedIndustries, loadRuns } from '../storage'
+import { bestScore, completedIndustries, loadRuns, type RunRecord } from '../storage'
 import { isMuted, play, setMuted } from '../sound'
 
 const INDUSTRIES = ['Oil', 'Fishing', 'Pharma', 'Tech']
+// a run that died, rather than one that finished a stage or the game
+const ended = (r: RunRecord) => r.outcome === 'Bankrupt' || r.outcome === 'Out of time'
 
 export function Intro({ onBegin, onHistory }: { onBegin: () => void; onHistory: () => void }) {
   const done = completedIndustries()
@@ -85,8 +87,8 @@ export function History({ onBack }: { onBack: () => void }) {
             <tbody>{runs.map((r, i) => (
               <tr key={r.id}>
                 <td>{runs.length - i}</td><td>{new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td><td>{r.industry}</td>
-                <td><span className="mini-bar">{Array.from({ length: 16 }, (_, k) => <i key={k} className={k + 1 < r.rounds || (k + 1 === r.rounds && r.outcome !== 'Bankrupt') ? 'd' : k + 1 === r.rounds ? 'x' : ''} />)}</span> {r.completed ? 'Complete' : `Stage ${Math.ceil(r.rounds / 4)} · Round ${((r.rounds - 1) % 4) + 1}`}</td>
-                <td className={r.outcome === 'Bankrupt' ? 'cl-minus' : ''}>{r.outcome}</td>
+                <td><span className="mini-bar">{Array.from({ length: 16 }, (_, k) => <i key={k} className={k + 1 < r.rounds || (k + 1 === r.rounds && !ended(r)) ? 'd' : k + 1 === r.rounds ? 'x' : ''} />)}</span> {r.completed ? 'Complete' : `Stage ${Math.ceil(r.rounds / 4)} · Round ${((r.rounds - 1) % 4) + 1}`}</td>
+                <td className={ended(r) ? 'cl-minus' : ''}>{r.outcome}</td>
                 <td className="num">{r.gold !== null ? `${r.gold} gold` : <span className="res-note">— ({r.stageGold} gold)</span>}</td>
               </tr>
             ))}</tbody>
