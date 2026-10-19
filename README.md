@@ -8,7 +8,7 @@ This repository holds the first playable slice: **Oil, stage 1** (four rounds an
 
 ## Play it
 
-Online: https://brightonspindoctor.github.io/tycoon/ (rebuilt automatically on every push to `main`).
+Online: https://brightonspindoctor.github.io/Tycoon/ (rebuilt automatically on every push to `main`).
 
 ## Run it locally
 
