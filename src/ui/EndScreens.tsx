@@ -23,7 +23,7 @@ function Progress({ reached, dead }: { reached: number; dead: boolean }) {
   )
 }
 
-export function CrashOut({ run, unlocked, onAgain, onHistory }: { run: Run; unlocked?: string | null; onAgain: () => void; onHistory: () => void }) {
+export function CrashOut({ run, bailout, onAgain, onHistory }: { run: Run; bailout?: boolean; onAgain: () => void; onHistory: () => void }) {
   useEffect(() => { play('stamp'); const t = setTimeout(() => play('lose'), 400); return () => clearTimeout(t) }, [])
   const st = run.stage
   const reached = roundsReached(run)
@@ -45,11 +45,11 @@ export function CrashOut({ run, unlocked, onAgain, onHistory }: { run: Run; unlo
             <div className="tile"><span className="cl-label">Oil sold</span><b className="cl-num">{run.stats.oilSold} bbl</b><span className="res-note">{money(run.stats.earned, st)} earned · {money(run.stats.spent, st)} spent</span></div>
           </div>
           <div className="fortune fortune--lost"><div><span className="cl-label">Your fortune</span><p>Not recorded. A fortune only counts if you finish as Chairman.</p></div><b className="cl-num struck">{run.gold} gold</b></div>
-          {unlocked === 'trustFund' && (
+          {bailout && (
             <div className="unlock" role="status">
-              <span className="cl-label">New starting bonus</span>
+              <span className="cl-label">{CONFIG.trustFundStreak} failures in a row · Father has written</span>
               <b className="cl-display">{BONUSES.trustFund.name}</b>
-              <span>{BONUSES.trustFund.text} Pick it on your next run.</span>
+              <span>{BONUSES.trustFund.text} On offer for your next run.</span>
             </div>
           )}
           <div className="end__buttons"><button type="button" className="cl-btn cl-btn--primary" onClick={onAgain}>Try again</button><button type="button" className="cl-btn" onClick={onHistory}>Run history</button></div>
@@ -79,7 +79,7 @@ export function StageComplete({ run, onMenu, onHistory }: { run: Run; onMenu: ()
         <div className="end__main">
           <div className="end__progress"><div className="end__progress-head"><span className="cl-label">How far you got</span><span className="cl-num">Round 4 of 16</span></div><Progress reached={4} dead={false} /></div>
           <div className="end__tiles">
-            <div className="tile"><span className="cl-label">Capital</span><b className="cl-num">{money(run.capital, st)}</b><span className="res-note">carried into stage 2</span></div>
+            <div className="tile"><span className="cl-label">Capital</span><b className="cl-num">{money(run.capital, st)}</b><span className="res-note">carried into stage 2{run.bonus === 'trustFund' ? '. The Trust Fund ends here: Bank Debt starts in stage 2.' : ''}</span></div>
             <div className="tile"><span className="cl-label">Wells standing</span><b className="cl-num">{run.plots.filter(Boolean).length}</b><span className="res-note">{run.stats.wellsBuilt} built in total</span></div>
             <div className="tile"><span className="cl-label">Oil sold</span><b className="cl-num">{run.stats.oilSold} bbl</b><span className="res-note">{money(run.stats.earned, st)} earned</span></div>
           </div>

@@ -12,7 +12,6 @@ export interface RunRecord {
 
 const KEY = 'tycoon.runs.v1'
 const MUTE = 'tycoon.muted'
-const UNLOCKS = 'tycoon.unlocks.v1'
 
 export function loadRuns(): RunRecord[] {
   try { return JSON.parse(localStorage.getItem(KEY) ?? '[]') as RunRecord[] } catch { return [] }
@@ -42,20 +41,16 @@ export function saveMuted(m: boolean) {
   try { localStorage.setItem(MUTE, m ? '1' : '0') } catch { /* ignore */ }
 }
 
-// Unlocks earned so far. Kept apart from run history so trimming history never takes one away.
-export function loadUnlocks(): string[] {
-  try { return JSON.parse(localStorage.getItem(UNLOCKS) ?? '[]') as string[] } catch { return [] }
-}
-function saveUnlock(key: string) {
-  try { localStorage.setItem(UNLOCKS, JSON.stringify([...new Set([...loadUnlocks(), key])])) } catch { /* ignore */ }
+/** How many runs in a row, most recent first, ended before the end of stage 1. */
+export function lossStreak(runs: RunRecord[]): number {
+  let n = 0
+  for (const r of runs) { // newest first
+    const lostInStage1 = !r.completed && r.rounds <= 4 && (r.outcome === 'Bankrupt' || r.outcome === 'Out of time')
+    if (!lostInStage1) break
+    n++
+  }
+  return n
 }
 
-/** Runs that ended before the end of stage 1 (bankrupt or out of time). */
-export const stage1Losses = () => loadRuns().filter(r => r.industry === 'Oil' && r.rounds <= 4 && r.outcome !== 'Stage 1 complete' && !r.completed).length
-
-/** Unlocks the Trust Fund once enough stage 1 runs are lost. True only on the run that unlocks it. */
-export function checkTrustFund(needed: number): boolean {
-  if (loadUnlocks().includes('trustFund') || stage1Losses() < needed) return false
-  saveUnlock('trustFund')
-  return true
-}
+/** The Trust Fund is offered after enough stage 1 losses in a row. */
+export const trustFundOffered = (needed: number) => lossStreak(loadRuns()) >= needed

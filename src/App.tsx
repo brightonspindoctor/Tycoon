@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { act, newRun, roundsReached, type Action, type Run } from './engine/engine'
 import type { BonusKey } from './engine/data'
-import { checkTrustFund, saveRun } from './storage'
+import { saveRun, trustFundOffered } from './storage'
 import { CONFIG } from './engine/config'
 import { ERA_THEME } from './engine/format'
 import { play } from './sound'
@@ -33,7 +33,7 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('intro')
   const [run, setRun] = useState<Run | null>(null)
   const [shake, setShake] = useState(false)
-  const [unlocked, setUnlocked] = useState<string | null>(null) // bonus unlocked by the run just finished
+  const [bailout, setBailout] = useState(false) // a losing streak earns the Trust Fund next run
   const saved = useRef<number | null>(null)
   const { scale, mobile } = useLayout()
 
@@ -83,7 +83,7 @@ export default function App() {
         id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run),
         outcome: run.phase === 'stageComplete' ? 'Stage 1 complete' : run.loss?.reason === 'stalemate' ? 'Out of time' : 'Bankrupt', gold: null, completed: false, stageGold: run.gold,
       })
-      setUnlocked(checkTrustFund(CONFIG.trustFundUnlock) ? 'trustFund' : null)
+      setBailout(trustFundOffered(CONFIG.trustFundStreak))
     }
   }, [run])
 
@@ -99,7 +99,7 @@ export default function App() {
   else if (screen === 'bonus') body = <BonusPick onPick={start} onBack={() => setScreen('intro')} />
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />
   else if (run.phase === 'shop') body = <ShopScreen run={run} dispatch={dispatch} />
-  else if (run.phase === 'lost') body = <CrashOut run={run} unlocked={unlocked} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
+  else if (run.phase === 'lost') body = <CrashOut run={run} bailout={bailout} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
   else if (run.phase === 'stageComplete') body = <StageComplete run={run} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} />
   else body = (
     <>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { act, canPlay, damageFor, newRun, type Run } from './engine'
+import { act, canPlay, damageFor, debtPerTurn, newRun, type Run } from './engine'
+import { lossStreak, type RunRecord } from '../storage'
 import { CONFIG } from './config'
 import { money } from './format'
 import { botRun } from '../../tools/bot'
@@ -199,5 +200,20 @@ describe('Trust Fund', () => {
     expect(r.debt).toBe(0)
     expect(r.capital).toBe(CONFIG.startCapital) // nothing was charged on turn 1
     expect(r.ledger.some(l => l.label.startsWith('Bank debt'))).toBe(false)
+  })
+
+  it('only covers stage 1', () => {
+    const r = newRun(3, 'trustFund')
+    expect(debtPerTurn(r)).toBe(0)
+    r.stage = 2
+    expect(debtPerTurn(r)).toBe(CONFIG.startDebt)
+  })
+
+  it('is offered after 3 stage 1 losses in a row, and a stage 1 win resets it', () => {
+    const rec = (outcome: string, rounds = 2): RunRecord => ({ id: outcome + rounds + Math.random(), date: '', industry: 'Oil', rounds, outcome, gold: null, completed: false, stageGold: 0 })
+    const lost = rec('Bankrupt'), timeout = rec('Out of time', 3), won = rec('Stage 1 complete', 4)
+    expect(lossStreak([lost, timeout, lost])).toBe(3)
+    expect(lossStreak([lost, lost, won, lost, lost])).toBe(2) // newest first: a win breaks the streak
+    expect(lossStreak([won, lost, lost, lost])).toBe(0)
   })
 })

@@ -2,8 +2,8 @@
 export const CONFIG = {
   startCapital: 15,
   startDebt: 1, // Bank Debt per turn; loans raise it
-  trustFundDebt: 0, // the Trust Fund bonus starts debt-free
-  trustFundUnlock: 3, // runs lost in stage 1 before the Trust Fund is offered
+  trustFundDebt: 0, // the Trust Fund bonus pays no Bank Debt in stage 1; normal debt from stage 2
+  trustFundStreak: 3, // stage 1 losses in a row before the Trust Fund is offered
   baseAP: 2,
   handSize: 5,
   oilPrice: 3,

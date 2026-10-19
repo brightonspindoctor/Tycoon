@@ -98,6 +98,7 @@ export const netPrice = (r: Run) => Math.max(0, price(r) - r.freight)
 
 export function debtPerTurn(r: Run): number {
   let d = r.debt
+  if (r.bonus === 'trustFund' && r.stage > 1) d += CONFIG.startDebt // Father's money only covers stage 1
   if (r.modifier === 'bankSqueeze' || r.modifier === 'boomtown') d += 1
   return d
 }

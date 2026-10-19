@@ -76,7 +76,7 @@ export const BONUSES: Record<BonusKey, { name: string; text: string }> = {
   threeOil: { name: '3 Oil', text: 'Start with 3 barrels in the stockpile.' },
   pettyCash: { name: 'Petty Cash', text: 'Skim 1 gold for 0 AP. Three uses.' },
   gearGraft: { name: 'Improve Gear + Hard Graft', text: 'One more of each in your deck.' },
-  trustFund: { name: 'Trust Fund', text: 'No Bank Debt. Father has taken care of it.' },
+  trustFund: { name: 'Trust Fund', text: 'No Bank Debt in stage 1. Father has taken care of it.' },
 }
 
 export type ThreatKind = 'blowout' | 'strike' | 'inspector' | 'railroad' | 'claimJumper' | 'speculator' | 'baron'
