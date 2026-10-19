@@ -96,7 +96,12 @@ export default function App() {
 
   return (
     <div className="stage-wrap">
-      <div className={`stage ${shake ? 'is-shaking' : ''}`} style={{ transform: `scale(${scale})` }}>
+      <div className="rotate-hint" data-theme="victorian" role="alert">
+        <div className="rotate-hint__icon" aria-hidden="true" />
+        <h1 className="cl-display">Turn your phone sideways</h1>
+        <p>The oil fields need a wider view.</p>
+      </div>
+      <div className={`stage ${shake ? 'is-shaking' : ''}`} style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
         <div key={`${screen}-${run?.phase}-${run?.round}`} className="screen-fade">{body}</div>
       </div>
     </div>
