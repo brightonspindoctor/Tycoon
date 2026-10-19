@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import type { Run } from '../engine/engine'
 import { roundsReached } from '../engine/engine'
+import { BONUSES } from '../engine/data'
 import { money, year } from '../engine/format'
 import { CONFIG } from '../engine/config'
 import { play } from '../sound'
@@ -22,7 +23,7 @@ function Progress({ reached, dead }: { reached: number; dead: boolean }) {
   )
 }
 
-export function CrashOut({ run, onAgain, onHistory }: { run: Run; onAgain: () => void; onHistory: () => void }) {
+export function CrashOut({ run, unlocked, onAgain, onHistory }: { run: Run; unlocked?: string | null; onAgain: () => void; onHistory: () => void }) {
   useEffect(() => { play('stamp'); const t = setTimeout(() => play('lose'), 400); return () => clearTimeout(t) }, [])
   const st = run.stage
   const reached = roundsReached(run)
@@ -44,6 +45,13 @@ export function CrashOut({ run, onAgain, onHistory }: { run: Run; onAgain: () =>
             <div className="tile"><span className="cl-label">Oil sold</span><b className="cl-num">{run.stats.oilSold} bbl</b><span className="res-note">{money(run.stats.earned, st)} earned · {money(run.stats.spent, st)} spent</span></div>
           </div>
           <div className="fortune fortune--lost"><div><span className="cl-label">Your fortune</span><p>Not recorded. A fortune only counts if you finish as Chairman.</p></div><b className="cl-num struck">{run.gold} gold</b></div>
+          {unlocked === 'trustFund' && (
+            <div className="unlock" role="status">
+              <span className="cl-label">New starting bonus</span>
+              <b className="cl-display">{BONUSES.trustFund.name}</b>
+              <span>{BONUSES.trustFund.text} Pick it on your next run.</span>
+            </div>
+          )}
           <div className="end__buttons"><button type="button" className="cl-btn cl-btn--primary" onClick={onAgain}>Try again</button><button type="button" className="cl-btn" onClick={onHistory}>Run history</button></div>
         </div>
         <section className="cl-ledger ledger">

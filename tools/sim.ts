@@ -5,7 +5,7 @@ import type { BonusKey } from '../src/engine/data'
 import { botRun } from './bot'
 
 const N = 2000
-const bonuses: BonusKey[] = ['extraProspect', 'threeOil', 'pettyCash', 'gearGraft']
+const bonuses: BonusKey[] = ['extraProspect', 'threeOil', 'pettyCash', 'gearGraft', 'trustFund']
 for (const b of bonuses) {
   const reach = [0, 0, 0, 0, 0]
   let wins = 0, gold = 0

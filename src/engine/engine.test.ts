@@ -192,3 +192,12 @@ describe('who you fight', () => {
     }
   })
 })
+
+describe('Trust Fund', () => {
+  it('starts with $15 and no Bank Debt', () => {
+    const r = newRun(3, 'trustFund')
+    expect(r.debt).toBe(0)
+    expect(r.capital).toBe(CONFIG.startCapital) // nothing was charged on turn 1
+    expect(r.ledger.some(l => l.label.startsWith('Bank debt'))).toBe(false)
+  })
+})

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BONUSES, type BonusKey } from '../engine/data'
-import { bestScore, completedIndustries, loadRuns, type RunRecord } from '../storage'
+import { bestScore, checkTrustFund, completedIndustries, loadRuns, loadUnlocks, type RunRecord } from '../storage'
+import { CONFIG } from '../engine/config'
 import { isMuted, play, setMuted } from '../sound'
 
 const INDUSTRIES = ['Oil', 'Fishing', 'Pharma', 'Tech']
@@ -43,6 +44,7 @@ export function Intro({ onBegin, onHistory }: { onBegin: () => void; onHistory: 
 }
 
 export function BonusPick({ onPick, onBack }: { onPick: (b: BonusKey) => void; onBack: () => void }) {
+  const [unlocks] = useState(() => { checkTrustFund(CONFIG.trustFundUnlock); return loadUnlocks() })
   return (
     <div className="screen bonus" data-theme="victorian">
       <header className="game__head">
@@ -51,8 +53,9 @@ export function BonusPick({ onPick, onBack }: { onPick: (b: BonusKey) => void; o
       </header>
       <p className="bonus__lead">Everyone starts with $15, two action points, a ten-card deck and a loan from the bank. Pick one thing more.</p>
       <div className="bonus__grid">
-        {(Object.keys(BONUSES) as BonusKey[]).map(k => (
-          <button key={k} type="button" className="bonus__card" onClick={() => { play('card'); onPick(k) }}>
+        {(Object.keys(BONUSES) as BonusKey[]).filter(k => k !== 'trustFund' || unlocks.includes('trustFund')).map(k => (
+          <button key={k} type="button" className={`bonus__card ${k === 'trustFund' ? 'bonus__card--earned' : ''}`} onClick={() => { play('card'); onPick(k) }}>
+            {k === 'trustFund' && <span className="cl-label bonus__tag">Unlocked</span>}
             <span className="cl-display bonus__name">{BONUSES[k].name}</span>
             <span>{BONUSES[k].text}</span>
           </button>

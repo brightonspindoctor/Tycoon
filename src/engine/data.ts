@@ -70,12 +70,13 @@ export const STARTER: CardKey[] = ['prospect', 'hiredHand', 'hiredHand', 'lawyer
 export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBrigade', 'payWages', 'dynamite', 'bribe', 'wildcat', 'telegram']
 export const ATTACK_CARDS: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'dynamite']
 
-export type BonusKey = 'extraProspect' | 'threeOil' | 'pettyCash' | 'gearGraft'
+export type BonusKey = 'extraProspect' | 'threeOil' | 'pettyCash' | 'gearGraft' | 'trustFund'
 export const BONUSES: Record<BonusKey, { name: string; text: string }> = {
   extraProspect: { name: 'Extra Prospect', text: 'A second Prospect card in your deck.' },
   threeOil: { name: '3 Oil', text: 'Start with 3 barrels in the stockpile.' },
   pettyCash: { name: 'Petty Cash', text: 'Skim 1 gold for 0 AP. Three uses.' },
   gearGraft: { name: 'Improve Gear + Hard Graft', text: 'One more of each in your deck.' },
+  trustFund: { name: 'Trust Fund', text: 'No Bank Debt. Father has taken care of it.' },
 }
 
 export type ThreatKind = 'blowout' | 'strike' | 'inspector' | 'railroad' | 'claimJumper' | 'speculator' | 'baron'

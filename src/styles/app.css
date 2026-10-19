@@ -228,10 +228,15 @@ button.threat { cursor: crosshair; }
 
 /* bonus pick */
 .bonus__lead { margin: 0; font-size: 16px; color: var(--ink-muted); }
-.bonus__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-top: 10px; }
+.bonus__grid { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 18px; margin-top: 10px; }
 .bonus__card { min-height: 260px; display: flex; flex-direction: column; gap: 10px; text-align: left; padding: 20px; border: 2px solid var(--ink); border-radius: var(--radius-1860); background: var(--paper-raised); cursor: pointer; font-size: 15px; line-height: 21px; transition: transform .15s; }
 .bonus__card:hover { transform: translateY(-6px); border-color: var(--accent); }
 .bonus__name { font-size: 26px; line-height: 30px; }
+.bonus__card--earned { border-color: var(--personal); border-width: 2.5px; position: relative; }
+.bonus__tag { color: var(--personal); }
+.unlock { display: flex; flex-direction: column; gap: 4px; border: 2.5px solid var(--personal); background: var(--paper-raised); padding: 14px 16px; border-radius: var(--radius-1860); animation: rise .5s ease-out both .6s; }
+.unlock .cl-label { color: var(--personal); }
+.unlock b { font-size: 26px; line-height: 30px; color: var(--personal); }
 
 /* history */
 .history__table { border: 1.5px solid var(--ink); border-radius: var(--radius-1860); background: var(--paper-raised); padding: 8px 12px; overflow-y: auto; flex: 1; min-height: 0; }
@@ -411,7 +416,7 @@ button.m-threat { cursor: pointer; }
 .m .industry__name { font-size: 22px; }
 .m .intro__menu { margin-top: 8px; padding-bottom: 0; }
 .m .intro__menu .cl-btn { flex: 1; }
-.m .bonus__grid { grid-template-columns: 1fr; gap: 10px; margin-top: 0; }
+.m .bonus__grid { grid-auto-flow: row; grid-template-columns: 1fr; gap: 10px; margin-top: 0; }
 .m .bonus__card { min-height: 0; padding: 14px 16px; gap: 4px; }
 .m .bonus__card:hover { transform: none; }
 .m .bonus__name { font-size: 22px; line-height: 26px; }

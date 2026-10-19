@@ -128,7 +128,7 @@ export function GameScreen({ run, dispatch }: Props) {
           <section className="items">
             <span className="cl-label">Items</span>
             <div className="items__row">
-              <div className="cl-item cl-item--neg"><div className="cl-item__disc">−{run.debt}</div><div className="cl-item__name">Bank Debt</div><div className="cl-item__fx">{money(-run.debt, st)} a turn</div></div>
+              {run.debt > 0 && <div className="cl-item cl-item--neg"><div className="cl-item__disc">−{run.debt}</div><div className="cl-item__name">Bank Debt</div><div className="cl-item__fx">{money(-run.debt, st)} a turn</div></div>}
               {run.items.map((k, i) => <div key={i} className="cl-item"><div className="cl-item__disc"><img src={`${import.meta.env.BASE_URL}art/icons/${ITEMS[k].icon}.png`} alt="" /></div><div className="cl-item__name">{ITEMS[k].name}</div><div className="cl-item__fx">{ITEMS[k].text}</div></div>)}
             </div>
           </section>

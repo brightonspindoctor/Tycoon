@@ -31,6 +31,7 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 - Enemies have **Hold** (health). Attack cards deal Hold damage by family; enemies are weak to some families (double damage) and resist others (half).
 - Starting deck (10): Prospect, Hired Hand ×2, Lawyer Up, Shore Up, Bucket of Water ×2, Improve Gear ×2, Hard Graft.
 - Starting bonus (pick one): Extra Prospect, 3 Oil, Petty Cash (skim 1 gold, 0 AP, 3 uses), Improve Gear + Hard Graft.
+- Unlockable bonus: **Trust Fund** ($15 and no Bank Debt). Offered from the third run lost in stage 1 (bankrupt or out of time) onwards, and kept once earned.
 - Junk: Loose Thread (must play, −$1), Bad Blood (unplayable; 1 in 3 chance of fire while in hand), Margin Call (must play, −$2), IOU (−$1 a turn until cleared).
 
 ### Fire (a hazard, not an enemy)

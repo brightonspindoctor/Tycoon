@@ -161,7 +161,7 @@ function loseWell(r: Run, i: number, how: 'burnt' | 'stolen' | 'lost' | 'dry') {
 export function newRun(seed: number, bonus: BonusKey): Run {
   const r: Run = {
     seed, rng: seed, bonus, phase: 'shop', stage: 1, round: 0, turn: 0,
-    capital: CONFIG.startCapital, gold: 0, debt: CONFIG.startDebt, ap: 0, cover: 0, nextId: 1,
+    capital: CONFIG.startCapital, gold: 0, debt: bonus === 'trustFund' ? CONFIG.trustFundDebt : CONFIG.startDebt, ap: 0, cover: 0, nextId: 1,
     deck: [], draw: [], hand: [], discard: [], plots: [], oil: bonus === 'threeOil' ? 3 : 0,
     storage: CONFIG.startStorage, fire: 0, firebreak: false, marked: null, threats: [], modifier: null,
     short: 0, freight: 0, pending: { ap: 0, audit: false, refuse: false, margin: 0 }, current: { audit: false, refuse: false },
