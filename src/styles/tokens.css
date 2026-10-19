@@ -1,0 +1,110 @@
+/* Crude Ledger — generated from tokens.json */
+:root, [data-theme="victorian"] {
+  --paper: #f1e6cf;
+  --paper-raised: #f8f0dd;
+  --ink: #2a1f14;
+  --ink-muted: #5e4a30;
+  --rule: #a8916a;
+  --accent: #7a2e1d;
+  --on-accent: #f8f0dd;
+  --loss: #9b1c1c;
+  --gain: #2f5d3a;
+  --personal: #6e5410;
+  --cover: #2c4a6b;
+  --oil: #1b1712;
+  --heat: #a33d12;
+  --board: #4a3b6b;
+  --truth: #111111;
+  --on-truth: #ffffff;
+  --influence: var(--accent);
+}
+[data-theme="deco"] {
+  --paper: #15140f;
+  --paper-raised: #211f18;
+  --ink: #efe6cf;
+  --ink-muted: #b9ad91;
+  --rule: #5a5140;
+  --accent: #d4ae55;
+  --on-accent: #15140f;
+  --loss: #f08a7a;
+  --gain: #93cfa0;
+  --personal: #e6c76f;
+  --cover: #9dbde0;
+  --oil: #cfc5ab;
+  --heat: #f2a073;
+  --board: #c6b5e8;
+  --truth: #f5f5f5;
+  --on-truth: #111111;
+  --influence: var(--accent);
+}
+[data-theme="midcentury"] {
+  --paper: #fbf3e4;
+  --paper-raised: #ffffff;
+  --ink: #1d2433;
+  --ink-muted: #4c566a;
+  --rule: #cdbfa3;
+  --accent: #b23a22;
+  --on-accent: #ffffff;
+  --loss: #a8231b;
+  --gain: #1c6654;
+  --personal: #7a5000;
+  --cover: #1f5a94;
+  --oil: #1d2433;
+  --heat: #b8460f;
+  --board: #5a3f8a;
+  --truth: #111111;
+  --on-truth: #ffffff;
+  --influence: var(--accent);
+}
+[data-theme="greenwash"] {
+  --paper: #f2f9f4;
+  --paper-raised: #ffffff;
+  --ink: #10302a;
+  --ink-muted: #456459;
+  --rule: #c3dfcf;
+  --accent: #1b7a50;
+  --on-accent: #ffffff;
+  --loss: #a8231b;
+  --gain: #1b6e47;
+  --personal: #6e5200;
+  --cover: #22648a;
+  --oil: #10302a;
+  --heat: #b0450f;
+  --board: #55408a;
+  --truth: #111111;
+  --on-truth: #ffffff;
+  --influence: var(--accent);
+}
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --radius-1860: 3px;
+  --radius-1900: 0px;
+  --radius-1950: 10px;
+  --radius-1990: 18px;
+  --radius-pill: 999px;
+  --font-body: "Libre Caslon Text", Georgia, "Times New Roman", serif;
+  --font-figures: "Courier Prime", "Courier New", ui-monospace, monospace;
+  --font-display-1860: "IM Fell English", "Libre Caslon Text", Georgia, serif;
+  --font-display-1900: Limelight, "Libre Caslon Text", Georgia, serif;
+  --font-display-1950: "Alfa Slab One", Rockwell, Georgia, serif;
+  --font-display-1990: Quicksand, "Trebuchet MS", system-ui, sans-serif;
+  --font-truth: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+.era-1860 { font-family: var(--font-display-1860); font-size: 34px; line-height: 38px; font-weight: 400; }
+.era-1900 { font-family: var(--font-display-1900); font-size: 30px; line-height: 36px; font-weight: 400; }
+.era-1950 { font-family: var(--font-display-1950); font-size: 30px; line-height: 36px; font-weight: 400; }
+.era-1990 { font-family: var(--font-display-1990); font-size: 30px; line-height: 36px; font-weight: 600; }
+.card-name { font-family: var(--font-body); font-size: 16px; line-height: 20px; font-weight: 700; }
+.card-effect { font-family: var(--font-body); font-size: 13px; line-height: 18px; font-weight: 400; }
+.card-type { font-family: var(--font-figures); font-size: 10px; line-height: 12px; font-weight: 700; letter-spacing: 0.08em; }
+.card-cost { font-family: var(--font-figures); font-size: 18px; line-height: 18px; font-weight: 700; }
+.ledger-total { font-family: var(--font-figures); font-size: 28px; line-height: 32px; font-weight: 700; }
+.ledger-entry { font-family: var(--font-figures); font-size: 13px; line-height: 20px; font-weight: 400; }
+.label { font-family: var(--font-figures); font-size: 11px; line-height: 14px; font-weight: 700; letter-spacing: 0.06em; }
+.body { font-family: var(--font-body); font-size: 15px; line-height: 22px; font-weight: 400; }
+.truth { font-family: var(--font-truth); font-size: 15px; line-height: 22px; font-weight: 500; }

@@ -1,0 +1,22 @@
+// Money grows a unit every stage (same value underneath): $15 → $15K → $15M → $15B.
+const UNITS = ['', '', 'K', 'M', 'B']
+
+export function money(n: number, stage = 1, sign = false): string {
+  const unit = UNITS[Math.min(stage, 4)]
+  const s = `$${Math.abs(n)}${unit}`
+  if (n < 0) return `−${s}`
+  return sign && n > 0 ? `+${s}` : s
+}
+
+// Each stage spans an era; each round moves the calendar on.
+const YEARS: Record<number, number[]> = {
+  1: [1863, 1870, 1880, 1890],
+  2: [1901, 1910, 1920, 1930],
+  3: [1946, 1955, 1965, 1973],
+  4: [1988, 1997, 2009, 2026],
+}
+export function year(stage: number, round: number): number {
+  return YEARS[stage]?.[Math.max(0, Math.min(3, round - 1))] ?? 1863
+}
+
+export const ERA_THEME: Record<number, string> = { 1: 'victorian', 2: 'deco', 3: 'midcentury', 4: 'greenwash' }
