@@ -322,6 +322,9 @@ function startRound(r: Run, round: number) {
   r.hand = []
   r.discard = []
   r.draw = shuffle(r, [...r.deck])
+  // a Prospect, if you own one, is always in the round's opening hand (cards are drawn from the end)
+  const p = r.draw.findIndex(c => c.key === 'prospect')
+  if (p >= 0) r.draw.push(...r.draw.splice(p, 1))
   r.phase = 'turn'
   r.events = []
   for (const t of r.threats) say(r, `${THREATS[t.kind].name} arrives.`)

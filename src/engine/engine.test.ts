@@ -447,3 +447,19 @@ describe('Loose Thread', () => {
     expect(r.capital).toBe(9)
   })
 })
+
+describe('opening hand', () => {
+  it('always has a Prospect when you own one', () => {
+    for (let seed = 1; seed <= 300; seed++) {
+      const r = newRun(seed, 'threeOil')
+      expect(r.hand.some(c => c.key === 'prospect')).toBe(true)
+    }
+  })
+  it('in later rounds too', () => {
+    for (let seed = 1; seed <= 100; seed++) {
+      let r = newRun(seed, 'gearGraft'); r.phase = 'shop'; r.round = 1
+      r = act(r, { type: 'leaveShop' })
+      expect(r.hand.some(c => c.key === 'prospect')).toBe(true)
+    }
+  })
+})
