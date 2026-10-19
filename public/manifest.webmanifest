@@ -1,0 +1,15 @@
+{
+  "name": "Tycoon",
+  "short_name": "Tycoon",
+  "description": "Industry. Influence. Plausible deniability.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1e6cf",
+  "theme_color": "#f1e6cf",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
