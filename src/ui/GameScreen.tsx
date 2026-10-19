@@ -60,7 +60,7 @@ export function GameScreen({ run, dispatch }: Props) {
           {run.threats.map(t => (
             <ThreatPanel key={t.id} run={run} threat={t}
               targeting={targeting && targets.some(x => x.id === t.id)}
-              preview={!sel ? undefined : stopping ? (t.stopped ? 'Already stopped' : 'Stop this move') : (n => (n > 0 ? `Deal ${n}` : 'No effect'))(damageFor(CARDS[sel.key].family, CARDS[sel.key].power, t.kind))}
+              preview={!sel ? undefined : stopping ? (t.stopped ? 'Already stopped' : 'Stop this move') : (n => (n > 0 ? `−${n} Hold` : 'No effect'))(damageFor(CARDS[sel.key].family, CARDS[sel.key].power, t.kind))}
               onTarget={() => { dispatch({ type: 'play', cardId: sel!.id, target: t.id }); setSelected(null) }} />
           ))}
           {run.fire > 0 && (

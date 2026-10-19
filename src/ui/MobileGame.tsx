@@ -104,7 +104,7 @@ export function MobileGame({ run, dispatch }: Props) {
                     {[d.weak && `Weak: ${d.weak}`, d.resist && `Resists: ${d.resist}`, d.immune && `Immune: ${d.immune}`].filter(Boolean).join(' · ')}
                   </div>
                 </div>
-                {needsTarget && !t.beaten && <span className={`m-threat__dmg ${can ? '' : 'is-none'}`}>{stopping ? (can ? 'Stop' : 'Stopped') : can ? `Deal ${dmgOn(t)}` : 'No effect'}</span>}
+                {needsTarget && !t.beaten && <span className={`m-threat__dmg ${can ? '' : 'is-none'}`}>{stopping ? (can ? 'Stop' : 'Stopped') : can ? `−${dmgOn(t)} Hold` : 'No effect'}</span>}
               </Tag>
             )
           })}

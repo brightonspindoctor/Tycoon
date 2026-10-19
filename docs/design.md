@@ -30,11 +30,11 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 - A Well card (1 AP) builds a Well on the next free plot and is used up. A Well pumps 1 oil a turn and runs dry after 6 barrels (Wildcat: 2 a turn, 8 barrels); the plot then frees up for a new Well. Oil pumped while storage is full is lost but still drains the Well.
 - Oil starts at $3 a barrel and never drops below $1, freight included.
 - Sell oil (1 AP) sells the whole stockpile. Oil carries over between rounds. Sell a Well (1 AP) for $1 per barrel still in it.
-- Enemies have **Hold** (health). There are two damage types, **Legal** and **Dirty**; enemies are weak to one (double damage), resist one (half) or are immune. No card is tied to one enemy.
+- Enemies have **Hold** (health). Cards remove Hold. There are two kinds, **Legal** and **Dirty**; an enemy can be weak to one (double), resist one (half) or be immune. No card is tied to one enemy.
 - Starting deck (9): Prospect, Hired Hand ×2, Lawyer Up, Shore Up, Bucket of Water ×2, Improve Gear, Hard Graft.
 - Starting bonus (pick one): Extra Prospect, 3 Oil, Petty Cash (skim 1 gold, 0 AP, 3 uses), Improve Gear + Hard Graft.
 - Bailout bonus: **Trust Fund** ($15 and no Bank Debt for stage 1; normal Bank Debt from stage 2). Offered only after 3 runs in a row lost in stage 1 (bankrupt or out of time); finishing stage 1 resets the streak.
-- Junk: Loose Thread (must play, 0 AP, −$1), Bad Blood (must play, 0 AP, 1 in 3 chance of a fire, destroyed after 2 plays; Dynamite, Bribe the Sheriff and a refused Bribe put one in your discard pile; Dirty damage alone never does), Margin Call (must play, −$2), IOU (−$1 a turn until cleared).
+- Junk: Loose Thread (must play, 0 AP, −$1), Bad Blood (must play, 0 AP, 1 in 3 chance of a fire, destroyed after 2 plays; Dynamite, Bribe the Sheriff and a refused Bribe put one in your discard pile; Dirty cards alone never do), Margin Call (must play, −$2), IOU (−$1 a turn until cleared).
 
 ### Before and after the boss
 - After round 3 the Land Office offers one small, single-use item for **1 gold**: A Spare Hand (+1 AP on the first boss turn), Spare Rigs (2 Well cards), Fire Brigade (card), Inheritance (a card: +$5 once) or Temporary Silo (+4 storage for the boss round).
@@ -44,25 +44,24 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 A card is offered (weighted by rarity, like the shop): take it into your deck or turn it down for $3. What happens when an enemy is beaten is not shown in advance.
 
 ### Cards changed in play-testing
-- Shore Up: stop one enemy's next move this turn (with two enemies, you choose). The move is skipped; the enemy's cycle carries on. It no longer deals damage.
-- Lawyer Up deals 3 (was 4). Bribe the Sheriff: pay $2, 5 Hold damage. Hired Hand and Pay Wages are Dirty.
-- Pay Wages: pay $2, deal 4 Hold damage (Dirty). Costs $1 to buy. No card is tied to one enemy; enemy weaknesses and resistances decide what works.
-- Shore Up: 1 Hold damage and +1 Cover this turn (was 3 damage).
+- Shore Up: stop one enemy's next move this turn (with two enemies, you choose). The move is skipped; the enemy's cycle carries on.
+- Lawyer Up deals 3 (was 4). Bribe the Sheriff: pay $2, 5 Hold. Hired Hand and Pay Wages are Dirty.
+- Pay Wages: pay $2, remove 4 Hold (Dirty). Costs $1 to buy. No card is tied to one enemy; enemy weaknesses and resistances decide what works.
 - Hard Graft (+1 AP, 0 AP to play) can be played once per round: it then sits out until the next round. It is never destroyed. It can be bought ($4).
-- **Bribe** ($4): pay 1 gold from your fortune; 50% chance of 4 Hold damage (Dirty, so doubled against the Baron and the Railroad Agent), otherwise it is refused and adds Bad Blood.
+- **Bribe** ($4): pay 1 gold from your fortune; 50% chance of 4 Hold (Dirty, so doubled against the Strike, Claim Jumper and Baron), otherwise it is refused and adds Bad Blood.
 - Enemies that move first show what they opened with on turn 1, above their next move.
 
 ### Fire (a hazard, not an enemy)
 Fire is counted as a number of fires (up to 3); new outbreaks add to it. Each end of turn every fire burns 1 oil from the stockpile; with no oil it destroys the highest-numbered Well. Pumps stop while it burns. It can't touch Capital. A Bucket of Water puts out one fire and never wears out; Fire Brigade puts out every fire. Or cut a Firebreak (2 AP): lose your weakest Well (lowest output, then fewest barrels left) and every fire goes out. Sources: Claim Jumper (when beaten), Strike (round 3), Bad Blood, the Baron.
 
 ### Enemies
-Only a few enemies resist a damage type (the Blowout, the Railroad Agent and the Baron). Round 1 is always a cash enemy (it drains your money), round 2 always an engine enemy (it breaks your Wells, cards or turns), round 3 one of each at once, and round 4 the boss.
+Only a few enemies resist a kind of card (the Blowout, the Railroad Agent and the Baron). Round 1 is always a cash enemy (it drains your money), round 2 always an engine enemy (it breaks your Wells, cards or turns), round 3 one of each at once, and round 4 the boss.
 
 | Enemy | Role | Hold | Weak | Resists | Cycle | Notes |
 |---|---|---|---|---|---|---|
 | Blowout | Engine | 5 | — | Legal | Rumble → Spray → Blow | Beaten = +3 oil |
 | Strike | Engine | 8 | Dirty | — | Picket → Sabotage (a random Well) (+ Torch in R3) | Moves first: Walkout (−1 AP) |
-| Bank Inspector | Cash | 6 | Legal | Dirty (immune) | Audit → Fine | Ending a turn with $12+ costs him 2 Hold; beaten = 2 Loose Threads |
+| Bank Inspector | Cash | 6 | Legal | Dirty (immune) | Audit → Fine | Ending a turn with $12+ removes 2 of his Hold; beaten = 2 Loose Threads |
 | Railroad Agent | Cash | 7 | — | Legal | Raise Rates → Refuse | Owns the railway: freight is her toll per barrel sold, and Raise Rates adds $1 to it |
 | Claim Jumper | Engine | 6 | Dirty | — | Jump → Scout | Moves first: Scout. Beaten = 2 fires |
 | Speculator | Cash | 7 | Legal | — | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |

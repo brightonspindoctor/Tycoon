@@ -17,7 +17,7 @@ export const CUES: { cue: Cue; label: string }[] = [
   { cue: 'card', label: 'Card played' },
   { cue: 'coin', label: 'Coin' },
   { cue: 'fire', label: 'Fire' },
-  { cue: 'hit', label: 'Damage taken' },
+  { cue: 'hit', label: 'Money lost' },
   { cue: 'stamp', label: 'Stamp' },
   { cue: 'win', label: 'Stage complete' },
   { cue: 'click', label: 'Click' },

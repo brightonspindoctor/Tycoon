@@ -485,10 +485,10 @@ function play(r: Run, cardId: number, target?: number) {
     if (d.gold) r.gold -= d.gold
     if (d.chance !== undefined) {
       // a gamble: it either lands cleanly or backfires with Bad Blood
-      if (next(r) < d.chance) { say(r, `${d.name} taken: ${dmg} Hold damage to ${THREATS[t.kind].name}.`); hit(r, t, dmg) }
+      if (next(r) < d.chance) { say(r, `${d.name} taken: ${THREATS[t.kind].name} −${dmg} Hold.`); hit(r, t, dmg) }
       else { addJunk(r, 'badBlood', 'discard'); say(r, `${THREATS[t.kind].name} refused the bribe. Bad Blood added to your discard pile.`) }
     } else {
-      say(r, `${d.name}: ${dmg} Hold damage to ${THREATS[t.kind].name}.`)
+      say(r, `${d.name}: ${THREATS[t.kind].name} −${dmg} Hold.`)
       hit(r, t, dmg, !!d.badBlood)
     }
   } else if (d.stop) {
@@ -686,7 +686,7 @@ function endTurn(r: Run) {
     }
   }
   const taken = Math.max(0, dmg - r.cover)
-  if (taken) money(r, 'Fines and damage', -taken)
+  if (taken) money(r, 'Fines and losses', -taken)
   if (dmg && r.cover) say(r, `Cover blocked $${Math.min(dmg, r.cover)}.`)
   if (checkBankrupt(r)) return
   if (r.turn >= CONFIG.turnLimit) { r.phase = 'lost'; r.loss = { reason: 'stalemate', by: liveThreats(r).map(t => THREATS[t.kind].name) }; return }
