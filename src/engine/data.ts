@@ -23,6 +23,7 @@ export interface CardDef {
   rarity?: 'Common' | 'Uncommon' | 'Rare'
   forced?: boolean // must be played before other cards
   stop?: boolean // stops one enemy's next move this turn
+  oncePerRound?: boolean // after it's played it sits out until the next round
   badBlood?: boolean // puts a Bad Blood card in your discard pile when played
   gold?: number // paid from your own fortune when played
   chance?: number // chance the attack lands; if it fails you get Bad Blood
@@ -48,8 +49,8 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Put out every fire.', flavour: 'For a fee.' },
   improveGear: { name: 'Improve Gear', ap: 1, cost: 1, uses: null, family: 'Defence', power: 3, icon: 'gear',
     text: 'Pay $1. +3 Cover this turn.', flavour: 'Stronger timber, fewer accidents.' },
-  hardGraft: { name: 'Hard Graft', ap: 0, cost: 0, uses: 1, family: 'Tempo', power: 1, icon: 'graft', price: 4, rarity: 'Uncommon',
-    text: '+1 AP.', flavour: 'Sleep is for shareholders.' },
+  hardGraft: { name: 'Hard Graft', ap: 0, cost: 0, uses: null, oncePerRound: true, family: 'Tempo', power: 1, icon: 'graft', price: 4, rarity: 'Uncommon',
+    text: '+1 AP. Once per round.', flavour: 'Sleep is for shareholders.' },
   pettyCash: { name: 'Petty Cash', ap: 0, cost: 0, uses: 3, family: 'Skim', power: 1, icon: 'coins',
     text: 'Skim 1 gold.', flavour: 'Necessary expenses.' },
   payWages: { name: 'Pay Wages', ap: 1, cost: 2, uses: null, family: 'Dirty', power: 4, icon: 'coins', price: 1, rarity: 'Common',

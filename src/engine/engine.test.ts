@@ -544,3 +544,23 @@ describe('selling a Well', () => {
     expect(r.plots[0]).toBeNull()
   })
 })
+
+describe('Hard Graft', () => {
+  it('plays once per round and comes back next round', () => {
+    let r = newRun(14, 'threeOil')
+    r.threats = [{ id: 900, kind: 'railroad', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
+    const g = r.deck.find(c => c.key === 'hardGraft')!
+    r.hand = [g]; r.draw = r.draw.filter(c => c.id !== g.id); r.discard = []; r.ap = 2
+    r = act(r, { type: 'play', cardId: g.id })
+    expect(r.ap).toBe(3)
+    expect(r.deck.some(c => c.id === g.id)).toBe(true) // never destroyed
+    for (let t = 0; t < 4 && r.phase === 'turn'; t++) { // sits out for the rest of the round
+      expect([...r.hand, ...r.draw, ...r.discard].some(c => c.id === g.id)).toBe(false)
+      r.threats.forEach(x => (x.hold = 50)); r.capital = 50
+      r = act(r, { type: 'endTurn' })
+    }
+    r.phase = 'shop'; r.round = 1
+    r = act(r, { type: 'leaveShop' }) // next round
+    expect([...r.hand, ...r.draw].some(c => c.id === g.id)).toBe(true)
+  })
+})

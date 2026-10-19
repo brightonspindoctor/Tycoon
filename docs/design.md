@@ -48,7 +48,7 @@ A card is offered (weighted by rarity, like the shop): take it into your deck or
 - Lawyer Up deals 3 (was 4). Bribe the Sheriff: pay $2, 5 Hold damage. Hired Hand and Pay Wages are Dirty.
 - Pay Wages: pay $2, deal 4 Hold damage (Dirty). Costs $1 to buy. No card is tied to one enemy; enemy weaknesses and resistances decide what works.
 - Shore Up: 1 Hold damage and +1 Cover this turn (was 3 damage).
-- Hard Graft (+1 AP, single use) can be bought ($4).
+- Hard Graft (+1 AP, 0 AP to play) can be played once per round: it then sits out until the next round. It is never destroyed. It can be bought ($4).
 - **Bribe** ($4): pay 1 gold from your fortune; 50% chance of 4 Hold damage (Dirty, so doubled against the Baron and the Railroad Agent), otherwise it is refused and adds Bad Blood.
 - Enemies that move first show what they opened with on turn 1, above their next move.
 

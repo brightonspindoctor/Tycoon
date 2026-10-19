@@ -459,6 +459,7 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
 function spendCard(r: Run, c: Card) {
   r.hand = r.hand.filter(x => x.id !== c.id)
   if (c.temp) return
+  if (CARDS[c.key].oncePerRound) return // sits out until the next round's shuffle
   if (c.uses !== null) {
     c.uses -= 1
     const master = r.deck.find(x => x.id === c.id)

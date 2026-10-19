@@ -555,3 +555,4 @@ button.m-threat { cursor: pointer; }
 .m .spoils__buttons .cl-btn { flex: 1; }
 .warn--stopped, .m-intent--stopped { background: var(--ink-muted); }
 .warn--stopped s, .m-intent--stopped s { opacity: .8; }
+.card-once { font-size: 10px; font-weight: 700; color: var(--ink-muted); }
