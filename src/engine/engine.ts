@@ -102,9 +102,10 @@ export function price(r: Run): number {
   let p = CONFIG.oilPrice - r.short
   if (r.modifier === 'glut') p -= 1
   if (r.modifier === 'boomtown') p += 1
-  return Math.max(0, p)
+  return Math.max(CONFIG.oilFloor, p)
 }
-export const netPrice = (r: Run) => Math.max(0, price(r) - r.freight)
+/** What you get per barrel after freight; never below the floor. */
+export const netPrice = (r: Run) => Math.max(CONFIG.oilFloor, price(r) - r.freight)
 
 export function debtPerTurn(r: Run): number {
   let d = r.debt

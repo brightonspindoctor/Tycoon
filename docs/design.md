@@ -28,6 +28,7 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 - A Prospect, if you own one, is always in each round's opening hand.
 - Prospect (2 AP, single use: it is destroyed once played; buy more at the Land Office) claims 2 plots and puts 2 Well cards in your hand. They join your deck: build them now, or they are discarded at end of turn and come back in a later hand. Maximum 5 plots, filled in order 1–5. Once all 5 are claimed, Prospect still gives 2 Well cards while any plot is empty.
 - A Well card (1 AP) builds a Well on the next free plot and is used up. A Well pumps 1 oil a turn and runs dry after 6 barrels (Wildcat: 2 a turn, 8 barrels); the plot then frees up for a new Well. Oil pumped while storage is full is lost but still drains the Well.
+- Oil starts at $3 a barrel and never drops below $1, freight included.
 - Sell oil (1 AP) sells the whole stockpile. Oil carries over between rounds. Sell a Well (1 AP) for $5.
 - Enemies have **Hold** (health). There are two damage types, **Legal** and **Dirty**; enemies are weak to one (double damage), resist one (half) or are immune. No card is tied to one enemy.
 - Starting deck (9): Prospect, Hired Hand ×2, Lawyer Up, Shore Up, Bucket of Water ×2, Improve Gear, Hard Graft.
@@ -54,16 +55,16 @@ A card is offered (weighted by rarity, like the shop): take it into your deck or
 Fire is counted as a number of fires (up to 3); new outbreaks add to it. Each end of turn every fire burns 1 oil from the stockpile; with no oil it destroys the highest-numbered Well. Pumps stop while it burns. It can't touch Capital. A Bucket of Water puts out one fire and never wears out; Fire Brigade puts out every fire. Or cut a Firebreak (2 AP): lose your weakest Well (lowest output, then fewest barrels left) and every fire goes out. Sources: Claim Jumper (when beaten), Strike (round 3), Bad Blood, the Baron.
 
 ### Enemies
-Round 1 is always a cash enemy (it drains your money), round 2 always an engine enemy (it breaks your Wells, cards or turns), round 3 one of each at once, and round 4 the boss.
+Only a few enemies resist a damage type (the Blowout, the Railroad Agent and the Baron). Round 1 is always a cash enemy (it drains your money), round 2 always an engine enemy (it breaks your Wells, cards or turns), round 3 one of each at once, and round 4 the boss.
 
 | Enemy | Role | Hold | Weak | Resists | Cycle | Notes |
 |---|---|---|---|---|---|---|
 | Blowout | Engine | 5 | — | Legal | Rumble → Spray → Blow | Cap the Well (1 AP) for 3 damage; beaten = +3 oil |
-| Strike | Engine | 8 | Dirty | Legal | Picket → Sabotage (a random Well) (+ Torch in R3) | Moves first: Walkout (−1 AP) |
+| Strike | Engine | 8 | Dirty | — | Picket → Sabotage (a random Well) (+ Torch in R3) | Moves first: Walkout (−1 AP) |
 | Bank Inspector | Cash | 6 | Legal | Dirty (immune) | Audit → Fine | Ending a turn with $12+ costs him 2 Hold; beaten = 2 Loose Threads |
 | Railroad Agent | Cash | 7 | — | Legal | Raise Rates → Refuse | Owns the railway: freight is her toll per barrel sold, and Raise Rates adds $1 to it |
-| Claim Jumper | Engine | 6 | Dirty | Legal | Jump → Scout | Moves first: Scout. Beaten = 2 fires |
-| Speculator | Cash | 7 | Legal | Dirty | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |
+| Claim Jumper | Engine | 6 | Dirty | — | Jump → Scout | Moves first: Scout. Beaten = 2 fires |
+| Speculator | Cash | 7 | Legal | — | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |
 | **Rival Baron** (boss) | Boss | 20 | Dirty | Legal | Sabotage (a random Well) → Lease → Arson | Moves first: Arson (1). Arson grows each cycle |
 
 Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown.

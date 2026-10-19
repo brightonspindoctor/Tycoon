@@ -6,7 +6,8 @@ export const CONFIG = {
   trustFundStreak: 3, // stage 1 losses in a row before the Trust Fund is offered
   baseAP: 2,
   handSize: 5,
-  oilPrice: 3,
+  oilPrice: 3, // starting price per barrel
+  oilFloor: 1, // the price never drops below this, freight included
   startStorage: 3,
   maxPlots: 5,
   plotsPerProspect: 2,

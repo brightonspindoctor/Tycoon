@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, canPlay, damageFor, debtPerTurn, isAttack, newRun, type Run } from './engine'
+import { act, canPlay, damageFor, debtPerTurn, isAttack, netPrice, newRun, type Run } from './engine'
 import { lossStreak, type RunRecord } from '../storage'
 import { CONFIG } from './config'
 import { money } from './format'
@@ -32,7 +32,7 @@ describe('a new run', () => {
 describe('damage', () => {
   it('doubles when weak and halves when resisted', () => {
     expect(damageFor('Dirty', 2, 'claimJumper')).toBe(4)
-    expect(damageFor('Legal', 4, 'claimJumper')).toBe(2)
+    expect(damageFor('Legal', 4, 'railroad')).toBe(2)
     expect(damageFor('Dirty', 2, 'inspector')).toBe(0)
     expect(damageFor('Dirty', 6, 'baron')).toBe(12)
   })
@@ -303,7 +303,7 @@ describe('Bribe', () => {
 describe('Pay Wages and Sabotage', () => {
   it('Pay Wages is a Dirty card that works on anyone', () => {
     expect(damageFor('Dirty', 4, 'inspector')).toBe(0) // the Inspector is immune to Dirty
-    expect(damageFor('Dirty', 4, 'speculator')).toBe(2) // resists
+    expect(damageFor('Dirty', 4, 'speculator')).toBe(4) // no resist any more
     expect(damageFor('Dirty', 4, 'claimJumper')).toBe(8) // weak
   })
 
@@ -484,5 +484,22 @@ describe('Firebreak', () => {
       r = act(r, { type: 'firebreak' })
       expect(JSON.stringify([r.fire, r.plots, r.ap])).toBe(before)
     }
+  })
+})
+
+describe('oil price', () => {
+  it('starts at $3 and never drops below $1 a barrel, freight included', () => {
+    const r = newRun(10, 'threeOil'); r.modifier = null; r.short = 0; r.freight = 0
+    expect(netPrice(r)).toBe(3)
+    r.short = 5; r.modifier = 'glut'
+    expect(netPrice(r)).toBe(1)
+    r.short = 0; r.modifier = null; r.freight = 4
+    expect(netPrice(r)).toBe(1)
+  })
+})
+
+describe('resists', () => {
+  it('only the Blowout, the Railroad Agent and the Baron resist anything', () => {
+    expect(Object.entries(THREATS).filter(([, t]) => t.resist).map(([k]) => k).sort()).toEqual(['baron', 'blowout', 'railroad'])
   })
 })
