@@ -17,7 +17,7 @@ export function ThreatPanel({ run, threat, targeting, damagePreview, onTarget }:
     <Tag className={`threat ${threat.beaten ? 'threat--beaten' : ''} ${targeting ? 'threat--target' : ''}`} onClick={targeting ? onTarget : undefined}
       aria-label={`${d.name}, Hold ${threat.hold} of ${threat.maxHold}`}>
       <div className="threat__head">
-        <img className="threat__portrait" src={`/art/enemies/${d.portrait}.jpg`} alt="" />
+        <img className="threat__portrait" src={`${import.meta.env.BASE_URL}art/enemies/${d.portrait}.jpg`} alt="" />
         <div className="threat__title">
           <span className="cl-label">{threat.kind === 'baron' ? 'Boss' : `Round ${run.round}`}{d.movesFirst ? ' · Moves first' : ''}</span>
           <h2 className="threat__name">{d.name}</h2>

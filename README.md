@@ -6,7 +6,11 @@ A satirical solo roguelike deckbuilder by Jonny Sadler. You run a harmful indust
 
 This repository holds the first playable slice: **Oil, stage 1** (four rounds and the Rival Baron).
 
-## Run it
+## Play it
+
+Online: https://brightonspindoctor.github.io/tycoon/ (rebuilt automatically on every push to `main`).
+
+## Run it locally
 
 You need Node.js 20 or newer.
 

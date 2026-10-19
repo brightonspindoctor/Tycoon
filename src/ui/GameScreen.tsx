@@ -60,7 +60,7 @@ export function GameScreen({ run, dispatch }: Props) {
           ))}
           {run.fire > 0 && (
             <section className="hazard" aria-label={`Fire, intensity ${run.fire}`}>
-              <div className="hazard__head"><img src="/art/icons/fire.png" alt="" /><span className="cl-label">Fire</span><span className="cl-num hazard__level">{run.fire} / {CONFIG.fireMax}</span></div>
+              <div className="hazard__head"><img src={`${import.meta.env.BASE_URL}art/icons/fire.png`} alt="" /><span className="cl-label">Fire</span><span className="cl-num hazard__level">{run.fire} / {CONFIG.fireMax}</span></div>
               <div className="warn warn--heat"><b>End of turn</b><span>{fireNext}</span></div>
               <span className="hazard__note">Pumps stopped.</span>
             </section>
@@ -79,7 +79,7 @@ export function GameScreen({ run, dispatch }: Props) {
                 <div key={i} className={`plot ${!w ? 'plot--empty' : ''} ${w?.unstable ? 'plot--unstable' : ''} ${marked ? 'plot--marked' : ''} ${burning ? 'plot--burning' : ''} ${run.fire && w ? 'plot--stopped' : ''}`}>
                   <span className="cl-label">Plot {i + 1}{i === CONFIG.firebreakPlot ? ' · Firebreak' : ''}</span>
                   {w ? <button type="button" className="plot__well" onClick={() => setPlotMenu(plotMenu === i ? null : i)} aria-label={`Well No. ${i + 1}, ${state}`}>
-                    <img src="/art/icons/derrick.png" alt="" />
+                    <img src={`${import.meta.env.BASE_URL}art/icons/derrick.png`} alt="" />
                   </button> : <div className="plot__hole" />}
                   <span className="plot__name">{w ? `Well No. ${i + 1}` : '—'}</span>
                   <span className="plot__state">{state}</span>
@@ -126,7 +126,7 @@ export function GameScreen({ run, dispatch }: Props) {
             <span className="cl-label">Items</span>
             <div className="items__row">
               <div className="cl-item cl-item--neg"><div className="cl-item__disc">−{run.debt}</div><div className="cl-item__name">Bank Debt</div><div className="cl-item__fx">{money(-run.debt, st)} a turn</div></div>
-              {run.items.map((k, i) => <div key={i} className="cl-item"><div className="cl-item__disc"><img src={`/art/icons/${ITEMS[k].icon}.png`} alt="" /></div><div className="cl-item__name">{ITEMS[k].name}</div><div className="cl-item__fx">{ITEMS[k].text}</div></div>)}
+              {run.items.map((k, i) => <div key={i} className="cl-item"><div className="cl-item__disc"><img src={`${import.meta.env.BASE_URL}art/icons/${ITEMS[k].icon}.png`} alt="" /></div><div className="cl-item__name">{ITEMS[k].name}</div><div className="cl-item__fx">{ITEMS[k].text}</div></div>)}
             </div>
           </section>
         </aside>

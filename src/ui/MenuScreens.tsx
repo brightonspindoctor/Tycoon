@@ -13,7 +13,7 @@ export function Intro({ onBegin, onHistory }: { onBegin: () => void; onHistory: 
   const open = INDUSTRIES.filter((_, i) => i === 0 || done.includes(INDUSTRIES[i - 1]))
   return (
     <div className="screen intro" data-theme="victorian">
-      <img className="intro__art" src="/art/title.jpg" alt="Tycoon: a share certificate with the industries arranged around a globe" />
+      <img className="intro__art" src={`${import.meta.env.BASE_URL}art/title.jpg`} alt="Tycoon: a share certificate with the industries arranged around a globe" />
       <div className="intro__side">
         <span className="cl-label">Industry. Influence. Plausible deniability.</span>
         <h1 className="cl-display intro__title">Choose your industry</h1>

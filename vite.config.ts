@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+// Relative base so the game works at any address, including GitHub Pages (/tycoon/).
 export default defineConfig({
+  base: './',
   plugins: [react()],
 })
