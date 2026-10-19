@@ -5,11 +5,11 @@ interface Props {
   run: Run
   threat: Threat
   targeting?: boolean
-  damagePreview?: number
+  preview?: string
   onTarget?: () => void
 }
 
-export function ThreatPanel({ run, threat, targeting, damagePreview, onTarget }: Props) {
+export function ThreatPanel({ run, threat, targeting, preview, onTarget }: Props) {
   const d = THREATS[threat.kind]
   const pct = Math.max(0, (threat.hold / threat.maxHold) * 100)
   const Tag = targeting ? 'button' : 'section'
@@ -25,11 +25,16 @@ export function ThreatPanel({ run, threat, targeting, damagePreview, onTarget }:
             <span className="hold-bar"><span style={{ width: `${pct}%` }} /></span>
             <span className="cl-num">{Math.max(0, threat.hold)} / {threat.maxHold}</span>
           </div>
-          {targeting && damagePreview !== undefined && <span className="cl-label threat__preview">{damagePreview > 0 ? `Deal ${damagePreview}` : 'No effect'}</span>}
+          {targeting && preview && <span className="cl-label threat__preview">{preview}</span>}
         </div>
       </div>
       {threat.opened && run.turn === 1 && !threat.beaten && <div className="opened"><b>Opened with</b> {threat.opened}</div>}
-      {threat.beaten ? <div className="warn warn--done">Beaten</div> : (
+      {threat.beaten ? <div className="warn warn--done">Beaten</div> : threat.stopped ? (
+        <div className="warn warn--stopped">
+          <b>Stopped this turn · {intent(run, threat)}</b>
+          <span><s>{intentText(run, threat)}</s></span>
+        </div>
+      ) : (
         <div className="warn">
           <b>Next · end of turn · {intent(run, threat)}</b>
           <span>{intentText(run, threat)}</span>

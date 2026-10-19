@@ -1,5 +1,5 @@
 // A simple rule-following player, used by the tests and the balance simulator.
-import { act, canPlay, intent, isAttack, liveThreats, netPrice, type Run } from '../src/engine/engine'
+import { act, canPlay, isAttack, netPrice, type Run } from '../src/engine/engine'
 import { CARDS } from '../src/engine/data'
 
 export function botShop(r: Run): Run {
@@ -29,6 +29,7 @@ export function botTurn(r: Run): Run {
     const prospect = find('prospect')
     const graft = find('hardGraft')
     const petty = find('pettyCash')
+    const stop = find('shoreUp')
     let choice: Run | null = null
     if (forced) choice = act(r, { type: 'play', cardId: forced.id })
     else if (r.fire && water) choice = act(r, { type: 'play', cardId: water.id })
@@ -37,7 +38,7 @@ export function botTurn(r: Run): Run {
     else if (prospect && !r.hand.some(c => c.key === 'well') && r.plots.every(Boolean)) choice = act(r, { type: 'play', cardId: prospect.id })
     else if (attack) choice = act(r, { type: 'play', cardId: attack.id })
     else if (r.oil > 0 && netPrice(r) > 0 && !r.current.refuse) choice = act(r, { type: 'sellOil' })
-    else if (liveThreats(r).some(t => t.kind === 'blowout' && intent(r, t) === 'Blow') && r.plots.some(w => w?.unstable)) choice = act(r, { type: 'capWell' })
+    else if (stop) choice = act(r, { type: 'play', cardId: stop.id })
     else if (petty && r.capital > 10) choice = act(r, { type: 'play', cardId: petty.id })
     else if (graft && r.ap === 0 && r.hand.some(c => c.key !== 'hardGraft' && CARDS[c.key].ap === 1)) choice = act(r, { type: 'play', cardId: graft.id })
     if (!choice || choice === r || JSON.stringify(choice) === JSON.stringify(r)) break

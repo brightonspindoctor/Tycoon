@@ -2,7 +2,7 @@
 import { CONFIG } from './config'
 
 export type Family = 'Legal' | 'Dirty' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Junk'
-export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'shovels' | 'coins' | 'telegraph' | 'dynamite' | 'gear' | 'timber' | 'hose' | 'envelope'
+export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'shovels' | 'coins' | 'telegraph' | 'dynamite' | 'gear' | 'timber' | 'hose' | 'envelope' | 'graft'
 
 export type CardKey =
   | 'prospect' | 'well' | 'wildcat' | 'hiredHand' | 'lawyerUp' | 'shoreUp' | 'bucket' | 'fireBrigade'
@@ -22,7 +22,7 @@ export interface CardDef {
   price?: number // shop price
   rarity?: 'Common' | 'Uncommon' | 'Rare'
   forced?: boolean // must be played before other cards
-  cover?: number // attack cards that also give Cover this turn
+  stop?: boolean // stops one enemy's next move this turn
   badBlood?: boolean // puts a Bad Blood card in your discard pile when played
   gold?: number // paid from your own fortune when played
   chance?: number // chance the attack lands; if it fails you get Bad Blood
@@ -40,15 +40,15 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Deal 2 Hold damage.', flavour: 'A firm word, and a firmer grip.' },
   lawyerUp: { name: 'Lawyer Up', ap: 1, cost: 2, uses: null, family: 'Legal', power: 3, icon: 'deed', price: 4, rarity: 'Common',
     text: 'Pay $2. Deal 3 Hold damage.', flavour: 'The paperwork always wins (eventually).' },
-  shoreUp: { name: 'Shore Up', ap: 1, cost: 0, uses: null, family: 'Dirty', power: 1, cover: CONFIG.shoreUpCover, icon: 'timber', price: 3, rarity: 'Common',
-    text: `Deal 1 Hold damage. +${CONFIG.shoreUpCover} Cover this turn.`, flavour: 'More timber. More rope.' },
+  shoreUp: { name: 'Shore Up', ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, stop: true, icon: 'timber', price: 3, rarity: 'Common',
+    text: "Stop one enemy's next move this turn.", flavour: 'More timber. More rope.' },
   bucket: { name: 'Bucket of Water', ap: 1, cost: 0, uses: null, family: 'Water', power: 1, icon: 'bucket',
     text: 'Put out one fire.', flavour: "It won't stop the well, but it might buy a moment." },
   fireBrigade: { name: 'Fire Brigade', ap: 1, cost: 0, uses: null, family: 'Water', power: 3, icon: 'hose', price: 4, rarity: 'Common',
     text: 'Put out every fire.', flavour: 'For a fee.' },
   improveGear: { name: 'Improve Gear', ap: 1, cost: 1, uses: null, family: 'Defence', power: 3, icon: 'gear',
     text: 'Pay $1. +3 Cover this turn.', flavour: 'Stronger timber, fewer accidents.' },
-  hardGraft: { name: 'Hard Graft', ap: 0, cost: 0, uses: 1, family: 'Tempo', power: 1, icon: 'cudgels', price: 4, rarity: 'Uncommon',
+  hardGraft: { name: 'Hard Graft', ap: 0, cost: 0, uses: 1, family: 'Tempo', power: 1, icon: 'graft', price: 4, rarity: 'Uncommon',
     text: '+1 AP.', flavour: 'Sleep is for shareholders.' },
   pettyCash: { name: 'Petty Cash', ap: 0, cost: 0, uses: 3, family: 'Skim', power: 1, icon: 'coins',
     text: 'Skim 1 gold.', flavour: 'Necessary expenses.' },
@@ -68,8 +68,8 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $3. Add a random attack card to your hand.', flavour: 'STOP. SEND HELP. STOP.' },
   looseThread: { name: 'Loose Thread', ap: 0, cost: 1, uses: null, family: 'Junk', power: 0, icon: 'deed', forced: true, junk: true,
     text: 'Must play. Lose $1.', flavour: 'Someone kept a copy.' },
-  badBlood: { name: 'Bad Blood', ap: 0, cost: 0, uses: null, family: 'Junk', power: 0, icon: 'fire', forced: true, junk: true,
-    text: 'Must play. 1 in 3 chance of a fire.', flavour: 'They remember.' },
+  badBlood: { name: 'Bad Blood', ap: 0, cost: 0, uses: 2, family: 'Junk', power: 0, icon: 'fire', forced: true, junk: true,
+    text: 'Must play. 1 in 3 chance of a fire. Gone after 2 plays.', flavour: 'They remember. For a while.' },
   marginCall: { name: 'Margin Call', ap: 1, cost: 2, uses: 1, family: 'Junk', power: 0, icon: 'telegraph', forced: true, junk: true,
     text: 'Must play. Pay $2.', flavour: 'Payable on demand.' },
   iou: { name: 'IOU', ap: 1, cost: 1, uses: 1, family: 'Junk', power: 0, icon: 'deed', junk: true,
@@ -78,7 +78,7 @@ export const CARDS: Record<CardKey, CardDef> = {
 
 export const STARTER: CardKey[] = ['prospect', 'hiredHand', 'hiredHand', 'lawyerUp', 'shoreUp', 'bucket', 'bucket', 'improveGear', 'hardGraft']
 export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBrigade', 'payWages', 'dynamite', 'bribe', 'wildcat', 'telegram', 'hardGraft', 'payOff']
-export const ATTACK_CARDS: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'dynamite']
+export const ATTACK_CARDS: CardKey[] = ['hiredHand', 'lawyerUp', 'dynamite']
 
 export type BonusKey = 'extraProspect' | 'threeOil' | 'pettyCash' | 'gearGraft' | 'trustFund'
 export const BONUSES: Record<BonusKey, { name: string; text: string }> = {

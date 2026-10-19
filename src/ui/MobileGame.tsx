@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { CARDS, ITEMS, MODS, ROLE_LABEL, THREATS } from '../engine/data'
 import {
-  apCost, canPlay, damageFor, fires, weakestWell, debtPerTurn, fireTarget, intent, intentText, isAttack, liveThreats, netPrice, price, production, skimRate,
+  apCost, canPlay, damageFor, fires, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, intent, intentText, netPrice, price, production, skimRate,
   type Action, type Run, type Threat,
 } from '../engine/engine'
 import { money, year } from '../engine/format'
@@ -23,14 +23,14 @@ export function MobileGame({ run, dispatch }: Props) {
   const [sheet, setSheet] = useState(false)
   const [pile, setPile] = useState<'draw' | 'discard' | null>(null)
   const st = run.stage
-  const live = liveThreats(run)
   const sel = run.hand.find(c => c.id === selected) ?? null
   const selDef = sel ? CARDS[sel.key] : null
   const selCheck = sel ? canPlay(run, sel) : null
   const dmgOn = (t: Threat) => (selDef ? damageFor(selDef.family, selDef.power, t.kind) : 0)
-  const needsTarget = !!sel && !!selCheck?.ok && isAttack(sel.key) && live.filter(t => dmgOn(t) > 0).length > 1
-  const blowout = live.find(t => t.kind === 'blowout')
-  const unstable = run.plots.findIndex(w => w?.unstable)
+  const targets = sel ? targetsFor(run, sel) : []
+  const stopping = !!selDef?.stop
+  const needsTarget = !!sel && !!selCheck?.ok && targets.length > 1
+  const canTarget = (t: Threat) => targets.some(x => x.id === t.id)
   const burnsWell = run.fire > 0 && run.oil === 0
   const lastWell = run.plots.reduce((m, p, k) => (p ? k : m), -1)
   const nextDebt = debtPerTurn(run) * (run.pending.audit ? 2 : 1)
@@ -46,7 +46,7 @@ export function MobileGame({ run, dispatch }: Props) {
     setSelected(id)
   }
   function tapThreat(t: Threat) {
-    if (!needsTarget || !sel || dmgOn(t) <= 0) return
+    if (!needsTarget || !sel || !canTarget(t)) return
     dispatch({ type: 'play', cardId: sel.id, target: t.id })
     setSelected(null)
   }
@@ -77,10 +77,10 @@ export function MobileGame({ run, dispatch }: Props) {
         {run.modifier && <div className="m-chip"><b>{MODS[run.modifier].name}</b> · {MODS[run.modifier].text}</div>}
 
         <section className="m-threats" aria-label="Opposition">
-          {needsTarget && <span className="cl-label m-prompt">Tap an enemy to hit</span>}
+          {needsTarget && <span className="cl-label m-prompt">{stopping ? 'Tap the move to stop' : 'Tap an enemy to hit'}</span>}
           {run.threats.map(t => {
             const d = THREATS[t.kind]
-            const can = needsTarget && !t.beaten && dmgOn(t) > 0
+            const can = needsTarget && canTarget(t)
             const Tag = can ? 'button' : 'section'
             return (
               <Tag key={t.id} onClick={can ? () => tapThreat(t) : undefined}
@@ -95,14 +95,16 @@ export function MobileGame({ run, dispatch }: Props) {
                   </div>
                   <span className="hold-bar"><span style={{ width: `${Math.max(0, (t.hold / t.maxHold) * 100)}%` }} /></span>
                   {t.opened && run.turn === 1 && !t.beaten && <div className="opened"><b>Opened with</b> {t.opened}</div>}
-                  {t.beaten ? <div className="m-intent m-intent--done">Beaten</div> : (
+                  {t.beaten ? <div className="m-intent m-intent--done">Beaten</div> : t.stopped ? (
+                    <div className="m-intent m-intent--stopped"><b>Stopped · {intent(run, t)}</b> <s>{intentText(run, t)}</s></div>
+                  ) : (
                     <div className="m-intent"><b>Next · {intent(run, t)}</b> {intentText(run, t)}</div>
                   )}
                   <div className="m-traits">
                     {[d.weak && `Weak: ${d.weak}`, d.resist && `Resists: ${d.resist}`, d.immune && `Immune: ${d.immune}`].filter(Boolean).join(' · ')}
                   </div>
                 </div>
-                {needsTarget && !t.beaten && <span className={`m-threat__dmg ${can ? '' : 'is-none'}`}>{can ? `Deal ${dmgOn(t)}` : 'No effect'}</span>}
+                {needsTarget && !t.beaten && <span className={`m-threat__dmg ${can ? '' : 'is-none'}`}>{stopping ? (can ? 'Stop' : 'Stopped') : can ? `Deal ${dmgOn(t)}` : 'No effect'}</span>}
               </Tag>
             )
           })}
@@ -142,7 +144,7 @@ export function MobileGame({ run, dispatch }: Props) {
           {plotMenu !== null && run.plots[plotMenu] && (
             <div className="m-plotmenu">
               <span>Well No. {plotMenu + 1}</span>
-              <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < 1} onClick={() => { dispatch({ type: 'sellWell', plot: plotMenu }); setPlotMenu(null) }}>Sell · 1 AP · {money(CONFIG.sellWellValue, st, true)}</button>
+              <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < 1} onClick={() => { dispatch({ type: 'sellWell', plot: plotMenu }); setPlotMenu(null) }}>Sell · 1 AP · {money(wellValue(run.plots[plotMenu]!), st, true)}</button>
               <button type="button" className="cl-btn cl-btn--small" onClick={() => setPlotMenu(null)}>Keep</button>
             </div>
           )}
@@ -178,14 +180,13 @@ export function MobileGame({ run, dispatch }: Props) {
               {!selCheck?.ok && selCheck?.why && <span className="cl-minus m-detail__why">{selCheck.why}</span>}
             </div>
             {selCheck?.ok && (needsTarget
-              ? <span className="cl-label m-detail__hint">Tap an enemy ↑</span>
+              ? <span className="cl-label m-detail__hint">{stopping ? 'Tap a move ↑' : 'Tap an enemy ↑'}</span>
               : <button type="button" className="cl-btn cl-btn--primary" onClick={playSelected}>Play · {apCost(run, sel)} AP</button>)}
           </div>
         ) : (
           <div className="m-actions">
             <button type="button" className="cl-btn cl-btn--small m-pilebtn" onClick={() => setPile('draw')}>Draw {run.draw.length}</button>
             <button type="button" className="cl-btn cl-btn--small m-pilebtn" onClick={() => setPile('discard')}>Discard {run.discard.length}</button>
-            {blowout && unstable >= 0 && <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < 1} onClick={() => dispatch({ type: 'capWell' })}>Cap No. {unstable + 1} · {CONFIG.capWellDamage} Hold</button>}
             {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose No. {weakestWell(run) + 1}</button>}
             {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
           </div>

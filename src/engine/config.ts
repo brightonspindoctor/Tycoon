@@ -14,12 +14,10 @@ export const CONFIG = {
   wellCardsPerProspect: 2,
   wellReserve: 6, // barrels a Well pumps before it runs dry
   wildcatReserve: 8,
-  sellWellValue: 5,
+  sellPerBarrel: 1, // selling a Well pays this for each barrel still in it
   firebreakAP: 2, // Firebreak: lose your weakest Well, put out every fire
-  capWellDamage: 3,
   fireMax: 3, // most fires burning at once
   bucketPrice: 2, // Bucket of Water, always for sale at the Land Office
-  shoreUpCover: 1,
   bribeGold: 1, // Bribe: costs this much of your own fortune to play
   bribeChance: 0.5, // chance the bribe is taken
   bribeDamage: 4,

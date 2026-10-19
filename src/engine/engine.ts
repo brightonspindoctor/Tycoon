@@ -9,7 +9,7 @@ import { next, pick, shuffle } from './rng'
 
 export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean }
 export interface Well { output: number; reserve: number; unstable?: boolean }
-export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string }
+export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string; stopped?: boolean }
 export interface LedgerLine { label: string; amount: number }
 export type Phase = 'shop' | 'turn' | 'roundWon' | 'lost' | 'stageComplete'
 export type LossReason = 'bankrupt' | 'stalemate'
@@ -74,7 +74,6 @@ export type Action =
   | { type: 'play'; cardId: number; target?: number }
   | { type: 'sellOil' }
   | { type: 'sellWell'; plot: number }
-  | { type: 'capWell' }
   | { type: 'firebreak' }
   | { type: 'endTurn' }
   | { type: 'buyCard'; slot: number }
@@ -431,6 +430,14 @@ function hit(r: Run, t: Threat, dmg: number, badBlood = false) {
 }
 
 // ------------------------------------------------------------- turn actions
+/** The enemies a card can be aimed at: ones an attack can hurt, or ones not yet stopped. */
+export function targetsFor(r: Run, c: Card): Threat[] {
+  const d = CARDS[c.key]
+  if (d.stop) return liveThreats(r).filter(t => !t.stopped)
+  if (isAttack(c.key)) return liveThreats(r).filter(t => damageFor(d.family, d.power, t.kind) > 0)
+  return []
+}
+
 export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   const d = CARDS[c.key]
   if (r.phase !== 'turn') return { ok: false }
@@ -443,6 +450,7 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (c.key === 'prospect' && r.plots.length >= CONFIG.maxPlots && freePlot(r) < 0) return { ok: false, why: 'No land left to claim' }
   if ((c.key === 'well' || c.key === 'wildcat') && freePlot(r) < 0) return { ok: false, why: 'No free plot' }
   if ((c.key === 'bucket' || c.key === 'fireBrigade') && !r.fire) return { ok: false, why: 'No fire' }
+  if (d.stop && !targetsFor(r, c).length) return { ok: false, why: 'Every move is already stopped' }
   if (c.key === 'pettyCash' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
   if (isAttack(c.key) && !liveThreats(r).some(t => damageFor(d.family, d.power, t.kind) > 0)) return { ok: false, why: 'No effect on these enemies' }
   return { ok: true }
@@ -473,7 +481,6 @@ function play(r: Run, cardId: number, target?: number) {
     const t = chosen && damageFor(d.family, d.power, chosen.kind) > 0 ? chosen : best
     const dmg = damageFor(d.family, d.power, t.kind)
     spendCard(r, c)
-    if (d.cover) r.cover += d.cover
     if (d.gold) r.gold -= d.gold
     if (d.chance !== undefined) {
       // a gamble: it either lands cleanly or backfires with Bad Blood
@@ -483,6 +490,12 @@ function play(r: Run, cardId: number, target?: number) {
       say(r, `${d.name}: ${dmg} Hold damage to ${THREATS[t.kind].name}.`)
       hit(r, t, dmg, !!d.badBlood)
     }
+  } else if (d.stop) {
+    const options = targetsFor(r, c)
+    const t = options.find(x => x.id === target) ?? options[0]
+    spendCard(r, c)
+    t.stopped = true
+    say(r, `${d.name}: ${THREATS[t.kind].name}'s ${intent(r, t)} is stopped this turn.`)
   } else {
     spendCard(r, c)
     switch (c.key) {
@@ -529,21 +542,16 @@ function sellOil(r: Run) {
   money(r, `Sold ${n} oil @ $${each}`, n * each)
 }
 
-function sellWell(r: Run, plot: number) {
-  if (r.ap < 1 || !r.plots[plot]) return
-  r.ap -= 1
-  loseWell(r, plot, 'lost')
-  money(r, `Sold Well No. ${plot + 1}`, CONFIG.sellWellValue)
-}
+/** What a Well sells for: $1 for every barrel still in it. */
+export const wellValue = (w: Well) => w.reserve * CONFIG.sellPerBarrel
 
-function capWell(r: Run) {
-  const bo = liveThreats(r).find(t => t.kind === 'blowout')
-  const i = r.plots.findIndex(w => w?.unstable)
-  if (!bo || i < 0 || r.ap < 1) return
+function sellWell(r: Run, plot: number) {
+  const w = r.plots[plot]
+  if (r.ap < 1 || !w) return
   r.ap -= 1
-  loseWell(r, i, 'lost')
-  say(r, `Capped Well No. ${i + 1}.`)
-  hit(r, bo, CONFIG.capWellDamage)
+  const value = wellValue(w)
+  loseWell(r, plot, 'lost')
+  money(r, `Sold Well No. ${plot + 1} (${w.reserve} bbl left)`, value)
 }
 
 /** The Well a Firebreak costs you: the lowest output, then the fewest barrels left. */
@@ -637,6 +645,7 @@ function endTurn(r: Run) {
     const c = t.cycle
     if (t.step % seqLen === 0) t.cycle += 1
     const name = THREATS[t.kind].name
+    if (t.stopped) { t.stopped = false; say(r, `${name}'s ${a} was stopped.`); continue } // the move is skipped, not delayed
     switch (a) {
       case 'Rumble': { const i = highestWell(r); if (i >= 0) { r.plots[i]!.unstable = true; say(r, `Well No. ${i + 1} is Unstable.`) } break }
       case 'Spray': dmg += 2; r.oil = Math.max(0, r.oil - 1); break
@@ -703,7 +712,6 @@ export function act(prev: Run, a: Action): Run {
     case 'play': play(r, a.cardId, a.target); break
     case 'sellOil': sellOil(r); break
     case 'sellWell': sellWell(r, a.plot); break
-    case 'capWell': capWell(r); break
     case 'firebreak': firebreak(r); break
     case 'endTurn': endTurn(r); break
   }

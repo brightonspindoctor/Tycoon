@@ -553,3 +553,5 @@ button.m-threat { cursor: pointer; }
 .m .spoils { flex-direction: column; align-items: stretch; }
 .m .spoils .card { align-self: center; }
 .m .spoils__buttons .cl-btn { flex: 1; }
+.warn--stopped, .m-intent--stopped { background: var(--ink-muted); }
+.warn--stopped s, .m-intent--stopped s { opacity: .8; }

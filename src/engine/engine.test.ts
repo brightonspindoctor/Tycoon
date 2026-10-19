@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, canPlay, damageFor, debtPerTurn, isAttack, netPrice, newRun, type Run } from './engine'
+import { act, canPlay, damageFor, debtPerTurn, intent, isAttack, netPrice, newRun, targetsFor, type Run } from './engine'
 import { lossStreak, type RunRecord } from '../storage'
 import { CONFIG } from './config'
 import { money } from './format'
@@ -228,12 +228,27 @@ describe('card and enemy changes', () => {
     expect(r.deck.some(c => c.key === 'prospect')).toBe(false)
   })
 
-  it('Shore Up deals 1 Hold damage and gives 1 Cover', () => {
-    let r = lone(begin(), 'railroad')
+  it('Shore Up stops one enemy move this turn; the cycle still moves on', () => {
+    let r = lone(begin(), 'inspector')
+    r.threats[0].step = 1 // next move: Fine (−$3)
     const s = card('shoreUp'); r.deck.push(s); r.hand = [s]; r.ap = 1
     r = act(r, { type: 'play', cardId: s.id })
-    expect(r.threats[0].hold).toBe(49)
-    expect(r.cover).toBe(CONFIG.shoreUpCover)
+    expect(r.threats[0].stopped).toBe(true)
+    const cash = r.capital
+    r = act(r, { type: 'endTurn' })
+    expect(r.capital).toBe(cash - debtPerTurn(r)) // only the Bank Debt, no Fine
+    expect(r.threats[0].stopped).toBe(false)
+    expect(intent(r, r.threats[0])).toBe('Audit') // moved past the Fine
+  })
+
+  it('with two enemies, Shore Up stops the one you pick', () => {
+    let r = lone(begin(), 'inspector')
+    r.threats.push({ id: 901, kind: 'railroad', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false })
+    const s = card('shoreUp'); r.deck.push(s); r.hand = [s]; r.ap = 1
+    expect(targetsFor(r, s)).toHaveLength(2)
+    r = act(r, { type: 'play', cardId: s.id, target: 901 })
+    expect(r.threats.find(t => t.id === 901)!.stopped).toBe(true)
+    expect(r.threats.find(t => t.id === 900)!.stopped).toBeFalsy()
   })
 
   it('Bucket of Water puts out one fire and never wears out', () => {
@@ -501,5 +516,31 @@ describe('oil price', () => {
 describe('resists', () => {
   it('only the Blowout, the Railroad Agent and the Baron resist anything', () => {
     expect(Object.entries(THREATS).filter(([, t]) => t.resist).map(([k]) => k).sort()).toEqual(['baron', 'blowout', 'railroad'])
+  })
+})
+
+describe('Bad Blood decays', () => {
+  it('is destroyed for good after being played twice', () => {
+    let r = newRun(12, 'threeOil')
+    r.threats = [{ id: 900, kind: 'railroad', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
+    const bb = { id: 8200, key: 'badBlood' as const, uses: 2 }
+    r.deck.push(bb); r.hand = [bb]; r.ap = 1
+    r = act(r, { type: 'play', cardId: 8200 })
+    expect(r.deck.find(c => c.id === 8200)?.uses).toBe(1)
+    const again = r.discard.find(c => c.id === 8200)!
+    r.discard = r.discard.filter(c => c.id !== 8200); r.hand = [again]
+    r = act(r, { type: 'play', cardId: 8200 })
+    expect(r.deck.some(c => c.id === 8200)).toBe(false)
+    expect([...r.draw, ...r.discard, ...r.hand].some(c => c.id === 8200)).toBe(false)
+  })
+})
+
+describe('selling a Well', () => {
+  it('pays $1 for every barrel still in it, and there is no Cap Well', () => {
+    let r = newRun(13, 'threeOil'); r.capital = 10; r.ap = 1
+    r.plots = [{ output: 1, reserve: 4 }]
+    r = act(r, { type: 'sellWell', plot: 0 })
+    expect(r.capital).toBe(14)
+    expect(r.plots[0]).toBeNull()
   })
 })

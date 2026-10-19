@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { CARDS, ITEMS, MODS, THREATS } from '../engine/data'
 import {
-  apCost, canPlay, damageFor, fires, weakestWell, debtPerTurn, fireTarget, isAttack, liveThreats, netPrice, price, production, skimRate,
+  apCost, canPlay, damageFor, fires, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, price, production, skimRate,
   type Action, type Run,
 } from '../engine/engine'
 import { ERA_THEME, money, year } from '../engine/format'
@@ -20,16 +20,15 @@ export function GameScreen({ run, dispatch }: Props) {
   const st = run.stage
   const live = liveThreats(run)
   const sel = run.hand.find(c => c.id === selected)
-  const targeting = !!sel && isAttack(sel.key) && live.length > 1
-  const blowout = live.find(t => t.kind === 'blowout')
-  const unstable = run.plots.findIndex(w => w?.unstable)
+  const targets = sel ? targetsFor(run, sel) : []
+  const targeting = targets.length > 1
+  const stopping = !!sel && !!CARDS[sel.key].stop
 
   function clickCard(id: number) {
     const c = run.hand.find(x => x.id === id)!
     if (!canPlay(run, c).ok) return
-    // only ask for a target when more than one enemy can be hurt by this card
-    const hurtable = live.filter(t => damageFor(CARDS[c.key].family, CARDS[c.key].power, t.kind) > 0)
-    if (isAttack(c.key) && hurtable.length > 1) { setSelected(selected === id ? null : id); return }
+    // only ask for a target when the card could go to more than one enemy
+    if (targetsFor(run, c).length > 1) { setSelected(selected === id ? null : id); return }
     setSelected(null)
     dispatch({ type: 'play', cardId: id })
   }
@@ -57,11 +56,11 @@ export function GameScreen({ run, dispatch }: Props) {
 
       <div className="game__grid">
         <section className="col-threats" aria-label="Opposition">
-          <span className="cl-label">Opposition{targeting ? ' · Choose a target' : ''}</span>
+          <span className="cl-label">Opposition{targeting ? (stopping ? ' · Choose a move to stop' : ' · Choose a target') : ''}</span>
           {run.threats.map(t => (
             <ThreatPanel key={t.id} run={run} threat={t}
-              targeting={targeting && !t.beaten && damageFor(CARDS[sel!.key].family, CARDS[sel!.key].power, t.kind) > 0}
-              damagePreview={sel ? damageFor(CARDS[sel.key].family, CARDS[sel.key].power, t.kind) : undefined}
+              targeting={targeting && targets.some(x => x.id === t.id)}
+              preview={!sel ? undefined : stopping ? (t.stopped ? 'Already stopped' : 'Stop this move') : (n => (n > 0 ? `Deal ${n}` : 'No effect'))(damageFor(CARDS[sel.key].family, CARDS[sel.key].power, t.kind))}
               onTarget={() => { dispatch({ type: 'play', cardId: sel!.id, target: t.id }); setSelected(null) }} />
           ))}
           {run.fire > 0 && (
@@ -94,7 +93,7 @@ export function GameScreen({ run, dispatch }: Props) {
                   {burning && <span className="plot__flag plot__flag--fire">Burns next</span>}
                   {plotMenu === i && w && (
                     <div className="plot__menu">
-                      <button type="button" className="cl-btn" disabled={run.ap < 1} onClick={() => { dispatch({ type: 'sellWell', plot: i }); setPlotMenu(null) }}>Sell · 1 AP · {money(CONFIG.sellWellValue, st, true)}</button>
+                      <button type="button" className="cl-btn" disabled={run.ap < 1} onClick={() => { dispatch({ type: 'sellWell', plot: i }); setPlotMenu(null) }}>Sell · 1 AP · {money(wellValue(w), st, true)}</button>
                     </div>
                   )}
                 </div>
@@ -153,7 +152,6 @@ export function GameScreen({ run, dispatch }: Props) {
           </button>
           {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
           <div className="action-strip__actions">
-            {blowout && unstable >= 0 && <button type="button" className="cl-btn" disabled={run.ap < 1} onClick={() => dispatch({ type: 'capWell' })}>Cap Well No. {unstable + 1} · 1 AP · {CONFIG.capWellDamage} Hold</button>}
             {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose Well No. {weakestWell(run) + 1}, put out every fire</button>}
           </div>
         </div>
