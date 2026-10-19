@@ -29,12 +29,13 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 - A Well card (1 AP) builds a Well on the next free plot and is used up. A Well pumps 1 oil a turn and runs dry after 6 barrels (Wildcat: 2 a turn, 8 barrels); the plot then frees up for a new Well. Oil pumped while storage is full is lost but still drains the Well.
 - Sell oil (1 AP) sells the whole stockpile. Oil carries over between rounds. Sell a Well (1 AP) for $5.
 - Enemies have **Hold** (health). Attack cards deal Hold damage by family; enemies are weak to some families (double damage) and resist others (half).
-- Starting deck (10): Prospect, Hired Hand ×2, Lawyer Up, Shore Up, Bucket of Water ×2, Improve Gear ×2, Hard Graft.
+- Starting deck (8): Prospect, Hired Hand ×2, Lawyer Up, Shore Up, Bucket of Water, Improve Gear, Hard Graft.
 - Starting bonus (pick one): Extra Prospect, 3 Oil, Petty Cash (skim 1 gold, 0 AP, 3 uses), Improve Gear + Hard Graft.
 - Bailout bonus: **Trust Fund** ($15 and no Bank Debt for stage 1; normal Bank Debt from stage 2). Offered only after 3 runs in a row lost in stage 1 (bankrupt or out of time); finishing stage 1 resets the streak.
 - Junk: Loose Thread (must play, −$1), Bad Blood (unplayable; 1 in 3 chance of fire while in hand), Margin Call (must play, −$2), IOU (−$1 a turn until cleared).
 
 ### Cards changed in play-testing
+- Pay Wages: pay $2, deal 4 Hold damage (Muscle). Costs $1 to buy. No card is tied to one enemy; enemy weaknesses and resistances decide what works.
 - Shore Up: 1 Hold damage and +1 Cover this turn (was 3 damage).
 - Hard Graft (+1 AP, single use) can be bought ($4).
 - **Bribe** ($4): pay 1 gold from your fortune; 50% chance of 4 Hold damage (Dirty, so doubled against the Baron and the Railroad Agent), otherwise it is refused and adds Bad Blood.
@@ -49,12 +50,12 @@ Round 1 is always a cash enemy (it drains your money), round 2 always an engine 
 | Enemy | Role | Hold | Weak | Resists | Cycle | Notes |
 |---|---|---|---|---|---|---|
 | Blowout | Engine | 5 | Fix | Muscle | Rumble → Spray → Blow | Cap the Well (1 AP) for 3 damage; beaten = +3 oil |
-| Strike | Engine | 8 | Muscle | Legal | Picket → Sabotage (+ Torch in R3) | Moves first: Walkout (−1 AP). Muscle adds Bad Blood |
+| Strike | Engine | 8 | Muscle | Legal | Picket → Sabotage (destroys a random Well) (+ Torch in R3) | Moves first: Walkout (−1 AP). Muscle adds Bad Blood |
 | Bank Inspector | Cash | 6 | Legal | Muscle (0) | Audit → Fine | Ending a turn with $12+ costs him 2 Hold; beaten = 2 Loose Threads |
 | Railroad Agent | Cash | 7 | Dirty | Muscle | Raise Rates → Refuse | Owns the railway: freight is her toll per barrel sold, and Raise Rates adds $1 to it. Legal does normal damage |
 | Claim Jumper | Engine | 6 | Muscle | Legal | Jump → Scout | Moves first: Scout. Beaten = Fire (2) |
 | Speculator | Cash | 6 | Legal | Muscle | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |
-| **Rival Baron** (boss) | Boss | 20 | Dirty | Legal | Sabotage → Lease → Arson | Moves first: Arson (1). Ramps each cycle |
+| **Rival Baron** (boss) | Boss | 20 | Dirty | Legal | Sabotage (a random Well) → Lease → Arson | Moves first: Arson (1). Arson grows each cycle |
 
 Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown.
 

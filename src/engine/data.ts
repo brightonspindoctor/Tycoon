@@ -1,7 +1,7 @@
 // Card, enemy, item and modifier definitions for Oil, stage 1.
 import { CONFIG } from './config'
 
-export type Family = 'Muscle' | 'Legal' | 'Fix' | 'Dirty' | 'Wages' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Junk'
+export type Family = 'Muscle' | 'Legal' | 'Fix' | 'Dirty' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Junk'
 export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'shovels' | 'coins' | 'telegraph' | 'dynamite' | 'gear' | 'timber' | 'hose' | 'envelope'
 
 export type CardKey =
@@ -51,8 +51,8 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: '+1 AP.', flavour: 'Sleep is for shareholders.' },
   pettyCash: { name: 'Petty Cash', ap: 0, cost: 0, uses: 3, family: 'Skim', power: 1, icon: 'coins',
     text: 'Skim 1 gold.', flavour: 'Necessary expenses.' },
-  payWages: { name: 'Pay Wages', ap: 1, cost: 2, uses: null, family: 'Wages', power: 3, icon: 'coins', price: 3, rarity: 'Common',
-    text: 'Pay $2. Deal 3 Hold damage to a Strike.', flavour: 'Just this once.' },
+  payWages: { name: 'Pay Wages', ap: 1, cost: 2, uses: null, family: 'Muscle', power: 4, icon: 'coins', price: 1, rarity: 'Common',
+    text: 'Pay $2. Deal 4 Hold damage.', flavour: 'Loyalty, by the week.' },
   dynamite: { name: 'Dynamite', ap: 1, cost: 0, uses: 1, family: 'Dirty', power: 6, icon: 'dynamite', price: 5, rarity: 'Uncommon',
     text: 'Deal 6 Hold damage. Adds Bad Blood.', flavour: 'An unfortunate accident.' },
   bribe: { name: 'Bribe the Sheriff', ap: 1, cost: 3, uses: null, family: 'Dirty', power: 3, icon: 'coins', price: 5, rarity: 'Uncommon',
@@ -71,7 +71,7 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: '−$1 each turn it stays in hand. Pay $1 to clear it.', flavour: 'Signed in haste.' },
 }
 
-export const STARTER: CardKey[] = ['prospect', 'hiredHand', 'hiredHand', 'lawyerUp', 'shoreUp', 'bucket', 'bucket', 'improveGear', 'improveGear', 'hardGraft']
+export const STARTER: CardKey[] = ['prospect', 'hiredHand', 'hiredHand', 'lawyerUp', 'shoreUp', 'bucket', 'improveGear', 'hardGraft']
 export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBrigade', 'payWages', 'dynamite', 'bribe', 'wildcat', 'telegram', 'hardGraft', 'payOff']
 export const ATTACK_CARDS: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'dynamite']
 

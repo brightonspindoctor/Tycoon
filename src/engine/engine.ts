@@ -123,13 +123,12 @@ function say(r: Run, msg: string) { r.events.unshift(msg); r.events = r.events.s
 
 export function damageFor(family: Family, power: number, kind: ThreatKind): number {
   const t = THREATS[kind]
-  if (family === 'Wages') return kind === 'strike' ? power : 0
   if (t.immune === family) return 0
   if (t.weak === family) return power * 2
   if (t.resist === family) return Math.floor(power / 2)
   return power
 }
-export const isAttack = (key: CardKey) => ['Muscle', 'Legal', 'Fix', 'Dirty', 'Wages'].includes(CARDS[key].family)
+export const isAttack = (key: CardKey) => ['Muscle', 'Legal', 'Fix', 'Dirty'].includes(CARDS[key].family)
 
 export const fires = (n: number) => `${n} fire${n === 1 ? '' : 's'}`
 /** Starts `count` new fires (Fire is the number of fires burning, up to fireMax). */
@@ -506,7 +505,7 @@ export function intentText(r: Run, t: Threat): string {
     case 'Spray': return 'Lose $2 and 1 oil.'
     case 'Blow': { const u = r.plots.findIndex(w => w?.unstable); return u >= 0 ? `Well No. ${u + 1} is destroyed.` : 'Pressure builds.' }
     case 'Picket': return '−1 AP next turn.'
-    case 'Sabotage': return t.kind === 'baron' ? `Destroys your ${1 + c > 1 ? `${1 + c} highest Wells` : 'highest Well'}.` : 'Destroys a random card in your deck.'
+    case 'Sabotage': return wellCount(r) ? 'Destroys a random Well.' : 'Looks for a Well to wreck.'
     case 'Torch': return 'Starts a fire.'
     case 'Audit': return 'Your debt doubles next turn.'
     case 'Fine': return 'Lose $3.'
@@ -576,13 +575,11 @@ function endTurn(r: Run) {
       }
       case 'Picket': r.pending.ap += 1; break
       case 'Sabotage':
-        if (t.kind === 'baron') {
-          for (let k = 0; k < 1 + c; k++) { const i = highestWell(r); if (i >= 0) { loseWell(r, i, 'lost'); say(r, `${name} sabotaged Well No. ${i + 1}.`) } }
-        } else {
-          const real = r.deck.filter(x => !CARDS[x.key].junk)
-          if (real.length) { const v = pick(r, real); removeFromDeck(r, v); say(r, `Sabotage: ${CARDS[v.key].name} destroyed.`) }
-        }
+      { // one random Well
+        const standing = r.plots.map((w, i) => (w ? i : -1)).filter(i => i >= 0)
+        if (standing.length) { const i = pick(r, standing); loseWell(r, i, 'lost'); say(r, `${name} sabotaged Well No. ${i + 1}.`) }
         break
+      }
       case 'Torch': startFire(r, 1); break
       case 'Audit': r.pending.audit = true; break
       case 'Fine': dmg += 3; break

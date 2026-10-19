@@ -9,7 +9,7 @@ export function botShop(r: Run): Run {
   // Prospect is single use: rebuy one when there is land to claim or an empty plot to fill
   const roomForWells = r.plots.length < 5 || r.plots.some(p => !p)
   if (roomForWells && !r.deck.some(c => c.key === 'prospect') && r.capital > r.prospectPrice + 6) r = act(r, { type: 'buyProspect' })
-  const want = ['dynamite', 'lawyerUp', 'fireBrigade', 'shoreUp']
+  const want = ['payWages', 'dynamite', 'lawyerUp', 'fireBrigade', 'shoreUp']
   for (let i = 0; i < r.shop.cards.length; i++) {
     const k = r.shop.cards[i]
     if (k && want.includes(k) && r.capital > (CARDS[k].price ?? 0) + 7) { r = act(r, { type: 'buyCard', slot: i }); break }

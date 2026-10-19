@@ -13,7 +13,7 @@ describe('a new run', () => {
     const r = newRun(1, 'threeOil')
     expect(r.capital).toBe(CONFIG.startCapital - 1) // first turn's Bank Debt is paid
     expect(r.debt).toBe(1)
-    expect(r.deck).toHaveLength(10)
+    expect(r.deck).toHaveLength(8)
     expect(r.oil).toBe(3)
     expect(r.phase).toBe('turn') // no shop before the first fight
     expect(r.round).toBe(1)
@@ -34,7 +34,6 @@ describe('damage', () => {
     expect(damageFor('Muscle', 2, 'claimJumper')).toBe(4)
     expect(damageFor('Legal', 4, 'claimJumper')).toBe(2)
     expect(damageFor('Muscle', 2, 'inspector')).toBe(0)
-    expect(damageFor('Wages', 3, 'blowout')).toBe(0)
     expect(damageFor('Dirty', 6, 'baron')).toBe(12)
   })
 })
@@ -298,5 +297,29 @@ describe('Bribe', () => {
     const b = { id: 7778, key: 'payOff' as const, uses: null }
     r.hand = [b]; r.ap = 1; r.gold = 0
     expect(canPlay(r, b).ok).toBe(false)
+  })
+})
+
+describe('Pay Wages and Sabotage', () => {
+  it('Pay Wages is a Muscle card that works on anyone', () => {
+    expect(damageFor('Muscle', 4, 'inspector')).toBe(0) // the Inspector is immune to Muscle
+    expect(damageFor('Muscle', 4, 'blowout')).toBe(2) // resists
+    expect(damageFor('Muscle', 4, 'claimJumper')).toBe(8) // weak
+  })
+
+  it('Sabotage destroys exactly one random Well', () => {
+    const lost = new Set<number>()
+    for (let seed = 1; seed <= 60; seed++) {
+      let r = newRun(seed, 'threeOil')
+      r.threats = [{ id: 900, kind: 'strike', hold: 99, maxHold: 99, step: 1, cycle: 0, round3: false, beaten: false }] // next move: Sabotage
+      r.capital = 50; r.storage = 20
+      r.plots = [{ output: 1, reserve: 9 }, { output: 1, reserve: 9 }, { output: 1, reserve: 9 }]
+      const deck = r.deck.length
+      r = act(r, { type: 'endTurn' })
+      expect(r.plots.filter(Boolean)).toHaveLength(2)
+      expect(r.deck.length).toBe(deck) // no cards destroyed any more
+      lost.add(r.plots.findIndex(w => !w))
+    }
+    expect(lost.size).toBeGreaterThan(1) // not always the same Well
   })
 })

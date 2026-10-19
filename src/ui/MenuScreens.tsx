@@ -51,7 +51,7 @@ export function BonusPick({ onPick, onBack }: { onPick: (b: BonusKey) => void; o
         <div><span className="cl-label">Oil · Pennsylvania · 1863</span><h1 className="cl-display game__title">Choose your advantage</h1></div>
         <button type="button" className="cl-btn" onClick={onBack}>Back</button>
       </header>
-      <p className="bonus__lead">Everyone starts with $15, two action points, a ten-card deck and a loan from the bank. Pick one thing more.</p>
+      <p className="bonus__lead">Everyone starts with $15, two action points, an eight-card deck and a loan from the bank. Pick one thing more.</p>
       <div className="bonus__grid">
         {(Object.keys(BONUSES) as BonusKey[]).filter(k => k !== 'trustFund' || offered).map(k => (
           <button key={k} type="button" className={`bonus__card ${k === 'trustFund' ? 'bonus__card--earned' : ''}`} onClick={() => { play('card'); onPick(k) }}>
