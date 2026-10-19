@@ -32,7 +32,7 @@ export function GameScreen({ run, dispatch }: Props) {
   }
 
   const fireNext = fireTarget(run)
-  const burnsWell = run.fire && run.oil === 0
+  const burnsWell = run.fire > 0 && run.oil === 0
   const endReady = run.ap === 0
 
   return (

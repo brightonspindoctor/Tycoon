@@ -2,8 +2,10 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { act, newRun, roundsReached, type Action, type Run } from './engine/engine'
 import type { BonusKey } from './engine/data'
 import { saveRun } from './storage'
+import { ERA_THEME } from './engine/format'
 import { play } from './sound'
 import { GameScreen } from './ui/GameScreen'
+import { MobileGame } from './ui/MobileGame'
 import { ShopScreen } from './ui/ShopScreen'
 import { RoundSummary } from './ui/RoundSummary'
 import { CrashOut, StageComplete } from './ui/EndScreens'
@@ -11,15 +13,18 @@ import { BonusPick, History, Intro } from './ui/MenuScreens'
 
 type Screen = 'intro' | 'bonus' | 'run' | 'history'
 
-/** Scales the 1440×900 game to fit the window. */
-function useFit() {
-  const [scale, setScale] = useState(1)
+// Phones held upright get their own layout; anything wider gets the 1440×900 board scaled to fit.
+const MOBILE_MAX = 760
+const measure = () => ({ scale: Math.min(window.innerWidth / 1440, window.innerHeight / 900), mobile: window.innerWidth <= MOBILE_MAX })
+
+function useLayout() {
+  const [layout, setLayout] = useState(measure)
   useLayoutEffect(() => {
-    const fit = () => setScale(Math.min(window.innerWidth / 1440, window.innerHeight / 900))
+    const fit = () => setLayout(measure())
     fit(); window.addEventListener('resize', fit)
     return () => window.removeEventListener('resize', fit)
   }, [])
-  return scale
+  return layout
 }
 
 export default function App() {
@@ -27,7 +32,7 @@ export default function App() {
   const [run, setRun] = useState<Run | null>(null)
   const [shake, setShake] = useState(false)
   const saved = useRef<number | null>(null)
-  const scale = useFit()
+  const { scale, mobile } = useLayout()
 
   function dispatch(a: Action) {
     if (!run) return
@@ -41,7 +46,7 @@ export default function App() {
     setRun(nextRun)
   }
 
-  // ?preview=summary | crash | complete | shop jumps to a screen (for design checks)
+  // ?preview=summary | crash | complete | shop | round3 | boss jumps to a screen (for design checks)
   useEffect(() => {
     const want = new URLSearchParams(location.search).get('preview')
     if (!want) return
@@ -51,13 +56,16 @@ export default function App() {
         for (let i = 0; i < 400; i++) {
           if (want === 'shop' && r.phase === 'shop' && r.round >= 1) break
           if (want === 'summary' && r.phase === 'roundWon' && r.round >= 2) break
+          if (want === 'round3' && r.phase === 'turn' && r.round === 3 && r.turn >= 2) break
+          if (want === 'boss' && r.phase === 'turn' && r.round === 4 && r.turn >= 2) break
           if (r.phase === 'shop') r = botShop(r)
           else if (r.phase === 'turn') r = botTurn(r)
           else if (r.phase === 'roundWon') r = act(r, { type: 'continue' })
           else break
         }
         const hit = (want === 'crash' && r.phase === 'lost') || (want === 'complete' && r.phase === 'stageComplete') ||
-          (want === 'summary' && r.phase === 'roundWon') || (want === 'shop' && r.phase === 'shop')
+          (want === 'summary' && r.phase === 'roundWon') || (want === 'shop' && r.phase === 'shop') ||
+          (want === 'round3' && r.phase === 'turn' && r.round === 3) || (want === 'boss' && r.phase === 'turn' && r.round === 4)
         if (hit) { saved.current = r.seed; setRun(r); setScreen('run'); return }
       }
     })
@@ -89,20 +97,18 @@ export default function App() {
   else if (run.phase === 'stageComplete') body = <StageComplete run={run} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} />
   else body = (
     <>
-      <GameScreen run={run} dispatch={dispatch} />
+      {mobile ? <MobileGame run={run} dispatch={dispatch} /> : <GameScreen run={run} dispatch={dispatch} />}
       {run.phase === 'roundWon' && <RoundSummary key={run.round} run={run} onContinue={() => dispatch({ type: 'continue' })} />}
     </>
   )
 
+  const fade = <div key={`${screen}-${run?.phase}-${run?.round}`} className="screen-fade">{body}</div>
+  if (mobile) return <div className={`m ${shake ? 'is-shaking' : ''}`} data-theme={ERA_THEME[run?.stage ?? 1] ?? 'victorian'}>{fade}</div>
+
   return (
     <div className="stage-wrap">
-      <div className="rotate-hint" data-theme="victorian" role="alert">
-        <div className="rotate-hint__icon" aria-hidden="true" />
-        <h1 className="cl-display">Turn your phone sideways</h1>
-        <p>The oil fields need a wider view.</p>
-      </div>
       <div className={`stage ${shake ? 'is-shaking' : ''}`} style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
-        <div key={`${screen}-${run?.phase}-${run?.round}`} className="screen-fade">{body}</div>
+        {fade}
       </div>
     </div>
   )

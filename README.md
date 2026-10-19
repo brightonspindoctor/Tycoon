@@ -22,7 +22,7 @@ npm run sim      # balance check: 2,000 bot runs per starting bonus
 npm run build    # production build in dist/
 ```
 
-Design previews: add `?preview=summary`, `?preview=shop`, `?preview=crash` or `?preview=complete` to the URL to jump straight to that screen.
+Design previews: add `?preview=summary`, `?preview=shop`, `?preview=crash`, `?preview=complete`, `?preview=round3` (two enemies) or `?preview=boss` to the URL to jump straight to that screen.
 
 ## How it is built
 
