@@ -529,3 +529,13 @@ button.m-threat { cursor: pointer; }
 .m .pile-view .card--small { width: 100%; height: auto; min-height: 150px; }
 .m .opened { font-size: 11.5px; line-height: 15px; }
 .soundboard { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+
+/* ---------- the item before the boss ---------- */
+.boon { display: flex; align-items: center; gap: 14px; padding: 10px 14px; border: 2.5px solid var(--personal); background: var(--paper-raised); border-radius: var(--radius-1860); }
+.boon img { width: 56px; height: 56px; flex: none; }
+.boon__text { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 14px; line-height: 19px; }
+.boon__text .cl-label, .boon--bought .cl-label { color: var(--personal); }
+.boon__text b, .boon--bought b { font-size: 22px; line-height: 26px; }
+.boon--bought { flex-direction: column; align-items: flex-start; gap: 2px; border-style: dashed; }
+.m .shop .boon { order: 2; flex-wrap: wrap; }
+.m .shop .boon .cl-btn { width: 100%; }

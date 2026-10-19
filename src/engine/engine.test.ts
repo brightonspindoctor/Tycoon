@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { act, canPlay, damageFor, debtPerTurn, newRun, type Run } from './engine'
+import { act, canPlay, damageFor, debtPerTurn, isAttack, newRun, type Run } from './engine'
 import { lossStreak, type RunRecord } from '../storage'
 import { CONFIG } from './config'
 import { money } from './format'
 import { botRun } from '../../tools/bot'
-import { THREATS, type CardKey } from './data'
+import { BOONS, CARDS, REWARDS, THREATS, type CardKey } from './data'
 
 const begin = (bonus: Parameters<typeof newRun>[1] = 'threeOil', seed = 7): Run => newRun(seed, bonus)
 
@@ -13,7 +13,7 @@ describe('a new run', () => {
     const r = newRun(1, 'threeOil')
     expect(r.capital).toBe(CONFIG.startCapital - 1) // first turn's Bank Debt is paid
     expect(r.debt).toBe(1)
-    expect(r.deck).toHaveLength(8)
+    expect(r.deck).toHaveLength(9)
     expect(r.oil).toBe(3)
     expect(r.phase).toBe('turn') // no shop before the first fight
     expect(r.round).toBe(1)
@@ -31,9 +31,9 @@ describe('a new run', () => {
 
 describe('damage', () => {
   it('doubles when weak and halves when resisted', () => {
-    expect(damageFor('Muscle', 2, 'claimJumper')).toBe(4)
+    expect(damageFor('Dirty', 2, 'claimJumper')).toBe(4)
     expect(damageFor('Legal', 4, 'claimJumper')).toBe(2)
-    expect(damageFor('Muscle', 2, 'inspector')).toBe(0)
+    expect(damageFor('Dirty', 2, 'inspector')).toBe(0)
     expect(damageFor('Dirty', 6, 'baron')).toBe(12)
   })
 })
@@ -229,7 +229,7 @@ describe('card and enemy changes', () => {
   })
 
   it('Shore Up deals 1 Hold damage and gives 1 Cover', () => {
-    let r = lone(begin(), 'inspector')
+    let r = lone(begin(), 'railroad')
     const s = card('shoreUp'); r.deck.push(s); r.hand = [s]; r.ap = 1
     r = act(r, { type: 'play', cardId: s.id })
     expect(r.threats[0].hold).toBe(49)
@@ -254,9 +254,9 @@ describe('card and enemy changes', () => {
     expect(r.fire).toBe(Math.min(CONFIG.fireMax, 1 + 2))
   })
 
-  it('the Railroad Agent is no longer weak to Legal; she takes bribes', () => {
-    expect(damageFor('Legal', 4, 'railroad')).toBe(4)
-    expect(damageFor('Dirty', 3, 'railroad')).toBe(6)
+  it('the Railroad Agent resists Legal and has no weakness', () => {
+    expect(damageFor('Legal', 4, 'railroad')).toBe(2)
+    expect(damageFor('Dirty', 3, 'railroad')).toBe(3)
   })
 
   it('Buckets are always for sale at the Land Office', () => {
@@ -276,7 +276,7 @@ describe('Bribe', () => {
     let landed = 0, refused = 0
     for (let seed = 1; seed <= 400; seed++) {
       let r = newRun(seed, 'threeOil')
-      r.threats = [{ id: 900, kind: 'inspector', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
+      r.threats = [{ id: 900, kind: 'railroad', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
       r.gold = 3
       const b = { id: 7777, key: 'payOff' as const, uses: null }
       r.deck.push(b); r.hand = [b]; r.ap = 1
@@ -301,10 +301,10 @@ describe('Bribe', () => {
 })
 
 describe('Pay Wages and Sabotage', () => {
-  it('Pay Wages is a Muscle card that works on anyone', () => {
-    expect(damageFor('Muscle', 4, 'inspector')).toBe(0) // the Inspector is immune to Muscle
-    expect(damageFor('Muscle', 4, 'blowout')).toBe(2) // resists
-    expect(damageFor('Muscle', 4, 'claimJumper')).toBe(8) // weak
+  it('Pay Wages is a Dirty card that works on anyone', () => {
+    expect(damageFor('Dirty', 4, 'inspector')).toBe(0) // the Inspector is immune to Dirty
+    expect(damageFor('Dirty', 4, 'speculator')).toBe(2) // resists
+    expect(damageFor('Dirty', 4, 'claimJumper')).toBe(8) // weak
   })
 
   it('Sabotage destroys exactly one random Well', () => {
@@ -321,5 +321,88 @@ describe('Pay Wages and Sabotage', () => {
       lost.add(r.plots.findIndex(w => !w))
     }
     expect(lost.size).toBeGreaterThan(1) // not always the same Well
+  })
+})
+
+describe('families, shop limits and the boss items', () => {
+  it('only Legal and Dirty deal damage, and one Lawyer Up no longer finishes the Speculator', () => {
+    const fams = new Set(Object.values(CARDS).filter(c => isAttack(Object.keys(CARDS).find(k => CARDS[k as CardKey] === c) as CardKey)).map(c => c.family))
+    expect([...fams].sort()).toEqual(['Dirty', 'Legal'])
+    expect(damageFor('Legal', CARDS.lawyerUp.power, 'speculator')).toBeLessThan(THREATS.speculator.hold)
+  })
+
+  it('Dirty damage adds no Bad Blood by itself; Dynamite puts one in the discard pile', () => {
+    for (const [kind, expected] of [['claimJumper', 0], ['strike', 0]] as const) {
+      let r = newRun(4, 'threeOil')
+      r.threats = [{ id: 900, kind, hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
+      const h = r.deck.find(c => c.key === 'hiredHand')!; r.hand = [h]; r.ap = 1
+      const before = r.deck.filter(c => c.key === 'badBlood').length
+      r = act(r, { type: 'play', cardId: h.id })
+      expect(r.deck.filter(c => c.key === 'badBlood').length - before).toBe(expected)
+    }
+  })
+
+  it('one Prospect and one Bucket per visit; destroying starts at $2', () => {
+    let r = newRun(5, 'threeOil'); r.phase = 'roundWon'; r.capital = 40
+    r = act(r, { type: 'continue' })
+    expect(r.destroyCost).toBe(2)
+    const n = (k: CardKey) => r.deck.filter(c => c.key === k).length
+    const p0 = n('prospect'), b0 = n('bucket')
+    r = act(r, { type: 'buyProspect' }); r = act(r, { type: 'buyProspect' })
+    r = act(r, { type: 'buyBucket' }); r = act(r, { type: 'buyBucket' })
+    r = act(r, { type: 'reroll' }); r = act(r, { type: 'buyProspect' }) // a reroll doesn't restock them
+    expect(n('prospect')).toBe(p0 + 1)
+    expect(n('bucket')).toBe(b0 + 1)
+  })
+
+  it('before the boss you can buy a small item for 1 gold, and beating the boss gives a bigger one of another type', () => {
+    for (let seed = 1; seed <= 40; seed++) {
+      let r = newRun(seed, 'threeOil'); r.round = 3; r.phase = 'roundWon'; r.gold = 2
+      r = act(r, { type: 'continue' })
+      expect(r.shop.boon).not.toBeNull()
+      r = act(r, { type: 'buyBoon' })
+      expect(r.gold).toBe(2 - CONFIG.boonGold)
+      const boon = r.boon!
+      r = act(r, { type: 'leaveShop' })
+      expect(r.round).toBe(4)
+      r.threats[0].hold = 1; r.ap = 5
+      const hit = r.hand.find(c => isAttack(c.key) && canPlay(r, c).ok) ?? (() => { const h = r.deck.find(c => c.key === 'hiredHand')!; r.hand.push(h); return h })()
+      r.capital = 50
+      r = act(r, { type: 'play', cardId: hit.id })
+      if (r.phase !== 'stageComplete') { r.threats[0].hold = 0; continue }
+      expect(r.reward).not.toBeNull()
+      expect(REWARDS[r.reward!].type).not.toBe(BOONS[boon].type)
+    }
+  })
+})
+
+describe('Bad Blood', () => {
+  it('must be played first, costs 0 AP, and sometimes starts a fire', () => {
+    let fires = 0
+    for (let seed = 1; seed <= 300; seed++) {
+      let r = newRun(seed, 'threeOil')
+      r.threats = [{ id: 900, kind: 'railroad', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
+      r.fire = 0
+      const bb = { id: 8000, key: 'badBlood' as const, uses: null }
+      const hh = r.deck.find(c => c.key === 'hiredHand')!
+      r.deck.push(bb); r.hand = [hh, bb]; r.ap = 1
+      expect(canPlay(r, hh).ok).toBe(false) // Must play first
+      expect(canPlay(r, bb).ok).toBe(true)
+      r = act(r, { type: 'play', cardId: bb.id })
+      expect(r.ap).toBe(1) // free
+      expect(r.discard.some(c => c.id === 8000)).toBe(true) // back in the deck cycle
+      if (r.fire > 0) fires++
+    }
+    expect(fires / 300).toBeGreaterThan(0.25); expect(fires / 300).toBeLessThan(0.42)
+  })
+
+  it('Dynamite puts Bad Blood straight into the discard pile', () => {
+    let r = newRun(6, 'threeOil')
+    r.threats = [{ id: 900, kind: 'railroad', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
+    const d = { id: 8001, key: 'dynamite' as const, uses: 1 }
+    r.deck.push(d); r.hand = [d]; r.ap = 1
+    r = act(r, { type: 'play', cardId: d.id })
+    expect(r.discard.filter(c => c.key === 'badBlood')).toHaveLength(1)
+    expect(r.draw.some(c => c.key === 'badBlood')).toBe(false)
   })
 })

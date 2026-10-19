@@ -57,7 +57,7 @@ export default function App() {
     setRun(nextRun)
   }
 
-  // ?preview=summary | crash | complete | shop | round3 | boss jumps to a screen (for design checks)
+  // ?preview=summary | crash | complete | shop | bossshop | round3 | boss jumps to a screen (for design checks)
   useEffect(() => {
     const want = new URLSearchParams(location.search).get('preview')
     if (!want) return
@@ -66,6 +66,7 @@ export default function App() {
         let r = newRun(seed, 'threeOil')
         for (let i = 0; i < 400; i++) {
           if (want === 'shop' && r.phase === 'shop' && r.round >= 1) break
+          if (want === 'bossshop' && r.phase === 'shop' && r.round === 3) break
           if (want === 'summary' && r.phase === 'roundWon' && r.round >= 2) break
           if (want === 'round3' && r.phase === 'turn' && r.round === 3 && r.turn >= 2) break
           if (want === 'boss' && r.phase === 'turn' && r.round === 4 && r.turn >= 2) break
@@ -75,7 +76,7 @@ export default function App() {
           else break
         }
         const hit = (want === 'crash' && r.phase === 'lost') || (want === 'complete' && r.phase === 'stageComplete') ||
-          (want === 'summary' && r.phase === 'roundWon') || (want === 'shop' && r.phase === 'shop') ||
+          (want === 'summary' && r.phase === 'roundWon') || (want === 'shop' && r.phase === 'shop') || (want === 'bossshop' && r.phase === 'shop' && r.round === 3) ||
           (want === 'round3' && r.phase === 'turn' && r.round === 3) || (want === 'boss' && r.phase === 'turn' && r.round === 4)
         if (hit) { saved.current = r.seed; setRun(r); setScreen('run'); return }
       }

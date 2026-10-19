@@ -23,11 +23,15 @@ export const CONFIG = {
   bribeGold: 1, // Bribe: costs this much of your own fortune to play
   bribeChance: 0.5, // chance the bribe is taken
   bribeDamage: 4,
+  boonGold: 1, // the item offered before the boss costs this much of your fortune
+  inheritance: 5, // Inheritance card: $ once, then gone
+  dividends: 3, // Dividends card: $ every time it's played
+  tempSilo: 4, // Temporary Silo: storage for the boss round only
   badBloodFireChance: 1 / 3,
   inspectorReserve: 12, // end a turn holding this much and the Inspector loses Hold
   inspectorReserveDamage: 2,
   skimRate: { 0: 1, 1: 1, 2: 2, 3: 3, 4: 4 } as Record<number, number>, // $ per gold, by round
-  destroyCost: 3,
+  destroyCost: 2, // rises by $1 each time (players find out)
   prospectPrice: 3,
   turnLimit: 25,
   oilCarriesOver: true,

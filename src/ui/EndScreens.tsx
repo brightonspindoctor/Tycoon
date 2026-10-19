@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import type { Run } from '../engine/engine'
 import { roundsReached } from '../engine/engine'
-import { BONUSES } from '../engine/data'
+import { BONUSES, REWARDS } from '../engine/data'
 import { money, year } from '../engine/format'
 import { CONFIG } from '../engine/config'
 import { play } from '../sound'
@@ -83,6 +83,13 @@ export function StageComplete({ run, onMenu, onHistory }: { run: Run; onMenu: ()
             <div className="tile"><span className="cl-label">Wells standing</span><b className="cl-num">{run.plots.filter(Boolean).length}</b><span className="res-note">{run.stats.wellsBuilt} built in total</span></div>
             <div className="tile"><span className="cl-label">Oil sold</span><b className="cl-num">{run.stats.oilSold} bbl</b><span className="res-note">{money(run.stats.earned, st)} earned</span></div>
           </div>
+          {run.reward && (
+            <div className="unlock reward" role="status">
+              <span className="cl-label">The Baron's assets · yours for stage 2</span>
+              <b className="cl-display">{REWARDS[run.reward].name}</b>
+              <span>{REWARDS[run.reward].text}</span>
+            </div>
+          )}
           <div className="fortune"><div><span className="cl-label">Your fortune so far</span><p>Stage 2 is still being drilled. This playtest ends here.</p></div><b className="cl-num">{run.gold} gold</b></div>
           <div className="end__buttons"><button type="button" className="cl-btn cl-btn--primary" onClick={onMenu}>Back to the start</button><button type="button" className="cl-btn" onClick={onHistory}>Run history</button></div>
         </div>

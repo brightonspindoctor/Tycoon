@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CARDS, ITEMS } from '../engine/data'
+import { BOONS, CARDS, ITEMS } from '../engine/data'
 import { skimRate, type Action, type Run } from '../engine/engine'
 import { ERA_THEME, money } from '../engine/format'
 import { CONFIG } from '../engine/config'
@@ -37,16 +37,30 @@ export function ShopScreen({ run, dispatch }: Props) {
                   why={can(CARDS[k].price!) ? undefined : 'Too expensive'} onClick={() => dispatch({ type: 'buyCard', slot: i })} />
               ) : <div key={i} className="sold">Sold</div>)}
               <div className="prospect-slot">
-                <CardView card={{ id: -8, key: 'bucket', uses: null }} price={money(CONFIG.bucketPrice, st)} playable={can(CONFIG.bucketPrice)} onClick={() => dispatch({ type: 'buyBucket' })} />
-                <span className="res-note">Always in stock.</span>
+                {run.shop.bucketSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -8, key: 'bucket', uses: null }} price={money(CONFIG.bucketPrice, st)} playable={can(CONFIG.bucketPrice)} onClick={() => dispatch({ type: 'buyBucket' })} />}
+                <span className="res-note">One per visit.</span>
               </div>
               <div className="prospect-slot">
-                <CardView card={{ id: -9, key: 'prospect', uses: null }} price={money(run.prospectPrice, st)} playable={can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })} />
-                <span className="res-note">{plotsLeft === 0 ? 'No land left to claim.' : plotsLeft === 1 ? 'Only 1 plot left: half value.' : `${plotsLeft} plots left.`} Single use. Price rises each time.</span>
+                {run.shop.prospectSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -9, key: 'prospect', uses: 1 }} price={money(run.prospectPrice, st)} playable={can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })} />}
+                <span className="res-note">One per visit. {plotsLeft === 0 ? 'No land left to claim.' : plotsLeft === 1 ? 'Only 1 plot left.' : `${plotsLeft} plots left.`}</span>
               </div>
             </div>
           </section>
 
+          {run.shop.boon && (
+            <section className="boon" aria-label="Before the Baron">
+              <img src={`${import.meta.env.BASE_URL}art/icons/${BOONS[run.shop.boon].icon}.png`} alt="" />
+              <div className="boon__text">
+                <span className="cl-label">Before the Baron · one offer</span>
+                <b className="cl-display">{BOONS[run.shop.boon].name}</b>
+                <span>{BOONS[run.shop.boon].text}</span>
+              </div>
+              <button type="button" className="cl-btn cl-btn--skim" disabled={run.gold < CONFIG.boonGold} onClick={() => dispatch({ type: 'buyBoon' })}>
+                {run.gold < CONFIG.boonGold ? `Needs ${CONFIG.boonGold} gold` : `Buy · ${CONFIG.boonGold} gold`}
+              </button>
+            </section>
+          )}
+          {run.boon && run.round === 3 && !run.shop.boon && <div className="boon boon--bought"><span className="cl-label">Bought for the Baron</span><b className="cl-display">{BOONS[run.boon].name}</b></div>}
           <section className="shop__deals">
             {run.shop.item ? (
               <div className="cl-slot slot">
@@ -65,7 +79,7 @@ export function ShopScreen({ run, dispatch }: Props) {
             <div className="cl-slot slot">
               <span className="cl-tag">{money(run.destroyCost, st)}</span>
               <div className="cl-slot__name">Destroy a card</div>
-              <div className="cl-slot__desc">Remove it for good. Price rises each time.</div>
+              <div className="cl-slot__desc">Remove it for good.</div>
               <button type="button" className="cl-btn" disabled={!can(run.destroyCost)} onClick={() => setMode(mode === 'destroy' ? null : 'destroy')}>{mode === 'destroy' ? 'Cancel' : 'Choose'}</button>
             </div>
             <div className="cl-slot slot">

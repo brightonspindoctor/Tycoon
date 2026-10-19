@@ -3,7 +3,7 @@
 import { CONFIG } from './config'
 import {
   ATTACK_CARDS, CARDS, CASH_POOL, ENGINE_POOL, ITEMS, MODS, SHOP_POOL, STARTER, THREATS,
-  type BonusKey, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
+  BOONS, REWARDS, type BoonKey, type RewardKey, type BonusKey, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
 } from './data'
 import { next, pick, shuffle } from './rng'
 
@@ -18,6 +18,9 @@ export interface ShopOffer {
   cards: (CardKey | null)[]
   item: ItemKey | null
   loanTaken: boolean
+  prospectSold: boolean // one Prospect per visit
+  bucketSold: boolean // one Bucket of Water per visit
+  boon: BoonKey | null // before the boss: one small item for gold
 }
 
 export interface Run {
@@ -59,6 +62,9 @@ export interface Run {
   stats: { oilSold: number; earned: number; spent: number; wellsBuilt: number; wellsBurnt: number; wellsStolen: number; wellsLost: number; wellsDry: number; skims: number }
   loss?: { reason: LossReason; by: string[] }
   roundStart: Snapshot
+  boon: BoonKey | null // bought before the boss
+  reward: RewardKey | null // given for beating the boss
+  tempStorage: number // storage that only lasts for the boss round
 }
 
 export interface Snapshot { capital: number; gold: number; wells: number; oil: number; deck: number }
@@ -74,6 +80,7 @@ export type Action =
   | { type: 'buyCard'; slot: number }
   | { type: 'buyProspect' }
   | { type: 'buyBucket' }
+  | { type: 'buyBoon' }
   | { type: 'buyItem' }
   | { type: 'takeLoan' }
   | { type: 'destroyCard'; cardId: number }
@@ -128,7 +135,7 @@ export function damageFor(family: Family, power: number, kind: ThreatKind): numb
   if (t.resist === family) return Math.floor(power / 2)
   return power
 }
-export const isAttack = (key: CardKey) => ['Muscle', 'Legal', 'Fix', 'Dirty'].includes(CARDS[key].family)
+export const isAttack = (key: CardKey) => ['Legal', 'Dirty'].includes(CARDS[key].family)
 
 export const fires = (n: number) => `${n} fire${n === 1 ? '' : 's'}`
 /** Starts `count` new fires (Fire is the number of fires burning, up to fireMax). */
@@ -145,10 +152,18 @@ function removeFromDeck(r: Run, c: Card) {
   r.discard = r.discard.filter(x => x.id !== c.id)
   r.hand = r.hand.filter(x => x.id !== c.id)
 }
-function addJunk(r: Run, key: CardKey) {
+/** Adds a junk card: shuffled into the draw pile (enemies), or onto the discard pile (your own cards). */
+function addJunk(r: Run, key: CardKey, where: 'draw' | 'discard' = 'draw') {
   const c = card(r, key)
   r.deck.push(c)
-  r.draw.splice(Math.floor(next(r) * (r.draw.length + 1)), 0, c)
+  if (where === 'discard') r.discard.push(c)
+  else r.draw.splice(Math.floor(next(r) * (r.draw.length + 1)), 0, c)
+}
+
+/** Bad Blood, played (or forced at end of turn): 1 in 3 chance of a fire. */
+function badBloodRoll(r: Run) {
+  if (next(r) < CONFIG.badBloodFireChance) { say(r, 'Bad Blood: someone set a fire.'); startFire(r, 1) }
+  else say(r, 'Bad Blood: nothing happened. This time.')
 }
 function loseWell(r: Run, i: number, how: 'burnt' | 'stolen' | 'lost' | 'dry') {
   if (!r.plots[i]) return
@@ -169,9 +184,10 @@ export function newRun(seed: number, bonus: BonusKey): Run {
     storage: CONFIG.startStorage, fire: 0, firebreak: false, marked: null, threats: [], modifier: null,
     short: 0, freight: 0, pending: { ap: 0, audit: false, refuse: false, margin: 0 }, current: { audit: false, refuse: false },
     items: [], destroyCost: CONFIG.destroyCost, prospectPrice: CONFIG.prospectPrice,
-    shop: { cards: [], item: null, loanTaken: false }, ledger: [], events: [],
+    shop: { cards: [], item: null, loanTaken: false, prospectSold: false, bucketSold: false, boon: null }, ledger: [], events: [],
     stats: { oilSold: 0, earned: 0, spent: 0, wellsBuilt: 0, wellsBurnt: 0, wellsStolen: 0, wellsLost: 0, wellsDry: 0, skims: 0 },
     roundStart: { capital: CONFIG.startCapital, gold: 0, wells: 0, oil: 0, deck: 0 },
+    boon: null, reward: null, tempStorage: 0,
   }
   r.deck = STARTER.map(k => card(r, k))
   if (bonus === 'extraProspect') r.deck.push(card(r, 'prospect'))
@@ -193,7 +209,14 @@ function stockShop(r: Run) {
     picks.push(k); pool.splice(pool.indexOf(k), 1)
   }
   const items = (Object.keys(ITEMS) as ItemKey[]).filter(i => ITEMS[i].repeatable || !r.items.includes(i))
-  r.shop = { cards: picks, item: items.length ? pick(r, items) : null, loanTaken: false }
+  r.shop = { ...r.shop, cards: picks, item: items.length ? pick(r, items) : null }
+}
+
+/** Opening the Land Office after a round: fresh stock, and before the boss, one small item for gold. */
+function openShop(r: Run) {
+  r.shop = { cards: [], item: null, loanTaken: false, prospectSold: false, bucketSold: false, boon: null }
+  stockShop(r)
+  if (r.round === 3) r.shop.boon = pick(r, Object.keys(BOONS) as BoonKey[])
 }
 
 function pay(r: Run, amount: number, label: string): boolean {
@@ -211,13 +234,22 @@ function shopAction(r: Run, a: Action) {
       return
     }
     case 'buyBucket':
-      if (!pay(r, CONFIG.bucketPrice, 'Bucket of Water')) return
-      r.deck.push(card(r, 'bucket'))
+      if (r.shop.bucketSold || !pay(r, CONFIG.bucketPrice, 'Bucket of Water')) return
+      r.deck.push(card(r, 'bucket')); r.shop.bucketSold = true
       return
     case 'buyProspect':
-      if (!pay(r, r.prospectPrice, 'Prospect')) return
-      r.deck.push(card(r, 'prospect')); r.prospectPrice += 1
+      if (r.shop.prospectSold || !pay(r, r.prospectPrice, 'Prospect')) return
+      r.deck.push(card(r, 'prospect')); r.prospectPrice += 1; r.shop.prospectSold = true
       return
+    case 'buyBoon': {
+      const b = r.shop.boon
+      if (!b || r.gold < CONFIG.boonGold) return
+      r.gold -= CONFIG.boonGold; r.boon = b; r.shop.boon = null
+      if (b === 'fireBrigade') r.deck.push(card(r, 'fireBrigade'))
+      if (b === 'inheritance') r.deck.push(card(r, 'inheritance'))
+      say(r, `${BOONS[b].name}: yours for ${CONFIG.boonGold} gold.`)
+      return
+    }
     case 'buyItem': {
       const it = r.shop.item
       if (!it || !pay(r, ITEMS[it].price, ITEMS[it].name)) return
@@ -300,7 +332,14 @@ function startRound(r: Run, round: number) {
       if (op === 'Arson') { startFire(r, 1); t.opened = 'Arson: started a fire.' }
     }
   }
+  if (round === 4 && r.boon) {
+    if (r.boon === 'spareHand') r.pending.ap -= 1
+    if (r.boon === 'tempSilo') { r.storage += CONFIG.tempSilo; r.tempStorage = CONFIG.tempSilo }
+  }
   beginTurn(r)
+  if (round === 4 && r.boon === 'spareRigs' && r.turn === 1) {
+    for (let i = 0; i < 2; i++) { const w = card(r, 'well'); r.deck.push(w); r.hand.push(w) }
+  }
 }
 
 function beginTurn(r: Run) {
@@ -358,13 +397,27 @@ function threatBeaten(r: Run, t: Threat) {
   }
   if (!liveThreats(r).length) {
     r.phase = r.round >= 4 ? 'stageComplete' : 'roundWon'
+    if (r.phase === 'stageComplete') grantReward(r)
     r.plots.forEach(w => w && (w.unstable = false))
   }
 }
 
-function hit(r: Run, t: Threat, dmg: number, family: Family, clean = false) {
+function grantReward(r: Run) {
+  if (r.tempStorage) { r.storage -= r.tempStorage; r.tempStorage = 0 }
+  const avoid = r.boon ? BOONS[r.boon].type : null
+  const options = (Object.keys(REWARDS) as RewardKey[]).filter(k => REWARDS[k].type !== avoid && !(k === 'steamPump' && r.items.includes('steamPump')) && !(k === 'silo' && r.items.includes('silo')))
+  const k = pick(r, options)
+  r.reward = k
+  if (k === 'steamPump') r.items.push('steamPump')
+  if (k === 'silo') { r.items.push('silo'); r.storage += 4 }
+  if (k === 'dividends') r.deck.push(card(r, 'dividends'))
+  if (k === 'wildcatRights') r.deck.push(card(r, 'wildcat'), card(r, 'wildcat'))
+}
+
+/** Damage to an enemy. Cards marked badBlood put a Bad Blood card in your discard pile. */
+function hit(r: Run, t: Threat, dmg: number, badBlood = false) {
   t.hold -= dmg
-  if (!clean && ((family === 'Muscle' && t.kind === 'strike') || family === 'Dirty')) { addJunk(r, 'badBlood'); say(r, 'Bad Blood added to your deck.') }
+  if (badBlood) { addJunk(r, 'badBlood', 'discard'); say(r, 'Bad Blood added to your discard pile.') }
   if (t.hold <= 0) threatBeaten(r, t)
 }
 
@@ -415,11 +468,11 @@ function play(r: Run, cardId: number, target?: number) {
     if (d.gold) r.gold -= d.gold
     if (d.chance !== undefined) {
       // a gamble: it either lands cleanly or backfires with Bad Blood
-      if (next(r) < d.chance) { say(r, `${d.name} taken: ${dmg} Hold damage to ${THREATS[t.kind].name}.`); hit(r, t, dmg, d.family, true) }
-      else { addJunk(r, 'badBlood'); say(r, `${THREATS[t.kind].name} refused the bribe. Bad Blood added to your deck.`) }
+      if (next(r) < d.chance) { say(r, `${d.name} taken: ${dmg} Hold damage to ${THREATS[t.kind].name}.`); hit(r, t, dmg) }
+      else { addJunk(r, 'badBlood', 'discard'); say(r, `${THREATS[t.kind].name} refused the bribe. Bad Blood added to your discard pile.`) }
     } else {
       say(r, `${d.name}: ${dmg} Hold damage to ${THREATS[t.kind].name}.`)
-      hit(r, t, dmg, d.family)
+      hit(r, t, dmg, !!d.badBlood)
     }
   } else {
     spendCard(r, c)
@@ -447,7 +500,10 @@ function play(r: Run, cardId: number, target?: number) {
         if (r.capital - rate >= 1) { money(r, 'Petty Cash (skim)', -rate); r.gold += 1; r.stats.skims++ }
         break
       }
+      case 'inheritance': money(r, 'Inheritance', CONFIG.inheritance); break
+      case 'dividends': money(r, 'Dividends', CONFIG.dividends); break
       case 'telegram': r.hand.push(card(r, pick(r, ATTACK_CARDS), true)); say(r, 'Help is on its way.'); break
+      case 'badBlood': badBloodRoll(r); break
       case 'looseThread': case 'marginCall': case 'iou': break
     }
   }
@@ -478,7 +534,7 @@ function capWell(r: Run) {
   r.ap -= 1
   loseWell(r, i, 'lost')
   say(r, `Capped Well No. ${i + 1}.`)
-  hit(r, bo, CONFIG.capWellDamage, 'Fix')
+  hit(r, bo, CONFIG.capWellDamage)
 }
 
 function firebreak(r: Run) {
@@ -534,15 +590,14 @@ export function fireTarget(r: Run): string {
 
 function endTurn(r: Run) {
   // unplayed Must play cards still cost their money
-  for (const c of r.hand.filter(x => CARDS[x.key].forced)) { money(r, CARDS[c.key].name, -CARDS[c.key].cost); spendCard(r, c) }
+  for (const c of r.hand.filter(x => CARDS[x.key].forced)) { if (c.key === 'badBlood') badBloodRoll(r); else money(r, CARDS[c.key].name, -CARDS[c.key].cost); spendCard(r, c) }
   for (const t of liveThreats(r)) {
     if (t.kind === 'inspector' && r.capital >= CONFIG.inspectorReserve) {
       say(r, 'The Inspector is impressed by your reserves.')
-      hit(r, t, CONFIG.inspectorReserveDamage, 'Legal')
+      hit(r, t, CONFIG.inspectorReserveDamage)
     }
   }
   if (checkBankrupt(r) || r.phase !== 'turn') return
-  const badBlood = r.hand.filter(c => c.key === 'badBlood').length
   r.discard.push(...r.hand.filter(c => !c.temp))
   r.hand = r.hand.filter(c => c.temp && c.key === 'iou')
   // fire burns
@@ -602,7 +657,6 @@ function endTurn(r: Run) {
       case 'Arson': startFire(r, Math.min(CONFIG.fireMax, 2 + c)); break
     }
   }
-  for (let i = 0; i < badBlood; i++) if (next(r) < CONFIG.badBloodFireChance) { say(r, 'Bad Blood: someone set a fire.'); startFire(r, 1) }
   const taken = Math.max(0, dmg - r.cover)
   if (taken) money(r, 'Fines and damage', -taken)
   if (dmg && r.cover) say(r, `Cover blocked $${Math.min(dmg, r.cover)}.`)
@@ -616,7 +670,7 @@ export function act(prev: Run, a: Action): Run {
   const r = clone(prev)
   if (r.phase === 'shop') { shopAction(r, a); return r }
   if (r.phase === 'roundWon' && a.type === 'continue') {
-    r.phase = 'shop'; r.hand = []; stockShop(r); r.ledger = []; r.events = []
+    r.phase = 'shop'; r.hand = []; openShop(r); r.ledger = []; r.events = []
     return r
   }
   if (r.phase !== 'turn') return r
