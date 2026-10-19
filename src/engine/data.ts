@@ -80,8 +80,11 @@ export const BONUSES: Record<BonusKey, { name: string; text: string }> = {
 
 export type ThreatKind = 'blowout' | 'strike' | 'inspector' | 'railroad' | 'claimJumper' | 'speculator' | 'baron'
 
+export type ThreatRole = 'cash' | 'engine' | 'boss'
+
 export interface ThreatDef {
   name: string
+  role: ThreatRole // cash: drains your money · engine: breaks your Wells, cards or turns
   hold: number
   weak?: Family
   resist?: Family
@@ -94,17 +97,19 @@ export interface ThreatDef {
 }
 
 export const THREATS: Record<ThreatKind, ThreatDef> = {
-  blowout: { name: 'The Blowout', hold: 5, weak: 'Fix', resist: 'Muscle', cycle: ['Rumble', 'Spray', 'Blow'], whenBeaten: 'Gusher: +3 oil', portrait: 'blowout' },
-  strike: { name: 'The Strike', hold: 8, weak: 'Muscle', resist: 'Legal', cycle: ['Picket', 'Sabotage'], round3: 'Torch', movesFirst: 'Walkout', portrait: 'strike' },
-  inspector: { name: 'The Bank Inspector', hold: 6, weak: 'Legal', immune: 'Muscle', cycle: ['Audit', 'Fine'], whenBeaten: '2 Loose Threads', portrait: 'inspector' },
-  railroad: { name: 'The Railroad Agent', hold: 7, weak: 'Legal', resist: 'Muscle', cycle: ['Raise Rates', 'Refuse'], portrait: 'railroad' },
-  claimJumper: { name: 'The Claim Jumper', hold: 6, weak: 'Muscle', resist: 'Legal', cycle: ['Jump', 'Scout'], movesFirst: 'Scout', whenBeaten: 'Fire (2)', portrait: 'claimJumper' },
-  speculator: { name: 'The Speculator', hold: 6, weak: 'Legal', resist: 'Muscle', cycle: ['Short', 'Margin Call', 'Rumours'], round3: 'Paper Promise', whenBeaten: 'Price recovers', portrait: 'speculator' },
-  baron: { name: 'The Rival Baron', hold: 20, weak: 'Dirty', resist: 'Legal', cycle: ['Sabotage', 'Lease', 'Arson'], movesFirst: 'Arson', portrait: 'baron' },
+  blowout: { role: 'engine', name: 'The Blowout', hold: 5, weak: 'Fix', resist: 'Muscle', cycle: ['Rumble', 'Spray', 'Blow'], whenBeaten: 'Gusher: +3 oil', portrait: 'blowout' },
+  strike: { role: 'engine', name: 'The Strike', hold: 8, weak: 'Muscle', resist: 'Legal', cycle: ['Picket', 'Sabotage'], round3: 'Torch', movesFirst: 'Walkout', portrait: 'strike' },
+  inspector: { role: 'cash', name: 'The Bank Inspector', hold: 6, weak: 'Legal', immune: 'Muscle', cycle: ['Audit', 'Fine'], whenBeaten: '2 Loose Threads', portrait: 'inspector' },
+  railroad: { role: 'cash', name: 'The Railroad Agent', hold: 7, weak: 'Legal', resist: 'Muscle', cycle: ['Raise Rates', 'Refuse'], portrait: 'railroad' },
+  claimJumper: { role: 'engine', name: 'The Claim Jumper', hold: 6, weak: 'Muscle', resist: 'Legal', cycle: ['Jump', 'Scout'], movesFirst: 'Scout', whenBeaten: 'Fire (2)', portrait: 'claimJumper' },
+  speculator: { role: 'cash', name: 'The Speculator', hold: 6, weak: 'Legal', resist: 'Muscle', cycle: ['Short', 'Margin Call', 'Rumours'], round3: 'Paper Promise', whenBeaten: 'Price recovers', portrait: 'speculator' },
+  baron: { role: 'boss', name: 'The Rival Baron', hold: 20, weak: 'Dirty', resist: 'Legal', cycle: ['Sabotage', 'Lease', 'Arson'], movesFirst: 'Arson', portrait: 'baron' },
 }
 
-export const ROUND1_POOL: ThreatKind[] = ['blowout', 'strike', 'inspector', 'railroad']
-export const ALL_POOL: ThreatKind[] = ['blowout', 'strike', 'inspector', 'railroad', 'claimJumper', 'speculator']
+// Round 1 takes your cash, round 2 breaks your engine, round 3 sends one of each.
+export const CASH_POOL: ThreatKind[] = ['inspector', 'railroad', 'speculator']
+export const ENGINE_POOL: ThreatKind[] = ['blowout', 'strike', 'claimJumper']
+export const ROLE_LABEL: Record<ThreatRole, string> = { cash: 'Takes your cash', engine: 'Breaks your engine', boss: 'Boss' }
 
 export type ModKey = 'drySeason' | 'glut' | 'hardRock' | 'bankSqueeze' | 'badWeather' | 'boomtown'
 export const MODS: Record<ModKey, { name: string; text: string }> = {

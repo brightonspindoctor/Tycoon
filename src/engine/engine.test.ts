@@ -3,6 +3,7 @@ import { act, canPlay, damageFor, newRun, type Run } from './engine'
 import { CONFIG } from './config'
 import { money } from './format'
 import { botRun } from '../../tools/bot'
+import { THREATS } from './data'
 
 const begin = (bonus: Parameters<typeof newRun>[1] = 'threeOil', seed = 7): Run => newRun(seed, bonus)
 
@@ -172,5 +173,22 @@ describe('wells and hands', () => {
     r = act(r, { type: 'play', cardId: w.id })
     expect(r.deck.some(c => c.id === w.id)).toBe(false)
     expect(r.plots[0]?.reserve).toBe(CONFIG.wellReserve)
+  })
+})
+
+describe('who you fight', () => {
+  const roleOf = (k: string) => THREATS[k as keyof typeof THREATS].role
+  const enter = (r: Run, round: number): Run => { r.phase = 'shop'; r.round = round - 1; return act(r, { type: 'leaveShop' }) }
+
+  it('round 1 takes your cash, round 2 breaks your engine, round 3 sends one of each', () => {
+    for (let seed = 1; seed <= 200; seed++) {
+      const r1 = newRun(seed, 'threeOil')
+      expect(r1.threats.map(t => roleOf(t.kind))).toEqual(['cash'])
+      const r2 = enter(newRun(seed, 'threeOil'), 2)
+      expect(r2.threats.map(t => roleOf(t.kind))).toEqual(['engine'])
+      const r3 = enter(newRun(seed, 'threeOil'), 3)
+      expect(r3.threats.map(t => roleOf(t.kind)).sort()).toEqual(['cash', 'engine'])
+      expect(enter(newRun(seed, 'threeOil'), 4).threats.map(t => t.kind)).toEqual(['baron'])
+    }
   })
 })

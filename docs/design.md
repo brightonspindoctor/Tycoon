@@ -37,15 +37,17 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 Starts in the stockpile. Each end of turn it burns oil equal to its intensity (1–3); with no oil it destroys the highest-numbered Well. Pumps stop while it burns. It can't touch Capital. Put it out with water, or cut a Firebreak at Plot 2 (2 AP, lose that Well) to save Plot 1. Sources: Claim Jumper (when beaten), Strike (round 3), Bad Blood, the Baron.
 
 ### Enemies
-| Enemy | Hold | Weak | Resists | Cycle | Notes |
-|---|---|---|---|---|---|
-| Blowout | 5 | Fix | Muscle | Rumble → Spray → Blow | Cap the Well (1 AP) for 3 damage; beaten = +3 oil |
-| Strike | 8 | Muscle | Legal | Picket → Sabotage (+ Torch in R3) | Moves first: Walkout (−1 AP). Muscle adds Bad Blood |
-| Bank Inspector | 6 | Legal | Muscle (0) | Audit → Fine | Ending a turn with $12+ costs him 2 Hold; beaten = 2 Loose Threads |
-| Railroad Agent | 7 | Legal | Muscle | Raise Rates → Refuse | Freight charge per oil sold |
-| Claim Jumper | 6 | Muscle | Legal | Jump → Scout | Moves first: Scout. Beaten = Fire (2) |
-| Speculator | 6 | Legal | Muscle | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |
-| **Rival Baron** (boss) | 20 | Dirty | Legal | Sabotage → Lease → Arson | Moves first: Arson (1). Ramps each cycle |
+Round 1 is always a cash enemy (it drains your money), round 2 always an engine enemy (it breaks your Wells, cards or turns), round 3 one of each at once, and round 4 the boss.
+
+| Enemy | Role | Hold | Weak | Resists | Cycle | Notes |
+|---|---|---|---|---|---|---|
+| Blowout | Engine | 5 | Fix | Muscle | Rumble → Spray → Blow | Cap the Well (1 AP) for 3 damage; beaten = +3 oil |
+| Strike | Engine | 8 | Muscle | Legal | Picket → Sabotage (+ Torch in R3) | Moves first: Walkout (−1 AP). Muscle adds Bad Blood |
+| Bank Inspector | Cash | 6 | Legal | Muscle (0) | Audit → Fine | Ending a turn with $12+ costs him 2 Hold; beaten = 2 Loose Threads |
+| Railroad Agent | Cash | 7 | Legal | Muscle | Raise Rates → Refuse | Freight charge per oil sold |
+| Claim Jumper | Engine | 6 | Muscle | Legal | Jump → Scout | Moves first: Scout. Beaten = Fire (2) |
+| Speculator | Cash | 6 | Legal | Muscle | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |
+| **Rival Baron** (boss) | Boss | 20 | Dirty | Legal | Sabotage → Lease → Arson | Moves first: Arson (1). Ramps each cycle |
 
 Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown.
 

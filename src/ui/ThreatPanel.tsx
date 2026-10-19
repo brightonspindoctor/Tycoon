@@ -1,4 +1,4 @@
-import { THREATS } from '../engine/data'
+import { ROLE_LABEL, THREATS } from '../engine/data'
 import { intent, intentText, type Run, type Threat } from '../engine/engine'
 
 interface Props {
@@ -19,7 +19,7 @@ export function ThreatPanel({ run, threat, targeting, damagePreview, onTarget }:
       <div className="threat__head">
         <img className="threat__portrait" src={`${import.meta.env.BASE_URL}art/enemies/${d.portrait}.jpg`} alt="" />
         <div className="threat__title">
-          <span className="cl-label">{threat.kind === 'baron' ? 'Boss' : `Round ${run.round}`}{d.movesFirst ? ' · Moves first' : ''}</span>
+          <span className="cl-label">{ROLE_LABEL[d.role]}{d.movesFirst ? ' · Moves first' : ''}</span>
           <h2 className="threat__name">{d.name}</h2>
           <div className="threat__hold">
             <span className="hold-bar"><span style={{ width: `${pct}%` }} /></span>

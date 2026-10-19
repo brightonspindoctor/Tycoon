@@ -23,7 +23,7 @@ export function ShopScreen({ run, dispatch }: Props) {
           <span className="cl-label">Stage {st} · {run.round === 0 ? 'Before you start' : `After round ${run.round}`}</span>
           <h1 className="cl-display game__title">The Land Office</h1>
         </div>
-        <div className="shop__next"><span className="cl-label">Next: Round {run.round + 1}</span><span>{['One threat', 'One threat and a modifier', 'Two threats at once', 'The Rival Baron'][run.round]}</span></div>
+        <div className="shop__next"><span className="cl-label">Next: Round {run.round + 1}</span><span>{['Someone after your cash', 'Someone after your cash', 'Someone after your Wells, plus a modifier', 'One of each, at once', 'The Rival Baron'][run.round + 1]}</span></div>
       </header>
 
       <div className="shop__grid">

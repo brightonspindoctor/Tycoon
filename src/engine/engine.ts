@@ -2,10 +2,10 @@
 // drives the game screens, the tests and the balance simulator.
 import { CONFIG } from './config'
 import {
-  ALL_POOL, ATTACK_CARDS, CARDS, ITEMS, MODS, ROUND1_POOL, SHOP_POOL, STARTER, THREATS,
+  ATTACK_CARDS, CARDS, CASH_POOL, ENGINE_POOL, ITEMS, MODS, SHOP_POOL, STARTER, THREATS,
   type BonusKey, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
 } from './data'
-import { next, pick, sample, shuffle } from './rng'
+import { next, pick, shuffle } from './rng'
 
 export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean }
 export interface Well { output: number; reserve: number; unstable?: boolean }
@@ -260,9 +260,9 @@ function startRound(r: Run, round: number) {
   r.turn = 0
   r.modifier = null
   let kinds: ThreatKind[]
-  if (round === 1) kinds = [pick(r, ROUND1_POOL)]
-  else if (round === 2) { kinds = [pick(r, ALL_POOL)]; r.modifier = pick(r, Object.keys(MODS) as ModKey[]) }
-  else if (round === 3) kinds = sample(r, ALL_POOL, 2)
+  if (round === 1) kinds = [pick(r, CASH_POOL)]
+  else if (round === 2) { kinds = [pick(r, ENGINE_POOL)]; r.modifier = pick(r, Object.keys(MODS) as ModKey[]) }
+  else if (round === 3) kinds = [pick(r, CASH_POOL), pick(r, ENGINE_POOL)]
   else kinds = ['baron']
   r.threats = kinds.map(k => ({ id: r.nextId++, kind: k, hold: THREATS[k].hold, maxHold: THREATS[k].hold, step: 0, cycle: 0, round3: round === 3, beaten: false }))
   if (!CONFIG.oilCarriesOver) r.oil = 0

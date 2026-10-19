@@ -302,6 +302,7 @@ button.threat { cursor: crosshair; }
 button.m-threat { cursor: pointer; }
 .m-threat__portrait { width: 56px; height: 72px; object-fit: cover; object-position: top; border: 1.5px solid var(--ink); flex: none; }
 .m-threat__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.m-threat__role { font-size: 9.5px; line-height: 11px; }
 .m-threat__top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .m-threat__name { margin: 0; font-family: var(--cl-display); font-weight: 400; font-size: 18px; line-height: 20px; }
 .m-threat__hold { font-weight: 700; font-size: 13px; }

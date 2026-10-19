@@ -4,7 +4,7 @@
 // played by accident on a small screen.
 import { useState } from 'react'
 import { CONFIG } from '../engine/config'
-import { CARDS, ITEMS, MODS, THREATS } from '../engine/data'
+import { CARDS, ITEMS, MODS, ROLE_LABEL, THREATS } from '../engine/data'
 import {
   apCost, canPlay, damageFor, debtPerTurn, fireTarget, intent, intentText, isAttack, liveThreats, netPrice, price, production, skimRate,
   type Action, type Run, type Threat,
@@ -85,6 +85,7 @@ export function MobileGame({ run, dispatch }: Props) {
                 aria-label={`${d.name}, Hold ${Math.max(0, t.hold)} of ${t.maxHold}`}>
                 <img className="m-threat__portrait" src={art(`enemies/${d.portrait}.jpg`)} alt="" />
                 <div className="m-threat__body">
+                  <span className="cl-label m-threat__role">{ROLE_LABEL[d.role]}{d.movesFirst ? ' · Moves first' : ''}</span>
                   <div className="m-threat__top">
                     <h2 className="m-threat__name">{d.name}</h2>
                     <span className="cl-num m-threat__hold">{Math.max(0, t.hold)}/{t.maxHold}</span>
