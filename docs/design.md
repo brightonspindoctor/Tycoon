@@ -24,9 +24,9 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 - A score is only recorded if you finish all four stages as Chairman.
 
 ## Stage 1 rules (as built)
-- Start: $15 Capital, 0 gold, 2 AP a turn, 5-card hand, Bank Debt −$1 a turn (loans raise it), storage for 3 oil.
-- Prospect (2 AP) claims 2 plots and gives 2 Well cards. Maximum 5 plots, filled in order 1–5. Once all 5 are claimed, Prospect still gives 2 Well cards while any plot is empty.
-- A Well card (1 AP) builds a Well on the next free plot: 1 oil a turn. Wells last the whole stage.
+- Start: $15 Capital, 0 gold, 2 AP a turn, a hand of 5 (each turn you draw back up to 5; cards left in hand, such as an IOU or a Margin Call, take a slot), Bank Debt −$1 a turn (loans raise it), storage for 3 oil.
+- Prospect (2 AP) claims 2 plots and puts 2 Well cards in your hand. They join your deck: build them now, or they are discarded at end of turn and come back in a later hand. Maximum 5 plots, filled in order 1–5. Once all 5 are claimed, Prospect still gives 2 Well cards while any plot is empty.
+- A Well card (1 AP) builds a Well on the next free plot and is used up. A Well pumps 1 oil a turn and runs dry after 6 barrels (Wildcat: 2 a turn, 8 barrels); the plot then frees up for a new Well. Oil pumped while storage is full is lost but still drains the Well.
 - Sell oil (1 AP) sells the whole stockpile. Oil carries over between rounds. Sell a Well (1 AP) for $5.
 - Enemies have **Hold** (health). Attack cards deal Hold damage by family; enemies are weak to some families (double damage) and resist others (half).
 - Starting deck (10): Prospect, Hired Hand ×2, Lawyer Up, Shore Up, Bucket of Water ×2, Improve Gear ×2, Hard Graft.

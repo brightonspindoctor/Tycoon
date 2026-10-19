@@ -127,6 +127,7 @@ export function MobileGame({ run, dispatch }: Props) {
                     </button>
                   ) : <div className="m-plot__hole" />}
                   <span className="m-plot__state">{state}</span>
+                  {w && <span className={`m-plot__state ${w.reserve <= w.output * 2 ? 'cl-minus' : ''}`}>{w.reserve} left</span>}
                   {marked && <span className="m-flag">Marked</span>}
                   {burning && <span className="m-flag m-flag--fire">Burns</span>}
                 </div>

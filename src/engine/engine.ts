@@ -8,7 +8,7 @@ import {
 import { next, pick, sample, shuffle } from './rng'
 
 export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean }
-export interface Well { output: number; unstable?: boolean }
+export interface Well { output: number; reserve: number; unstable?: boolean }
 export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean }
 export interface LedgerLine { label: string; amount: number }
 export type Phase = 'shop' | 'turn' | 'roundWon' | 'lost' | 'stageComplete'
@@ -56,7 +56,7 @@ export interface Run {
   shop: ShopOffer
   ledger: LedgerLine[]
   events: string[]
-  stats: { oilSold: number; earned: number; spent: number; wellsBuilt: number; wellsBurnt: number; wellsStolen: number; wellsLost: number; skims: number }
+  stats: { oilSold: number; earned: number; spent: number; wellsBuilt: number; wellsBurnt: number; wellsStolen: number; wellsLost: number; wellsDry: number; skims: number }
   loss?: { reason: LossReason; by: string[] }
   roundStart: Snapshot
 }
@@ -108,7 +108,8 @@ export const freePlot = (r: Run) => r.plots.findIndex(p => p === null)
 export const highestWell = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (r.plots[i]) return i; return -1 }
 export const liveThreats = (r: Run) => r.threats.filter(t => !t.beaten)
 export const wellCount = (r: Run) => r.plots.filter(Boolean).length
-export const production = (r: Run) => r.fire ? 0 : r.plots.reduce((s, w) => s + (w && !w.unstable ? w.output : 0), 0)
+const pumps = (w: Well | null) => (w && !w.unstable ? Math.min(w.output, w.reserve) : 0)
+export const production = (r: Run) => r.fire ? 0 : r.plots.reduce((s, w) => s + pumps(w), 0)
 
 function money(r: Run, label: string, amount: number) {
   if (amount === 0) return
@@ -146,12 +147,13 @@ function addJunk(r: Run, key: CardKey) {
   r.deck.push(c)
   r.draw.splice(Math.floor(next(r) * (r.draw.length + 1)), 0, c)
 }
-function loseWell(r: Run, i: number, how: 'burnt' | 'stolen' | 'lost') {
+function loseWell(r: Run, i: number, how: 'burnt' | 'stolen' | 'lost' | 'dry') {
   if (!r.plots[i]) return
   r.plots[i] = null
   if (r.marked === i) r.marked = null
   if (how === 'burnt') r.stats.wellsBurnt++
   else if (how === 'stolen') r.stats.wellsStolen++
+  else if (how === 'dry') r.stats.wellsDry++
   else r.stats.wellsLost++
 }
 
@@ -165,7 +167,7 @@ export function newRun(seed: number, bonus: BonusKey): Run {
     short: 0, freight: 0, pending: { ap: 0, audit: false, refuse: false, margin: 0 }, current: { audit: false, refuse: false },
     items: [], destroyCost: CONFIG.destroyCost, prospectPrice: CONFIG.prospectPrice,
     shop: { cards: [], item: null, loanTaken: false }, ledger: [], events: [],
-    stats: { oilSold: 0, earned: 0, spent: 0, wellsBuilt: 0, wellsBurnt: 0, wellsStolen: 0, wellsLost: 0, skims: 0 },
+    stats: { oilSold: 0, earned: 0, spent: 0, wellsBuilt: 0, wellsBurnt: 0, wellsStolen: 0, wellsLost: 0, wellsDry: 0, skims: 0 },
     roundStart: { capital: CONFIG.startCapital, gold: 0, wells: 0, oil: 0, deck: 0 },
   }
   r.deck = STARTER.map(k => card(r, k))
@@ -272,7 +274,7 @@ function startRound(r: Run, round: number) {
   r.marked = null
   r.plots.forEach(w => w && (w.unstable = false))
   r.pending = { ap: 0, audit: false, refuse: false, margin: 0 }
-  r.hand = r.hand.filter(c => c.key === 'well') // unbuilt Well cards stay with you
+  r.hand = []
   r.discard = []
   r.draw = shuffle(r, [...r.deck])
   r.phase = 'turn'
@@ -306,16 +308,22 @@ function beginTurn(r: Run) {
   if (checkBankrupt(r)) return
   const made = production(r)
   if (made) {
+    r.plots.forEach((w, i) => {
+      if (!w) return
+      w.reserve -= pumps(w)
+      if (w.reserve <= 0) { loseWell(r, i, 'dry'); say(r, `Well No. ${i + 1} has run dry.`) }
+    })
     const room = r.storage - r.oil
     r.oil += Math.min(room, made)
     if (made > room) say(r, `Storage full: ${made - room} oil lost.`)
   }
   for (let i = 0; i < margins; i++) r.hand.push(card(r, 'marginCall', true))
   const n = CONFIG.handSize - (r.modifier === 'badWeather' ? 1 : 0)
-  for (let i = 0; i < n; i++) {
+  while (r.hand.length < n) { // draw back up to a full hand
     if (!r.draw.length) { r.draw = shuffle(r, r.discard); r.discard = [] }
     const c = r.draw.pop()
-    if (c) r.hand.push(c)
+    if (!c) break
+    r.hand.push(c)
   }
   r.ap = Math.max(0, CONFIG.baseAP + (r.items.includes('steamPump') ? 1 : 0) - apPenalty)
 }
@@ -400,13 +408,13 @@ function play(r: Run, cardId: number, target?: number) {
       case 'prospect': {
         const add = Math.min(CONFIG.plotsPerProspect, CONFIG.maxPlots - r.plots.length)
         for (let i = 0; i < add; i++) r.plots.push(null)
-        for (let i = 0; i < CONFIG.wellCardsPerProspect; i++) r.hand.push(card(r, 'well', true))
+        for (let i = 0; i < CONFIG.wellCardsPerProspect; i++) { const w = card(r, 'well'); r.deck.push(w); r.hand.push(w) }
         say(r, add ? `Claimed ${add} plot${add > 1 ? 's' : ''}.` : 'No new land. 2 Well cards drawn.')
         break
       }
       case 'well': case 'wildcat': {
         const i = freePlot(r)
-        r.plots[i] = { output: d.power }
+        r.plots[i] = { output: d.power, reserve: c.key === 'wildcat' ? CONFIG.wildcatReserve : CONFIG.wellReserve }
         r.stats.wellsBuilt++
         say(r, `Well No. ${i + 1} built.`)
         break
@@ -517,7 +525,7 @@ function endTurn(r: Run) {
   if (checkBankrupt(r) || r.phase !== 'turn') return
   const badBlood = r.hand.filter(c => c.key === 'badBlood').length
   r.discard.push(...r.hand.filter(c => !c.temp))
-  r.hand = r.hand.filter(c => c.temp && (c.key === 'well' || c.key === 'iou'))
+  r.hand = r.hand.filter(c => c.temp && c.key === 'iou')
   // fire burns
   if (r.fire) {
     if (r.oil > 0) { const burnt = Math.min(r.oil, r.fire); r.oil -= burnt; say(r, `Fire burnt ${burnt} oil.`) }
@@ -591,7 +599,7 @@ export function act(prev: Run, a: Action): Run {
   const r = clone(prev)
   if (r.phase === 'shop') { shopAction(r, a); return r }
   if (r.phase === 'roundWon' && a.type === 'continue') {
-    r.phase = 'shop'; r.hand = r.hand.filter(c => c.key === 'well'); stockShop(r); r.ledger = []; r.events = []
+    r.phase = 'shop'; r.hand = []; stockShop(r); r.ledger = []; r.events = []
     return r
   }
   if (r.phase !== 'turn') return r

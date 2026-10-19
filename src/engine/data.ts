@@ -1,4 +1,5 @@
 // Card, enemy, item and modifier definitions for Oil, stage 1.
+import { CONFIG } from './config'
 
 export type Family = 'Muscle' | 'Legal' | 'Fix' | 'Dirty' | 'Wages' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Junk'
 export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'shovels' | 'coins' | 'telegraph' | 'dynamite'
@@ -28,9 +29,9 @@ export const CARDS: Record<CardKey, CardDef> = {
   prospect: { name: 'Prospect', ap: 2, cost: 0, uses: null, family: 'Production', power: 0, icon: 'plot', price: 3,
     text: 'Claim 2 plots. Add 2 Well cards to your hand.', flavour: 'Somewhere under here.' },
   well: { name: 'Well', ap: 1, cost: 0, uses: 1, family: 'Production', power: 1, icon: 'derrick',
-    text: '+1 oil a turn.', flavour: 'Black gold. A brighter future.' },
+    text: `+1 oil a turn. Runs dry after ${CONFIG.wellReserve}.`, flavour: 'Black gold. A brighter future.' },
   wildcat: { name: 'Wildcat Well', ap: 1, cost: 0, uses: 1, family: 'Production', power: 2, icon: 'derrick', price: 6, rarity: 'Uncommon',
-    text: '+2 oil a turn.', flavour: 'Drill deeper. Ask later.' },
+    text: `+2 oil a turn. Runs dry after ${CONFIG.wildcatReserve}.`, flavour: 'Drill deeper. Ask later.' },
   hiredHand: { name: 'Hired Hand', ap: 1, cost: 0, uses: null, family: 'Muscle', power: 2, icon: 'cudgels', price: 3, rarity: 'Common',
     text: 'Deal 2 Hold damage.', flavour: 'A firm word, and a firmer grip.' },
   lawyerUp: { name: 'Lawyer Up', ap: 1, cost: 2, uses: null, family: 'Legal', power: 4, icon: 'deed', price: 4, rarity: 'Common',

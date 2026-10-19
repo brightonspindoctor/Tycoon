@@ -60,7 +60,7 @@ describe('selling and prospecting', () => {
 describe('fire', () => {
   it('burns oil first, then the highest Well', () => {
     let r = begin()
-    r.plots = [{ output: 1 }, { output: 1 }, { output: 1 }]
+    r.plots = [{ output: 1, reserve: 6 }, { output: 1, reserve: 6 }, { output: 1, reserve: 6 }]
     r.oil = 1; r.fire = 2; r.threats.forEach(t => (t.hold = 99))
     r = act(r, { type: 'endTurn' })
     expect(r.oil).toBe(0)
@@ -96,14 +96,14 @@ describe('fixes', () => {
     if (!r.hand.includes(p)) { r.hand.push(p); r.draw = r.draw.filter(c => c !== p) }
     r.hand = r.hand.filter(c => c.key !== 'well')
     r.ap = 2
-    r.plots = [{ output: 1 }, null, { output: 1 }, { output: 1 }, { output: 1 }]
+    r.plots = [{ output: 1, reserve: 6 }, null, { output: 1, reserve: 6 }, { output: 1, reserve: 6 }, { output: 1, reserve: 6 }]
     r = act(r, { type: 'play', cardId: p.id })
     expect(r.hand.filter(c => c.key === 'well')).toHaveLength(2)
   })
 
   it('Prospect is refused when every plot has a Well', () => {
     const r = begin()
-    r.plots = Array.from({ length: CONFIG.maxPlots }, () => ({ output: 1 }))
+    r.plots = Array.from({ length: CONFIG.maxPlots }, () => ({ output: 1, reserve: 6 }))
     const p = r.deck.find(c => c.key === 'prospect')!
     r.hand.push(p); r.ap = 2
     expect(canPlay(r, p).ok).toBe(false)
@@ -120,5 +120,55 @@ describe('fixes', () => {
     r = act(r, { type: 'play', cardId: h.id, target: 900 })
     expect(r.threats[0].hold).toBe(6)
     expect(r.threats[1].hold).toBe(4)
+  })
+})
+
+describe('wells and hands', () => {
+  it('a Well runs dry and frees its plot', () => {
+    let r = begin()
+    r.threats.forEach(t => (t.hold = 99))
+    r.plots = [{ output: 1, reserve: 2 }, null]
+    r.storage = 99
+    r = act(r, { type: 'endTurn' })
+    expect(r.plots[0]?.reserve).toBe(1)
+    r = act(r, { type: 'endTurn' })
+    expect(r.plots[0]).toBeNull()
+    expect(r.stats.wellsDry).toBe(1)
+  })
+
+  it('every hand is five cards', () => {
+    let r = begin('extraProspect')
+    for (let t = 0; t < 6 && r.phase === 'turn'; t++) {
+      r.threats.forEach(x => (x.hold = 99))
+      expect(r.hand).toHaveLength(CONFIG.handSize)
+      r = act(r, { type: 'endTurn' })
+    }
+  })
+
+  it('unbuilt Well cards are discarded and come back later', () => {
+    let r = begin()
+    r.threats.forEach(t => (t.hold = 99))
+    const p = r.deck.find(c => c.key === 'prospect')!
+    r.hand = [p]; r.draw = r.draw.filter(c => c.id !== p.id); r.discard = []; r.ap = 2
+    r = act(r, { type: 'play', cardId: p.id })
+    const wells = r.hand.filter(c => c.key === 'well')
+    expect(wells).toHaveLength(2)
+    expect(r.deck.filter(c => c.key === 'well')).toHaveLength(2)
+    r = act(r, { type: 'endTurn' })
+    const ids = wells.map(w => w.id)
+    const where = [...r.hand, ...r.draw, ...r.discard].filter(c => ids.includes(c.id))
+    expect(where).toHaveLength(2)
+    expect(r.hand.length).toBe(CONFIG.handSize)
+  })
+
+  it('building a Well uses the card up', () => {
+    let r = begin()
+    const p = r.deck.find(c => c.key === 'prospect')!
+    r.hand = [p]; r.ap = 3
+    r = act(r, { type: 'play', cardId: p.id })
+    const w = r.hand.find(c => c.key === 'well')!
+    r = act(r, { type: 'play', cardId: w.id })
+    expect(r.deck.some(c => c.id === w.id)).toBe(false)
+    expect(r.plots[0]?.reserve).toBe(CONFIG.wellReserve)
   })
 })

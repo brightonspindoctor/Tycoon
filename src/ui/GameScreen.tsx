@@ -85,6 +85,7 @@ export function GameScreen({ run, dispatch }: Props) {
                   </button> : <div className="plot__hole" />}
                   <span className="plot__name">{w ? `Well No. ${i + 1}` : '—'}</span>
                   <span className="plot__state">{state}</span>
+                  {w && <span className={`plot__state ${w.reserve <= w.output * 2 ? 'cl-minus' : ''}`}>{w.reserve} bbl left</span>}
                   {marked && <span className="plot__flag">Marked</span>}
                   {burning && <span className="plot__flag plot__flag--fire">Burns next</span>}
                   {plotMenu === i && w && (

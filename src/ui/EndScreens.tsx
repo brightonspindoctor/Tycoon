@@ -40,7 +40,7 @@ export function CrashOut({ run, onAgain, onHistory }: { run: Run; onAgain: () =>
           <div className="end__progress"><div className="end__progress-head"><span className="cl-label">How far you got</span><span className="cl-num">Round {reached} of 16</span></div><Progress reached={reached} dead /></div>
           <div className="end__tiles">
             <div className="tile"><span className="cl-label">Finished off by</span><b className="cl-display">{run.loss?.by[0] ?? 'Debt'}</b>{run.loss && run.loss.by.length > 1 && <span className="res-note">and {run.loss.by.slice(1).join(', ')}</span>}</div>
-            <div className="tile"><span className="cl-label">Wells built</span><b className="cl-num">{run.stats.wellsBuilt}</b><span className="res-note">{run.stats.wellsBurnt} burnt · {run.stats.wellsStolen} stolen · {run.stats.wellsLost} lost</span></div>
+            <div className="tile"><span className="cl-label">Wells built</span><b className="cl-num">{run.stats.wellsBuilt}</b><span className="res-note">{run.stats.wellsDry} dry · {run.stats.wellsBurnt} burnt · {run.stats.wellsStolen} stolen · {run.stats.wellsLost} lost</span></div>
             <div className="tile"><span className="cl-label">Oil sold</span><b className="cl-num">{run.stats.oilSold} bbl</b><span className="res-note">{money(run.stats.earned, st)} earned · {money(run.stats.spent, st)} spent</span></div>
           </div>
           <div className="fortune fortune--lost"><div><span className="cl-label">Your fortune</span><p>Not recorded. A fortune only counts if you finish as Chairman.</p></div><b className="cl-num struck">{run.gold} gold</b></div>

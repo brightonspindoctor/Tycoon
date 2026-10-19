@@ -9,6 +9,8 @@ export const CONFIG = {
   maxPlots: 5,
   plotsPerProspect: 2,
   wellCardsPerProspect: 2,
+  wellReserve: 6, // barrels a Well pumps before it runs dry
+  wildcatReserve: 8,
   sellWellValue: 5,
   firebreakPlot: 1, // index: Plot 2
   firebreakAP: 2,
