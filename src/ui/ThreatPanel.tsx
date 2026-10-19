@@ -28,9 +28,10 @@ export function ThreatPanel({ run, threat, targeting, damagePreview, onTarget }:
           {targeting && damagePreview !== undefined && <span className="cl-label threat__preview">{damagePreview > 0 ? `Deal ${damagePreview}` : 'No effect'}</span>}
         </div>
       </div>
+      {threat.opened && run.turn === 1 && !threat.beaten && <div className="opened"><b>Opened with</b> {threat.opened}</div>}
       {threat.beaten ? <div className="warn warn--done">Beaten</div> : (
         <div className="warn">
-          <b>End of turn · {intent(run, threat)}</b>
+          <b>Next · end of turn · {intent(run, threat)}</b>
           <span>{intentText(run, threat)}</span>
         </div>
       )}

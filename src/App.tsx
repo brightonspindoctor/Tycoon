@@ -7,6 +7,7 @@ import { ERA_THEME } from './engine/format'
 import { play } from './sound'
 import { GameScreen } from './ui/GameScreen'
 import { CardGallery } from './ui/CardGallery'
+import { SoundBoard } from './ui/SoundBoard'
 import { MobileGame } from './ui/MobileGame'
 import { SettingsPanel } from './ui/Settings'
 import { InstallPrompt } from './ui/InstallPrompt'
@@ -43,11 +44,16 @@ export default function App() {
     if (!run) return
     const nextRun = act(run, a)
     // sound and feedback from what changed
-    if (a.type === 'play') play('card')
-    if (a.type === 'sellOil' || a.type === 'sellWell') play('coin')
+    if (a.type === 'play') {
+      const key = run.hand.find(c => c.id === a.cardId)?.key
+      const changed = nextRun.ap !== run.ap || nextRun.hand.length !== run.hand.length
+      if (changed) play(key === 'prospect' ? 'prospect' : key === 'well' || key === 'wildcat' ? 'well' : 'card')
+    }
+    if (a.type === 'sellOil' && nextRun.capital > run.capital) play('sell')
+    if (a.type === 'sellWell') play('coin')
     if (nextRun.fire > run.fire) play('fire')
     if (nextRun.capital < run.capital - 1 && a.type === 'endTurn') { play('hit'); setShake(true); setTimeout(() => setShake(false), 350) }
-    if (a.type === 'buyCard' || a.type === 'buyProspect' || a.type === 'buyItem' || a.type === 'skim') play('coin')
+    if (a.type === 'buyCard' || a.type === 'buyProspect' || a.type === 'buyBucket' || a.type === 'buyItem' || a.type === 'skim') play('coin')
     setRun(nextRun)
   }
 
@@ -92,11 +98,13 @@ export default function App() {
   function start(bonus: BonusKey) {
     setRun(newRun(Math.floor(Math.random() * 2 ** 31), bonus))
     setScreen('run')
+    play('whistle')
   }
 
-  const gallery = new URLSearchParams(location.search).get('preview') === 'cards'
+  const previewPage = new URLSearchParams(location.search).get('preview')
   let body: JSX.Element
-  if (gallery) body = <CardGallery />
+  if (previewPage === 'cards') body = <CardGallery />
+  else if (previewPage === 'sounds') body = <SoundBoard />
   else if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
   else if (screen === 'bonus') body = <BonusPick onPick={start} onBack={() => setScreen('intro')} />
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />

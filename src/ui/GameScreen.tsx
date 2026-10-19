@@ -2,19 +2,21 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { CARDS, ITEMS, MODS, THREATS } from '../engine/data'
 import {
-  apCost, canPlay, damageFor, debtPerTurn, fireTarget, isAttack, liveThreats, netPrice, price, production, skimRate,
+  apCost, canPlay, damageFor, fires, debtPerTurn, fireTarget, isAttack, liveThreats, netPrice, price, production, skimRate,
   type Action, type Run,
 } from '../engine/engine'
 import { ERA_THEME, money, year } from '../engine/format'
 import { CardView } from './CardView'
 import { ThreatPanel } from './ThreatPanel'
 import { SettingsButton } from './Settings'
+import { PileView } from './PileView'
 
 interface Props { run: Run; dispatch: (a: Action) => void }
 
 export function GameScreen({ run, dispatch }: Props) {
   const [selected, setSelected] = useState<number | null>(null)
   const [plotMenu, setPlotMenu] = useState<number | null>(null)
+  const [pile, setPile] = useState<'draw' | 'discard' | null>(null)
   const st = run.stage
   const live = liveThreats(run)
   const sel = run.hand.find(c => c.id === selected)
@@ -63,8 +65,8 @@ export function GameScreen({ run, dispatch }: Props) {
               onTarget={() => { dispatch({ type: 'play', cardId: sel!.id, target: t.id }); setSelected(null) }} />
           ))}
           {run.fire > 0 && (
-            <section className="hazard" aria-label={`Fire, intensity ${run.fire}`}>
-              <div className="hazard__head"><img src={`${import.meta.env.BASE_URL}art/icons/fire.png`} alt="" /><span className="cl-label">Fire</span><span className="cl-num hazard__level">{run.fire} / {CONFIG.fireMax}</span></div>
+            <section className="hazard" aria-label={`${fires(run.fire)} burning`}>
+              <div className="hazard__head"><img src={`${import.meta.env.BASE_URL}art/icons/fire.png`} alt="" /><span className="cl-label">{fires(run.fire)} burning</span><span className="cl-num hazard__level">max {CONFIG.fireMax}</span></div>
               <div className="warn warn--heat"><b>End of turn</b><span>{fireNext}</span></div>
               <span className="hazard__note">Pumps stopped.</span>
             </section>
@@ -144,19 +146,19 @@ export function GameScreen({ run, dispatch }: Props) {
             {Array.from({ length: Math.max(run.ap, CONFIG.baseAP) }, (_, i) => <span key={i} className={`ap-coin ${i < run.ap ? 'is-on' : ''}`} />)}
             <span className="cl-num">{run.ap}</span>
           </div>
+          <button type="button" className="cl-btn sell-btn" disabled={run.ap < 1 || run.oil < 1 || run.current.refuse}
+            onClick={() => dispatch({ type: 'sellOil' })}>
+            {run.current.refuse ? 'Shipment refused' : `Sell ${run.oil} oil · 1 AP · ${money(run.oil * netPrice(run), st, true)}`}
+            {run.fire > 0 && run.oil > 0 && <em> · fire hits Wells next</em>}
+          </button>
           {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
           <div className="action-strip__actions">
-            <button type="button" className="cl-btn" disabled={run.ap < 1 || run.oil < 1 || run.current.refuse}
-              onClick={() => dispatch({ type: 'sellOil' })}>
-              {run.current.refuse ? 'Shipment refused' : `Sell ${run.oil} oil · 1 AP · ${money(run.oil * netPrice(run), st, true)}`}
-              {run.fire > 0 && run.oil > 0 && <em> · fire hits Wells next</em>}
-            </button>
             {blowout && unstable >= 0 && <button type="button" className="cl-btn" disabled={run.ap < 1} onClick={() => dispatch({ type: 'capWell' })}>Cap Well No. {unstable + 1} · 1 AP · {CONFIG.capWellDamage} Hold</button>}
             {run.fire > 0 && run.plots.length > CONFIG.firebreakPlot && <button type="button" className="cl-btn" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · 2 AP{run.plots[CONFIG.firebreakPlot] ? ' · lose Well No. 2' : ''}</button>}
           </div>
         </div>
         <div className="hand-row">
-          <div className="pile" title="Draw pile"><span className="pile__card cl-num">{run.draw.length}</span><span className="cl-label">Draw</span></div>
+          <button type="button" className="pile pile--btn" title="See what's left to draw" onClick={() => setPile('draw')}><span className="pile__card cl-num">{run.draw.length}</span><span className="cl-label">Draw</span></button>
           <div className="hand">
             {run.hand.map((c, i) => {
               const chk = canPlay(run, c)
@@ -166,11 +168,12 @@ export function GameScreen({ run, dispatch }: Props) {
             })}
           </div>
           <div className="pile-col">
-            <div className="pile" title="Discard pile"><span className="pile__card pile__card--discard cl-num">{run.discard.length}</span><span className="cl-label">Discard</span></div>
+            <button type="button" className="pile pile--btn" title="See the discard pile" onClick={() => setPile('discard')}><span className="pile__card pile__card--discard cl-num">{run.discard.length}</span><span className="cl-label">Discard</span></button>
             <button type="button" className={`cl-btn end-turn ${endReady ? 'cl-btn--primary' : ''}`} onClick={() => { setSelected(null); dispatch({ type: 'endTurn' }) }}>End turn</button>
           </div>
         </div>
       </footer>
+      {pile && <PileView title={pile === 'draw' ? 'Draw pile' : 'Discard pile'} cards={pile === 'draw' ? run.draw : run.discard} onClose={() => setPile(null)} />}
       <span className="sr-only">{live.map(t => THREATS[t.kind].name).join(', ')}</span>
     </div>
   )

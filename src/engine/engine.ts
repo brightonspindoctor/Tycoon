@@ -9,7 +9,7 @@ import { next, pick, shuffle } from './rng'
 
 export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean }
 export interface Well { output: number; reserve: number; unstable?: boolean }
-export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean }
+export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string }
 export interface LedgerLine { label: string; amount: number }
 export type Phase = 'shop' | 'turn' | 'roundWon' | 'lost' | 'stageComplete'
 export type LossReason = 'bankrupt' | 'stalemate'
@@ -73,6 +73,7 @@ export type Action =
   | { type: 'endTurn' }
   | { type: 'buyCard'; slot: number }
   | { type: 'buyProspect' }
+  | { type: 'buyBucket' }
   | { type: 'buyItem' }
   | { type: 'takeLoan' }
   | { type: 'destroyCard'; cardId: number }
@@ -130,11 +131,13 @@ export function damageFor(family: Family, power: number, kind: ThreatKind): numb
 }
 export const isAttack = (key: CardKey) => ['Muscle', 'Legal', 'Fix', 'Dirty', 'Wages'].includes(CARDS[key].family)
 
-function startFire(r: Run, intensity: number) {
+export const fires = (n: number) => `${n} fire${n === 1 ? '' : 's'}`
+/** Starts `count` new fires (Fire is the number of fires burning, up to fireMax). */
+function startFire(r: Run, count: number) {
   const bonus = r.modifier === 'drySeason' ? 1 : 0
-  r.fire = r.fire ? Math.min(CONFIG.fireMax, r.fire + 1) : Math.min(CONFIG.fireMax, intensity + bonus)
+  r.fire = Math.min(CONFIG.fireMax, r.fire + count + bonus)
   r.firebreak = false
-  say(r, `Fire! Intensity ${r.fire}. Pumps stopped.`)
+  say(r, `Fire! ${fires(r.fire)} burning. Pumps stopped.`)
 }
 
 function removeFromDeck(r: Run, c: Card) {
@@ -208,6 +211,10 @@ function shopAction(r: Run, a: Action) {
       r.deck.push(card(r, key)); r.shop.cards[a.slot] = null
       return
     }
+    case 'buyBucket':
+      if (!pay(r, CONFIG.bucketPrice, 'Bucket of Water')) return
+      r.deck.push(card(r, 'bucket'))
+      return
     case 'buyProspect':
       if (!pay(r, r.prospectPrice, 'Prospect')) return
       r.deck.push(card(r, 'prospect')); r.prospectPrice += 1
@@ -285,9 +292,13 @@ function startRound(r: Run, round: number) {
   if (!r.items.includes('lookout')) {
     for (const t of r.threats) {
       const op = THREATS[t.kind].movesFirst
-      if (op === 'Walkout') { r.pending.ap += 1; say(r, 'Walkout: −1 AP on your first turn.') }
-      if (op === 'Scout') { const i = highestWell(r); r.marked = i >= 0 ? i : null; if (i >= 0) say(r, `The Claim Jumper has marked Well No. ${i + 1}.`) }
-      if (op === 'Arson') startFire(r, 1)
+      if (op === 'Walkout') { r.pending.ap += 1; t.opened = 'Walkout: −1 AP this turn.'; say(r, 'Walkout: −1 AP on your first turn.') }
+      if (op === 'Scout') {
+        const i = highestWell(r); r.marked = i >= 0 ? i : null
+        t.opened = i >= 0 ? `Scout: marked Well No. ${i + 1}.` : 'Scout: found no Well to mark.'
+        if (i >= 0) say(r, `The Claim Jumper has marked Well No. ${i + 1}.`)
+      }
+      if (op === 'Arson') { startFire(r, 1); t.opened = 'Arson: started a fire.' }
     }
   }
   beginTurn(r)
@@ -352,9 +363,9 @@ function threatBeaten(r: Run, t: Threat) {
   }
 }
 
-function hit(r: Run, t: Threat, dmg: number, family: Family) {
+function hit(r: Run, t: Threat, dmg: number, family: Family, clean = false) {
   t.hold -= dmg
-  if ((family === 'Muscle' && t.kind === 'strike') || family === 'Dirty') { addJunk(r, 'badBlood'); say(r, 'Bad Blood added to your deck.') }
+  if (!clean && ((family === 'Muscle' && t.kind === 'strike') || family === 'Dirty')) { addJunk(r, 'badBlood'); say(r, 'Bad Blood added to your deck.') }
   if (t.hold <= 0) threatBeaten(r, t)
 }
 
@@ -367,6 +378,7 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (forced && !d.forced) return { ok: false, why: 'Play your Must play cards first' }
   if (apCost(r, c) > r.ap) return { ok: false, why: 'Not enough AP' }
   if (d.cost && r.capital - d.cost < 1 && !d.forced) return { ok: false, why: 'Not enough Capital' }
+  if (d.gold && r.gold < d.gold) return { ok: false, why: 'Not enough gold' }
   if (c.key === 'prospect' && r.plots.length >= CONFIG.maxPlots && freePlot(r) < 0) return { ok: false, why: 'No land left to claim' }
   if ((c.key === 'well' || c.key === 'wildcat') && freePlot(r) < 0) return { ok: false, why: 'No free plot' }
   if ((c.key === 'bucket' || c.key === 'fireBrigade') && !r.fire) return { ok: false, why: 'No fire' }
@@ -399,9 +411,17 @@ function play(r: Run, cardId: number, target?: number) {
     const chosen = live.find(x => x.id === target)
     const t = chosen && damageFor(d.family, d.power, chosen.kind) > 0 ? chosen : best
     const dmg = damageFor(d.family, d.power, t.kind)
-    say(r, `${d.name}: ${dmg} Hold damage to ${THREATS[t.kind].name}.`)
     spendCard(r, c)
-    hit(r, t, dmg, d.family)
+    if (d.cover) r.cover += d.cover
+    if (d.gold) r.gold -= d.gold
+    if (d.chance !== undefined) {
+      // a gamble: it either lands cleanly or backfires with Bad Blood
+      if (next(r) < d.chance) { say(r, `${d.name} taken: ${dmg} Hold damage to ${THREATS[t.kind].name}.`); hit(r, t, dmg, d.family, true) }
+      else { addJunk(r, 'badBlood'); say(r, `${THREATS[t.kind].name} refused the bribe. Bad Blood added to your deck.`) }
+    } else {
+      say(r, `${d.name}: ${dmg} Hold damage to ${THREATS[t.kind].name}.`)
+      hit(r, t, dmg, d.family)
+    }
   } else {
     spendCard(r, c)
     switch (c.key) {
@@ -419,8 +439,8 @@ function play(r: Run, cardId: number, target?: number) {
         say(r, `Well No. ${i + 1} built.`)
         break
       }
-      case 'bucket': r.fire = Math.max(0, r.fire - 1); say(r, r.fire ? `Fire down to ${r.fire}.` : 'Fire out. Pumps restart next turn.'); break
-      case 'fireBrigade': r.fire = 0; say(r, 'Fire out. Pumps restart next turn.'); break
+      case 'bucket': r.fire = Math.max(0, r.fire - 1); say(r, r.fire ? `One fire out. ${fires(r.fire)} still burning.` : 'Fire out. Pumps restart next turn.'); break
+      case 'fireBrigade': r.fire = 0; say(r, 'Every fire is out. Pumps restart next turn.'); break
       case 'improveGear': r.cover += d.power; break
       case 'hardGraft': r.ap += 1; break
       case 'pettyCash': {
@@ -487,11 +507,11 @@ export function intentText(r: Run, t: Threat): string {
     case 'Blow': { const u = r.plots.findIndex(w => w?.unstable); return u >= 0 ? `Well No. ${u + 1} is destroyed.` : 'Pressure builds.' }
     case 'Picket': return '−1 AP next turn.'
     case 'Sabotage': return t.kind === 'baron' ? `Destroys your ${1 + c > 1 ? `${1 + c} highest Wells` : 'highest Well'}.` : 'Destroys a random card in your deck.'
-    case 'Torch': return 'Starts a Fire (1).'
+    case 'Torch': return 'Starts a fire.'
     case 'Audit': return 'Your debt doubles next turn.'
     case 'Fine': return 'Lose $3.'
-    case 'Raise Rates': return `Freight rises to $${r.freight + 1} per oil.`
-    case 'Refuse': return "You can't sell oil next turn."
+    case 'Raise Rates': return `Raises her freight charge: you get $1 less for every barrel you sell.`
+    case 'Refuse': return "Won't carry your oil: you can't sell next turn."
     case 'Jump': return r.marked !== null && r.plots[r.marked] ? `Steals Well No. ${r.marked + 1}.` : 'Looks for a Well to steal.'
     case 'Scout': return hw >= 0 ? `Marks Well No. ${hw + 1}.` : 'Watches your claim.'
     case 'Short': return 'Oil price −$1.'
@@ -499,7 +519,7 @@ export function intentText(r: Run, t: Threat): string {
     case 'Rumours': return 'Adds Bad Blood to your deck.'
     case 'Paper Promise': return 'Adds an IOU to your hand.'
     case 'Lease': return 'Removes your most expensive card for good.'
-    case 'Arson': return `Starts a Fire (${Math.min(CONFIG.fireMax, 2 + c)}).`
+    case 'Arson': return `Starts ${fires(Math.min(CONFIG.fireMax, 2 + c))}.`
   }
   return a
 }

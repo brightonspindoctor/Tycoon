@@ -24,7 +24,7 @@ function Progress({ reached, dead }: { reached: number; dead: boolean }) {
 }
 
 export function CrashOut({ run, bailout, onAgain, onHistory }: { run: Run; bailout?: boolean; onAgain: () => void; onHistory: () => void }) {
-  useEffect(() => { play('stamp'); const t = setTimeout(() => play('lose'), 400); return () => clearTimeout(t) }, [])
+  useEffect(() => { play('stamp'); const t = setTimeout(() => play('straw'), 500); return () => clearTimeout(t) }, [])
   const st = run.stage
   const reached = roundsReached(run)
   const stalled = run.loss?.reason === 'stalemate'
@@ -65,7 +65,7 @@ export function CrashOut({ run, bailout, onAgain, onHistory }: { run: Run; bailo
 }
 
 export function StageComplete({ run, onMenu, onHistory }: { run: Run; onMenu: () => void; onHistory: () => void }) {
-  useEffect(() => { play('win') }, [])
+  useEffect(() => { play('register'); const t = setTimeout(() => play('win'), 900); return () => clearTimeout(t) }, [])
   const st = run.stage
   return (
     <div className="screen end" data-theme="victorian">

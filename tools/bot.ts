@@ -6,7 +6,9 @@ export function botShop(r: Run): Run {
   // destroy junk, buy a Prospect if land is left, buy one attack card, then leave
   const junk = r.deck.find(c => CARDS[c.key].junk)
   if (junk && r.capital > r.destroyCost + 6) r = act(r, { type: 'destroyCard', cardId: junk.id })
-  if (r.plots.length < 5 && !r.deck.some(c => c.key === 'prospect') && r.capital > r.prospectPrice + 6) r = act(r, { type: 'buyProspect' })
+  // Prospect is single use: rebuy one when there is land to claim or an empty plot to fill
+  const roomForWells = r.plots.length < 5 || r.plots.some(p => !p)
+  if (roomForWells && !r.deck.some(c => c.key === 'prospect') && r.capital > r.prospectPrice + 6) r = act(r, { type: 'buyProspect' })
   const want = ['dynamite', 'lawyerUp', 'fireBrigade', 'shoreUp']
   for (let i = 0; i < r.shop.cards.length; i++) {
     const k = r.shop.cards[i]

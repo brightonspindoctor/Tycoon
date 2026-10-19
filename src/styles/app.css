@@ -505,3 +505,27 @@ button.m-threat { cursor: pointer; }
 }
 @keyframes install-in { from { opacity: 0; transform: translate(-50%, 30px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .m .settings-btn { padding: 0; min-height: 0; }
+
+/* ---------- opening moves, pile viewer, sell button ---------- */
+.opened { font-size: 12.5px; line-height: 16px; color: var(--ink-muted); border-left: 3px solid var(--loss); padding: 2px 0 2px 8px; }
+.opened b { font-family: var(--font-figures); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--loss); margin-right: 4px; }
+.pile--btn { border: 0; background: none; padding: 0; cursor: pointer; font: inherit; color: inherit; }
+.pile--btn:hover .pile__card { transform: translateY(-3px); }
+.pile--btn .pile__card { transition: transform .15s; }
+.pile-view-wrap { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, #120f0b 55%, transparent); animation: fade-in .2s; }
+.pile-view { width: min(760px, 100%); max-height: 86%; overflow-y: auto; background: var(--paper); color: var(--ink); font-family: var(--font-body); border: 2px solid var(--ink); padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 0 0 5px var(--paper-raised), 0 0 0 6.5px var(--ink); animation: rise .25s ease-out; }
+.pile-view .settings__head h2 { font-size: 24px; }
+.pile-view__grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.pile-view__item { position: relative; }
+.pile-view__count { position: absolute; top: -8px; right: -6px; z-index: 2; background: var(--ink); color: var(--paper-raised); font-weight: 700; font-size: 13px; padding: 2px 7px; border-radius: var(--radius-pill); }
+.pile-view .card { cursor: default; }
+.sell-btn { white-space: nowrap; }
+.m-sell { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-sell b { color: var(--gain); }
+.m-sell:disabled b { color: inherit; }
+.m .pile-view { max-height: 85dvh; padding: 14px; }
+.m .pile-view__grid { gap: 8px; }
+.m .pile-view__item { width: calc((100% - 16px) / 3); }
+.m .pile-view .card--small { width: 100%; height: auto; min-height: 150px; }
+.m .opened { font-size: 11.5px; line-height: 15px; }
+.soundboard { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }

@@ -24,7 +24,7 @@ export function ShopScreen({ run, dispatch }: Props) {
           <span className="cl-label">Stage {st} · {run.round === 0 ? 'Before you start' : `After round ${run.round}`}</span>
           <h1 className="cl-display game__title">The Land Office</h1>
         </div>
-        <div className="shop__head-right"><SettingsButton /><div className="shop__next"><span className="cl-label">Next: Round {run.round + 1}</span><span>{['Someone after your cash', 'Someone after your cash', 'Someone after your Wells, plus a modifier', 'One of each, at once', 'The Rival Baron'][run.round + 1]}</span></div></div>
+        <div className="shop__head-right"><SettingsButton /><div className="shop__next"><span className="cl-label">Next: Round {run.round + 1}</span></div></div>
       </header>
 
       <div className="shop__grid">
@@ -37,8 +37,12 @@ export function ShopScreen({ run, dispatch }: Props) {
                   why={can(CARDS[k].price!) ? undefined : 'Too expensive'} onClick={() => dispatch({ type: 'buyCard', slot: i })} />
               ) : <div key={i} className="sold">Sold</div>)}
               <div className="prospect-slot">
+                <CardView card={{ id: -8, key: 'bucket', uses: null }} price={money(CONFIG.bucketPrice, st)} playable={can(CONFIG.bucketPrice)} onClick={() => dispatch({ type: 'buyBucket' })} />
+                <span className="res-note">Always in stock.</span>
+              </div>
+              <div className="prospect-slot">
                 <CardView card={{ id: -9, key: 'prospect', uses: null }} price={money(run.prospectPrice, st)} playable={can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })} />
-                <span className="res-note">{plotsLeft === 0 ? 'No land left to claim.' : plotsLeft === 1 ? 'Only 1 plot left: half value.' : `${plotsLeft} plots left.`} Price rises each time.</span>
+                <span className="res-note">{plotsLeft === 0 ? 'No land left to claim.' : plotsLeft === 1 ? 'Only 1 plot left: half value.' : `${plotsLeft} plots left.`} Single use. Price rises each time.</span>
               </div>
             </div>
           </section>

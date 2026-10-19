@@ -4,7 +4,7 @@ import { lossStreak, type RunRecord } from '../storage'
 import { CONFIG } from './config'
 import { money } from './format'
 import { botRun } from '../../tools/bot'
-import { THREATS } from './data'
+import { THREATS, type CardKey } from './data'
 
 const begin = (bonus: Parameters<typeof newRun>[1] = 'threeOil', seed = 7): Run => newRun(seed, bonus)
 
@@ -215,5 +215,88 @@ describe('Trust Fund', () => {
     expect(lossStreak([lost, timeout, lost])).toBe(3)
     expect(lossStreak([lost, lost, won, lost, lost])).toBe(2) // newest first: a win breaks the streak
     expect(lossStreak([won, lost, lost, lost])).toBe(0)
+  })
+})
+
+describe('card and enemy changes', () => {
+  const lone = (r: Run, kind: Parameters<typeof damageFor>[2]) => { r.threats = [{ id: 900, kind, hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]; r.capital = 50; return r }
+
+  it('Prospect is used up once played', () => {
+    let r = lone(begin(), 'inspector')
+    const p = r.deck.find(c => c.key === 'prospect')!
+    r.hand = [p]; r.ap = 2
+    r = act(r, { type: 'play', cardId: p.id })
+    expect(r.deck.some(c => c.key === 'prospect')).toBe(false)
+  })
+
+  it('Shore Up deals 1 Hold damage and gives 1 Cover', () => {
+    let r = lone(begin(), 'inspector')
+    const s = card('shoreUp'); r.deck.push(s); r.hand = [s]; r.ap = 1
+    r = act(r, { type: 'play', cardId: s.id })
+    expect(r.threats[0].hold).toBe(49)
+    expect(r.cover).toBe(CONFIG.shoreUpCover)
+  })
+
+  it('Bucket of Water puts out one fire and never wears out', () => {
+    let r = lone(begin(), 'inspector')
+    const b = r.deck.find(c => c.key === 'bucket')!
+    expect(b.uses).toBeNull()
+    r.fire = 2; r.hand = [b]; r.ap = 1
+    r = act(r, { type: 'play', cardId: b.id })
+    expect(r.fire).toBe(1)
+    expect(r.deck.some(c => c.id === b.id)).toBe(true)
+  })
+
+  it('fires add up', () => {
+    let r = lone(begin(), 'baron')
+    r.modifier = null; r.oil = 5; r.storage = 9; r.fire = 1 // one fire burning, oil to keep it fed
+    r.threats[0].step = 2 // the Baron's next move is Arson: 2 more fires
+    r = act(r, { type: 'endTurn' })
+    expect(r.fire).toBe(Math.min(CONFIG.fireMax, 1 + 2))
+  })
+
+  it('the Railroad Agent is no longer weak to Legal; she takes bribes', () => {
+    expect(damageFor('Legal', 4, 'railroad')).toBe(4)
+    expect(damageFor('Dirty', 3, 'railroad')).toBe(6)
+  })
+
+  it('Buckets are always for sale at the Land Office', () => {
+    let r = begin(); r.phase = 'shop'; r.capital = 20
+    const before = r.deck.filter(c => c.key === 'bucket').length
+    r = act(r, { type: 'buyBucket' })
+    expect(r.deck.filter(c => c.key === 'bucket').length).toBe(before + 1)
+    expect(r.capital).toBe(20 - CONFIG.bucketPrice)
+  })
+})
+
+let cid = 5000
+function card(key: CardKey) { return { id: cid++, key, uses: null as number | null } }
+
+describe('Bribe', () => {
+  it('costs 1 gold, then either lands cleanly or backfires with Bad Blood', () => {
+    let landed = 0, refused = 0
+    for (let seed = 1; seed <= 400; seed++) {
+      let r = newRun(seed, 'threeOil')
+      r.threats = [{ id: 900, kind: 'inspector', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
+      r.gold = 3
+      const b = { id: 7777, key: 'payOff' as const, uses: null }
+      r.deck.push(b); r.hand = [b]; r.ap = 1
+      const blood = r.deck.filter(c => c.key === 'badBlood').length
+      r = act(r, { type: 'play', cardId: b.id })
+      expect(r.gold).toBe(3 - CONFIG.bribeGold)
+      const hitIt = r.threats[0].hold === 50 - CONFIG.bribeDamage
+      const backfired = r.deck.filter(c => c.key === 'badBlood').length === blood + 1
+      expect(hitIt !== backfired).toBe(true) // exactly one of the two
+      if (hitIt) landed++; else refused++
+    }
+    expect(landed / 400).toBeGreaterThan(0.4); expect(landed / 400).toBeLessThan(0.6)
+    expect(refused).toBeGreaterThan(0)
+  })
+
+  it("can't be played without gold", () => {
+    const r = newRun(2, 'threeOil')
+    const b = { id: 7778, key: 'payOff' as const, uses: null }
+    r.hand = [b]; r.ap = 1; r.gold = 0
+    expect(canPlay(r, b).ok).toBe(false)
   })
 })

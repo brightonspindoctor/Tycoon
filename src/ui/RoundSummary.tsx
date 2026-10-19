@@ -41,7 +41,7 @@ export function RoundSummary({ run, onContinue }: { run: Run; onContinue: () => 
   const fromYear = year(st, run.round)
   const toYear = year(st, run.round + 1)
   const y = useCountUp(fromYear, toYear, 1400, 200)
-  useEffect(() => { play('win'); const t = setTimeout(() => play('ink'), 600); return () => clearTimeout(t) }, [])
+  useEffect(() => { play('register') }, [])
   const m = (n: number) => money(n, st)
   return (
     <div className="overlay" role="dialog" aria-label={`Round ${run.round} complete`}>

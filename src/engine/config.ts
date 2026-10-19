@@ -17,7 +17,12 @@ export const CONFIG = {
   firebreakPlot: 1, // index: Plot 2
   firebreakAP: 2,
   capWellDamage: 3,
-  fireMax: 3,
+  fireMax: 3, // most fires burning at once
+  bucketPrice: 2, // Bucket of Water, always for sale at the Land Office
+  shoreUpCover: 1,
+  bribeGold: 1, // Bribe: costs this much of your own fortune to play
+  bribeChance: 0.5, // chance the bribe is taken
+  bribeDamage: 4,
   badBloodFireChance: 1 / 3,
   inspectorReserve: 12, // end a turn holding this much and the Inspector loses Hold
   inspectorReserveDamage: 2,

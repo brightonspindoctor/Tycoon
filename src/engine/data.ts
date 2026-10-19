@@ -2,12 +2,12 @@
 import { CONFIG } from './config'
 
 export type Family = 'Muscle' | 'Legal' | 'Fix' | 'Dirty' | 'Wages' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Junk'
-export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'shovels' | 'coins' | 'telegraph' | 'dynamite'
+export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'shovels' | 'coins' | 'telegraph' | 'dynamite' | 'gear' | 'timber' | 'hose' | 'envelope'
 
 export type CardKey =
   | 'prospect' | 'well' | 'wildcat' | 'hiredHand' | 'lawyerUp' | 'shoreUp' | 'bucket' | 'fireBrigade'
   | 'improveGear' | 'hardGraft' | 'pettyCash' | 'payWages' | 'dynamite' | 'bribe' | 'telegram'
-  | 'looseThread' | 'badBlood' | 'marginCall' | 'iou'
+  | 'looseThread' | 'badBlood' | 'marginCall' | 'iou' | 'payOff'
 
 export interface CardDef {
   name: string
@@ -22,11 +22,14 @@ export interface CardDef {
   price?: number // shop price
   rarity?: 'Common' | 'Uncommon' | 'Rare'
   forced?: boolean // must be played before other cards
+  cover?: number // attack cards that also give Cover this turn
+  gold?: number // paid from your own fortune when played
+  chance?: number // chance the attack lands; if it fails you get Bad Blood
   junk?: boolean
 }
 
 export const CARDS: Record<CardKey, CardDef> = {
-  prospect: { name: 'Prospect', ap: 2, cost: 0, uses: null, family: 'Production', power: 0, icon: 'plot', price: 3,
+  prospect: { name: 'Prospect', ap: 2, cost: 0, uses: 1, family: 'Production', power: 0, icon: 'plot', price: 3,
     text: 'Claim 2 plots. Add 2 Well cards to your hand.', flavour: 'Somewhere under here.' },
   well: { name: 'Well', ap: 1, cost: 0, uses: 1, family: 'Production', power: 1, icon: 'derrick',
     text: `+1 oil a turn. Runs dry after ${CONFIG.wellReserve}.`, flavour: 'Black gold. A brighter future.' },
@@ -36,15 +39,15 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Deal 2 Hold damage.', flavour: 'A firm word, and a firmer grip.' },
   lawyerUp: { name: 'Lawyer Up', ap: 1, cost: 2, uses: null, family: 'Legal', power: 4, icon: 'deed', price: 4, rarity: 'Common',
     text: 'Pay $2. Deal 4 Hold damage.', flavour: 'The paperwork always wins (eventually).' },
-  shoreUp: { name: 'Shore Up', ap: 1, cost: 0, uses: null, family: 'Fix', power: 3, icon: 'shovels', price: 3, rarity: 'Common',
-    text: 'Deal 3 Hold damage.', flavour: 'More timber. More rope.' },
-  bucket: { name: 'Bucket of Water', ap: 1, cost: 0, uses: 2, family: 'Water', power: 1, icon: 'bucket',
-    text: '−1 Fire.', flavour: "It won't stop the well, but it might buy a moment." },
-  fireBrigade: { name: 'Fire Brigade', ap: 1, cost: 0, uses: null, family: 'Water', power: 3, icon: 'bucket', price: 4, rarity: 'Common',
-    text: 'Put the fire out.', flavour: 'For a fee.' },
-  improveGear: { name: 'Improve Gear', ap: 1, cost: 1, uses: null, family: 'Defence', power: 3, icon: 'shovels',
+  shoreUp: { name: 'Shore Up', ap: 1, cost: 0, uses: null, family: 'Fix', power: 1, cover: CONFIG.shoreUpCover, icon: 'timber', price: 3, rarity: 'Common',
+    text: `Deal 1 Hold damage. +${CONFIG.shoreUpCover} Cover this turn.`, flavour: 'More timber. More rope.' },
+  bucket: { name: 'Bucket of Water', ap: 1, cost: 0, uses: null, family: 'Water', power: 1, icon: 'bucket',
+    text: 'Put out one fire.', flavour: "It won't stop the well, but it might buy a moment." },
+  fireBrigade: { name: 'Fire Brigade', ap: 1, cost: 0, uses: null, family: 'Water', power: 3, icon: 'hose', price: 4, rarity: 'Common',
+    text: 'Put out every fire.', flavour: 'For a fee.' },
+  improveGear: { name: 'Improve Gear', ap: 1, cost: 1, uses: null, family: 'Defence', power: 3, icon: 'gear',
     text: 'Pay $1. +3 Cover this turn.', flavour: 'Stronger timber, fewer accidents.' },
-  hardGraft: { name: 'Hard Graft', ap: 0, cost: 0, uses: 1, family: 'Tempo', power: 1, icon: 'cudgels',
+  hardGraft: { name: 'Hard Graft', ap: 0, cost: 0, uses: 1, family: 'Tempo', power: 1, icon: 'cudgels', price: 4, rarity: 'Uncommon',
     text: '+1 AP.', flavour: 'Sleep is for shareholders.' },
   pettyCash: { name: 'Petty Cash', ap: 0, cost: 0, uses: 3, family: 'Skim', power: 1, icon: 'coins',
     text: 'Skim 1 gold.', flavour: 'Necessary expenses.' },
@@ -54,12 +57,14 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Deal 6 Hold damage. Adds Bad Blood.', flavour: 'An unfortunate accident.' },
   bribe: { name: 'Bribe the Sheriff', ap: 1, cost: 3, uses: null, family: 'Dirty', power: 3, icon: 'coins', price: 5, rarity: 'Uncommon',
     text: 'Pay $3. Deal 3 Hold damage. Adds Bad Blood.', flavour: 'A contribution to local order.' },
+  payOff: { name: 'Bribe', ap: 1, cost: 0, gold: CONFIG.bribeGold, chance: CONFIG.bribeChance, uses: null, family: 'Dirty', power: CONFIG.bribeDamage, icon: 'envelope', price: 4, rarity: 'Uncommon',
+    text: `Pay ${CONFIG.bribeGold} gold. ${Math.round(CONFIG.bribeChance * 100)}% chance: deal ${CONFIG.bribeDamage} Hold damage. If refused: Bad Blood.`, flavour: 'Everyone has a price. Most of them remember it.' },
   telegram: { name: 'Send a Telegram', ap: 1, cost: 3, uses: 1, family: 'Tempo', power: 0, icon: 'telegraph', price: 3, rarity: 'Common',
     text: 'Pay $3. Add a random attack card to your hand.', flavour: 'STOP. SEND HELP. STOP.' },
   looseThread: { name: 'Loose Thread', ap: 1, cost: 1, uses: null, family: 'Junk', power: 0, icon: 'deed', forced: true, junk: true,
     text: 'Must play. Lose $1.', flavour: 'Someone kept a copy.' },
   badBlood: { name: 'Bad Blood', ap: null, cost: 0, uses: null, family: 'Junk', power: 0, icon: 'fire', junk: true,
-    text: "Can't be played. In hand: 1 in 3 chance of Fire.", flavour: 'They remember.' },
+    text: "Can't be played. Each turn it sits in your hand: 1 in 3 chance of a fire.", flavour: 'They remember.' },
   marginCall: { name: 'Margin Call', ap: 1, cost: 2, uses: 1, family: 'Junk', power: 0, icon: 'telegraph', forced: true, junk: true,
     text: 'Must play. Pay $2.', flavour: 'Payable on demand.' },
   iou: { name: 'IOU', ap: 1, cost: 1, uses: 1, family: 'Junk', power: 0, icon: 'deed', junk: true,
@@ -67,7 +72,7 @@ export const CARDS: Record<CardKey, CardDef> = {
 }
 
 export const STARTER: CardKey[] = ['prospect', 'hiredHand', 'hiredHand', 'lawyerUp', 'shoreUp', 'bucket', 'bucket', 'improveGear', 'improveGear', 'hardGraft']
-export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBrigade', 'payWages', 'dynamite', 'bribe', 'wildcat', 'telegram']
+export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBrigade', 'payWages', 'dynamite', 'bribe', 'wildcat', 'telegram', 'hardGraft', 'payOff']
 export const ATTACK_CARDS: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'dynamite']
 
 export type BonusKey = 'extraProspect' | 'threeOil' | 'pettyCash' | 'gearGraft' | 'trustFund'
@@ -101,8 +106,8 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   blowout: { role: 'engine', name: 'The Blowout', hold: 5, weak: 'Fix', resist: 'Muscle', cycle: ['Rumble', 'Spray', 'Blow'], whenBeaten: 'Gusher: +3 oil', portrait: 'blowout' },
   strike: { role: 'engine', name: 'The Strike', hold: 8, weak: 'Muscle', resist: 'Legal', cycle: ['Picket', 'Sabotage'], round3: 'Torch', movesFirst: 'Walkout', portrait: 'strike' },
   inspector: { role: 'cash', name: 'The Bank Inspector', hold: 6, weak: 'Legal', immune: 'Muscle', cycle: ['Audit', 'Fine'], whenBeaten: '2 Loose Threads', portrait: 'inspector' },
-  railroad: { role: 'cash', name: 'The Railroad Agent', hold: 7, weak: 'Legal', resist: 'Muscle', cycle: ['Raise Rates', 'Refuse'], portrait: 'railroad' },
-  claimJumper: { role: 'engine', name: 'The Claim Jumper', hold: 6, weak: 'Muscle', resist: 'Legal', cycle: ['Jump', 'Scout'], movesFirst: 'Scout', whenBeaten: 'Fire (2)', portrait: 'claimJumper' },
+  railroad: { role: 'cash', name: 'The Railroad Agent', hold: 7, weak: 'Dirty', resist: 'Muscle', cycle: ['Raise Rates', 'Refuse'], portrait: 'railroad' },
+  claimJumper: { role: 'engine', name: 'The Claim Jumper', hold: 6, weak: 'Muscle', resist: 'Legal', cycle: ['Jump', 'Scout'], movesFirst: 'Scout', whenBeaten: 'Starts 2 fires', portrait: 'claimJumper' },
   speculator: { role: 'cash', name: 'The Speculator', hold: 6, weak: 'Legal', resist: 'Muscle', cycle: ['Short', 'Margin Call', 'Rumours'], round3: 'Paper Promise', whenBeaten: 'Price recovers', portrait: 'speculator' },
   baron: { role: 'boss', name: 'The Rival Baron', hold: 20, weak: 'Dirty', resist: 'Legal', cycle: ['Sabotage', 'Lease', 'Arson'], movesFirst: 'Arson', portrait: 'baron' },
 }
@@ -114,7 +119,7 @@ export const ROLE_LABEL: Record<ThreatRole, string> = { cash: 'Takes your cash',
 
 export type ModKey = 'drySeason' | 'glut' | 'hardRock' | 'bankSqueeze' | 'badWeather' | 'boomtown'
 export const MODS: Record<ModKey, { name: string; text: string }> = {
-  drySeason: { name: 'Dry Season', text: 'Fires start +1' },
+  drySeason: { name: 'Dry Season', text: 'Every outbreak starts 1 extra fire' },
   glut: { name: 'Glut', text: 'Oil sells −$1' },
   hardRock: { name: 'Hard Rock', text: 'Prospect costs +1 AP' },
   bankSqueeze: { name: 'Bank Squeeze', text: 'Debt +$1 a turn' },
