@@ -406,3 +406,44 @@ describe('Bad Blood', () => {
     expect(r.draw.some(c => c.key === 'badBlood')).toBe(false)
   })
 })
+
+describe('Spoils', () => {
+  const winRound = (seed: number) => {
+    let r = newRun(seed, 'threeOil'); r.capital = 30
+    r.threats.forEach(t => (t.hold = 1)); r.ap = 3
+    const atk = r.deck.find(c => c.key === 'lawyerUp')!; r.hand = [atk]
+    r = act(r, { type: 'play', cardId: atk.id, target: r.threats[0].id })
+    return r
+  }
+  it('winning a round offers a card: take it into your deck…', () => {
+    let r = winRound(3)
+    expect(r.phase).toBe('roundWon')
+    const k = r.spoils!
+    expect(k).toBeTruthy()
+    const before = r.deck.filter(c => c.key === k).length
+    r = act(r, { type: 'takeSpoils' })
+    expect(r.deck.filter(c => c.key === k).length).toBe(before + 1)
+    expect(r.spoils).toBeNull()
+    r = act(r, { type: 'sellSpoils' }) // only one choice
+    r = act(r, { type: 'continue' })
+    expect(r.phase).toBe('shop')
+  })
+  it('…or turn it down for $3', () => {
+    let r = winRound(4)
+    const cash = r.capital, deck = r.deck.length
+    r = act(r, { type: 'sellSpoils' })
+    expect(r.capital).toBe(cash + CONFIG.spoilsCash)
+    expect(r.deck.length).toBe(deck)
+  })
+})
+
+describe('Loose Thread', () => {
+  it('costs $1 and no AP', () => {
+    let r = newRun(8, 'threeOil'); r.capital = 10
+    const lt = { id: 8100, key: 'looseThread' as const, uses: null }
+    r.deck.push(lt); r.hand = [lt]; r.ap = 2
+    r = act(r, { type: 'play', cardId: lt.id })
+    expect(r.ap).toBe(2)
+    expect(r.capital).toBe(9)
+  })
+})

@@ -50,7 +50,10 @@ export function botRun(r: Run): Run {
   for (let guard = 0; guard < 400; guard++) {
     if (r.phase === 'shop') r = botShop(r)
     else if (r.phase === 'turn') r = botTurn(r)
-    else if (r.phase === 'roundWon') r = act(r, { type: 'continue' })
+    else if (r.phase === 'roundWon') {
+      if (r.spoils) r = act(r, { type: isAttack(r.spoils) || r.spoils === 'prospect' ? 'takeSpoils' : 'sellSpoils' })
+      r = act(r, { type: 'continue' })
+    }
     else break
   }
   return r

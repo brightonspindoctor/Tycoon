@@ -32,11 +32,14 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 - Starting deck (9): Prospect, Hired Hand ×2, Lawyer Up, Shore Up, Bucket of Water ×2, Improve Gear, Hard Graft.
 - Starting bonus (pick one): Extra Prospect, 3 Oil, Petty Cash (skim 1 gold, 0 AP, 3 uses), Improve Gear + Hard Graft.
 - Bailout bonus: **Trust Fund** ($15 and no Bank Debt for stage 1; normal Bank Debt from stage 2). Offered only after 3 runs in a row lost in stage 1 (bankrupt or out of time); finishing stage 1 resets the streak.
-- Junk: Loose Thread (must play, −$1), Bad Blood (must play, 0 AP, 1 in 3 chance of a fire; Dynamite, Bribe the Sheriff and a refused Bribe put one in your discard pile; Dirty damage alone never does), Margin Call (must play, −$2), IOU (−$1 a turn until cleared).
+- Junk: Loose Thread (must play, 0 AP, −$1), Bad Blood (must play, 0 AP, 1 in 3 chance of a fire; Dynamite, Bribe the Sheriff and a refused Bribe put one in your discard pile; Dirty damage alone never does), Margin Call (must play, −$2), IOU (−$1 a turn until cleared).
 
 ### Before and after the boss
 - After round 3 the Land Office offers one small, single-use item for **1 gold**: A Spare Hand (+1 AP on the first boss turn), Spare Rigs (2 Well cards), Fire Brigade (card), Inheritance (a card: +$5 once) or Temporary Silo (+4 storage for the boss round).
 - Beating the Baron gives a lasting item of a **different type** from the one bought: Steam Pump (+1 AP every turn), Dividends (a card: +$3 each play), Silo (+4 storage) or Wildcat Rights (2 Wildcat Well cards).
+
+### After each round
+A card is offered (weighted by rarity, like the shop): take it into your deck or turn it down for $3. What happens when an enemy is beaten is not shown in advance.
 
 ### Cards changed in play-testing
 - Lawyer Up deals 3 (was 4). Bribe the Sheriff: pay $2, 5 Hold damage. Hired Hand, Pay Wages and Shore Up are Dirty.

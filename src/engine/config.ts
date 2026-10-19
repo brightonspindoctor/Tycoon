@@ -23,6 +23,7 @@ export const CONFIG = {
   bribeGold: 1, // Bribe: costs this much of your own fortune to play
   bribeChance: 0.5, // chance the bribe is taken
   bribeDamage: 4,
+  spoilsCash: 3, // turning down the card offered after a round
   boonGold: 1, // the item offered before the boss costs this much of your fortune
   inheritance: 5, // Inheritance card: $ once, then gone
   dividends: 3, // Dividends card: $ every time it's played

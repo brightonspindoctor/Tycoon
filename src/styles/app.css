@@ -539,3 +539,17 @@ button.m-threat { cursor: pointer; }
 .boon--bought { flex-direction: column; align-items: flex-start; gap: 2px; border-style: dashed; }
 .m .shop .boon { order: 2; flex-wrap: wrap; }
 .m .shop .boon .cl-btn { width: 100%; }
+
+/* ---------- spoils after a round ---------- */
+.spoils { display: flex; gap: 16px; align-items: center; padding: 12px; border: 2px solid var(--accent); background: var(--paper); animation: rise .45s ease-out both 1.9s; }
+.spoils .card { flex: none; cursor: default; }
+.spoils__side { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.spoils__side .cl-label { color: var(--accent); }
+.spoils__side p { margin: 0; font-size: 14px; line-height: 20px; }
+.spoils__buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.spoils__done { font-family: var(--font-figures); font-weight: 700; }
+.summary__go:disabled { opacity: .4; }
+.m .summary { max-height: calc(100dvh - 24px); overflow-y: auto; }
+.m .spoils { flex-direction: column; align-items: stretch; }
+.m .spoils .card { align-self: center; }
+.m .spoils__buttons .cl-btn { flex: 1; }

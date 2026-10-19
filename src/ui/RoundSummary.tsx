@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
-import { type Run, snapshot } from '../engine/engine'
+import { type Action, type Run, snapshot } from '../engine/engine'
+import { CARDS } from '../engine/data'
+import { CONFIG } from '../engine/config'
+import { CardView } from './CardView'
 import { money, year } from '../engine/format'
 import { play } from '../sound'
 
@@ -34,7 +37,9 @@ function Row({ label, from, to, delay, fmt }: { label: string; from: number; to:
   )
 }
 
-export function RoundSummary({ run, onContinue }: { run: Run; onContinue: () => void }) {
+export function RoundSummary({ run, onContinue, dispatch }: { run: Run; onContinue: () => void; dispatch: (a: Action) => void }) {
+  const [offered] = useState(run.spoils) // the card shown, kept after the choice is made
+  const [choice, setChoice] = useState<'took' | 'sold' | null>(null)
   const a = run.roundStart
   const b = snapshot(run)
   const st = run.stage
@@ -55,7 +60,22 @@ export function RoundSummary({ run, onContinue }: { run: Run; onContinue: () => 
           <Row label="Oil in stock" from={a.oil} to={b.oil} delay={1400} fmt={n => `${n}`} />
           <Row label="Cards in deck" from={a.deck} to={b.deck} delay={1700} fmt={n => `${n}`} />
         </ul>
-        <button type="button" className="cl-btn cl-btn--primary summary__go" onClick={onContinue}>To the Land Office</button>
+        {offered && (
+          <section className="spoils" aria-label="Spoils">
+            <CardView card={{ id: -50, key: offered, uses: CARDS[offered].uses }} playable small />
+            <div className="spoils__side">
+              <span className="cl-label">Spoils of the round</span>
+              {choice === null ? <>
+                <p>Take this card into your deck, or turn it down for {m(CONFIG.spoilsCash)}.</p>
+                <div className="spoils__buttons">
+                  <button type="button" className="cl-btn cl-btn--primary" onClick={() => { dispatch({ type: 'takeSpoils' }); setChoice('took'); play('card') }}>Take it</button>
+                  <button type="button" className="cl-btn" onClick={() => { dispatch({ type: 'sellSpoils' }); setChoice('sold'); play('coin') }}>Turn it down · {m(CONFIG.spoilsCash)}</button>
+                </div>
+              </> : <p className="spoils__done">{choice === 'took' ? `${CARDS[offered].name} is in your deck.` : `Turned down. ${m(CONFIG.spoilsCash)} to the company.`}</p>}
+            </div>
+          </section>
+        )}
+        <button type="button" className="cl-btn cl-btn--primary summary__go" disabled={!!offered && choice === null} onClick={onContinue}>To the Land Office</button>
       </div>
     </div>
   )

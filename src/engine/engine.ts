@@ -65,6 +65,7 @@ export interface Run {
   boon: BoonKey | null // bought before the boss
   reward: RewardKey | null // given for beating the boss
   tempStorage: number // storage that only lasts for the boss round
+  spoils: CardKey | null // the card offered after a round is won
 }
 
 export interface Snapshot { capital: number; gold: number; wells: number; oil: number; deck: number }
@@ -81,6 +82,8 @@ export type Action =
   | { type: 'buyProspect' }
   | { type: 'buyBucket' }
   | { type: 'buyBoon' }
+  | { type: 'takeSpoils' }
+  | { type: 'sellSpoils' }
   | { type: 'buyItem' }
   | { type: 'takeLoan' }
   | { type: 'destroyCard'; cardId: number }
@@ -187,7 +190,7 @@ export function newRun(seed: number, bonus: BonusKey): Run {
     shop: { cards: [], item: null, loanTaken: false, prospectSold: false, bucketSold: false, boon: null }, ledger: [], events: [],
     stats: { oilSold: 0, earned: 0, spent: 0, wellsBuilt: 0, wellsBurnt: 0, wellsStolen: 0, wellsLost: 0, wellsDry: 0, skims: 0 },
     roundStart: { capital: CONFIG.startCapital, gold: 0, wells: 0, oil: 0, deck: 0 },
-    boon: null, reward: null, tempStorage: 0,
+    boon: null, reward: null, tempStorage: 0, spoils: null,
   }
   r.deck = STARTER.map(k => card(r, k))
   if (bonus === 'extraProspect') r.deck.push(card(r, 'prospect'))
@@ -198,14 +201,18 @@ export function newRun(seed: number, bonus: BonusKey): Run {
 }
 
 // ------------------------------------------------------------------- shop
+const WEIGHTS = { Common: 6, Uncommon: 3, Rare: 1 } as const
+function weightedCard(r: Run, pool: CardKey[]): CardKey {
+  const total = pool.reduce((s, k) => s + WEIGHTS[CARDS[k].rarity ?? 'Common'], 0)
+  let roll = next(r) * total
+  return pool.find(k => (roll -= WEIGHTS[CARDS[k].rarity ?? 'Common']) < 0) ?? pool[0]
+}
+
 function stockShop(r: Run) {
-  const weights = { Common: 6, Uncommon: 3, Rare: 1 } as const
   const pool = [...SHOP_POOL]
   const picks: CardKey[] = []
   while (picks.length < 3 && pool.length) {
-    const total = pool.reduce((s, k) => s + weights[CARDS[k].rarity ?? 'Common'], 0)
-    let roll = next(r) * total
-    const k = pool.find(k => (roll -= weights[CARDS[k].rarity ?? 'Common']) < 0) ?? pool[0]
+    const k = weightedCard(r, pool)
     picks.push(k); pool.splice(pool.indexOf(k), 1)
   }
   const items = (Object.keys(ITEMS) as ItemKey[]).filter(i => ITEMS[i].repeatable || !r.items.includes(i))
@@ -398,6 +405,7 @@ function threatBeaten(r: Run, t: Threat) {
   if (!liveThreats(r).length) {
     r.phase = r.round >= 4 ? 'stageComplete' : 'roundWon'
     if (r.phase === 'stageComplete') grantReward(r)
+    else r.spoils = weightedCard(r, [...SHOP_POOL]) // a card to take, or turn down for cash
     r.plots.forEach(w => w && (w.unstable = false))
   }
 }
@@ -669,7 +677,14 @@ function endTurn(r: Run) {
 export function act(prev: Run, a: Action): Run {
   const r = clone(prev)
   if (r.phase === 'shop') { shopAction(r, a); return r }
+  if (r.phase === 'roundWon' && r.spoils && (a.type === 'takeSpoils' || a.type === 'sellSpoils')) {
+    if (a.type === 'takeSpoils') { r.deck.push(card(r, r.spoils)); say(r, `${CARDS[r.spoils].name} added to your deck.`) }
+    else money(r, `Turned down ${CARDS[r.spoils].name}`, CONFIG.spoilsCash)
+    r.spoils = null
+    return r
+  }
   if (r.phase === 'roundWon' && a.type === 'continue') {
+    r.spoils = null
     r.phase = 'shop'; r.hand = []; openShop(r); r.ledger = []; r.events = []
     return r
   }

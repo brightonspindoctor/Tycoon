@@ -99,7 +99,7 @@ export function MobileGame({ run, dispatch }: Props) {
                     <div className="m-intent"><b>Next · {intent(run, t)}</b> {intentText(run, t)}</div>
                   )}
                   <div className="m-traits">
-                    {[d.weak && `Weak: ${d.weak}`, d.resist && `Resists: ${d.resist}`, d.immune && `Immune: ${d.immune}`, d.whenBeaten && `Beaten: ${d.whenBeaten}`].filter(Boolean).join(' · ')}
+                    {[d.weak && `Weak: ${d.weak}`, d.resist && `Resists: ${d.resist}`, d.immune && `Immune: ${d.immune}`].filter(Boolean).join(' · ')}
                   </div>
                 </div>
                 {needsTarget && !t.beaten && <span className={`m-threat__dmg ${can ? '' : 'is-none'}`}>{can ? `Deal ${dmgOn(t)}` : 'No effect'}</span>}

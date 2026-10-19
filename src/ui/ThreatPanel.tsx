@@ -39,7 +39,6 @@ export function ThreatPanel({ run, threat, targeting, damagePreview, onTarget }:
         {d.weak && <div><dt>Weak to:</dt><dd>{d.weak}</dd></div>}
         {d.resist && <div><dt>Resists:</dt><dd>{d.resist}</dd></div>}
         {d.immune && <div><dt>Immune to:</dt><dd>{d.immune}</dd></div>}
-        {d.whenBeaten && <div><dt>When beaten:</dt><dd>{d.whenBeaten}</dd></div>}
       </dl>
     </Tag>
   )

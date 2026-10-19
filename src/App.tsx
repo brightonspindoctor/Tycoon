@@ -115,7 +115,7 @@ export default function App() {
   else body = (
     <>
       {mobile ? <MobileGame run={run} dispatch={dispatch} /> : <GameScreen run={run} dispatch={dispatch} />}
-      {run.phase === 'roundWon' && <RoundSummary key={run.round} run={run} onContinue={() => dispatch({ type: 'continue' })} />}
+      {run.phase === 'roundWon' && <RoundSummary key={run.round} run={run} dispatch={dispatch} onContinue={() => dispatch({ type: 'continue' })} />}
     </>
   )
 
