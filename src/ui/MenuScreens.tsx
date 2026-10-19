@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { BONUSES, type BonusKey } from '../engine/data'
 import { bestScore, completedIndustries, loadRuns, trustFundOffered, type RunRecord } from '../storage'
 import { CONFIG } from '../engine/config'
-import { isMuted, play, setMuted } from '../sound'
+import { play } from '../sound'
+import { openSettings } from './settingsBus'
 
 const INDUSTRIES = ['Oil', 'Fishing', 'Pharma', 'Tech']
 // a run that died, rather than one that finished a stage or the game
@@ -11,7 +12,6 @@ const ended = (r: RunRecord) => r.outcome === 'Bankrupt' || r.outcome === 'Out o
 export function Intro({ onBegin, onHistory }: { onBegin: () => void; onHistory: () => void }) {
   const done = completedIndustries()
   const best = bestScore('Oil')
-  const [muted, setM] = useState(isMuted())
   // each industry is revealed when the one before it is finished
   const open = INDUSTRIES.filter((_, i) => i === 0 || done.includes(INDUSTRIES[i - 1]))
   return (
@@ -36,7 +36,7 @@ export function Intro({ onBegin, onHistory }: { onBegin: () => void; onHistory: 
         </div>
         <div className="intro__menu">
           <button type="button" className="cl-btn" onClick={onHistory}>Run history</button>
-          <button type="button" className="cl-btn" onClick={() => { setMuted(!muted); setM(!muted) }}>{muted ? 'Sound off' : 'Sound on'}</button>
+          <button type="button" className="cl-btn" onClick={() => { play('click'); openSettings() }}>Settings</button>
         </div>
       </div>
     </div>

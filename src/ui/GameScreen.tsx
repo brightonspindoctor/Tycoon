@@ -8,6 +8,7 @@ import {
 import { ERA_THEME, money, year } from '../engine/format'
 import { CardView } from './CardView'
 import { ThreatPanel } from './ThreatPanel'
+import { SettingsButton } from './Settings'
 
 interface Props { run: Run; dispatch: (a: Action) => void }
 
@@ -47,6 +48,7 @@ export function GameScreen({ run, dispatch }: Props) {
             <span className="cl-label">Round {run.round} of 4 · Turn {run.turn}</span>
             <div>{[1, 2, 3, 4].map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 ? 'is-boss' : ''}`} />)}</div>
           </div>
+          <SettingsButton />
           {run.modifier && <div className="modifier"><span className="cl-label">Modifier</span><b>{MODS[run.modifier].name}</b> · {MODS[run.modifier].text}</div>}
         </div>
       </header>

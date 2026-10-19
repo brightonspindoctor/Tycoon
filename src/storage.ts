@@ -34,6 +34,22 @@ export function bestScore(industry: string): number | null {
   return scores.length ? Math.max(...scores) : null
 }
 
+const VOLUME = 'tycoon.volume'
+const INSTALL_SEEN = 'tycoon.installPromptSeen'
+
+export function loadVolume(): number {
+  try { const v = Number(localStorage.getItem(VOLUME)); return localStorage.getItem(VOLUME) === null || Number.isNaN(v) ? 0.8 : Math.min(1, Math.max(0, v)) } catch { return 0.8 }
+}
+export function saveVolume(v: number) {
+  try { localStorage.setItem(VOLUME, String(v)) } catch { /* ignore */ }
+}
+export function installPromptSeen(): boolean {
+  try { return localStorage.getItem(INSTALL_SEEN) === '1' } catch { return true }
+}
+export function markInstallPromptSeen() {
+  try { localStorage.setItem(INSTALL_SEEN, '1') } catch { /* ignore */ }
+}
+
 export function loadMuted(): boolean {
   try { return localStorage.getItem(MUTE) === '1' } catch { return false }
 }

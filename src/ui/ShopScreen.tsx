@@ -4,6 +4,7 @@ import { skimRate, type Action, type Run } from '../engine/engine'
 import { ERA_THEME, money } from '../engine/format'
 import { CONFIG } from '../engine/config'
 import { CardView } from './CardView'
+import { SettingsButton } from './Settings'
 
 interface Props { run: Run; dispatch: (a: Action) => void }
 type Mode = null | 'destroy' | 'reinforce'
@@ -23,7 +24,7 @@ export function ShopScreen({ run, dispatch }: Props) {
           <span className="cl-label">Stage {st} · {run.round === 0 ? 'Before you start' : `After round ${run.round}`}</span>
           <h1 className="cl-display game__title">The Land Office</h1>
         </div>
-        <div className="shop__next"><span className="cl-label">Next: Round {run.round + 1}</span><span>{['Someone after your cash', 'Someone after your cash', 'Someone after your Wells, plus a modifier', 'One of each, at once', 'The Rival Baron'][run.round + 1]}</span></div>
+        <div className="shop__head-right"><SettingsButton /><div className="shop__next"><span className="cl-label">Next: Round {run.round + 1}</span><span>{['Someone after your cash', 'Someone after your cash', 'Someone after your Wells, plus a modifier', 'One of each, at once', 'The Rival Baron'][run.round + 1]}</span></div></div>
       </header>
 
       <div className="shop__grid">

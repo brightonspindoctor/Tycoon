@@ -11,6 +11,7 @@ import {
 } from '../engine/engine'
 import { money, year } from '../engine/format'
 import { CardView } from './CardView'
+import { SettingsButton } from './Settings'
 
 interface Props { run: Run; dispatch: (a: Action) => void }
 const art = (path: string) => `${import.meta.env.BASE_URL}art/${path}`
@@ -53,7 +54,7 @@ export function MobileGame({ run, dispatch }: Props) {
       <header className="m-hud">
         <div className="m-hud__when">
           <span className="cl-label">Round {run.round}/4 · Turn {run.turn}</span>
-          <b className="cl-display">{year(st, run.round)}</b>
+          <div className="m-hud__year"><b className="cl-display">{year(st, run.round)}</b><SettingsButton /></div>
           <div className="m-pips">{[1, 2, 3, 4].map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 ? 'is-boss' : ''}`} />)}</div>
         </div>
         <button type="button" className="m-hud__money" onClick={() => setSheet(true)} aria-label="Open the ledger">

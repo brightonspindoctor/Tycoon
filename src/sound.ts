@@ -1,14 +1,21 @@
 // Placeholder sound effects, synthesised in the browser so the game makes noise
 // before real recordings exist. Swap each cue for a file later (e.g. Howler.js).
-import { loadMuted, saveMuted } from './storage'
+import { loadMuted, loadVolume, saveMuted, saveVolume } from './storage'
 
 export type Cue = 'card' | 'coin' | 'stamp' | 'fire' | 'hit' | 'win' | 'lose' | 'click' | 'ink'
 
 let ctx: AudioContext | null = null
+let master: GainNode | null = null // every sound goes through this, so one slider sets the volume
 let muted = loadMuted()
+let volume = loadVolume()
 
 export const isMuted = () => muted
 export function setMuted(m: boolean) { muted = m; saveMuted(m) }
+export const getVolume = () => volume
+export function setVolume(v: number) {
+  volume = Math.min(1, Math.max(0, v)); saveVolume(volume)
+  if (master) master.gain.value = volume
+}
 
 function ac(): AudioContext | null {
   if (typeof window === 'undefined') return null
@@ -16,6 +23,7 @@ function ac(): AudioContext | null {
     const C = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
     if (!C) return null
     ctx = new C()
+    master = ctx.createGain(); master.gain.value = volume; master.connect(ctx.destination)
   }
   if (ctx.state === 'suspended') void ctx.resume()
   return ctx
@@ -28,7 +36,7 @@ function tone(freq: number, dur: number, type: OscillatorType = 'sine', gain = 0
   o.type = type; o.frequency.setValueAtTime(freq, t)
   if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, freq + slide), t + dur)
   g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
-  o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + 0.02)
+  o.connect(g).connect(master ?? a.destination); o.start(t); o.stop(t + dur + 0.02)
 }
 
 function noise(dur: number, gain = 0.12, freq = 1200, delay = 0) {
@@ -40,11 +48,11 @@ function noise(dur: number, gain = 0.12, freq = 1200, delay = 0) {
   const src = a.createBufferSource(); src.buffer = buf
   const f = a.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq
   const g = a.createGain(); g.gain.value = gain
-  src.connect(f).connect(g).connect(a.destination); src.start(t)
+  src.connect(f).connect(g).connect(master ?? a.destination); src.start(t)
 }
 
 export function play(cue: Cue) {
-  if (muted) return
+  if (muted || volume === 0) return
   switch (cue) {
     case 'card': noise(0.08, 0.08, 2400); break
     case 'click': tone(660, 0.05, 'square', 0.04); break

@@ -10,6 +10,8 @@ This repository holds the first playable slice: **Oil, stage 1** (four rounds an
 
 Online: https://brightonspindoctor.github.io/Tycoon/ (rebuilt automatically on every push to `main`).
 
+On a phone, the first visit offers to put Tycoon on your home screen (on iPhone: Share, then Add to Home Screen). Installed, it opens full-screen and keeps working without a connection. Volume and sound are under Settings (the gear).
+
 ## Run it locally
 
 You need Node.js 20 or newer.
@@ -31,7 +33,8 @@ Design previews: add `?preview=summary`, `?preview=shop`, `?preview=crash`, `?pr
 | `src/engine/` | The rules, as plain TypeScript with no React. `config.ts` holds every balance number. `data.ts` defines cards, enemies, items and modifiers. `engine.ts` runs the game. |
 | `src/ui/` | The screens, in React. |
 | `src/styles/` | The Crude Ledger design system (`tokens.css`, `ledger.css`) and game layout and animation (`app.css`). |
-| `src/sound.ts` | Placeholder sounds, synthesised in the browser until real recordings are added. |
+| `src/sound.ts` | Placeholder sounds, synthesised in the browser until real recordings are added, with one master volume. |
+| `src/install.ts`, `public/sw.js`, `public/manifest.webmanifest` | Installing to the home screen and playing offline. |
 | `src/storage.ts` | Run history, best scores and unlocks, saved in the browser. |
 | `public/art/` | Icons, enemy portraits, card frames and title art. |
 | `tools/` | The bot player and balance simulator (`sim.ts`), plus the original Python simulator. |

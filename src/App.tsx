@@ -8,6 +8,8 @@ import { play } from './sound'
 import { GameScreen } from './ui/GameScreen'
 import { CardGallery } from './ui/CardGallery'
 import { MobileGame } from './ui/MobileGame'
+import { SettingsPanel } from './ui/Settings'
+import { InstallPrompt } from './ui/InstallPrompt'
 import { ShopScreen } from './ui/ShopScreen'
 import { RoundSummary } from './ui/RoundSummary'
 import { CrashOut, StageComplete } from './ui/EndScreens'
@@ -109,13 +111,15 @@ export default function App() {
   )
 
   const fade = <div key={`${screen}-${run?.phase}-${run?.round}`} className="screen-fade">{body}</div>
-  if (mobile) return <div className={`m ${shake ? 'is-shaking' : ''}`} data-theme={ERA_THEME[run?.stage ?? 1] ?? 'victorian'}>{fade}</div>
+  const overlays = <><SettingsPanel /><InstallPrompt /></>
+  if (mobile) return <div className={`m ${shake ? 'is-shaking' : ''}`} data-theme={ERA_THEME[run?.stage ?? 1] ?? 'victorian'}>{fade}{overlays}</div>
 
   return (
     <div className="stage-wrap">
       <div className={`stage ${shake ? 'is-shaking' : ''}`} style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
         {fade}
       </div>
+      {overlays}
     </div>
   )
 }
