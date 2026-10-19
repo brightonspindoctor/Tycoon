@@ -7,7 +7,7 @@ import {
 } from './data'
 import { next, pick, shuffle } from './rng'
 
-export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean }
+export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean; free?: boolean } // free: costs no AP
 export interface Well { output: number; reserve: number; unstable?: boolean }
 export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string; stopped?: boolean }
 export interface LedgerLine { label: string; amount: number }
@@ -114,7 +114,7 @@ export function debtPerTurn(r: Run): number {
 }
 
 export const prospectAP = (r: Run) => CARDS.prospect.ap! + (r.modifier === 'hardRock' ? 1 : 0)
-export const apCost = (r: Run, c: Card) => (c.key === 'prospect' ? prospectAP(r) : CARDS[c.key].ap ?? 0)
+export const apCost = (r: Run, c: Card) => (c.free ? 0 : c.key === 'prospect' ? prospectAP(r) : CARDS[c.key].ap ?? 0)
 export const freePlot = (r: Run) => r.plots.findIndex(p => p === null)
 export const highestWell = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (r.plots[i]) return i; return -1 }
 export const liveThreats = (r: Run) => r.threats.filter(t => !t.beaten)
@@ -525,7 +525,7 @@ function play(r: Run, cardId: number, target?: number) {
       }
       case 'inheritance': money(r, 'Inheritance', CONFIG.inheritance); break
       case 'dividends': money(r, 'Dividends', CONFIG.dividends); break
-      case 'telegram': r.hand.push(card(r, pick(r, ATTACK_CARDS), true)); say(r, 'Help is on its way.'); break
+      case 'telegram': { const help = card(r, pick(r, ATTACK_CARDS), true); help.free = true; r.hand.push(help); say(r, `Help is on its way: ${CARDS[help.key].name}, free to play.`); break }
       case 'badBlood': badBloodRoll(r); break
       case 'looseThread': case 'marginCall': case 'iou': break
     }

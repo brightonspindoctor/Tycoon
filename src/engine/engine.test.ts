@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, canPlay, damageFor, debtPerTurn, intent, isAttack, netPrice, newRun, targetsFor, type Run } from './engine'
+import { act, apCost, canPlay, damageFor, debtPerTurn, intent, isAttack, netPrice, newRun, targetsFor, type Run } from './engine'
 import { lossStreak, type RunRecord } from '../storage'
 import { CONFIG } from './config'
 import { money } from './format'
@@ -562,5 +562,23 @@ describe('Hard Graft', () => {
     r.phase = 'shop'; r.round = 1
     r = act(r, { type: 'leaveShop' }) // next round
     expect([...r.hand, ...r.draw].some(c => c.id === g.id)).toBe(true)
+  })
+})
+
+describe('Send a Telegram', () => {
+  it('adds a random attack card that costs no AP', () => {
+    let r = newRun(15, 'threeOil'); r.capital = 20
+    r.threats = [{ id: 900, kind: 'railroad', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
+    const t = { id: 8300, key: 'telegram' as const, uses: 1 }
+    r.deck.push(t); r.hand = [t]; r.ap = 1
+    r = act(r, { type: 'play', cardId: t.id })
+    expect(r.ap).toBe(0)
+    const help = r.hand.find(c => c.temp)!
+    expect(isAttack(help.key)).toBe(true)
+    expect(apCost(r, help)).toBe(0)
+    expect(canPlay(r, help).ok).toBe(true) // playable with 0 AP left
+    const hold = r.threats[0].hold
+    r = act(r, { type: 'play', cardId: help.id })
+    expect(r.threats[0].hold).toBeLessThan(hold)
   })
 })

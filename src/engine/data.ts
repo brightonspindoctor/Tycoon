@@ -66,7 +66,7 @@ export const CARDS: Record<CardKey, CardDef> = {
   dividends: { name: 'Dividends', ap: 1, cost: 0, uses: null, family: 'Tempo', power: 0, icon: 'coins',
     text: `+$${CONFIG.dividends}.`, flavour: 'Paid to the people who matter.' },
   telegram: { name: 'Send a Telegram', ap: 1, cost: 3, uses: 1, family: 'Tempo', power: 0, icon: 'telegraph', price: 3, rarity: 'Common',
-    text: 'Pay $3. Add a random attack card to your hand.', flavour: 'STOP. SEND HELP. STOP.' },
+    text: 'Pay $3. Add a random attack card to your hand. It costs no AP.', flavour: 'STOP. SEND HELP. STOP.' },
   looseThread: { name: 'Loose Thread', ap: 0, cost: 1, uses: null, family: 'Junk', power: 0, icon: 'deed', forced: true, junk: true,
     text: 'Must play. Lose $1.', flavour: 'Someone kept a copy.' },
   badBlood: { name: 'Bad Blood', ap: 0, cost: 0, uses: 2, family: 'Junk', power: 0, icon: 'fire', forced: true, junk: true,

@@ -44,6 +44,7 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 A card is offered (weighted by rarity, like the shop): take it into your deck or turn it down for $3. What happens when an enemy is beaten is not shown in advance.
 
 ### Cards changed in play-testing
+- Send a Telegram: the random attack card it adds costs no AP (any $ cost still applies). It's gone at the end of the turn.
 - Shore Up: stop one enemy's next move this turn (with two enemies, you choose). The move is skipped; the enemy's cycle carries on.
 - Lawyer Up deals 3 (was 4). Bribe the Sheriff: pay $2, 5 Hold. Hired Hand and Pay Wages are Dirty.
 - Pay Wages: pay $2, remove 4 Hold (Dirty). Costs $1 to buy. No card is tied to one enemy; enemy weaknesses and resistances decide what works.
