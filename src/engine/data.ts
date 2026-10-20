@@ -263,14 +263,13 @@ export const MODS: Record<ModKey, { name: string; text: string; stages?: number[
   boomtown: { name: 'Boomtown', text: 'Oil +$1, debt +$1' },
 }
 
-export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'lookout' | 'accountant' | 'refinery' | 'offshore' | 'boardGrudge' | 'loyalDirectors'
+export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'accountant' | 'refinery' | 'offshore' | 'boardGrudge' | 'loyalDirectors'
   | 'pumpingStation' | 'pressOffice' | 'fillingStations' | 'auditingFirm'
 // stages: which stages' shops sell it (all if unset); never: a residue item, only ever given
 export const ITEMS: Record<ItemKey, { name: string; text: string; price: number; repeatable?: boolean; icon: Icon; stages?: number[]; never?: boolean; negative?: boolean }> = {
   storageTank: { name: 'Storage Tank', text: '+2 oil storage', price: 4, repeatable: true, icon: 'barrels', stages: [1] },
   silo: { name: 'Silo', text: '+4 oil storage', price: 7, icon: 'barrels', stages: [1] },
   steamPump: { name: 'Steam Pump', text: '+1 AP every turn', price: 10, icon: 'derrick', stages: [1] },
-  lookout: { name: 'Lookout', text: 'Enemies lose their opening move', price: 5, icon: 'telegraph', stages: [1] },
   accountant: { name: 'Accountant', text: 'Cover you don\'t use carries over to the next turn', price: 4, icon: 'deed', stages: [1] },
   refinery: { name: 'Refinery', text: 'Oil sells +$1', price: 10, icon: 'refinery', stages: [2] },
   offshore: { name: 'Offshore Account', text: 'Enemies take 1 less gold from your fortune', price: 5, icon: 'offshore', stages: [2] },
@@ -293,10 +292,10 @@ export const BOONS: Record<BoonKey, { name: string; text: string; type: BoonType
   inheritance: { name: 'Inheritance', text: `A card that gives $${CONFIG.inheritance} once, then is gone.`, type: 'cash', icon: 'will' },
   tempSilo: { name: 'Temporary Silo', text: `+${CONFIG.tempSilo} oil storage for the boss fight.`, type: 'storage', icon: 'barrels' },
 }
-export type RewardKey = 'steamPump' | 'dividends' | 'silo' | 'wildcatRights'
+export type RewardKey = 'steamPump' | 'dividends' | 'silo' | 'drillingRights'
 export const REWARDS: Record<RewardKey, { name: string; text: string; type: BoonType; icon: Icon }> = {
   steamPump: { name: 'Steam Pump', text: '+1 AP every turn.', type: 'ap', icon: 'derrick' },
   dividends: { name: 'Dividends', text: `A card that gives $${CONFIG.dividends} every time you play it.`, type: 'cash', icon: 'shares' },
   silo: { name: 'Silo', text: '+4 oil storage, for good.', type: 'storage', icon: 'barrels' },
-  wildcatRights: { name: 'Wildcat Rights', text: '2 Wildcat Well cards for your deck.', type: 'wells', icon: 'derrick' },
+  drillingRights: { name: 'Drilling Rights', text: '2 Well cards for your deck.', type: 'wells', icon: 'derrick' },
 }

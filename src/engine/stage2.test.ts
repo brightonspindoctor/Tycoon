@@ -419,7 +419,7 @@ describe('the Exchange, tidied', () => {
   })
   it('sells only stage 2 items, and the Refinery costs 10K', () => {
     expect(ITEMS.refinery.price).toBe(10)
-    for (const k of ['storageTank', 'silo', 'steamPump', 'lookout', 'accountant'] as const) expect(ITEMS[k].stages).toEqual([1])
+    for (const k of ['storageTank', 'silo', 'steamPump', 'accountant'] as const) expect(ITEMS[k].stages).toEqual([1])
     for (let seed = 1; seed < 30; seed++) {
       let r = inStage2(['lawyerUp'], 'muckraker', seed)
       r.threats[0].hold = 1

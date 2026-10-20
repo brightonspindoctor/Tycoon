@@ -464,27 +464,25 @@ function startRound(r: Run, round: number) {
   if (r.modifier === 'scandal') expose(r, 1, 'Scandal')
   if (r.items.includes('pressOffice')) expose(r, -1, 'Press Office')
   // opening moves
-  if (!r.items.includes('lookout')) {
-    for (const t of r.threats) {
-      const op = THREATS[t.kind].movesFirst
-      if (op === 'Walkout') { r.pending.ap += 1; t.opened = 'Walkout: −1 AP this turn.'; say(r, 'Walkout: −1 AP on your first turn.'); beat(r, 'enemy', `${THREATS[t.kind].name} · Walkout`, '−1 AP on your first turn.', t.id) }
-      if (op === 'Scout') {
-        const i = highestWell(r); r.marked = i >= 0 ? i : null
-        t.opened = i >= 0 ? `Scout: marked Well No. ${i + 1}.` : 'Scout: found no Well to mark.'
-        if (i >= 0) say(r, `The Claim Jumper has marked Well No. ${i + 1}.`)
-        beat(r, 'enemy', `${THREATS[t.kind].name} · Scout`, i >= 0 ? `Marked Well No. ${i + 1}.` : 'Found no Well to mark.', t.id)
-      }
-      if (op === 'Arson') { startFire(r, 1); t.opened = 'Arson: started a fire.'; beat(r, 'enemy', `${THREATS[t.kind].name} · Arson`, 'Started a fire.', t.id) }
-      if (op === 'Canvass' || op === 'Minutes') {
-        beat(r, 'enemy', `${THREATS[t.kind].name} · ${op}`, '+1 Board Exposure.', t.id)
-        captured = []; expose(r, 1, op); captured = null
-        t.opened = `${op}: +1 Board Exposure.`
-      }
-      if (op === 'Infiltrate') {
-        const i = infiltrateTarget(r); r.marked = i >= 0 ? i : null
-        t.opened = i >= 0 ? `Infiltrate: marked ${plotName(r, i)}.` : 'Infiltrate: found nothing to mark.'
-        beat(r, 'enemy', `${THREATS[t.kind].name} · Infiltrate`, i >= 0 ? `Marked ${plotName(r, i)}.` : 'Found nothing to mark.', t.id)
-      }
+  for (const t of r.threats) {
+    const op = THREATS[t.kind].movesFirst
+    if (op === 'Walkout') { r.pending.ap += 1; t.opened = 'Walkout: −1 AP this turn.'; say(r, 'Walkout: −1 AP on your first turn.'); beat(r, 'enemy', `${THREATS[t.kind].name} · Walkout`, '−1 AP on your first turn.', t.id) }
+    if (op === 'Scout') {
+      const i = highestWell(r); r.marked = i >= 0 ? i : null
+      t.opened = i >= 0 ? `Scout: marked Well No. ${i + 1}.` : 'Scout: found no Well to mark.'
+      if (i >= 0) say(r, `The Claim Jumper has marked Well No. ${i + 1}.`)
+      beat(r, 'enemy', `${THREATS[t.kind].name} · Scout`, i >= 0 ? `Marked Well No. ${i + 1}.` : 'Found no Well to mark.', t.id)
+    }
+    if (op === 'Arson') { startFire(r, 1); t.opened = 'Arson: started a fire.'; beat(r, 'enemy', `${THREATS[t.kind].name} · Arson`, 'Started a fire.', t.id) }
+    if (op === 'Canvass' || op === 'Minutes') {
+      beat(r, 'enemy', `${THREATS[t.kind].name} · ${op}`, '+1 Board Exposure.', t.id)
+      captured = []; expose(r, 1, op); captured = null
+      t.opened = `${op}: +1 Board Exposure.`
+    }
+    if (op === 'Infiltrate') {
+      const i = infiltrateTarget(r); r.marked = i >= 0 ? i : null
+      t.opened = i >= 0 ? `Infiltrate: marked ${plotName(r, i)}.` : 'Infiltrate: found nothing to mark.'
+      beat(r, 'enemy', `${THREATS[t.kind].name} · Infiltrate`, i >= 0 ? `Marked ${plotName(r, i)}.` : 'Found nothing to mark.', t.id)
     }
   }
   if (round === 4 && r.boon) {
@@ -643,7 +641,7 @@ function grantReward(r: Run) {
   if (k === 'steamPump') r.items.push('steamPump')
   if (k === 'silo') { r.items.push('silo'); r.storage += 4 }
   if (k === 'dividends') r.deck.push(card(r, 'dividends'))
-  if (k === 'wildcatRights') r.deck.push(card(r, 'wildcat'), card(r, 'wildcat'))
+  if (k === 'drillingRights') r.deck.push(card(r, 'well'), card(r, 'well'))
 }
 
 /** Damage to an enemy. Cards marked badBlood put a Bad Blood card in your discard pile. */
