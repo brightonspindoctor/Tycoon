@@ -514,8 +514,8 @@ describe('oil price', () => {
 })
 
 describe('resists', () => {
-  it('only the Blowout, the Railroad Agent and the Baron resist anything', () => {
-    expect(Object.entries(THREATS).filter(([, t]) => t.resist).map(([k]) => k).sort()).toEqual(['baron', 'blowout', 'railroad'])
+  it('only the Railroad Agent and the Baron resist anything; the Blowout is immune to Legal', () => {
+    expect(Object.entries(THREATS).filter(([, t]) => t.resist).map(([k]) => k).sort()).toEqual(['baron', 'railroad'])
   })
 })
 
@@ -676,5 +676,20 @@ describe('the Strike', () => {
     r = act(r, { type: 'endTurn' })
     expect(r.ap).toBe(CONFIG.baseAP) // no AP lost
     expect(cash - r.capital).toBe(2 + debtPerTurn(r))
+  })
+})
+
+describe('the Blowout', () => {
+  it('is immune to Legal', () => { expect(damageFor('Legal', 3, 'blowout')).toBe(0); expect(damageFor('Dirty', 2, 'blowout')).toBe(2) })
+
+  it('Rumble picks your highest stable Well, and only repeats on a shaking one when none are stable', () => {
+    let r = newRun(24, 'threeOil'); r.capital = 50
+    r.threats = [{ id: 900, kind: 'blowout', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }] // next: Rumble
+    r.plots = [{ output: 1, reserve: 6 }, { output: 1, reserve: 6 }, { output: 1, reserve: 6, unstable: true }]
+    expect(intentText(r, r.threats[0])).toBe('Well No. 2 becomes Unstable.')
+    r = act(r, { type: 'endTurn' })
+    expect(r.plots.map(w => !!w?.unstable)).toEqual([false, true, true])
+    r.plots = [{ output: 1, reserve: 6, unstable: true }]; r.threats[0].step = 0
+    expect(intentText(r, r.threats[0])).toBe('Well No. 1 shakes again.')
   })
 })

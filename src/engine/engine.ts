@@ -120,6 +120,8 @@ export const prospectAP = (r: Run) => CARDS.prospect.ap! + (r.modifier === 'hard
 export const apCost = (r: Run, c: Card) => (c.free ? 0 : c.key === 'prospect' ? prospectAP(r) : CARDS[c.key].ap ?? 0)
 export const freePlot = (r: Run) => r.plots.findIndex(p => p === null)
 export const highestWell = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (r.plots[i]) return i; return -1 }
+/** Where a Rumble lands: your highest stable Well, or if every Well is already unstable, the highest one. */
+export const rumbleTarget = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (r.plots[i] && !r.plots[i]!.unstable) return i; return highestWell(r) }
 export const liveThreats = (r: Run) => r.threats.filter(t => !t.beaten)
 export const wellCount = (r: Run) => r.plots.filter(Boolean).length
 const pumps = (w: Well | null) => (w && !w.unstable ? Math.min(w.output, w.reserve) : 0)
@@ -601,7 +603,7 @@ export function intentText(r: Run, t: Threat): string {
   const hw = highestWell(r)
   const c = t.cycle
   switch (a) {
-    case 'Rumble': return hw >= 0 ? `Well No. ${hw + 1} becomes Unstable.` : 'The ground rumbles.'
+    case 'Rumble': { const i = rumbleTarget(r); return i < 0 ? 'The ground rumbles.' : r.plots[i]!.unstable ? `Well No. ${i + 1} shakes again.` : `Well No. ${i + 1} becomes Unstable.` }
     case 'Spray': return 'Lose $2 and 1 oil.'
     case 'Blow': { const u = r.plots.findIndex(w => w?.unstable); return u >= 0 ? `Well No. ${u + 1} is destroyed.` : 'Pressure builds.' }
     case 'Picket': return 'Lose $2.'
@@ -674,12 +676,12 @@ function endTurn(r: Run) {
     const line = r.report[r.report.length - 1]
     captured = []
     switch (a) {
-      case 'Rumble': { const i = highestWell(r); if (i >= 0) { r.plots[i]!.unstable = true; say(r, `Well No. ${i + 1} is Unstable.`) } break }
+      case 'Rumble': { const i = rumbleTarget(r); if (i >= 0) { const again = r.plots[i]!.unstable; r.plots[i]!.unstable = true; say(r, again ? `Well No. ${i + 1} shakes again.` : `Well No. ${i + 1} is Unstable.`) } break }
       case 'Spray': dmg += 2; r.oil = Math.max(0, r.oil - 1); break
       case 'Blow': {
         const u = r.plots.findIndex(w => w?.unstable)
         if (u >= 0) { loseWell(r, u, 'lost'); t.hold = Math.min(t.maxHold, t.hold + 2); say(r, `Blowout! Well No. ${u + 1} destroyed.`) }
-        const i = highestWell(r); if (i >= 0) r.plots[i]!.unstable = true
+        const i = rumbleTarget(r); if (i >= 0) r.plots[i]!.unstable = true
         break
       }
       case 'Picket': dmg += 2; break

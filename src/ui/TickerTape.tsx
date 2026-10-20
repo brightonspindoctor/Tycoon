@@ -56,7 +56,6 @@ export function TickerTape({ beats, speed, onBeat, onDone }: Props) {
       </div>
       <div className="tape__foot">
         <span className="cl-num">{i + 1} / {beats.length}</span>
-        <span className="tape__hint">Tap to hurry</span>
         <button type="button" className="cl-btn cl-btn--small" onClick={e => { e.stopPropagation(); finish() }}>Skip ›</button>
       </div>
     </div>
