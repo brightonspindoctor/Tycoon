@@ -186,12 +186,28 @@ describe('Board Exposure', () => {
 
   it('a good quarter lowers it, a bad one raises it', () => {
     let r = inStage2(['lawyerUp'], 'muckraker')
-    r.exposure = 3
+    r.exposure = 3; r.turn = 6 // too slow for a quick win
     r.threats[0].hold = 1
     r.roundStart.capital = 10 // the company ends the round with more
     r = act(r, { type: 'play', cardId: inHand(r, 'lawyerUp').id })
     expect(r.phase).toBe('roundWon')
     expect(r.exposure).toBe(1) // Retraction −1, good quarter −1
+  })
+
+  it('winning a fight within 3 turns lowers it by 2, the boss included', () => {
+    for (const [turn, drop] of [[3, 2], [4, 0]] as const) {
+      let r = inStage2(['lawyerUp'], 'combine')
+      r.exposure = 5; r.turn = turn
+      r.threats[0].hold = 1
+      r.roundStart.capital = r.capital - 2 // Lawyer Up's $2: no quarter effect
+      r = act(r, { type: 'play', cardId: inHand(r, 'lawyerUp').id })
+      expect(r.exposure).toBe(5 - drop)
+    }
+    let b = inStage2(['lawyerUp'], 'proxyFight')
+    b.round = 4; b.exposure = 4; b.turn = 2; b.threats[0].hold = 1
+    b = act(b, { type: 'play', cardId: inHand(b, 'lawyerUp').id })
+    expect(b.phase).toBe('stageComplete')
+    expect(b.exposure).toBe(2)
   })
 
   it('is high from 5', () => {
@@ -281,7 +297,7 @@ describe('the end of stage 2', () => {
   it('leaves a residue item from Board Exposure', () => {
     for (const [exp, item] of [[6, 'boardGrudge'], [1, 'loyalDirectors'], [3, null]] as const) {
       let r = inStage2(['lawyerUp'], 'proxyFight')
-      r.round = 4; r.exposure = exp; r.threats[0].hold = 1
+      r.round = 4; r.exposure = exp; r.threats[0].hold = 1; r.turn = 9 // too slow for a quick win
       r = act(r, { type: 'play', cardId: inHand(r, 'lawyerUp').id })
       expect(r.phase).toBe('stageComplete')
       expect(r.residue).toBe(item)
@@ -301,5 +317,30 @@ describe('the Exchange', () => {
       r = act(act(r, { type: 'sellSpoils' }), { type: 'continue' })
       for (const k of r.shop.cards) expect(CARDS[k!].era).toBe(2)
     }
+  })
+})
+
+describe('fire in stage 2', () => {
+  it('burns oil and stops the pumps, but never touches Wells or Fields', () => {
+    let r = inStage2([], 'combine')
+    r.plots = [{ output: 1, reserve: 0, field: true }, { output: 1, reserve: 0, lasting: true }]
+    r.fire = 2; r.oil = 1; r.storage = 10
+    r = act(r, { type: 'endTurn' })
+    expect(r.oil).toBe(0)
+    expect(r.plots.filter(Boolean)).toHaveLength(2)
+    r = act(r, { type: 'endTurn' }) // nothing left to burn: a fire dies down
+    expect(r.plots.filter(Boolean)).toHaveLength(2)
+    expect(r.fire).toBeLessThan(2)
+  })
+})
+
+describe('the Exchange Silo', () => {
+  it('adds 2 storage, once a visit', () => {
+    let r = inStage2([])
+    r.phase = 'shop'; r.shop.siloSold = false; r.capital = 30
+    const st = r.storage
+    r = act(r, { type: 'buySilo' })
+    r = act(r, { type: 'buySilo' })
+    expect(r.storage).toBe(st + 2)
   })
 })

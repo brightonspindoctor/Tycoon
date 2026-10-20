@@ -97,13 +97,14 @@ Beating the Baron pays **3 gold** (every boss does). Then the company incorporat
 - Oil sells at **$4** (the motor car arrives).
 - **Every Well pumps 1 oil and never runs dry** in stage 2, old Well and Wildcat cards included. A Well card claims a new plot if none is empty (5 plots at most).
 - **Skimming is a card**: the Expense Account (0 AP, pay the rate for 1 gold, +1 Exposure; $5 in the shop). The rate starts at $4 a gold and rises each round: $4, $4, $5, $6, $7. The Exchange has no skim buttons.
-- The shop is **The Exchange**. It sells **only stage 2 cards**, stronger and dearer than stage 1's ($4–8). Its staples: a **Steel Derrick** (a Well) one per visit from $6, rising $2 each time, and a **Chemical Engine** ($3: put out two fires).
+- **Fire only burns oil** and stops the pumps; it never destroys a Well or Field. With no oil left, one fire dies down each turn.
+- The shop is **The Exchange**. It always offers a **Silo** ($5: +2 oil storage, once a visit), and sells **only stage 2 cards**, stronger and dearer than stage 1's ($4–8). Its staples: a **Steel Derrick** (a Well) one per visit from $6, rising $2 each time, and a **Chemical Engine** ($3: put out two fires).
 - Exchange extras: **Upgrade a card**, and **Pay dividends** ($4: Exposure −2, once per visit).
 - Items: Refinery ($8: oil +$1), Pipeline ($6: no freight), Offshore Account ($5: enemies take 1 less gold), plus the stage 1 items.
 
 ### Board Exposure (0 to 8)
 - **Rises:** +1 per Expense Account or Petty Cash skim, Shred the Files and Industrial Espionage, +1 when a round ends with less Capital than it started (a bad quarter), and from enemies.
-- **Falls:** Pay a Dividend card (−1; upgraded −2), the Exchange's dividends (−2), +Capital over a round (a good quarter, −1), beating the Muckraker or the Clawback Committee (−1). The quarter check doesn't apply after the boss.
+- **Falls:** winning a fight within 3 turns (−2, the boss included), Pay a Dividend card (−1; upgraded −2), the Exchange's dividends (−2), +Capital over a round (a good quarter, −1), beating the Muckraker or the Clawback Committee (−1). The quarter check doesn't apply after the boss.
 - **High at 5+:** the Clawback Committee takes gold instead of cash.
 - **At 8: ousted.**
 - **Residue** at the end of stage 2: 5+ leaves **Board Grudge** (the board takes $1 every shop visit); 2 or less leaves **Loyal Directors** (+1 AP in boss fights). Both apply from stage 3.

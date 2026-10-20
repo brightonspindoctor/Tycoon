@@ -35,7 +35,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
   const needsTarget = !!sel && !!selCheck?.ok && targets.length > 1
   const scrapping = !!sel && !!selCheck?.ok && handTargetsFor(run, sel).length > 0 // pick a card in your hand to destroy
   const canTarget = (t: Threat) => targets.some(x => x.id === t.id)
-  const burnsWell = run.fire > 0 && run.oil === 0
+  const burnsWell = run.fire > 0 && run.oil === 0 && st < 2 // from stage 2, fire only burns oil
   const lastWell = run.plots.reduce((m, p, k) => (p ? k : m), -1)
   const nextDebt = debtPerTurn(run) * (run.pending.audit ? 2 : 1)
 
@@ -60,7 +60,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
     <div className="m-game">
       <header className="m-hud">
         <div className="m-hud__when">
-          <span className="cl-label">Round {run.round}/4 · Turn {run.turn}</span>
+          <span className="cl-label">Round {run.round}/4 · Turn {run.turn}{st >= 2 && run.turn <= CONFIG.quickWinTurns ? ` · −${CONFIG.quickWinDrop} if won by ${CONFIG.quickWinTurns}` : ''}</span>
           <div className="m-hud__year"><b className="cl-display">{year(st, run.round)}</b><SettingsButton /></div>
           <div className="m-pips">{[1, 2, 3, 4].map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 ? 'is-boss' : ''}`} />)}</div>
         </div>

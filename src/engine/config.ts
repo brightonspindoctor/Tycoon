@@ -39,6 +39,8 @@ export const CONFIG = {
   surveyPrice: 5, // (unused since stage 2 sells Wells instead)
   derrickPrice: 6, // the Steel Derrick, a stage 2 Well the Exchange always stocks; rises by derrickStep each time
   derrickStep: 2,
+  silo2Price: 5, // the Exchange's Silo: +silo2Storage oil storage, offered every visit
+  silo2Storage: 2,
   bucketPrice2: 3, // the Chemical Engine, the Exchange's fire card
   stage2Output: 1, // every Well and Field pumps this in stage 2, and none runs dry
   fieldValue: 8, // selling a Field
@@ -48,6 +50,8 @@ export const CONFIG = {
   exposureLow: 2, // 2 or less at the end of stage 2: Loyal Directors
   exposureStartCap: 3, // stage 2 starts with 1 Exposure per exposureStartPer gold skimmed in stage 1, up to this
   exposureStartPer: 3,
+  quickWinTurns: 3, // win a fight within this many turns (stage 2 on)...
+  quickWinDrop: 2, // ...and Board Exposure falls by this much
   dividendCost: 4, // the shop's dividend: $ for −dividendDrop Exposure, once per visit
   dividendDrop: 2,
   upgradeCost: 3, // rises by $1 each time

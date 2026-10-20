@@ -98,6 +98,14 @@ export function ShopScreen({ run, dispatch }: Props) {
             )}
             {stage2 && (
               <div className="cl-slot slot">
+                <span className="cl-tag">{money(CONFIG.silo2Price, st)}</span>
+                <div className="cl-slot__name">Silo</div>
+                <div className="cl-slot__desc">+{CONFIG.silo2Storage} oil storage, for good. Now {run.storage}.</div>
+                <button type="button" className="cl-btn" disabled={!!run.shop.siloSold || !can(CONFIG.silo2Price)} onClick={() => dispatch({ type: 'buySilo' })}>{run.shop.siloSold ? 'Built' : 'Build'}</button>
+              </div>
+            )}
+            {stage2 && (
+              <div className="cl-slot slot">
                 <span className="cl-tag">{money(CONFIG.dividendCost, st)}</span>
                 <div className="cl-slot__name">Pay dividends</div>
                 <div className="cl-slot__desc">Board Exposure −{CONFIG.dividendDrop}. Once per visit.</div>

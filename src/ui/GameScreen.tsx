@@ -39,7 +39,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
   }
 
   const fireNext = fireTarget(run)
-  const burnsWell = run.fire > 0 && run.oil === 0
+  const burnsWell = run.fire > 0 && run.oil === 0 && st < 2 // from stage 2, fire only burns oil
   const endReady = run.ap === 0
 
   return (
@@ -51,7 +51,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
         </div>
         <div className="game__meta">
           <div className="round-track" aria-label={`Round ${run.round} of 4`}>
-            <span className="cl-label">Round {run.round} of 4 · Turn {run.turn}</span>
+            <span className="cl-label">Round {run.round} of 4 · Turn {run.turn}{st >= 2 && run.turn <= CONFIG.quickWinTurns ? ` · Win by turn ${CONFIG.quickWinTurns}: Exposure −${CONFIG.quickWinDrop}` : ''}</span>
             <div>{[1, 2, 3, 4].map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 ? 'is-boss' : ''}`} />)}</div>
           </div>
           <SettingsButton />
@@ -155,7 +155,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
           <button type="button" className="cl-btn sell-btn" disabled={run.ap < 1 || run.oil < 1 || run.current.refuse}
             onClick={() => dispatch({ type: 'sellOil' })}>
             {run.current.refuse ? 'Shipment refused' : `Sell ${run.oil} oil · 1 AP · ${money(run.oil * netPrice(run), st, true)}`}
-            {run.fire > 0 && run.oil > 0 && <em> · fire hits Wells next</em>}
+            {run.fire > 0 && run.oil > 0 && st < 2 && <em> · fire hits Wells next</em>}
           </button>
           {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
           <div className="action-strip__actions">

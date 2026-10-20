@@ -14,7 +14,7 @@ function randomAction(r: Run): Action {
   if (r.phase === 'roundWon') return r.spoils ? { type: rand() < 0.5 ? 'takeSpoils' : 'sellSpoils' } : { type: 'continue' }
   if (r.phase === 'stageComplete') return { type: 'continue' }
   if (r.phase === 'incorporate') {
-    const opts: Action[] = [{ type: 'leaveShop' }, { type: 'takeLoan' }, { type: 'skim', gold: 1 }, { type: 'buyCard', slot: 0 }, { type: 'payDividends' }]
+    const opts: Action[] = [{ type: 'leaveShop' }, { type: 'takeLoan' }, { type: 'skim', gold: 1 }, { type: 'buyCard', slot: 0 }, { type: 'payDividends' }, { type: 'buySilo' }]
     if (r.deck.length) opts.push({ type: 'destroyCard', cardId: pick(r.deck).id }, { type: 'upgradeCard', cardId: pick(r.deck).id })
     return rand() < 0.2 ? { type: 'leaveShop' } : pick(opts)
   }

@@ -25,6 +25,7 @@ export interface ShopOffer {
   bucketSold: boolean // one Bucket of Water per visit
   boon: BoonKey | null // before the boss: one small item for gold
   dividendPaid: boolean // the shop's dividend, once per visit (stage 2 on)
+  siloSold?: boolean // the Exchange's Silo, once per visit
 }
 
 export interface Run {
@@ -105,6 +106,7 @@ export type Action =
   | { type: 'skim'; gold: number }
   | { type: 'upgradeCard'; cardId: number }
   | { type: 'payDividends' }
+  | { type: 'buySilo' }
   | { type: 'admin'; op: AdminOp; card?: CardKey; target?: number }
   | { type: 'leaveShop' }
   | { type: 'continue' }
@@ -366,6 +368,11 @@ function shopAction(r: Run, a: Action) {
       say(r, `${cardDef(c).name}: upgraded.`)
       return
     }
+    case 'buySilo':
+      if (r.stage < 2 || r.phase !== 'shop' || r.shop.siloSold || !pay(r, CONFIG.silo2Price, 'Silo')) return
+      r.storage += CONFIG.silo2Storage; r.shop.siloSold = true
+      say(r, `Silo built: storage for ${r.storage} oil.`)
+      return
     case 'payDividends':
       if (r.stage < 2 || r.phase !== 'shop' || r.shop.dividendPaid || r.exposure === 0 || !pay(r, CONFIG.dividendCost, 'Dividends to the board')) return
       r.shop.dividendPaid = true
@@ -568,6 +575,8 @@ function threatBeaten(r: Run, t: Threat) {
     case 'saboteur': startFire(r, 1); say(r, 'The Saboteur left a parting gift.'); break
   }
   if (!liveThreats(r).length && r.phase !== 'lost') {
+    // a quick win impresses the board, the boss included
+    if (r.stage >= 2 && r.turn <= CONFIG.quickWinTurns) expose(r, -CONFIG.quickWinDrop, `Won in ${r.turn} turn${r.turn === 1 ? '' : 's'}`)
     // the board reads the quarter: Capital up, Exposure falls; Capital down, it rises (not after the boss)
     if (r.stage >= 2 && r.round < 4) {
       if (r.capital > r.roundStart.capital) expose(r, -1, 'A good quarter')
@@ -880,6 +889,7 @@ export const royalty = (r: Run) => Math.max(1, wellCount(r))
 export function fireTarget(r: Run): string {
   if (!r.fire) return ''
   if (r.oil > 0) return `Burns ${Math.min(r.oil, r.fire)} oil (${r.oil} → ${Math.max(0, r.oil - r.fire)}).`
+  if (r.stage >= 2) return 'Nothing to burn: one fire dies down.'
   const i = highestWell(r)
   if (i < 0) return 'Nothing left to burn.'
   return `Destroys Well No. ${i + 1}.`
@@ -910,6 +920,7 @@ function endTurn(r: Run) {
   if (r.fire) {
     const title = `${fires(r.fire)} burning`
     if (r.oil > 0) { const burnt = Math.min(r.oil, r.fire); r.oil -= burnt; say(r, `Fire burnt ${burnt} oil.`); beat(r, 'fire', title, `Burnt ${burnt} oil.`) }
+    else if (r.stage >= 2) { r.fire -= 1; say(r, r.fire ? 'Nothing to burn: one fire dies down.' : 'Nothing to burn: the fire went out.'); beat(r, 'fire', title, r.fire ? 'Nothing to burn. One fire dies down.' : 'Nothing to burn. It went out.') } // steel and brick: Wells don't burn
     else {
       const i = highestWell(r)
       if (i < 0) { r.fire = 0; say(r, 'The fire burnt itself out.'); beat(r, 'fire', title, 'Nothing left to burn. It went out.') }

@@ -41,6 +41,7 @@ export function botShop(r: Run): Run {
     const up = UPGRADE_ORDER.map(k => r.deck.find(x => x.key === k && canUpgrade(x))).find(Boolean)
     if (up && r.capital > r.upgradeCost + 14) r = act(r, { type: 'upgradeCard', cardId: up.id })
   }
+  if (stage2 && r.storage < 6 && r.capital > CONFIG.silo2Price + 14) r = act(r, { type: 'buySilo' })
   return act(r, { type: 'leaveShop' })
 }
 

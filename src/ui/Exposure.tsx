@@ -17,7 +17,7 @@ export function ExposureMeter({ run, compact, lit }: { run: Run; compact?: boole
           <span key={i} className={`seg ${i < e ? 'is-on' : ''} ${i >= CONFIG.exposureHigh - 1 ? 'is-hot' : ''} ${i === CONFIG.exposureMax - 1 ? 'is-last' : ''}`} />
         ))}
       </div>
-      {!compact && <span className="res-note">{high ? 'High: the board is circling.' : 'Skimming raises it. Dividends and a good round lower it.'} Ousted at {CONFIG.exposureMax}.</span>}
+      {!compact && <span className="res-note">{high ? 'High: the board is circling.' : `Skimming raises it. Dividends, a good round and winning a fight by turn ${CONFIG.quickWinTurns} (−${CONFIG.quickWinDrop}) lower it.`} Ousted at {CONFIG.exposureMax}.</span>}
     </section>
   )
 }
