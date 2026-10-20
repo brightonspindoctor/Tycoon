@@ -706,3 +706,6 @@ button.m-threat { cursor: pointer; }
 .era-trans__stamp { position: static; margin-top: 18px; }
 .era-trans__skip { position: absolute; bottom: calc(18px + env(safe-area-inset-bottom)); opacity: .6; }
 @media (prefers-reduced-motion: reduce) { .era-trans__old { animation-duration: .01s; } }
+.admin-hit { border-style: dashed; border-color: var(--accent); color: var(--accent); align-self: flex-start; }
+.m-threat .admin-hit { position: absolute; right: 8px; bottom: 8px; min-height: 0; padding: 4px 8px; }
+.m-threat { position: relative; }

@@ -37,3 +37,15 @@ describe('admin mode', () => {
     expect(act(plain, { type: 'admin', op: 'cash' }).capital).toBe(plain.capital)
   })
 })
+
+describe('admin −20 Hold', () => {
+  it('takes 20 Hold off the chosen enemy for no AP, immune or not', () => {
+    let r = adminStart(11, { ...ADMIN_DEFAULTS, start: 4 })
+    const t = r.threats[0], ap = r.ap
+    r = act(r, { type: 'admin', op: 'hold20', target: t.id })
+    expect(r.threats[0].hold).toBe(t.hold - 20)
+    expect(r.ap).toBe(ap)
+    r = act(r, { type: 'admin', op: 'hold20', target: t.id })
+    expect(r.phase).toBe('stageComplete')
+  })
+})

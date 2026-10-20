@@ -10,9 +10,10 @@ interface Props {
   acting?: boolean
   preview?: string
   onTarget?: () => void
+  onAdminHit?: () => void // admin runs: −20 Hold, 0 AP
 }
 
-export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget }: Props) {
+export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget, onAdminHit }: Props) {
   const d = THREATS[threat.kind]
   const pct = Math.max(0, (threat.hold / threat.maxHold) * 100)
   const Tag = targeting ? 'button' : 'section'
@@ -43,6 +44,7 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget 
           <span>{units(intentText(run, threat), run.stage)}</span>
         </div>
       )}
+      {onAdminHit && !threat.beaten && <button type="button" className="cl-btn cl-btn--small admin-hit" onClick={e => { e.stopPropagation(); onAdminHit() }}>Admin · −20 Hold</button>}
       <dl className="threat__traits">
         {d.weak && <div><dt>Weak to:</dt><dd>{d.weak}</dd></div>}
         {d.resist && <div><dt>Resists:</dt><dd>{d.resist}</dd></div>}

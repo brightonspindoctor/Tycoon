@@ -81,7 +81,7 @@ export interface Run {
   admin?: boolean // a playtest run started from admin mode: never recorded
 }
 
-export type AdminOp = 'cash' | 'gold' | 'exposureUp' | 'exposureDown' | 'ap' | 'winRound' | 'addCard'
+export type AdminOp = 'cash' | 'gold' | 'exposureUp' | 'exposureDown' | 'ap' | 'winRound' | 'addCard' | 'hold20'
 
 export interface Snapshot { capital: number; gold: number; wells: number; oil: number; deck: number; exposure: number }
 export const snapshot = (r: Run): Snapshot => ({ capital: r.capital, gold: r.gold, wells: wellCount(r), oil: r.oil, deck: r.deck.length, exposure: r.exposure ?? 0 })
@@ -105,7 +105,7 @@ export type Action =
   | { type: 'skim'; gold: number }
   | { type: 'upgradeCard'; cardId: number }
   | { type: 'payDividends' }
-  | { type: 'admin'; op: AdminOp; card?: CardKey }
+  | { type: 'admin'; op: AdminOp; card?: CardKey; target?: number }
   | { type: 'leaveShop' }
   | { type: 'continue' }
 
@@ -1039,8 +1039,13 @@ export function incorporate(r: Run) {
 const INCORPORATE_ACTIONS: Action['type'][] = ['takeLoan', 'upgradeCard', 'destroyCard', 'leaveShop']
 
 /** Playtest tools, only on admin runs. */
-function adminAction(r: Run, op: AdminOp, key?: CardKey) {
+function adminAction(r: Run, op: AdminOp, key?: CardKey, target?: number) {
   switch (op) {
+    case 'hold20': { // 0 AP, ignores weaknesses and immunities
+      const t = liveThreats(r).find(x => x.id === target) ?? liveThreats(r)[0]
+      if (r.phase === 'turn' && t) { say(r, `Admin: ${THREATS[t.kind].name} −20 Hold.`); hit(r, t, Math.min(20, t.hold)) }
+      break
+    }
     case 'cash': money(r, 'Admin', 10); break
     case 'gold': r.gold += 1; break
     case 'exposureUp': expose(r, 1, 'Admin'); break
@@ -1053,7 +1058,7 @@ function adminAction(r: Run, op: AdminOp, key?: CardKey) {
 
 export function act(prev: Run, a: Action): Run {
   const r = clone(prev)
-  if (a.type === 'admin') { if (r.admin && r.phase !== 'lost') adminAction(r, a.op, a.card); return r }
+  if (a.type === 'admin') { if (r.admin && r.phase !== 'lost') adminAction(r, a.op, a.card, a.target); return r }
   if (r.phase === 'shop') { shopAction(r, a); return r }
   if (r.phase === 'incorporate') { if (INCORPORATE_ACTIONS.includes(a.type)) shopAction(r, a); return r }
   if (r.phase === 'stageComplete' && a.type === 'continue' && r.stage === 1) { incorporate(r); return r }

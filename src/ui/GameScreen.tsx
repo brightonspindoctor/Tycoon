@@ -66,7 +66,8 @@ export function GameScreen({ run, dispatch, acting }: Props) {
             <ThreatPanel key={t.id} run={run} threat={t} acting={acting?.who === t.id}
               targeting={targeting && targets.some(x => x.id === t.id)}
               preview={!sel ? undefined : stopping ? (t.stopped ? 'Already stopped' : 'Stop this move') : (n => (n > 0 ? `−${n} Hold` : 'No effect'))(damageFor(cardDef(sel).family, cardDef(sel).power, t.kind))}
-              onTarget={() => { dispatch({ type: 'play', cardId: sel!.id, target: t.id }); setSelected(null) }} />
+              onTarget={() => { dispatch({ type: 'play', cardId: sel!.id, target: t.id }); setSelected(null) }}
+              onAdminHit={run.admin && run.phase === 'turn' ? () => dispatch({ type: 'admin', op: 'hold20', target: t.id }) : undefined} />
           ))}
           {run.fire > 0 && (
             <section className={`hazard ${lit('fire')}`} aria-label={`${fires(run.fire)} burning`}>

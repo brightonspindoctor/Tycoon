@@ -109,6 +109,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                     {[d.weak && `Weak: ${d.weak}`, d.resist && `Resists: ${d.resist}`, d.immune && `Immune: ${d.immune}`].filter(Boolean).join(' · ')}
                   </div>
                 </div>
+                {run.admin && run.phase === 'turn' && !t.beaten && !needsTarget && <button type="button" className="cl-btn cl-btn--small admin-hit" onClick={e => { e.stopPropagation(); dispatch({ type: 'admin', op: 'hold20', target: t.id }) }}>−20</button>}
                 {needsTarget && !t.beaten && <span className={`m-threat__dmg ${can ? '' : 'is-none'}`}>{stopping ? (can ? 'Stop' : 'Stopped') : can ? `−${dmgOn(t)} Hold` : 'No effect'}</span>}
               </Tag>
             )
