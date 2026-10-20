@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, MODS, ROLE_LABEL, THREATS } from '../engine/data'
 import {
-  apCost, canPlay, cardDef, damageFor, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, intent, intentText, netPrice, plotName, price, production, skimRate,
+  apCost, canPlay, cardDef, damageFor, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run, type Threat,
 } from '../engine/engine'
 import { FIELD_PLACE, money, units, year } from '../engine/format'
@@ -141,7 +141,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                     </button>
                   ) : <div className="m-plot__hole" />}
                   <span className="m-plot__state">{state}</span>
-                  {w && (w.field ? <span className="m-plot__state plot__forever">Field</span> : <span className={`m-plot__state ${w.reserve <= w.output * 2 ? 'cl-minus' : ''}`}>{w.reserve} left</span>)}
+                  {w && (neverDry(w) ? <span className="m-plot__state plot__forever">{w.field ? 'Field' : 'Lasting'}</span> : <span className={`m-plot__state ${w.reserve <= w.output * 2 ? 'cl-minus' : ''}`}>{w.reserve} left</span>)}
                   {marked && <span className="m-flag">Marked</span>}
                   {burning && <span className="m-flag m-flag--fire">Burns</span>}
                 </div>

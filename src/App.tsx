@@ -18,6 +18,7 @@ import { ShopScreen } from './ui/ShopScreen'
 import { RoundSummary } from './ui/RoundSummary'
 import { CrashOut, StageComplete } from './ui/EndScreens'
 import { IncorporateScreen } from './ui/Incorporate'
+import { EraTransition } from './ui/EraTransition'
 import { units } from './engine/format'
 import { BonusPick, History, Intro } from './ui/MenuScreens'
 
@@ -41,6 +42,7 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('intro')
   const [run, setRun] = useState<Run | null>(null)
   const [shake, setShake] = useState(false)
+  const [eraTo, setEraTo] = useState<number | null>(null) // the stage being turned to
   const [bailout, setBailout] = useState(false) // a losing streak earns the Trust Fund next run
   const [admin, setAdmin] = useState(() => {
     const q = new URLSearchParams(location.search).get('admin')
@@ -72,6 +74,7 @@ export default function App() {
     if (nextRun.fire > run.fire && !replaying) play('fire')
     if (nextRun.capital < run.capital - 1 && a.type === 'endTurn' && !replaying) { play('hit'); setShake(true); setTimeout(() => setShake(false), 350) }
     if (replaying) replay(nextRun, a.type === 'endTurn' ? run : nextRun)
+    if (nextRun.stage > run.stage) setEraTo(nextRun.stage) // a new era: turn the page
     if (a.type === 'buyCard' || a.type === 'buyProspect' || a.type === 'buyBucket' || a.type === 'buyItem' || a.type === 'skim' || a.type === 'payDividends' || (a.type === 'upgradeCard' && nextRun.upgradeCost > run.upgradeCost)) play('coin')
     setRun(nextRun)
   }
@@ -158,7 +161,7 @@ export default function App() {
   else if (run.phase === 'shop' && !tape) body = <ShopScreen run={run} dispatch={dispatch} />
   else if (run.phase === 'lost' && !tape) body = <CrashOut run={run} bailout={bailout} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
   else if (run.phase === 'stageComplete' && !tape) body = <StageComplete run={run} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} onContinue={() => dispatch({ type: 'continue' })} />
-  else if (run.phase === 'incorporate') body = <IncorporateScreen run={run} dispatch={dispatch} />
+  else if (run.phase === 'incorporate') body = <>{<IncorporateScreen run={run} dispatch={dispatch} />}{eraTo && <EraTransition to={eraTo} onDone={() => setEraTo(null)} />}</>
   else if (tape) body = (
     <>
       {mobile ? <MobileGame run={tape.frozen} dispatch={() => {}} acting={acting} /> : <GameScreen run={tape.frozen} dispatch={() => {}} acting={acting} />}

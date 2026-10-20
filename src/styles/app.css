@@ -693,3 +693,16 @@ button.m-threat { cursor: pointer; }
 .admin__select { font: inherit; font-size: 14px; padding: 6px 8px; border: 1.5px solid var(--ink); border-radius: var(--cl-radius); background: var(--paper); color: var(--ink); max-width: 100%; }
 .admin-tools__buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .admin-badge { position: fixed; left: 50%; top: calc(4px + env(safe-area-inset-top)); transform: translateX(-50%); z-index: 50; background: var(--accent); color: var(--on-accent); padding: 2px 10px; border-radius: 3px; pointer-events: none; font-size: 10px; }
+
+/* Between stages: the old page lifts away and the new era shows through */
+.era-trans { position: fixed; inset: 0; z-index: 80; cursor: pointer; overflow: hidden; }
+.era-trans__new, .era-trans__old { position: absolute; inset: 0; background: var(--paper); }
+.era-trans__old { background: var(--paper) repeating-linear-gradient(to bottom, transparent 0 31px, var(--rule) 31px 32px);
+  animation: era-lift 1.4s cubic-bezier(.6, 0, .3, 1) .8s forwards; transform-origin: top center; box-shadow: 0 20px 40px rgba(0, 0, 0, .5); }
+@keyframes era-lift { to { transform: translateY(-110%) rotate(-3deg); } }
+.era-trans__copy { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 24px; color: var(--ink); }
+.era-trans__year { font-size: clamp(64px, 14vw, 140px); line-height: 1; color: var(--accent); }
+.era-trans__line { margin: 0; font-size: clamp(16px, 2.4vw, 22px); opacity: 0; animation: rise .5s ease-out both; }
+.era-trans__stamp { position: static; margin-top: 18px; }
+.era-trans__skip { position: absolute; bottom: calc(18px + env(safe-area-inset-bottom)); opacity: .6; }
+@media (prefers-reduced-motion: reduce) { .era-trans__old { animation-duration: .01s; } }

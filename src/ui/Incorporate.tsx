@@ -1,6 +1,6 @@
 // Between stage 1 and 2: the company incorporates. What carried over, the board's
 // arrival, the bank's loan, and a chance to upgrade and destroy cards.
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { canUpgrade, debtPerTurn, type Action, type Run } from '../engine/engine'
 import { money, units, year } from '../engine/format'
@@ -13,7 +13,6 @@ type Mode = null | 'destroy' | 'upgrade'
 
 export function IncorporateScreen({ run, dispatch }: { run: Run; dispatch: (a: Action) => void }) {
   const [mode, setMode] = useState<Mode>(null)
-  useEffect(() => { play('stamp') }, [])
   const st = run.stage
   const m = (n: number, sign = false) => money(n, st, sign)
   const can = (cost: number) => run.capital - cost >= 1
@@ -35,14 +34,14 @@ export function IncorporateScreen({ run, dispatch }: { run: Run; dispatch: (a: A
       <div className="shop__grid">
         <div className="shop__main">
           <section className="end__tiles incorporate__tiles" aria-label="What carried over">
-            <div className="tile"><span className="cl-label">Fields</span><b className="cl-num">{fields}</b><span className="res-note">{fields ? `Your ${fields === 1 ? 'Well is now a Field' : `${fields} Wells are now Fields`}. Fields never run dry.` : 'No Wells were standing. Survey for new land.'}</span></div>
-            <div className="tile"><span className="cl-label">Prospecting</span><b className="cl-num">{worn} worn</b><span className="res-note">Old Prospects add a Well but claim no land. A fresh Survey (1 plot, 1 Well) is in your deck.</span></div>
+            <div className="tile"><span className="cl-label">Fields</span><b className="cl-num">{fields}</b><span className="res-note">{fields ? `Your ${fields === 1 ? 'Well is now a Field' : `${fields} Wells are now Fields`}: 1 oil a turn, never dry.` : 'No Wells were standing.'} New Wells never run dry either.</span></div>
+            <div className="tile"><span className="cl-label">Prospecting is over</span><b className="cl-num">{worn ? `${worn} worn` : 'Wells'}</b><span className="res-note">The Exchange sells Wells now, not Prospects. A Steel Derrick is in your deck{worn ? '; old Prospects just add a Well' : ''}.</span></div>
             <div className="tile"><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b><span className="res-note">{CONFIG.bossGold} for the Baron. Some enemies can take gold now. Below 0, you're ruined.</span></div>
           </section>
 
           <section className="incorporate__board">
             <ExposureMeter run={run} />
-            <p className="res-note">The new board read the old books: {skimmed ? `you skimmed ${skimmed} gold in stage 1, so Board Exposure starts at ${run.exposure}.` : 'nothing skimmed, so Board Exposure starts at 0.'} High from {CONFIG.exposureHigh}. A Pay a Dividend card is in your deck.</p>
+            <p className="res-note">The new board read the old books: {skimmed ? `you skimmed ${skimmed} gold in stage 1, so Board Exposure starts at ${run.exposure}.` : 'nothing skimmed, so Board Exposure starts at 0.'} High from {CONFIG.exposureHigh}. A Pay a Dividend card is in your deck, and an Expense Account: from now on, that's how you skim (from {m(CONFIG.skimRate2[1])} a gold).</p>
           </section>
 
           <section className="shop__deals">
@@ -92,7 +91,7 @@ export function IncorporateScreen({ run, dispatch }: { run: Run; dispatch: (a: A
             {run.bonus === 'trustFund' && <p className="res-note">The Trust Fund is spent. Bank Debt starts this stage.</p>}
           </section>
           <div className="events">{run.events.slice(0, 2).map((e, i) => <p key={i}>{units(e, st)}</p>)}</div>
-          <button type="button" className="cl-btn cl-btn--primary leave" onClick={() => { dispatch({ type: 'leaveShop' }); play('whistle') }}>Into {year(2, 1)}</button>
+          <button type="button" className="cl-btn cl-btn--primary leave" onClick={() => { dispatch({ type: 'leaveShop' }); play('click') }}>Begin round 1</button>
         </aside>
       </div>
     </div>

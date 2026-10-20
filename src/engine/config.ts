@@ -31,13 +31,16 @@ export const CONFIG = {
   inspectorReserve: 12, // end a turn holding this much and the Inspector loses Hold
   inspectorReserveDamage: 2,
   skimRate: { 0: 1, 1: 1, 2: 2, 3: 3, 4: 4 } as Record<number, number>, // $ per gold, by round (stage 1)
-  skimRate2: { 0: 2, 1: 2, 2: 3, 3: 4, 4: 5 } as Record<number, number>, // stage 2
+  skimRate2: { 0: 4, 1: 4, 2: 5, 3: 6, 4: 7 } as Record<number, number>, // stage 2: the Expense Account card, from $4 a gold
   bossGold: 3, // gold for beating a stage's boss
   // stage 2
   stage2Loan: 10, // offered at incorporation
   stage2LoanDebt: 1, // Bank Debt it adds per turn
-  surveyPrice: 5, // the stage 2 Prospect (Survey); rises by surveyStep each time
-  surveyStep: 2,
+  surveyPrice: 5, // (unused since stage 2 sells Wells instead)
+  derrickPrice: 6, // the Steel Derrick, a stage 2 Well the Exchange always stocks; rises by derrickStep each time
+  derrickStep: 2,
+  bucketPrice2: 3, // the Chemical Engine, the Exchange's fire card
+  stage2Output: 1, // every Well and Field pumps this in stage 2, and none runs dry
   fieldValue: 8, // selling a Field
   wreckReserve: 3, // a wrecked Field becomes a Well with this many barrels
   exposureMax: 8, // Board Exposure at this: ousted

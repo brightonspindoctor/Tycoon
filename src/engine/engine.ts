@@ -2,13 +2,14 @@
 // drives the game screens, the tests and the balance simulator.
 import { CONFIG } from './config'
 import {
-  ATTACK_CARDS, BOSS, CARDS, CASH_POOLS, ENGINE_POOLS, ITEMS, MODS, PROSPECTS, PROSPECT_FOR, STARTER, THREATS, UPGRADES, shopPool,
+  ATTACK_CARDS, BOSS, CARDS, CASH_POOLS, ENGINE_POOLS, ITEMS, MODS, PROSPECTS, PROSPECT_FOR, WATER_FOR, STARTER, THREATS, UPGRADES, shopPool,
   BOONS, REWARDS, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
 } from './data'
 import { next, pick, shuffle } from './rng'
 
 export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean; free?: boolean; up?: boolean } // free: costs no AP · up: upgraded
-export interface Well { output: number; reserve: number; unstable?: boolean; field?: boolean } // a Field never runs dry
+export interface Well { output: number; reserve: number; unstable?: boolean; field?: boolean; lasting?: boolean } // a Field (an old Well) and a stage 2 Well (lasting) never run dry
+export const neverDry = (w: Well) => !!(w.field || w.lasting)
 export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string; stopped?: boolean }
 export interface LedgerLine { label: string; amount: number }
 /** One line of the end-of-turn report, played back on the ticker tape. */
@@ -121,6 +122,11 @@ export function cardDef(c: { key: CardKey; up?: boolean }): CardDef {
 export const canUpgrade = (c: Card) => !c.up && !c.temp && !!UPGRADES[c.key]
 export const isProspect = (k: CardKey) => PROSPECTS.includes(k)
 
+export const waterPrice = (r: Run) => (r.stage >= 2 ? CONFIG.bucketPrice2 : CONFIG.bucketPrice)
+/** Can a Well card be built? Stage 1 needs an empty plot; from stage 2 a Well claims a new plot if there's none. */
+export const canBuild = (r: Run) => freePlot(r) >= 0 || (r.stage >= 2 && r.plots.length < CONFIG.maxPlots)
+const BUILDS: CardKey[] = ['well', 'wildcat', 'derrick']
+
 export function skimRate(r: Run): number {
   const table = r.stage >= 2 ? CONFIG.skimRate2 : CONFIG.skimRate
   return table[r.round] ?? table[4]
@@ -151,7 +157,7 @@ export const highestWell = (r: Run) => { for (let i = r.plots.length - 1; i >= 0
 export const rumbleTarget = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (r.plots[i] && !r.plots[i]!.unstable) return i; return highestWell(r) }
 export const liveThreats = (r: Run) => r.threats.filter(t => !t.beaten)
 export const wellCount = (r: Run) => r.plots.filter(Boolean).length
-const pumps = (w: Well | null) => (w && !w.unstable ? (w.field ? w.output : Math.min(w.output, w.reserve)) : 0)
+const pumps = (w: Well | null) => (w && !w.unstable ? (neverDry(w) ? w.output : Math.min(w.output, w.reserve)) : 0)
 export const production = (r: Run) => {
   if (r.fire) return 0
   const made = r.plots.reduce((s, w) => s + pumps(w), 0)
@@ -316,14 +322,16 @@ function shopAction(r: Run, a: Action) {
       r.deck.push(card(r, key)); r.shop.cards[a.slot] = null
       return
     }
-    case 'buyBucket':
-      if (r.shop.bucketSold || !pay(r, CONFIG.bucketPrice, 'Bucket of Water')) return
-      r.deck.push(card(r, 'bucket')); r.shop.bucketSold = true
+    case 'buyBucket': {
+      const k = WATER_FOR[r.stage] ?? 'extinguisher'
+      if (r.shop.bucketSold || !pay(r, waterPrice(r), CARDS[k].name)) return
+      r.deck.push(card(r, k)); r.shop.bucketSold = true
       return
+    }
     case 'buyProspect': {
       const k = PROSPECT_FOR[r.stage] ?? 'survey'
       if (r.shop.prospectSold || !pay(r, r.prospectPrice, CARDS[k].name)) return
-      r.deck.push(card(r, k)); r.prospectPrice += r.stage >= 2 ? CONFIG.surveyStep : 1; r.shop.prospectSold = true
+      r.deck.push(card(r, k)); r.prospectPrice += r.stage >= 2 ? CONFIG.derrickStep : 1; r.shop.prospectSold = true
       return
     }
     case 'buyBoon': {
@@ -375,6 +383,7 @@ function shopAction(r: Run, a: Action) {
       return
     case 'skim': {
       if (r.phase !== 'shop') return
+      if (r.stage >= 2) { say(r, 'Skim with an Expense Account card.'); return } // from stage 2, skimming is a card
       const cost = a.gold * skimRate(r)
       if (a.gold < 1 || r.capital - cost < 1) { say(r, "The company can't spare that much."); return }
       if (r.stage >= 2 && r.exposure + 1 >= CONFIG.exposureMax) { say(r, 'The board is watching too closely to skim.'); return }
@@ -482,7 +491,7 @@ function beginTurn(r: Run) {
   const made = production(r)
   if (made) {
     r.plots.forEach((w, i) => {
-      if (!w || w.field) return
+      if (!w || neverDry(w)) return
       w.reserve -= pumps(w)
       if (w.reserve <= 0) { loseWell(r, i, 'dry'); say(r, `Well No. ${i + 1} has run dry.`); beat(r, 'oil', `Well No. ${i + 1}`, 'Has run dry.') }
     })
@@ -621,15 +630,16 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (d.cost && r.capital - d.cost < 1 && !d.forced) return { ok: false, why: 'Not enough Capital' }
   if (d.gold && r.gold < d.gold) return { ok: false, why: 'Not enough gold' }
   if (isProspect(c.key) && (d.plots ?? 0) > 0 && r.plots.length >= CONFIG.maxPlots && freePlot(r) < 0) return { ok: false, why: 'No land left to claim' }
-  if (isProspect(c.key) && !d.plots && freePlot(r) < 0) return { ok: false, why: 'No empty plot' }
+  if (isProspect(c.key) && !d.plots && !canBuild(r)) return { ok: false, why: 'No empty plot' }
   if (c.key === 'rotaryRig' && rigTarget(r) < 0) return { ok: false, why: 'No Well to convert' }
   if (c.key === 'rdSprint' && !fieldCount(r)) return { ok: false, why: 'No Fields' }
   if (d.scrap === 'one' && !handTargetsFor(r, c).length) return { ok: false, why: 'Nothing to destroy' }
   if (d.scrap === 'junk' && !r.hand.some(x => x.id !== c.id && CARDS[x.key].junk)) return { ok: false, why: 'No junk in hand' }
   if (c.key === 'payDividend' && r.exposure === 0) return { ok: false, why: 'The board is happy' }
   if (c.key === 'personalLawyer' && r.goldShield) return { ok: false, why: 'Already retained' }
-  if ((c.key === 'well' || c.key === 'wildcat') && freePlot(r) < 0) return { ok: false, why: 'No free plot' }
-  if ((c.key === 'bucket' || c.key === 'fireBrigade') && !r.fire) return { ok: false, why: 'No fire' }
+  if (BUILDS.includes(c.key) && !canBuild(r)) return { ok: false, why: 'No free plot' }
+  if ((c.key === 'bucket' || c.key === 'fireBrigade' || c.key === 'extinguisher') && !r.fire) return { ok: false, why: 'No fire' }
+  if (d.family === 'Skim' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
   if (d.stop && r.shoredUp) return { ok: false, why: 'Once per round' }
   if (d.stop && !targetsFor(r, c).length) return { ok: false, why: 'Every move is already stopped' }
   if (c.key === 'pettyCash' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
@@ -701,7 +711,7 @@ function play(r: Run, cardId: number, target?: number) {
     if (d.cover) r.cover += d.cover
     if (d.draw) drawCards(r, d.draw)
     if (d.apNext) r.pending.ap += d.apNext
-    if (d.exposure !== undefined && d.exposure !== 0 && c.key !== 'pettyCash') expose(r, d.exposure, d.name)
+    if (d.exposure !== undefined && d.exposure !== 0 && d.family !== 'Skim') expose(r, d.exposure, d.name)
     switch (c.key) {
       case 'prospect': case 'survey': case 'oldProspect': {
         const add = Math.min(d.plots ?? 0, CONFIG.maxPlots - r.plots.length)
@@ -724,20 +734,24 @@ function play(r: Run, cardId: number, target?: number) {
       case 'payDividend': break
       case 'personalLawyer': r.goldShield = true; say(r, 'Your Personal Lawyer is on retainer this turn.'); break
       case 'ceaseDesist': case 'proxyBallot': break
-      case 'well': case 'wildcat': {
+      case 'well': case 'wildcat': case 'derrick': {
+        if (freePlot(r) < 0) r.plots.push(null) // stage 2: a Well claims its own plot
         const i = freePlot(r)
-        r.plots[i] = { output: d.power, reserve: c.key === 'wildcat' ? CONFIG.wildcatReserve : CONFIG.wellReserve }
+        r.plots[i] = r.stage >= 2
+          ? { output: CONFIG.stage2Output, reserve: 0, lasting: true } // every stage 2 Well pumps 1 and never runs dry
+          : { output: d.power, reserve: c.key === 'wildcat' ? CONFIG.wildcatReserve : CONFIG.wellReserve }
         r.stats.wellsBuilt++
         say(r, `Well No. ${i + 1} built.`)
         break
       }
+      case 'extinguisher':
       case 'bucket': r.fire = Math.max(0, r.fire - d.power); say(r, r.fire ? `${d.power > 1 ? 'Two fires' : 'One fire'} out. ${fires(r.fire)} still burning.` : 'Fire out. Pumps restart next turn.'); break
       case 'fireBrigade': r.fire = 0; say(r, 'Every fire is out. Pumps restart next turn.'); break
       case 'improveGear': break
       case 'hardGraft': r.ap += d.power; break
-      case 'pettyCash': {
+      case 'pettyCash': case 'expenseAccount': {
         const rate = skimRate(r)
-        if (r.capital - rate >= 1) { money(r, 'Petty Cash (skim)', -rate); r.gold += 1; r.stats.skims++; expose(r, d.exposure ?? 1, 'Petty Cash') }
+        if (r.capital - rate >= 1) { money(r, `${d.name} (skim)`, -rate); r.gold += 1; r.stats.skims++; expose(r, d.exposure ?? 1, d.name) }
         break
       }
       case 'inheritance': money(r, 'Inheritance', CONFIG.inheritance); break
@@ -846,7 +860,7 @@ export function intentText(r: Run, t: Threat): string {
     case 'Wreck': {
       const m = r.marked
       if (m === null || !r.plots[m]) return 'Looks for something to wreck.'
-      return r.plots[m]!.field ? `Wrecks Field No. ${m + 1}: it becomes a Well with ${CONFIG.wreckReserve} barrels left.` : `Destroys Well No. ${m + 1}.`
+      return `Destroys ${plotName(r, m)}.`
     }
     case 'Infiltrate': { const i = infiltrateTarget(r); return i >= 0 ? `Marks ${plotName(r, i)}.` : 'Watches your fields.' }
     case 'Proration': return `Next turn you can pump only ${CONFIG.prorationCap} oil.`
@@ -966,10 +980,7 @@ function endTurn(r: Run) {
       case 'Injunction': case 'Inspection': r.pending.ap += 1; break
       case 'Wreck': {
         const m = r.marked
-        if (m !== null && r.plots[m]) {
-          if (r.plots[m]!.field) { r.plots[m] = { output: r.plots[m]!.output, reserve: CONFIG.wreckReserve }; say(r, `Field No. ${m + 1} wrecked: it will run dry.`) }
-          else { loseWell(r, m, 'lost'); say(r, `Well No. ${m + 1} wrecked.`) }
-        }
+        if (m !== null && r.plots[m]) { say(r, `${plotName(r, m)} wrecked.`); loseWell(r, m, 'lost') }
         r.marked = null
         break
       }
@@ -1003,8 +1014,8 @@ function endTurn(r: Run) {
 // ---------------------------------------------------------------- dispatcher
 // ------------------------------------------------------------ between stages
 /**
- * Stage 1 → 2: the company incorporates. Wells become Fields that never run dry,
- * Prospects wear out (a fresh Survey replaces them), the board arrives with its
+ * Stage 1 → 2: the company incorporates. Wells become Fields (1 oil, never dry),
+ * Prospects wear out and the Exchange sells Wells instead, the board arrives with its
  * Exposure meter, and there's a loan on the table, plus upgrades and destroys.
  */
 export function incorporate(r: Run) {
@@ -1012,10 +1023,10 @@ export function incorporate(r: Run) {
   r.round = 0
   r.phase = 'incorporate'
   r.stageGold = r.gold
-  r.plots = r.plots.map(w => (w ? { output: w.output, reserve: w.reserve, field: true } : null))
+  r.plots = r.plots.map(w => (w ? { output: CONFIG.stage2Output, reserve: w.reserve, field: true } : null))
   for (const c of r.deck) if (c.key === 'prospect') { c.key = 'oldProspect'; c.uses = CARDS.oldProspect.uses; c.up = false }
-  r.deck.push(card(r, 'survey'), card(r, 'payDividend'))
-  r.prospectPrice = CONFIG.surveyPrice
+  r.deck.push(card(r, 'derrick'), card(r, 'payDividend'), card(r, 'expenseAccount'))
+  r.prospectPrice = CONFIG.derrickPrice
   r.exposure = Math.min(CONFIG.exposureStartCap, Math.floor(r.stats.skims / CONFIG.exposureStartPer))
   r.shop = { cards: [], item: null, loanTaken: false, prospectSold: true, bucketSold: true, boon: null, dividendPaid: true }
   r.threats = []

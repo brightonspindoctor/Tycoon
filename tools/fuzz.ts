@@ -64,13 +64,15 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.fire < 0 || r.fire > CONFIG.fireMax) return `fire ${r.fire}`
   if (r.oil < 0 || r.oil > r.storage) return `oil ${r.oil} of ${r.storage}`
   if (r.plots.length > CONFIG.maxPlots) return `${r.plots.length} plots`
-  for (const w of r.plots) if (w && ((!w.field && w.reserve <= 0) || w.output <= 0)) return `well ${JSON.stringify(w)}`
+  for (const w of r.plots) if (w && ((!w.field && !w.lasting && w.reserve <= 0) || w.output <= 0)) return `well ${JSON.stringify(w)}`
   if (r.gold < 0 && !(r.phase === 'lost' && r.loss?.reason === 'ruined')) return `gold ${r.gold}`
   if (r.gold < 0 && r.phase !== 'lost') return `gold ${r.gold} but still playing`
   if (r.exposure < 0 || r.exposure > CONFIG.exposureMax) return `exposure ${r.exposure}`
   if (r.exposure >= CONFIG.exposureMax && r.phase !== 'lost') return `exposure ${r.exposure} but not ousted`
   if (r.stage === 1 && r.exposure !== 0) return 'Board Exposure in stage 1'
   if (r.stage === 2 && r.deck.some(c => c.key === 'prospect')) return 'a fresh Prospect in stage 2'
+  if (r.stage === 2 && r.plots.some(w => w && (w.output !== CONFIG.stage2Output || !(w.field || w.lasting)))) return 'a stage 2 Well that pumps other than 1 or runs dry'
+  if (r.stage === 2 && r.phase === 'shop' && r.shop.cards.some(k => k && (CARDS[k].era ?? 1) < 2)) return 'a stage 1 card in the stage 2 shop'
   if (r.loss?.reason === 'ousted' && r.exposure < CONFIG.exposureMax) return 'ousted below the top'
   if (r.loss?.reason === 'ruined' && r.gold >= 0) return 'ruined with gold left'
   if (r.ap < 0) return `ap ${r.ap}`

@@ -26,24 +26,24 @@ function inStage2(hand: CardKey[] = [], threat: ThreatKind = 'muckraker', seed =
 const inHand = (r: Run, k: CardKey) => r.hand.find(c => c.key === k)!
 
 describe('incorporation (stage 1 → 2)', () => {
-  it('turns every standing Well into a Field that never runs dry', () => {
+  it('turns every standing Well into a Field: 1 oil, never runs dry', () => {
     const r = act(afterBaron(), { type: 'continue' })
     expect(r.phase).toBe('incorporate')
     expect(r.stage).toBe(2)
     expect(r.plots[0]).toMatchObject({ field: true, output: 1 })
     expect(r.plots[1]).toBeNull()
-    expect(r.plots[2]).toMatchObject({ field: true, output: 2 })
+    expect(r.plots[2]).toMatchObject({ field: true, output: 1 }) // a 2-oil Well becomes a 1-oil Field
     expect(r.plots[2]!.unstable).toBeFalsy()
   })
 
-  it('wears out your Prospects and gives you one fresh Survey and a Pay a Dividend', () => {
+  it('wears out your Prospects and gives you a Steel Derrick, a Pay a Dividend and an Expense Account', () => {
     const before = afterBaron()
     const prospects = before.deck.filter(c => c.key === 'prospect').length
     const r = act(before, { type: 'continue' })
     expect(r.deck.filter(c => c.key === 'prospect')).toHaveLength(0)
     expect(r.deck.filter(c => c.key === 'oldProspect')).toHaveLength(prospects)
-    expect(r.deck.filter(c => c.key === 'survey')).toHaveLength(1)
-    expect(r.deck.filter(c => c.key === 'payDividend')).toHaveLength(1)
+    for (const k of ['derrick', 'payDividend', 'expenseAccount'] as const) expect(r.deck.filter(c => c.key === k)).toHaveLength(1)
+    expect(r.deck.some(c => c.key === 'survey')).toBe(false)
   })
 
   it('offers a 10K loan that adds 1K a turn to Bank Debt, once', () => {
@@ -105,22 +105,22 @@ describe('stage 2 economy', () => {
     expect(r.plots[1]).toBeNull()
   })
 
-  it('Survey claims 1 plot and 1 Well; the worn Prospect only adds a Well', () => {
-    let r = inStage2(['survey', 'oldProspect'])
-    r.plots = [{ output: 1, reserve: 3, field: true }, null]
-    r.ap = 4
-    r = act(r, { type: 'play', cardId: inHand(r, 'survey').id })
+  it('stage 2 Wells claim their own plot, pump 1 and never run dry, old Well cards included', () => {
+    let r = inStage2(['derrick', 'wildcat', 'oldProspect'])
+    r.plots = [{ output: 1, reserve: 3, field: true }]
+    r.ap = 5; r.storage = 20; r.oil = 0
+    r = act(r, { type: 'play', cardId: inHand(r, 'derrick').id })
+    r = act(r, { type: 'play', cardId: inHand(r, 'wildcat').id })
     expect(r.plots).toHaveLength(3)
+    expect(r.plots.slice(1).every(w => w?.lasting && w.output === 1)).toBe(true)
+    r = act(r, { type: 'play', cardId: inHand(r, 'oldProspect').id }) // a worn Prospect still gives a Well card
     expect(r.hand.filter(c => c.key === 'well')).toHaveLength(1)
-    r = act(r, { type: 'play', cardId: inHand(r, 'oldProspect').id })
-    expect(r.plots).toHaveLength(3)
-    expect(r.hand.filter(c => c.key === 'well')).toHaveLength(2)
   })
 
-  it('the worn Prospect needs an empty plot', () => {
-    const r = inStage2(['oldProspect'])
-    r.plots = [{ output: 1, reserve: 3, field: true }]
-    expect(canPlay(r, inHand(r, 'oldProspect')).ok).toBe(false)
+  it('Wells need room: 5 working plots is the most', () => {
+    const r = inStage2(['derrick'])
+    r.plots = Array.from({ length: 5 }, () => ({ output: 1, reserve: 0, lasting: true }))
+    expect(canPlay(r, inHand(r, 'derrick')).ok).toBe(false)
   })
 
   it('oil sells for more in stage 2, and skimming costs more', () => {
@@ -129,7 +129,7 @@ describe('stage 2 economy', () => {
     expect(skimRate(r)).toBe(CONFIG.skimRate2[1])
   })
 
-  it('a Rotary Rig turns your best Well into a Field', () => {
+  it('a Rotary Rig (no longer sold) still turns a Well into a Field', () => {
     let r = inStage2(['rotaryRig'])
     r.plots = [{ output: 1, reserve: 2 }, { output: 2, reserve: 1 }]
     r = act(r, { type: 'play', cardId: inHand(r, 'rotaryRig').id })
@@ -139,17 +139,18 @@ describe('stage 2 economy', () => {
 })
 
 describe('Board Exposure', () => {
-  it('rises with each skim, and the board blocks a skim that would oust you', () => {
-    let r = inStage2([])
-    r.phase = 'shop'; r.exposure = 5; r.capital = 50
-    r = act(r, { type: 'skim', gold: 3 })
-    expect(r.exposure).toBe(6)
-    r = act(r, { type: 'skim', gold: 1 })
-    expect(r.exposure).toBe(7)
-    const gold = r.gold
-    r = act(r, { type: 'skim', gold: 1 })
-    expect(r.gold).toBe(gold) // refused at 7
-    expect(r.exposure).toBe(7)
+  it('skimming is a card from stage 2: from $4 a gold, +1 Exposure each time', () => {
+    let r = inStage2(['expenseAccount'])
+    const cap = r.capital, gold = r.gold
+    expect(skimRate(r)).toBe(4)
+    r = act(r, { type: 'play', cardId: inHand(r, 'expenseAccount').id })
+    expect(r.gold).toBe(gold + 1)
+    expect(r.capital).toBe(cap - 4)
+    expect(r.exposure).toBe(1)
+    r.phase = 'shop'
+    const g = r.gold
+    r = act(r, { type: 'skim', gold: 1 }) // no side-door skim in the Exchange
+    expect(r.gold).toBe(g)
   })
 
   it('dividends bring it down: the shop for −2, the card for −1', () => {
@@ -232,13 +233,13 @@ describe('your own fortune', () => {
 })
 
 describe('stage 2 enemies', () => {
-  it('the Saboteur wrecks a Field back into a Well that will run dry', () => {
+  it('the Saboteur wrecks the marked Field', () => {
     let r = inStage2([], 'saboteur')
-    r.plots = [{ output: 1, reserve: 9, field: true }, { output: 1, reserve: 4 }]
+    r.plots = [{ output: 1, reserve: 9, field: true }, { output: 1, reserve: 0, lasting: true }]
     r.marked = 0
     r = act(r, { type: 'endTurn' }) // Wreck
-    expect(r.plots[0]!.field).toBeFalsy()
-    expect(r.plots[0]!.reserve).toBeLessThanOrEqual(CONFIG.wreckReserve)
+    expect(r.plots[0]).toBeNull()
+    expect(r.plots[1]).toBeTruthy()
   })
 
   it("the Railroad Commission's Proration caps next turn's pumping", () => {
@@ -289,3 +290,16 @@ describe('the end of stage 2', () => {
 })
 
 void incorporate
+
+describe('the Exchange', () => {
+  it('sells only stage 2 cards', () => {
+    for (let seed = 1; seed < 40; seed++) {
+      let r = inStage2(['lawyerUp'], 'muckraker', seed)
+      r.threats[0].hold = 1
+      r = act(r, { type: 'play', cardId: inHand(r, 'lawyerUp').id })
+      expect(CARDS[r.spoils!].era).toBe(2)
+      r = act(act(r, { type: 'sellSpoils' }), { type: 'continue' })
+      for (const k of r.shop.cards) expect(CARDS[k!].era).toBe(2)
+    }
+  })
+})

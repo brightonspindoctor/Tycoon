@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { BOONS, CARDS, ITEMS, PROSPECT_FOR } from '../engine/data'
-import { canUpgrade, skimRate, type Action, type Run } from '../engine/engine'
+import { BOONS, CARDS, ITEMS, PROSPECT_FOR, WATER_FOR } from '../engine/data'
+import { canUpgrade, skimRate, waterPrice, type Action, type Run } from '../engine/engine'
 import { ERA_THEME, SHOP_NAME, money, units } from '../engine/format'
 import { ExposureMeter } from './Exposure'
 import { CONFIG } from '../engine/config'
@@ -14,12 +14,12 @@ export function ShopScreen({ run, dispatch }: Props) {
   const [mode, setMode] = useState<Mode>(null)
   const st = run.stage
   const rate = skimRate(run)
-  const nextRate = CONFIG.skimRate[run.round + 1] ?? rate
+  const nextRate = (st >= 2 ? CONFIG.skimRate2 : CONFIG.skimRate)[run.round + 1] ?? rate
   const plotsLeft = CONFIG.maxPlots - run.plots.length
   const can = (cost: number) => run.capital - cost >= 1
   const stage2 = st >= 2
-  const prospectKey = PROSPECT_FOR[st] ?? 'survey'
-  const skimBlocked = stage2 && run.exposure + 1 >= CONFIG.exposureMax
+  const prospectKey = PROSPECT_FOR[st] ?? 'derrick'
+  const waterKey = WATER_FOR[st] ?? 'extinguisher'
 
   return (
     <div className="screen shop" data-theme={ERA_THEME[st] ?? 'victorian'}>
@@ -41,12 +41,14 @@ export function ShopScreen({ run, dispatch }: Props) {
                   why={can(CARDS[k].price!) ? undefined : 'Too expensive'} onClick={() => dispatch({ type: 'buyCard', slot: i })} />
               ) : <div key={i} className="sold">Sold</div>)}
               <div className="prospect-slot">
-                {run.shop.bucketSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -8, key: 'bucket', uses: null }} stage={st} price={money(CONFIG.bucketPrice, st)} playable={can(CONFIG.bucketPrice)} onClick={() => dispatch({ type: 'buyBucket' })} />}
+                {run.shop.bucketSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -8, key: waterKey, uses: CARDS[waterKey].uses }} stage={st} price={money(waterPrice(run), st)} playable={can(waterPrice(run))} onClick={() => dispatch({ type: 'buyBucket' })} />}
                 <span className="res-note">One per visit.</span>
               </div>
               <div className="prospect-slot">
-                {run.shop.prospectSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -9, key: prospectKey, uses: 1 }} stage={st} price={money(run.prospectPrice, st)} playable={can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })} />}
-                <span className="res-note">One per visit{stage2 ? `, and the price climbs ${money(CONFIG.surveyStep, st)} each time` : ''}. {plotsLeft > 1 ? `${plotsLeft} plots left to claim.` : plotsLeft === 1 ? 'Only 1 plot left to claim.' : run.plots.some(p => !p) ? 'All land claimed; fills empty plots.' : 'All land claimed.'}</span>
+                {run.shop.prospectSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -9, key: prospectKey, uses: CARDS[prospectKey].uses }} stage={st} price={money(run.prospectPrice, st)} playable={can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })} />}
+                <span className="res-note">{stage2
+                  ? `One per visit. The price climbs ${money(CONFIG.derrickStep, st)} each time. ${run.plots.length >= CONFIG.maxPlots && !run.plots.some(p => !p) ? 'All 5 plots are working.' : 'Claims its own plot.'}`
+                  : `One per visit. ${plotsLeft > 1 ? `${plotsLeft} plots left to claim.` : plotsLeft === 1 ? 'Only 1 plot left to claim.' : run.plots.some(p => !p) ? 'All land claimed; fills empty plots.' : 'All land claimed.'}`}</span>
               </div>
             </div>
           </section>
@@ -130,11 +132,11 @@ export function ShopScreen({ run, dispatch }: Props) {
           <ExposureMeter run={run} />
           <section className="fortune fortune--skim">
             <div><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b></div>
-            <p>{stage2 ? (skimBlocked ? 'The board is watching too closely to skim. Pay dividends first.' : 'Every skim also raises Board Exposure by 1, however much you take.') : "Gold can't buy anything here. Every dollar you skim comes off the company's health."}</p>
+            <p>{stage2 ? 'Skimming is done with an Expense Account card during a round: one gold at a time, +1 Board Exposure each.' : "Gold can't buy anything here. Every dollar you skim comes off the company's health."}</p>
             <span className="res-note">Rate now: <b>{money(rate, st)} → 1 gold</b>{nextRate !== rate ? ` · Round ${run.round + 1}: ${money(nextRate, st)}` : ''}</span>
-            <div className="skim-buttons">
-              {[1, 2, 3].map(g => <button key={g} type="button" className="cl-btn cl-btn--skim" disabled={!can(g * rate) || skimBlocked} onClick={() => dispatch({ type: 'skim', gold: g })}>{g} gold · {money(g * rate, st)}</button>)}
-            </div>
+            {!stage2 && <div className="skim-buttons">
+              {[1, 2, 3].map(g => <button key={g} type="button" className="cl-btn cl-btn--skim" disabled={!can(g * rate)} onClick={() => dispatch({ type: 'skim', gold: g })}>{g} gold · {money(g * rate, st)}</button>)}
+            </div>}
           </section>
           <div className="events">{run.events.slice(0, 2).map((e, i) => <p key={i}>{units(e, st)}</p>)}</div>
           <button type="button" className="cl-btn cl-btn--primary leave" onClick={() => dispatch({ type: 'leaveShop' })}>{run.round === 0 ? 'Begin round 1' : 'Leave shop'}</button>

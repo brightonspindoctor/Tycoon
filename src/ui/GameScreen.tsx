@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, MODS, THREATS } from '../engine/data'
 import {
-  apCost, canPlay, cardDef, damageFor, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, plotName, price, production, skimRate,
+  apCost, canPlay, cardDef, damageFor, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run,
 } from '../engine/engine'
 import { ERA_THEME, FIELD_PLACE, STAGE_TITLE, money, units, year } from '../engine/format'
@@ -93,7 +93,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
                   </button> : <div className="plot__hole" />}
                   <span className="plot__name">{w ? plotName(run, i) : '—'}</span>
                   <span className="plot__state">{state}</span>
-                  {w && (w.field ? <span className="plot__state plot__forever">Never runs dry</span> : <span className={`plot__state ${w.reserve <= w.output * 2 ? 'cl-minus' : ''}`}>{w.reserve} bbl left</span>)}
+                  {w && (neverDry(w) ? <span className="plot__state plot__forever">Never runs dry</span> : <span className={`plot__state ${w.reserve <= w.output * 2 ? 'cl-minus' : ''}`}>{w.reserve} bbl left</span>)}
                   {marked && <span className="plot__flag">Marked</span>}
                   {burning && <span className="plot__flag plot__flag--fire">Burns next</span>}
                   {plotMenu === i && w && (

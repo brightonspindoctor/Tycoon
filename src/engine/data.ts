@@ -13,6 +13,7 @@ export type CardKey =
   | 'survey' | 'oldProspect' | 'rotaryRig' | 'telegraphLine' | 'tickerTape' | 'nightShift' | 'efficiencyExpert'
   | 'streamline' | 'shredFiles' | 'scrapParts' | 'cleanHouse' | 'patentThicket' | 'espionage' | 'poachEngineer'
   | 'rdSprint' | 'payDividend' | 'personalLawyer' | 'ceaseDesist' | 'proxyBallot'
+  | 'derrick' | 'extinguisher' | 'securityDetail' | 'insurance' | 'expenseAccount'
 
 export interface CardDef {
   name: string
@@ -97,38 +98,48 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Add 1 Well card to your hand. No new land.', flavour: 'Every inch of it already drilled.' },
   rotaryRig: { name: 'Rotary Rig', era: 2, ap: 1, cost: 0, uses: 1, family: 'Production', power: 0, icon: 'gear', price: 4, rarity: 'Common',
     text: 'Turn your best Well into a Field. Fields never run dry.', flavour: 'Through rock the old rigs never reached.' },
-  telegraphLine: { name: 'Telegraph Line', era: 2, ap: 0, cost: 0, uses: null, family: 'Tempo', power: 0, draw: 1, icon: 'telegraph', price: 3, rarity: 'Common',
+  telegraphLine: { name: 'Telegraph Line', era: 2, ap: 0, cost: 0, uses: null, family: 'Tempo', power: 0, draw: 1, icon: 'telegraph', price: 5, rarity: 'Common',
     text: 'Draw 1 card.', flavour: 'Word travels. Yours first.' },
-  tickerTape: { name: 'Ticker Tape', era: 2, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 1, draw: 2, icon: 'shares', price: 4, rarity: 'Uncommon',
+  tickerTape: { name: 'Ticker Tape', era: 2, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 1, draw: 2, icon: 'shares', price: 6, rarity: 'Uncommon',
     text: 'Draw 2 cards. Oil sells +$1 this turn.', flavour: 'Buy on the rumour.' },
-  nightShift: { name: 'Night Shift', era: 2, ap: 0, cost: 0, uses: null, family: 'Tempo', power: 2, apNext: 1, icon: 'graft', price: 3, rarity: 'Common',
+  nightShift: { name: 'Night Shift', era: 2, ap: 0, cost: 0, uses: null, family: 'Tempo', power: 2, apNext: 1, icon: 'graft', price: 5, rarity: 'Common',
     text: '+2 AP now. −1 AP next turn.', flavour: 'The lamps never go out.' },
-  efficiencyExpert: { name: 'Efficiency Expert', era: 2, ap: 1, cost: 2, uses: null, family: 'Tempo', power: 0, draw: 3, icon: 'deed', price: 4, rarity: 'Common',
+  efficiencyExpert: { name: 'Efficiency Expert', era: 2, ap: 1, cost: 2, uses: null, family: 'Tempo', power: 0, draw: 3, icon: 'deed', price: 6, rarity: 'Common',
     text: 'Pay $2. Draw 3 cards.', flavour: 'He has timed your lunch.' },
-  streamline: { name: 'Streamline', era: 2, ap: 1, cost: 0, uses: null, family: 'Scrap', power: 0, scrap: 'one', icon: 'redtape', price: 3, rarity: 'Common',
+  streamline: { name: 'Streamline', era: 2, ap: 1, cost: 0, uses: null, family: 'Scrap', power: 0, scrap: 'one', icon: 'redtape', price: 5, rarity: 'Common',
     text: 'Destroy a card in your hand.', flavour: 'Fewer moving parts.' },
-  shredFiles: { name: 'Shred the Files', era: 2, ap: 0, cost: 0, uses: null, family: 'Scrap', power: 0, scrap: 'one', exposure: 1, icon: 'redtape', price: 2, rarity: 'Common',
+  shredFiles: { name: 'Shred the Files', era: 2, ap: 0, cost: 0, uses: null, family: 'Scrap', power: 0, scrap: 'one', exposure: 1, icon: 'redtape', price: 4, rarity: 'Common',
     text: 'Destroy a card in your hand. +1 Board Exposure.', flavour: 'What files?' },
-  scrapParts: { name: 'Scrap for Parts', era: 2, ap: 0, cost: 0, uses: null, family: 'Scrap', power: 0, scrap: 'one', goldBack: 1, icon: 'gear', price: 3, rarity: 'Common',
-    text: 'Destroy a card in your hand. +$1.', flavour: 'Waste not.' },
-  cleanHouse: { name: 'Clean House', era: 2, ap: 1, cost: 0, uses: null, family: 'Scrap', power: 0, scrap: 'junk', icon: 'bucket', price: 4, rarity: 'Uncommon',
+  scrapParts: { name: 'Scrap for Parts', era: 2, ap: 0, cost: 0, uses: null, family: 'Scrap', power: 0, scrap: 'one', goldBack: 2, icon: 'gear', price: 5, rarity: 'Common',
+    text: 'Destroy a card in your hand. +$2.', flavour: 'Waste not.' },
+  cleanHouse: { name: 'Clean House', era: 2, ap: 1, cost: 0, uses: null, family: 'Scrap', power: 0, scrap: 'junk', icon: 'bucket', price: 6, rarity: 'Uncommon',
     text: 'Destroy every junk card in your hand. Draw that many.', flavour: 'Under new management.' },
-  patentThicket: { name: 'Patent Thicket', era: 2, ap: 1, cost: 2, uses: null, family: 'Legal', power: 5, icon: 'deed', price: 5, rarity: 'Common',
-    text: 'Pay $2. Remove 5 Hold.', flavour: 'Forty patents. One invention.' },
-  espionage: { name: 'Industrial Espionage', era: 2, ap: 1, cost: 0, uses: null, family: 'Dirty', power: 6, exposure: 1, icon: 'envelope', price: 5, rarity: 'Uncommon',
-    text: 'Remove 6 Hold. +1 Board Exposure.', flavour: 'Their blueprints, your letterhead.' },
-  poachEngineer: { name: 'Poach an Engineer', era: 2, ap: 1, cost: 0, uses: null, family: 'Dirty', power: 3, draw: 1, icon: 'wages', price: 4, rarity: 'Common',
-    text: 'Remove 3 Hold. Draw 1 card.', flavour: 'Double the salary. Half the scruples.' },
-  rdSprint: { name: 'R&D Sprint', era: 2, ap: 1, cost: 0, uses: null, family: 'Production', power: 1, icon: 'barrels', price: 4, rarity: 'Uncommon',
+  patentThicket: { name: 'Patent Thicket', era: 2, ap: 1, cost: 2, uses: null, family: 'Legal', power: 7, icon: 'deed', price: 7, rarity: 'Common',
+    text: 'Pay $2. Remove 7 Hold.', flavour: 'Forty patents. One invention.' },
+  espionage: { name: 'Industrial Espionage', era: 2, ap: 1, cost: 0, uses: null, family: 'Dirty', power: 9, exposure: 1, icon: 'envelope', price: 8, rarity: 'Uncommon',
+    text: 'Remove 9 Hold. +1 Board Exposure.', flavour: 'Their blueprints, your letterhead.' },
+  poachEngineer: { name: 'Poach an Engineer', era: 2, ap: 1, cost: 0, uses: null, family: 'Dirty', power: 5, draw: 1, icon: 'wages', price: 6, rarity: 'Common',
+    text: 'Remove 5 Hold. Draw 1 card.', flavour: 'Double the salary. Half the scruples.' },
+  rdSprint: { name: 'R&D Sprint', era: 2, ap: 1, cost: 0, uses: null, family: 'Production', power: 1, icon: 'barrels', price: 6, rarity: 'Uncommon',
     text: '+1 oil from every Field now.', flavour: 'Results by Friday.' },
-  payDividend: { name: 'Pay a Dividend', era: 2, ap: 1, cost: 3, uses: null, family: 'Board', power: 0, exposure: -1, icon: 'shares', price: 2, rarity: 'Common',
+  payDividend: { name: 'Pay a Dividend', era: 2, ap: 1, cost: 3, uses: null, family: 'Board', power: 0, exposure: -1, icon: 'shares', price: 4, rarity: 'Common',
     text: 'Pay $3. −1 Board Exposure.', flavour: 'Gentlemen, a token of our esteem.' },
-  personalLawyer: { name: 'Personal Lawyer', era: 2, ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, icon: 'deed', price: 3, rarity: 'Common',
+  personalLawyer: { name: 'Personal Lawyer', era: 2, ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, icon: 'deed', price: 5, rarity: 'Common',
     text: 'Your fortune is safe this turn: the next gold an enemy takes is blocked.', flavour: 'Retained for the family.' },
   ceaseDesist: { name: 'Cease and Desist', era: 2, ap: 1, cost: 0, uses: 1, family: 'Junk', power: 0, icon: 'redtape', forced: true, junk: true,
     text: 'Must play. Does nothing.', flavour: 'Pursuant to patent No. 1,042,117.' },
   proxyBallot: { name: 'Proxy Ballot', era: 2, ap: 0, cost: 0, uses: 1, family: 'Junk', power: 0, exposure: 1, icon: 'envelope', forced: true, junk: true,
     text: 'Must play. +1 Board Exposure. Then it\'s gone.', flavour: 'Signed on behalf of a widow in Ohio.' },
+  derrick: { name: 'Steel Derrick', era: 2, ap: 1, cost: 0, uses: 1, family: 'Production', power: 1, icon: 'derrick', price: CONFIG.derrickPrice,
+    text: 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty.', flavour: 'Riveted, not nailed.' },
+  extinguisher: { name: 'Chemical Engine', era: 2, ap: 1, cost: 0, uses: null, family: 'Water', power: 2, icon: 'hose', price: CONFIG.bucketPrice2,
+    text: 'Put out two fires.', flavour: 'Soda, acid, and a brass bell.' },
+  securityDetail: { name: 'Security Detail', era: 2, ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, stop: true, oncePerRound: true, cover: 2, icon: 'cudgels', price: 6, rarity: 'Common',
+    text: "Stop one enemy's next move this turn. +2 Cover. One stop card per round.", flavour: 'Men in good suits, standing very still.' },
+  insurance: { name: 'Insurance Policy', era: 2, ap: 1, cost: 1, uses: null, family: 'Defence', power: 0, cover: 5, icon: 'deed', price: 5, rarity: 'Common',
+    text: 'Pay $1. +5 Cover this turn.', flavour: 'Acts of God excluded. Acts of you, also excluded.' },
+  expenseAccount: { name: 'Expense Account', era: 2, ap: 0, cost: 0, uses: null, family: 'Skim', power: 1, exposure: 1, icon: 'cashbox', price: 5, rarity: 'Common',
+    text: 'Skim: pay the rate, get 1 gold. +1 Board Exposure.', flavour: 'Entertaining clients. Some of them real.' },
 }
 
 /** Upgraded versions (bought in the shop from stage 2, or at incorporation). Name gets a +. */
@@ -157,23 +168,31 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   efficiencyExpert: { cost: 0, text: 'Draw 3 cards.' },
   streamline: { ap: 0, text: 'Destroy a card in your hand. Costs no AP.' },
   shredFiles: { exposure: 0, text: 'Destroy a card in your hand.' },
-  scrapParts: { goldBack: 2, text: 'Destroy a card in your hand. +$2.' },
+  scrapParts: { goldBack: 3, text: 'Destroy a card in your hand. +$3.' },
   cleanHouse: { ap: 0, text: 'Destroy every junk card in your hand. Draw that many. Costs no AP.' },
-  patentThicket: { power: 7, text: 'Pay $2. Remove 7 Hold.' },
-  espionage: { power: 8, text: 'Remove 8 Hold. +1 Board Exposure.' },
-  poachEngineer: { power: 4, text: 'Remove 4 Hold. Draw 1 card.' },
+  patentThicket: { power: 10, text: 'Pay $2. Remove 10 Hold.' },
+  espionage: { power: 12, text: 'Remove 12 Hold. +1 Board Exposure.' },
+  poachEngineer: { power: 7, text: 'Remove 7 Hold. Draw 1 card.' },
   rdSprint: { power: 2, text: '+2 oil from every Field now.' },
   payDividend: { exposure: -2, text: 'Pay $3. −2 Board Exposure.' },
   personalLawyer: { ap: 0, text: 'Your fortune is safe this turn: the next gold an enemy takes is blocked. Costs no AP.' },
+  derrick: { ap: 0, text: 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty. Costs no AP.' },
+  extinguisher: { power: 3, text: 'Put out every fire.' },
+  securityDetail: { cover: 4, text: "Stop one enemy's next move this turn. +4 Cover. One stop card per round." },
+  insurance: { cost: 0, cover: 7, text: '+7 Cover this turn.' },
+  expenseAccount: { exposure: 0, text: 'Skim: pay the rate, get 1 gold. The board never sees it.' },
 }
 
 export const STARTER: CardKey[] = ['prospect', 'hiredHand', 'hiredHand', 'lawyerUp', 'shoreUp', 'bucket', 'bucket', 'improveGear', 'hardGraft']
 export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBrigade', 'payWages', 'dynamite', 'bribe', 'wildcat', 'telegram', 'hardGraft', 'payOff']
+// stage 2 sells only stage 2 cards: better than stage 1's, and dearer
 export const SHOP_POOL_2: CardKey[] = ['telegraphLine', 'tickerTape', 'nightShift', 'efficiencyExpert', 'streamline', 'shredFiles', 'scrapParts', 'cleanHouse',
-  'patentThicket', 'espionage', 'poachEngineer', 'rdSprint', 'rotaryRig', 'payDividend', 'personalLawyer', 'lawyerUp', 'shoreUp', 'fireBrigade', 'hardGraft']
+  'patentThicket', 'espionage', 'poachEngineer', 'rdSprint', 'payDividend', 'personalLawyer', 'securityDetail', 'insurance', 'expenseAccount']
 export const shopPool = (stage: number): CardKey[] => (stage >= 2 ? SHOP_POOL_2 : SHOP_POOL)
-/** The Prospect card each stage sells. */
-export const PROSPECT_FOR: Record<number, CardKey> = { 1: 'prospect', 2: 'survey' }
+/** The land card each stage's shop always stocks: a Prospect in stage 1, a Steel Derrick (a Well) from stage 2. */
+export const PROSPECT_FOR: Record<number, CardKey> = { 1: 'prospect', 2: 'derrick' }
+/** The fire card each stage's shop always stocks. */
+export const WATER_FOR: Record<number, CardKey> = { 1: 'bucket', 2: 'extinguisher' }
 export const PROSPECTS: CardKey[] = ['prospect', 'survey', 'oldProspect']
 export const ATTACK_CARDS: CardKey[] = ['hiredHand', 'lawyerUp', 'dynamite']
 

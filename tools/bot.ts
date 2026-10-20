@@ -4,7 +4,7 @@ import { CARDS, PROSPECT_FOR, type CardKey } from '../src/engine/data'
 import { CONFIG } from '../src/engine/config'
 
 // which cards are worth upgrading first
-const UPGRADE_ORDER: CardKey[] = ['lawyerUp', 'payWages', 'hiredHand', 'patentThicket', 'espionage', 'dynamite', 'payDividend', 'oldProspect', 'improveGear', 'shoreUp', 'bucket']
+const UPGRADE_ORDER: CardKey[] = ['lawyerUp', 'payWages', 'hiredHand', 'patentThicket', 'espionage', 'dynamite', 'payDividend', 'expenseAccount', 'improveGear', 'shoreUp', 'insurance']
 
 /** Stage 1 → 2: take the loan when cash is short, upgrade the best cards, drop junk. */
 export function botIncorporate(r: Run): Run {
@@ -26,10 +26,11 @@ export function botShop(r: Run): Run {
   if (junk && r.capital > r.destroyCost + 6) r = act(r, { type: 'destroyCard', cardId: junk.id })
   // Prospect is single use: rebuy one when there is land to claim or an empty plot to fill
   const roomForWells = r.plots.length < 5 || r.plots.some(p => !p)
-  const prospectKey = PROSPECT_FOR[r.stage] ?? 'survey'
-  if (roomForWells && !r.deck.some(c => c.key === prospectKey) && r.capital > r.prospectPrice + 6) r = act(r, { type: 'buyProspect' })
+  const prospectKey = PROSPECT_FOR[r.stage] ?? 'derrick'
+  const wantWell = stage2 ? r.deck.filter(c => c.key === 'derrick' || c.key === 'well').length < 5 - r.plots.filter(Boolean).length : !r.deck.some(c => c.key === prospectKey)
+  if (roomForWells && wantWell && r.capital > r.prospectPrice + 6) r = act(r, { type: 'buyProspect' })
   const want = stage2
-    ? ['patentThicket', 'espionage', 'poachEngineer', 'rotaryRig', 'payDividend', 'lawyerUp', 'personalLawyer', 'shoreUp']
+    ? ['patentThicket', 'espionage', 'poachEngineer', 'securityDetail', 'insurance', 'payDividend', 'personalLawyer', 'expenseAccount']
     : ['payWages', 'dynamite', 'lawyerUp', 'fireBrigade', 'shoreUp']
   for (let i = 0; i < r.shop.cards.length; i++) {
     const k = r.shop.cards[i]
@@ -39,9 +40,6 @@ export function botShop(r: Run): Run {
   if (stage2) {
     const up = UPGRADE_ORDER.map(k => r.deck.find(x => x.key === k && canUpgrade(x))).find(Boolean)
     if (up && r.capital > r.upgradeCost + 14) r = act(r, { type: 'upgradeCard', cardId: up.id })
-    // a little gold for later, while the board isn't looking and the company can afford it
-    if (r.exposure <= 3 && r.capital > 3 * skimRate(r) + 18) r = act(r, { type: 'skim', gold: 3 })
-    else if (r.gold < 2 && r.exposure <= 4 && r.capital > skimRate(r) + 12) r = act(r, { type: 'skim', gold: 1 })
   }
   return act(r, { type: 'leaveShop' })
 }
@@ -53,15 +51,16 @@ export function botTurn(r: Run): Run {
     const playable = r.hand.filter(c => canPlay(r, c).ok)
     const forced = playable.find(c => CARDS[c.key].forced)
     const find = (k: string) => playable.find(c => c.key === k)
-    const water = find('fireBrigade') ?? find('bucket')
+    const water = find('fireBrigade') ?? find('extinguisher') ?? find('bucket')
     const attack = playable.find(c => isAttack(c.key))
     const building = playable.find(c => c.key === 'well' || c.key === 'wildcat')
     const prospect = playable.find(c => ['prospect', 'survey', 'oldProspect'].includes(c.key))
     const graft = find('hardGraft')
     const petty = find('pettyCash')
-    const stop = find('shoreUp')
+    const stop = find('shoreUp') ?? find('securityDetail')
     const draw = find('telegraphLine') ?? find('tickerTape') ?? (r.capital > 8 ? find('efficiencyExpert') : undefined)
-    const rig = find('rotaryRig')
+    const rig = find('rotaryRig') ?? find('derrick')
+    const expense = r.exposure <= 3 && r.capital > skimRate(r) + 12 ? find('expenseAccount') : undefined
     const sprint = find('rdSprint')
     const night = find('nightShift')
     const dividend = r.exposure >= 4 && r.capital > 8 ? find('payDividend') : undefined
@@ -89,6 +88,7 @@ export function botTurn(r: Run): Run {
     else if (r.oil > 0 && netPrice(r) > 0 && !r.current.refuse) choice = act(r, { type: 'sellOil' })
     else if (stop) choice = act(r, { type: 'play', cardId: stop.id })
     else if (petty && r.capital > 10 && r.exposure <= 3) choice = act(r, { type: 'play', cardId: petty.id })
+    else if (expense) choice = act(r, { type: 'play', cardId: expense.id })
     else if (graft && r.ap === 0 && r.hand.some(c => c.key !== 'hardGraft' && CARDS[c.key].ap === 1)) choice = act(r, { type: 'play', cardId: graft.id })
     if (!choice || choice === r || JSON.stringify(choice) === JSON.stringify(r)) break
     r = choice

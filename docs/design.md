@@ -85,21 +85,24 @@ Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtow
 ## Stage 2 rules (as built) · 1901–1930 · Technical race · Art Deco
 ### Incorporation (between stages)
 Beating the Baron pays **3 gold** (every boss does). Then the company incorporates:
-- Every standing Well becomes a **Field**: same output, never runs dry. Unstable is cleared. A Field sells for $8. New Wells built in stage 2 still run dry.
-- Every Prospect left in your deck becomes a **Worn Prospect** (2 AP: 1 Well card, no new land; needs an empty plot). One fresh **Survey** (2 AP: claim 1 plot, 1 Well card) and one **Pay a Dividend** join your deck.
+- A page-turn transition: the Victorian ledger page lifts away, the year rolls 1890 → 1901, INCORPORATED is stamped (tap to skip). Then the Incorporated screen.
+- Every standing Well becomes a **Field**: 1 oil a turn, never runs dry. Unstable is cleared. A Field sells for $8.
+- **Prospecting is over.** Every Prospect left in your deck becomes a **Worn Prospect** (2 AP: 1 Well card). A **Steel Derrick**, a **Pay a Dividend** and an **Expense Account** join your deck.
 - The bank offers a **10K loan**: +$10K now, Bank Debt +$1K a turn for good. Take it or leave it.
 - You can **upgrade** cards (from $3, rising $1 each time; once per card) and **destroy** cards (the usual rising price).
 - Board Exposure starts at 1 for every 3 gold skimmed in stage 1, up to 3.
 - The Trust Fund's debt relief ends: normal Bank Debt from here.
 
 ### Economy
-- Oil sells at **$4** (the motor car arrives). Skim rates: $2, $2, $3, $4, $5 per gold.
-- The shop is **The Exchange**. Its Prospect is the Survey: one per visit, from $5, rising $2 each time.
+- Oil sells at **$4** (the motor car arrives).
+- **Every Well pumps 1 oil and never runs dry** in stage 2, old Well and Wildcat cards included. A Well card claims a new plot if none is empty (5 plots at most).
+- **Skimming is a card**: the Expense Account (0 AP, pay the rate for 1 gold, +1 Exposure; $5 in the shop). The rate starts at $4 a gold and rises each round: $4, $4, $5, $6, $7. The Exchange has no skim buttons.
+- The shop is **The Exchange**. It sells **only stage 2 cards**, stronger and dearer than stage 1's ($4–8). Its staples: a **Steel Derrick** (a Well) one per visit from $6, rising $2 each time, and a **Chemical Engine** ($3: put out two fires).
 - Exchange extras: **Upgrade a card**, and **Pay dividends** ($4: Exposure −2, once per visit).
 - Items: Refinery ($8: oil +$1), Pipeline ($6: no freight), Offshore Account ($5: enemies take 1 less gold), plus the stage 1 items.
 
 ### Board Exposure (0 to 8)
-- **Rises:** +1 per skim at the shop (any amount; refused if it would reach 8), +1 per Petty Cash, Shred the Files and Industrial Espionage, +1 when a round ends with less Capital than it started (a bad quarter), and from enemies.
+- **Rises:** +1 per Expense Account or Petty Cash skim, Shred the Files and Industrial Espionage, +1 when a round ends with less Capital than it started (a bad quarter), and from enemies.
 - **Falls:** Pay a Dividend card (−1; upgraded −2), the Exchange's dividends (−2), +Capital over a round (a good quarter, −1), beating the Muckraker or the Clawback Committee (−1). The quarter check doesn't apply after the boss.
 - **High at 5+:** the Clawback Committee takes gold instead of cash.
 - **At 8: ousted.**
@@ -120,16 +123,18 @@ Each card can be upgraded once (shown with a +). Attacks hit harder (Hired Hand 
 | Efficiency Expert | 1 AP, $2 | Draw 3 |
 | Streamline | 1 AP | Destroy a card in hand (you choose) |
 | Shred the Files | 0 AP | Destroy a card in hand. +1 Exposure |
-| Scrap for Parts | 0 AP | Destroy a card in hand. +$1 |
+| Scrap for Parts | 0 AP | Destroy a card in hand. +$2 |
 | Clean House | 1 AP | Destroy every junk card in hand, draw that many |
-| Patent Thicket | 1 AP, $2 | Legal, remove 5 Hold |
-| Industrial Espionage | 1 AP | Dirty, remove 6 Hold. +1 Exposure |
-| Poach an Engineer | 1 AP | Dirty, remove 3 Hold. Draw 1 |
+| Patent Thicket | 1 AP, $2 | Legal, remove 7 Hold |
+| Industrial Espionage | 1 AP | Dirty, remove 9 Hold. +1 Exposure |
+| Poach an Engineer | 1 AP | Dirty, remove 5 Hold. Draw 1 |
 | R&D Sprint | 1 AP | +1 oil from every Field now |
-| Rotary Rig | 1 AP, single use | Turn your best Well into a Field |
+| Security Detail | 1 AP | Stop one enemy's next move, +2 Cover. One stop card per round |
+| Insurance Policy | 1 AP, $1 | +5 Cover |
+| Expense Account | 0 AP | Skim: pay the rate, 1 gold, +1 Exposure |
 | Pay a Dividend | 1 AP, $3 | −1 Exposure |
 | Personal Lawyer | 1 AP | Block the next gold an enemy takes this turn |
-Destroy cards can be played even with a Must play card in hand (so they can destroy it). Plus Lawyer Up, Shore Up, Fire Brigade and Hard Graft.
+Destroy cards can be played even with a Must play card in hand (so they can destroy it). Shop prices run $4–8. The Rotary Rig is no longer sold (every stage 2 Well already lasts).
 
 ### Stage 2 enemies
 | Enemy | Role | Hold | Weak | Resists | Cycle | Notes |
@@ -138,7 +143,7 @@ Destroy cards can be played even with a Must play card in hand (so they can dest
 | The Combine | Cash | 9 | — | Legal | Price War (oil −$1) → Rebate (freight +$1) → Squeeze (−$3) | Beaten: prices and freight recover |
 | The Clawback Committee | Cash | 8 | Dirty | — | Clawback (−$4, or −2 gold at 5+ Exposure) → Minutes (+1 Exposure) | Moves first: Minutes. Beaten: −1 Exposure |
 | The Patent Holder | Engine | 10 | Legal | — | Cease and Desist (must-play junk: 1 AP, does nothing) → Royalty (−$1 per Well/Field) (+ Injunction: −1 AP in R3) | |
-| The Saboteur | Engine | 8 | Dirty | — | Wreck (marked Field becomes a Well with 3 barrels; a marked Well is destroyed) → Infiltrate (marks your best Field) | Moves first: Infiltrate. Beaten: starts a fire |
+| The Saboteur | Engine | 8 | Dirty | — | Wreck (destroys the marked Field or Well) → Infiltrate (marks your best Field) | Moves first: Infiltrate. Beaten: starts a fire |
 | The Railroad Commission | Engine | 10 | Dirty | — | Proration (next turn pump 2 at most) → Inspection (−1 AP) (+ Shut-in: a Well pumps nothing this round, in R3) | |
 | **The Proxy Fight** (boss) | Boss | 24 | Legal | Dirty | Hostile Bid (−$3, +1 each cycle) → Proxy Ballot (must-play junk: +1 Exposure) → The Vote (+1 Exposure, +1 each cycle) | Moves first: Canvass (+1 Exposure) |
 Round 2 modifiers in stage 2: Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown, Scandal (+1 Exposure). Dry Season is stage 1 only.

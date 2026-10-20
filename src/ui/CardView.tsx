@@ -20,7 +20,9 @@ export function CardView({ card, apCost, playable = true, why, selected, onClick
   const era = d.era ?? 1 // a card keeps the look of the era it came from
   const cls = ['cl-card', 'card', d.forced ? 'cl-card--forced' : '', d.junk && !d.forced ? 'card--junk' : '', selected ? 'cl-card--selected' : '', playable ? 'card--playable' : 'card--dim', small ? 'card--small' : '', d.family === 'Skim' ? 'card--skim' : '', card.up ? 'card--up' : '', marked ? `card--${marked}` : '']
   const ap = apCost ?? d.ap
-  const text = units(d.text, stage)
+  // from stage 2 every Well pumps 1 and never runs dry, old Well cards included
+  const builds = stage >= 2 && (card.key === 'well' || card.key === 'wildcat')
+  const text = units(builds ? 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty.' : d.text, stage)
   const base = CARDS[card.key].uses
   return (
     <button type="button" className={cls.filter(Boolean).join(' ')} data-theme={ERA_THEME[era] ?? 'victorian'} onClick={onClick}
