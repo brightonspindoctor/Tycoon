@@ -32,7 +32,7 @@ export function CardView({ card, apCost, playable = true, why, selected, onClick
         <div className="cl-pips" aria-hidden="true">
           {d.oncePerRound ? <span className="cl-num card-once">1 / round</span> : card.uses === null ? <span className="cl-num">∞</span> : Array.from({ length: Math.max(card.uses, d.uses ?? 0) }, (_, i) => <span key={i} className={`cl-pip ${i < card.uses! ? 'cl-pip--on' : ''}`} />)}
         </div>
-        {why && !playable && <span className="cl-label card-why">{why}</span>}
+        {why && !playable && why !== 'Not enough AP' && <span className="cl-label card-why">{why}</span>}
       </div>
     </button>
   )
