@@ -3,7 +3,7 @@ import { CONFIG } from '../engine/config'
 import { CARDS, ITEMS, MODS, THREATS } from '../engine/data'
 import {
   apCost, canPlay, damageFor, fires, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, price, production, skimRate,
-  type Action, type Run,
+  type Action, type Beat, type Run,
 } from '../engine/engine'
 import { ERA_THEME, money, year } from '../engine/format'
 import { CardView } from './CardView'
@@ -11,9 +11,10 @@ import { ThreatPanel } from './ThreatPanel'
 import { SettingsButton } from './Settings'
 import { PileView } from './PileView'
 
-interface Props { run: Run; dispatch: (a: Action) => void }
+interface Props { run: Run; dispatch: (a: Action) => void; acting?: Beat | null }
 
-export function GameScreen({ run, dispatch }: Props) {
+export function GameScreen({ run, dispatch, acting }: Props) {
+  const lit = (k: Beat['kind']) => (acting?.kind === k ? 'is-acting' : '')
   const [selected, setSelected] = useState<number | null>(null)
   const [plotMenu, setPlotMenu] = useState<number | null>(null)
   const [pile, setPile] = useState<'draw' | 'discard' | null>(null)
@@ -58,13 +59,13 @@ export function GameScreen({ run, dispatch }: Props) {
         <section className="col-threats" aria-label="Opposition">
           <span className="cl-label">Opposition{targeting ? (stopping ? ' · Choose a move to stop' : ' · Choose a target') : ''}</span>
           {run.threats.map(t => (
-            <ThreatPanel key={t.id} run={run} threat={t}
+            <ThreatPanel key={t.id} run={run} threat={t} acting={acting?.who === t.id}
               targeting={targeting && targets.some(x => x.id === t.id)}
               preview={!sel ? undefined : stopping ? (t.stopped ? 'Already stopped' : 'Stop this move') : (n => (n > 0 ? `−${n} Hold` : 'No effect'))(damageFor(CARDS[sel.key].family, CARDS[sel.key].power, t.kind))}
               onTarget={() => { dispatch({ type: 'play', cardId: sel!.id, target: t.id }); setSelected(null) }} />
           ))}
           {run.fire > 0 && (
-            <section className="hazard" aria-label={`${fires(run.fire)} burning`}>
+            <section className={`hazard ${lit('fire')}`} aria-label={`${fires(run.fire)} burning`}>
               <div className="hazard__head"><img src={`${import.meta.env.BASE_URL}art/icons/fire.png`} alt="" /><span className="cl-label">{fires(run.fire)} burning</span><span className="cl-num hazard__level">max {CONFIG.fireMax}</span></div>
               <div className="warn warn--heat"><b>End of turn</b><span>{fireNext}</span></div>
               <span className="hazard__note">Pumps stopped.</span>
@@ -99,7 +100,7 @@ export function GameScreen({ run, dispatch }: Props) {
                 </div>
               )
             })}
-            <div className={`plot plot--stock ${run.fire && run.oil > 0 ? 'plot--burning' : ''}`}>
+            <div className={`plot plot--stock ${run.fire && run.oil > 0 ? 'plot--burning' : ''} ${lit('oil')}`}>
               <span className="cl-label">Stockpile</span>
               <div className="barrels">{Array.from({ length: run.storage }, (_, i) => <span key={i} className={`barrel ${i < run.oil ? 'is-full' : ''}`} />)}</div>
               <span className="plot__name cl-num">{run.oil} / {run.storage} oil</span>
@@ -117,7 +118,7 @@ export function GameScreen({ run, dispatch }: Props) {
         </section>
 
         <aside className="col-money">
-          <section className="cl-ledger ledger" aria-label="Company ledger">
+          <section className={`cl-ledger ledger ${lit('money')}`} aria-label="Company ledger">
             <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className={`cl-ledger__total ${run.capital <= debtPerTurn(run) * 2 ? 'cl-minus' : ''}`}>{money(run.capital, st)}</span></div>
             <ul className="cl-ledger__rows">
               {run.ledger.slice(-6).map((l, i) => <li key={`${run.turn}-${i}`} className="ink-in"><span>{l.label}</span><span className={l.label === 'Brought forward' ? '' : l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{l.label === 'Brought forward' ? money(l.amount, st) : money(l.amount, st, true)}</span></li>)}
@@ -156,8 +157,8 @@ export function GameScreen({ run, dispatch }: Props) {
           </div>
         </div>
         <div className="hand-row">
-          <button type="button" className="pile pile--btn" title="See what's left to draw" onClick={() => setPile('draw')}><span className="pile__card cl-num">{run.draw.length}</span><span className="cl-label">Draw</span></button>
-          <div className="hand">
+          <button type="button" className={`pile pile--btn ${lit('shuffle')}`} title="See what's left to draw" onClick={() => setPile('draw')}><span className="pile__card cl-num">{run.draw.length}</span><span className="cl-label">Draw</span></button>
+          <div className={`hand ${lit('cards')}`}>
             {run.hand.map((c, i) => {
               const chk = canPlay(run, c)
               return <div key={c.id} className="hand__slot" style={{ animationDelay: `${i * 60}ms` }}>

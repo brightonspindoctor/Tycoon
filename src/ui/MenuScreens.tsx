@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import { BONUSES, STARTER, type BonusKey } from '../engine/data'
-
-const WORDS: Record<number, string> = { 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten', 11: 'eleven', 12: 'twelve' }
+import { BONUSES, type BonusKey } from '../engine/data'
 import { bestScore, completedIndustries, loadRuns, trustFundOffered, type RunRecord } from '../storage'
 import { CONFIG } from '../engine/config'
 import { play } from '../sound'
@@ -22,7 +20,6 @@ export function Intro({ onBegin, onHistory }: { onBegin: () => void; onHistory: 
       <div className="intro__side">
         <span className="cl-label">Industry. Influence. Plausible deniability.</span>
         <h1 className="cl-display intro__title">Choose your industry</h1>
-        <p className="intro__lead">You start with $15, a bank loan and a hunch. Get rich. Stay in charge. Your fortune only counts if you're still Chairman at the end.</p>
         <div className="industries">
           {INDUSTRIES.map(name => open.includes(name) ? (
             <button key={name} type="button" className="industry" disabled={name !== 'Oil'} onClick={() => { play('click'); onBegin() }}>
@@ -53,7 +50,6 @@ export function BonusPick({ onPick, onBack }: { onPick: (b: BonusKey) => void; o
         <div><span className="cl-label">Oil · Pennsylvania · 1863</span><h1 className="cl-display game__title">Choose your advantage</h1></div>
         <button type="button" className="cl-btn" onClick={onBack}>Back</button>
       </header>
-      <p className="bonus__lead">Everyone starts with $15, two action points, a {WORDS[STARTER.length] ?? STARTER.length}-card deck and a loan from the bank. Pick one thing more.</p>
       <div className="bonus__grid">
         {(Object.keys(BONUSES) as BonusKey[]).filter(k => k !== 'trustFund' || offered).map(k => (
           <button key={k} type="button" className={`bonus__card ${k === 'trustFund' ? 'bonus__card--earned' : ''}`} onClick={() => { play('card'); onPick(k) }}>

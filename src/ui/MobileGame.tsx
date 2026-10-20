@@ -7,17 +7,18 @@ import { CONFIG } from '../engine/config'
 import { CARDS, ITEMS, MODS, ROLE_LABEL, THREATS } from '../engine/data'
 import {
   apCost, canPlay, damageFor, fires, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, intent, intentText, netPrice, price, production, skimRate,
-  type Action, type Run, type Threat,
+  type Action, type Beat, type Run, type Threat,
 } from '../engine/engine'
 import { money, year } from '../engine/format'
 import { CardView } from './CardView'
 import { SettingsButton } from './Settings'
 import { PileView } from './PileView'
 
-interface Props { run: Run; dispatch: (a: Action) => void }
+interface Props { run: Run; dispatch: (a: Action) => void; acting?: Beat | null }
 const art = (path: string) => `${import.meta.env.BASE_URL}art/${path}`
 
-export function MobileGame({ run, dispatch }: Props) {
+export function MobileGame({ run, dispatch, acting }: Props) {
+  const lit = (k: Beat['kind']) => (acting?.kind === k ? 'is-acting' : '')
   const [selected, setSelected] = useState<number | null>(null)
   const [plotMenu, setPlotMenu] = useState<number | null>(null)
   const [sheet, setSheet] = useState(false)
@@ -59,7 +60,7 @@ export function MobileGame({ run, dispatch }: Props) {
           <div className="m-hud__year"><b className="cl-display">{year(st, run.round)}</b><SettingsButton /></div>
           <div className="m-pips">{[1, 2, 3, 4].map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 ? 'is-boss' : ''}`} />)}</div>
         </div>
-        <button type="button" className="m-hud__money" onClick={() => setSheet(true)} aria-label="Open the ledger">
+        <button type="button" className={`m-hud__money ${lit('money')}`} onClick={() => setSheet(true)} aria-label="Open the ledger">
           <span className="m-hud__cap">
             <span className="cl-label">Capital</span>
             <b className={`cl-num ${run.capital <= debtPerTurn(run) * 2 ? 'cl-minus' : ''}`}>{money(run.capital, st)}</b>
@@ -84,7 +85,7 @@ export function MobileGame({ run, dispatch }: Props) {
             const Tag = can ? 'button' : 'section'
             return (
               <Tag key={t.id} onClick={can ? () => tapThreat(t) : undefined}
-                className={`m-threat ${t.beaten ? 'threat--beaten' : ''} ${can ? 'threat--target' : ''}`}
+                className={`m-threat ${t.beaten ? 'threat--beaten' : ''} ${can ? 'threat--target' : ''} ${acting?.who === t.id ? 'is-acting' : ''}`}
                 aria-label={`${d.name}, Hold ${Math.max(0, t.hold)} of ${t.maxHold}`}>
                 <img className="m-threat__portrait" src={art(`enemies/${d.portrait}.jpg`)} alt="" />
                 <div className="m-threat__body">
@@ -111,7 +112,7 @@ export function MobileGame({ run, dispatch }: Props) {
         </section>
 
         {run.fire > 0 && (
-          <section className="m-fire" aria-label={`${fires(run.fire)} burning`}>
+          <section className={`m-fire ${lit('fire')}`} aria-label={`${fires(run.fire)} burning`}>
             <img src={art('icons/fire.png')} alt="" />
             <div><b className="cl-label">{fires(run.fire)} burning · pumps stopped</b><span>End of turn: {fireTarget(run)}</span></div>
           </section>
@@ -150,7 +151,7 @@ export function MobileGame({ run, dispatch }: Props) {
           )}
         </section>
 
-        <section className="m-stats">
+        <section className={`m-stats ${lit('oil')}`}>
           <div className={run.fire && run.oil > 0 ? 'is-burning' : ''}>
             <span className="cl-label">Stockpile</span>
             <b className="cl-num">{run.oil}/{run.storage}</b>
@@ -185,7 +186,7 @@ export function MobileGame({ run, dispatch }: Props) {
           </div>
         ) : (
           <div className="m-actions">
-            <button type="button" className="cl-btn cl-btn--small m-pilebtn" onClick={() => setPile('draw')}>Draw {run.draw.length}</button>
+            <button type="button" className={`cl-btn cl-btn--small m-pilebtn ${lit('shuffle')}`} onClick={() => setPile('draw')}>Draw {run.draw.length}</button>
             <button type="button" className="cl-btn cl-btn--small m-pilebtn" onClick={() => setPile('discard')}>Discard {run.discard.length}</button>
             {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose No. {weakestWell(run) + 1}</button>}
             {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}

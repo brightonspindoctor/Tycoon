@@ -5,16 +5,17 @@ interface Props {
   run: Run
   threat: Threat
   targeting?: boolean
+  acting?: boolean
   preview?: string
   onTarget?: () => void
 }
 
-export function ThreatPanel({ run, threat, targeting, preview, onTarget }: Props) {
+export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget }: Props) {
   const d = THREATS[threat.kind]
   const pct = Math.max(0, (threat.hold / threat.maxHold) * 100)
   const Tag = targeting ? 'button' : 'section'
   return (
-    <Tag className={`threat ${threat.beaten ? 'threat--beaten' : ''} ${targeting ? 'threat--target' : ''}`} onClick={targeting ? onTarget : undefined}
+    <Tag className={`threat ${threat.beaten ? 'threat--beaten' : ''} ${targeting ? 'threat--target' : ''} ${acting ? 'is-acting' : ''}`} onClick={targeting ? onTarget : undefined}
       aria-label={`${d.name}, Hold ${threat.hold} of ${threat.maxHold}`}>
       <div className="threat__head">
         <img className="threat__portrait" src={`${import.meta.env.BASE_URL}art/enemies/${d.portrait}.jpg`} alt="" />

@@ -109,7 +109,6 @@ export function ShopScreen({ run, dispatch }: Props) {
           <section className="cl-ledger ledger">
             <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className="cl-ledger__total">{money(run.capital, st)}</span></div>
             <ul className="cl-ledger__rows">
-              <li><span>Capital is your health</span><span /></li>
               {run.ledger.slice(-5).map((l, i) => <li key={i} className="ink-in"><span>{l.label}</span><span className={l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{money(l.amount, st, true)}</span></li>)}
               <li className="next-debt"><span>Debt in round {run.round + 1}, per turn</span><span className="cl-minus">{run.debt ? `(${money(-run.debt, st)})` : 'None'}</span></li>
             </ul>

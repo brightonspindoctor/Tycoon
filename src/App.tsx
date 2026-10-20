@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { act, newRun, roundsReached, type Action, type Run } from './engine/engine'
+import { act, newRun, roundsReached, type Action, type Beat, type Run } from './engine/engine'
 import type { BonusKey } from './engine/data'
-import { saveRun, trustFundOffered } from './storage'
+import { loadReplay, saveRun, trustFundOffered } from './storage'
+import { TickerTape } from './ui/TickerTape'
 import { CONFIG } from './engine/config'
 import { ERA_THEME } from './engine/format'
 import { play } from './sound'
@@ -37,6 +38,10 @@ export default function App() {
   const [run, setRun] = useState<Run | null>(null)
   const [shake, setShake] = useState(false)
   const [bailout, setBailout] = useState(false) // a losing streak earns the Trust Fund next run
+  // the enemy turn being played back: the board stays as it was until the tape has run
+  const [tape, setTape] = useState<{ beats: Beat[]; frozen: Run } | null>(null)
+  const [acting, setActing] = useState<Beat | null>(null)
+  const replay = (next: Run, frozen: Run) => { if (next.report.length && loadReplay() !== 'off') setTape({ beats: next.report, frozen }) }
   const saved = useRef<number | null>(null)
   const { scale, mobile } = useLayout()
 
@@ -51,8 +56,10 @@ export default function App() {
     }
     if (a.type === 'sellOil' && nextRun.capital > run.capital) play('sell')
     if (a.type === 'sellWell') play('coin')
-    if (nextRun.fire > run.fire) play('fire')
-    if (nextRun.capital < run.capital - 1 && a.type === 'endTurn') { play('hit'); setShake(true); setTimeout(() => setShake(false), 350) }
+    const replaying = nextRun.reportSeq !== run.reportSeq && nextRun.report.length > 0 && loadReplay() !== 'off'
+    if (nextRun.fire > run.fire && !replaying) play('fire')
+    if (nextRun.capital < run.capital - 1 && a.type === 'endTurn' && !replaying) { play('hit'); setShake(true); setTimeout(() => setShake(false), 350) }
+    if (replaying) replay(nextRun, a.type === 'endTurn' ? run : nextRun)
     if (a.type === 'buyCard' || a.type === 'buyProspect' || a.type === 'buyBucket' || a.type === 'buyItem' || a.type === 'skim') play('coin')
     setRun(nextRun)
   }
@@ -97,9 +104,11 @@ export default function App() {
   }, [run])
 
   function start(bonus: BonusKey) {
-    setRun(newRun(Math.floor(Math.random() * 2 ** 31), bonus))
+    const r = newRun(Math.floor(Math.random() * 2 ** 31), bonus)
+    setRun(r)
     setScreen('run')
     play('whistle')
+    setTimeout(() => replay(r, r), 0)
   }
 
   const previewPage = new URLSearchParams(location.search).get('preview')
@@ -109,13 +118,19 @@ export default function App() {
   else if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
   else if (screen === 'bonus') body = <BonusPick onPick={start} onBack={() => setScreen('intro')} />
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />
-  else if (run.phase === 'shop') body = <ShopScreen run={run} dispatch={dispatch} />
-  else if (run.phase === 'lost') body = <CrashOut run={run} bailout={bailout} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
-  else if (run.phase === 'stageComplete') body = <StageComplete run={run} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} />
+  else if (run.phase === 'shop' && !tape) body = <ShopScreen run={run} dispatch={dispatch} />
+  else if (run.phase === 'lost' && !tape) body = <CrashOut run={run} bailout={bailout} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
+  else if (run.phase === 'stageComplete' && !tape) body = <StageComplete run={run} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} />
+  else if (tape) body = (
+    <>
+      {mobile ? <MobileGame run={tape.frozen} dispatch={() => {}} acting={acting} /> : <GameScreen run={tape.frozen} dispatch={() => {}} acting={acting} />}
+      <TickerTape key={tape.frozen.reportSeq + ':' + tape.beats.length} beats={tape.beats} speed={loadReplay()} onBeat={setActing} onDone={() => setTape(null)} />
+    </>
+  )
   else body = (
     <>
       {mobile ? <MobileGame run={run} dispatch={dispatch} /> : <GameScreen run={run} dispatch={dispatch} />}
-      {run.phase === 'roundWon' && <RoundSummary key={run.round} run={run} dispatch={dispatch} onContinue={() => dispatch({ type: 'continue' })} />}
+      {run.phase === 'roundWon' && !tape && <RoundSummary key={run.round} run={run} dispatch={dispatch} onContinue={() => dispatch({ type: 'continue' })} />}
     </>
   )
 

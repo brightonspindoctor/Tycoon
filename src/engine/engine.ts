@@ -11,6 +11,8 @@ export interface Card { id: number; key: CardKey; uses: number | null; temp?: bo
 export interface Well { output: number; reserve: number; unstable?: boolean }
 export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string; stopped?: boolean }
 export interface LedgerLine { label: string; amount: number }
+/** One line of the end-of-turn report, played back on the ticker tape. */
+export interface Beat { kind: 'enemy' | 'fire' | 'money' | 'cards' | 'shuffle' | 'oil' | 'info'; title: string; text: string; who?: number }
 export type Phase = 'shop' | 'turn' | 'roundWon' | 'lost' | 'stageComplete'
 export type LossReason = 'bankrupt' | 'stalemate'
 
@@ -65,6 +67,8 @@ export interface Run {
   reward: RewardKey | null // given for beating the boss
   tempStorage: number // storage that only lasts for the boss round
   spoils: CardKey | null // the card offered after a round is won
+  report: Beat[] // what happened since you last acted, in order
+  reportSeq: number // goes up each time a new report starts
 }
 
 export interface Snapshot { capital: number; gold: number; wells: number; oil: number; deck: number }
@@ -128,7 +132,10 @@ function money(r: Run, label: string, amount: number) {
   r.ledger.push({ label, amount })
   if (amount > 0) r.stats.earned += amount; else r.stats.spent -= amount
 }
-function say(r: Run, msg: string) { r.events.unshift(msg); r.events = r.events.slice(0, 6) }
+let captured: string[] | null = null // messages from the move being resolved, for the turn report
+function say(r: Run, msg: string) { r.events.unshift(msg); r.events = r.events.slice(0, 6); captured?.push(msg) }
+function beat(r: Run, kind: Beat['kind'], title: string, text: string, who?: number) { r.report.push({ kind, title, text, who }) }
+function newReport(r: Run) { r.report = []; r.reportSeq += 1 }
 
 export function damageFor(family: Family, power: number, kind: ThreatKind): number {
   const t = THREATS[kind]
@@ -162,9 +169,10 @@ function addJunk(r: Run, key: CardKey, where: 'draw' | 'discard' = 'draw') {
 }
 
 /** Bad Blood, played (or forced at end of turn): 1 in 3 chance of a fire. */
-function badBloodRoll(r: Run) {
-  if (next(r) < CONFIG.badBloodFireChance) { say(r, 'Bad Blood: someone set a fire.'); startFire(r, 1) }
-  else say(r, 'Bad Blood: nothing happened. This time.')
+function badBloodRoll(r: Run): boolean {
+  if (next(r) < CONFIG.badBloodFireChance) { say(r, 'Bad Blood: someone set a fire.'); startFire(r, 1); return true }
+  say(r, 'Bad Blood: nothing happened. This time.')
+  return false
 }
 function loseWell(r: Run, i: number, how: 'burnt' | 'stolen' | 'lost' | 'dry') {
   if (!r.plots[i]) return
@@ -188,7 +196,7 @@ export function newRun(seed: number, bonus: BonusKey): Run {
     shop: { cards: [], item: null, loanTaken: false, prospectSold: false, bucketSold: false, boon: null }, ledger: [], events: [],
     stats: { oilSold: 0, earned: 0, spent: 0, wellsBuilt: 0, wellsBurnt: 0, wellsStolen: 0, wellsLost: 0, wellsDry: 0, skims: 0 },
     roundStart: { capital: CONFIG.startCapital, gold: 0, wells: 0, oil: 0, deck: 0 },
-    boon: null, reward: null, tempStorage: 0, spoils: null,
+    boon: null, reward: null, tempStorage: 0, spoils: null, report: [], reportSeq: 0,
   }
   r.deck = STARTER.map(k => card(r, k))
   if (bonus === 'extraProspect') r.deck.push(card(r, 'prospect'))
@@ -324,19 +332,22 @@ function startRound(r: Run, round: number) {
   if (p >= 0) r.draw.push(...r.draw.splice(p, 1))
   r.phase = 'turn'
   r.events = []
-  for (const t of r.threats) say(r, `${THREATS[t.kind].name} arrives.`)
-  if (r.modifier) say(r, `${MODS[r.modifier].name}: ${MODS[r.modifier].text}.`)
+  r.cover = 0
+  newReport(r)
+  for (const t of r.threats) { say(r, `${THREATS[t.kind].name} arrives.`); beat(r, 'enemy', `Round ${round}`, `${THREATS[t.kind].name} arrives.`, t.id) }
+  if (r.modifier) { say(r, `${MODS[r.modifier].name}: ${MODS[r.modifier].text}.`); beat(r, 'info', MODS[r.modifier].name, `${MODS[r.modifier].text}.`) }
   // opening moves
   if (!r.items.includes('lookout')) {
     for (const t of r.threats) {
       const op = THREATS[t.kind].movesFirst
-      if (op === 'Walkout') { r.pending.ap += 1; t.opened = 'Walkout: −1 AP this turn.'; say(r, 'Walkout: −1 AP on your first turn.') }
+      if (op === 'Walkout') { r.pending.ap += 1; t.opened = 'Walkout: −1 AP this turn.'; say(r, 'Walkout: −1 AP on your first turn.'); beat(r, 'enemy', `${THREATS[t.kind].name} · Walkout`, '−1 AP on your first turn.', t.id) }
       if (op === 'Scout') {
         const i = highestWell(r); r.marked = i >= 0 ? i : null
         t.opened = i >= 0 ? `Scout: marked Well No. ${i + 1}.` : 'Scout: found no Well to mark.'
         if (i >= 0) say(r, `The Claim Jumper has marked Well No. ${i + 1}.`)
+        beat(r, 'enemy', `${THREATS[t.kind].name} · Scout`, i >= 0 ? `Marked Well No. ${i + 1}.` : 'Found no Well to mark.', t.id)
       }
-      if (op === 'Arson') { startFire(r, 1); t.opened = 'Arson: started a fire.' }
+      if (op === 'Arson') { startFire(r, 1); t.opened = 'Arson: started a fire.'; beat(r, 'enemy', `${THREATS[t.kind].name} · Arson`, 'Started a fire.', t.id) }
     }
   }
   if (round === 4 && r.boon) {
@@ -352,31 +363,34 @@ function startRound(r: Run, round: number) {
 function beginTurn(r: Run) {
   r.turn += 1
   r.ledger = [{ label: 'Brought forward', amount: r.capital }]
-  r.cover = 0
+  if (!r.items.includes('accountant')) r.cover = 0
   r.current = { audit: r.pending.audit, refuse: r.pending.refuse }
   const apPenalty = r.pending.ap
   const margins = r.pending.margin
   r.pending = { ap: 0, audit: false, refuse: false, margin: 0 }
   const d = debtPerTurn(r) * (r.current.audit ? 2 : 1)
   money(r, r.current.audit ? 'Bank debt (audited)' : 'Bank debt', -d)
+  if (d && r.turn > 1) beat(r, 'money', r.current.audit ? 'Bank debt · audited' : 'Bank debt', `−$${d}.`)
   const ious = r.hand.filter(c => c.key === 'iou').length
-  if (ious) money(r, 'IOU', -ious)
+  if (ious) { money(r, 'IOU', -ious); beat(r, 'money', 'IOU', `−$${ious}.`) }
   if (checkBankrupt(r)) return
   const made = production(r)
   if (made) {
     r.plots.forEach((w, i) => {
       if (!w) return
       w.reserve -= pumps(w)
-      if (w.reserve <= 0) { loseWell(r, i, 'dry'); say(r, `Well No. ${i + 1} has run dry.`) }
+      if (w.reserve <= 0) { loseWell(r, i, 'dry'); say(r, `Well No. ${i + 1} has run dry.`); beat(r, 'oil', `Well No. ${i + 1}`, 'Has run dry.') }
     })
     const room = r.storage - r.oil
     r.oil += Math.min(room, made)
     if (made > room) say(r, `Storage full: ${made - room} oil lost.`)
+    beat(r, 'oil', 'Pumps', made <= room ? `+${made} oil.` : room > 0 ? `+${room} oil. Storage full: ${made - room} lost.` : `Storage full: ${made} oil lost.`)
   }
   for (let i = 0; i < margins; i++) r.hand.push(card(r, 'marginCall', true))
+  if (margins) beat(r, 'cards', 'Margin Call', `${margins > 1 ? `${margins} Margin Calls` : 'A Margin Call'} in your hand.`)
   const n = CONFIG.handSize - (r.modifier === 'badWeather' ? 1 : 0)
   while (r.hand.length < n) { // draw back up to a full hand
-    if (!r.draw.length) { r.draw = shuffle(r, r.discard); r.discard = [] }
+    if (!r.draw.length && r.discard.length) { r.draw = shuffle(r, r.discard); beat(r, 'shuffle', 'Reshuffle', `Your discard pile is your new deck: ${r.discard.length} cards.`); r.discard = [] }
     const c = r.draw.pop()
     if (!c) break
     r.hand.push(c)
@@ -625,11 +639,17 @@ export function fireTarget(r: Run): string {
 }
 
 function endTurn(r: Run) {
+  newReport(r)
   // unplayed Must play cards still cost their money
-  for (const c of r.hand.filter(x => CARDS[x.key].forced)) { if (c.key === 'badBlood') badBloodRoll(r); else money(r, CARDS[c.key].name, -CARDS[c.key].cost); spendCard(r, c) }
+  for (const c of r.hand.filter(x => CARDS[x.key].forced)) {
+    if (c.key === 'badBlood') beat(r, 'cards', 'Bad Blood', badBloodRoll(r) ? 'Someone set a fire.' : 'Nothing happened. This time.')
+    else { money(r, CARDS[c.key].name, -CARDS[c.key].cost); beat(r, 'money', CARDS[c.key].name, `Unplayed: −$${CARDS[c.key].cost}.`) }
+    spendCard(r, c)
+  }
   for (const t of liveThreats(r)) {
     if (t.kind === 'inspector' && r.capital >= CONFIG.inspectorReserve) {
       say(r, 'The Inspector is impressed by your reserves.')
+      beat(r, 'enemy', THREATS[t.kind].name, `Impressed by your reserves: −${CONFIG.inspectorReserveDamage} Hold.`, t.id)
       hit(r, t, CONFIG.inspectorReserveDamage)
     }
   }
@@ -638,11 +658,12 @@ function endTurn(r: Run) {
   r.hand = r.hand.filter(c => c.temp && c.key === 'iou')
   // fire burns
   if (r.fire) {
-    if (r.oil > 0) { const burnt = Math.min(r.oil, r.fire); r.oil -= burnt; say(r, `Fire burnt ${burnt} oil.`) }
+    const title = `${fires(r.fire)} burning`
+    if (r.oil > 0) { const burnt = Math.min(r.oil, r.fire); r.oil -= burnt; say(r, `Fire burnt ${burnt} oil.`); beat(r, 'fire', title, `Burnt ${burnt} oil.`) }
     else {
       const i = highestWell(r)
-      if (i < 0) { r.fire = 0; say(r, 'The fire burnt itself out.') }
-      else { loseWell(r, i, 'burnt'); say(r, `Fire destroyed Well No. ${i + 1}.`) }
+      if (i < 0) { r.fire = 0; say(r, 'The fire burnt itself out.'); beat(r, 'fire', title, 'Nothing left to burn. It went out.') }
+      else { loseWell(r, i, 'burnt'); say(r, `Fire destroyed Well No. ${i + 1}.`); beat(r, 'fire', title, `Destroyed Well No. ${i + 1}.`) }
     }
   }
   // enemies act
@@ -654,7 +675,11 @@ function endTurn(r: Run) {
     const c = t.cycle
     if (t.step % seqLen === 0) t.cycle += 1
     const name = THREATS[t.kind].name
-    if (t.stopped) { t.stopped = false; say(r, `${name}'s ${a} was stopped.`); continue } // the move is skipped, not delayed
+    const preview = intentText(r, { ...t, step: t.step - 1, cycle: c }) // what the panel promised
+    if (t.stopped) { t.stopped = false; say(r, `${name}'s ${a} was stopped.`); beat(r, 'enemy', `${name} · ${a}`, 'Stopped by Shore Up.', t.id); continue } // the move is skipped, not delayed
+    beat(r, 'enemy', `${name} · ${a}`, preview, t.id)
+    const line = r.report[r.report.length - 1]
+    captured = []
     switch (a) {
       case 'Rumble': { const i = highestWell(r); if (i >= 0) { r.plots[i]!.unstable = true; say(r, `Well No. ${i + 1} is Unstable.`) } break }
       case 'Spray': dmg += 2; r.oil = Math.max(0, r.oil - 1); break
@@ -692,13 +717,23 @@ function endTurn(r: Run) {
       }
       case 'Arson': startFire(r, Math.min(CONFIG.fireMax, 2 + c)); break
     }
+    // report what actually happened, if the move said so; otherwise what it promised
+    if (captured.length) line.text = captured.join(' ')
+    captured = null
   }
-  const taken = Math.max(0, dmg - r.cover)
+  const blocked = Math.min(dmg, r.cover)
+  const taken = dmg - blocked
+  r.cover -= blocked // Cover is used up as it blocks
   if (taken) money(r, 'Fines and losses', -taken)
-  if (dmg && r.cover) say(r, `Cover blocked $${Math.min(dmg, r.cover)}.`)
+  if (blocked) say(r, `Cover blocked $${blocked}.`)
+  if (dmg) beat(r, 'money', 'Fines and losses', blocked ? (taken ? `−$${taken}. Cover blocked $${blocked}.` : `Cover blocked all $${dmg}.`) : `−$${taken}.`)
   if (checkBankrupt(r)) return
   if (r.turn >= CONFIG.turnLimit) { r.phase = 'lost'; r.loss = { reason: 'stalemate', by: liveThreats(r).map(t => THREATS[t.kind].name) }; return }
   beginTurn(r)
+  if (r.phase === 'turn') {
+    if (r.cover) beat(r, 'info', 'Accountant', `${r.cover} Cover carried over.`)
+    beat(r, 'info', `Turn ${r.turn}`, `Your move. ${r.ap} AP, ${r.hand.length} cards.`)
+  }
 }
 
 // ---------------------------------------------------------------- dispatcher

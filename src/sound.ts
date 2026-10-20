@@ -5,7 +5,7 @@ import { loadMuted, loadVolume, saveMuted, saveVolume } from './storage'
 
 export type Cue =
   | 'card' | 'coin' | 'stamp' | 'fire' | 'hit' | 'win' | 'lose' | 'click' | 'ink'
-  | 'whistle' | 'register' | 'straw' | 'prospect' | 'well' | 'sell'
+  | 'whistle' | 'register' | 'straw' | 'prospect' | 'well' | 'sell' | 'ticker' | 'shuffle'
 
 export const CUES: { cue: Cue; label: string }[] = [
   { cue: 'whistle', label: 'Steam whistle (start of a run)' },
@@ -14,6 +14,8 @@ export const CUES: { cue: Cue; label: string }[] = [
   { cue: 'prospect', label: 'Prospect' },
   { cue: 'well', label: 'Well built' },
   { cue: 'sell', label: 'Oil sold' },
+  { cue: 'ticker', label: 'Ticker tape (enemy turn)' },
+  { cue: 'shuffle', label: 'Deck reshuffled' },
   { cue: 'card', label: 'Card played' },
   { cue: 'coin', label: 'Coin' },
   { cue: 'fire', label: 'Fire' },
@@ -210,6 +212,25 @@ function sellOil(a: Ctx, out: AudioNode, t: number) {
   thud(a, out, t + 0.58, 180, 0.25, 0.08)
 }
 
+function ticker(a: Ctx, out: AudioNode, t: number) {
+  // a stock ticker printing: quick uneven clacks of the type wheel
+  for (let i = 0; i < 7; i++) {
+    const at = t + i * 0.045 + rnd(0, 0.012)
+    noise(a, out, at, 0.018, 0.16, rnd(2600, 3600), 6)
+    tone(a, out, at, rnd(1700, 2100), 0.012, 'square', 0.025)
+  }
+}
+
+function riffle(a: Ctx, out: AudioNode, t: number) {
+  // two half-decks riffled together, then squared up with a tap
+  for (let i = 0; i < 22; i++) {
+    const at = t + 0.05 + i * 0.026 + rnd(0, 0.006)
+    noise(a, out, at, 0.022, 0.12 + 0.05 * Math.sin(i / 3), rnd(3800, 5200), 3)
+  }
+  noise(a, out, t + 0.68, 0.06, 0.22, 900, 1.2)
+  thud(a, out, t + 0.7, 160, 0.16, 0.08)
+}
+
 /** Draws a cue onto any audio context, starting at time `t`. */
 export function renderCue(cue: Cue, a: Ctx, out: AudioNode, t: number) {
   switch (cue) {
@@ -227,6 +248,8 @@ export function renderCue(cue: Cue, a: Ctx, out: AudioNode, t: number) {
     case 'prospect': prospect(a, out, t); break
     case 'well': wellBuilt(a, out, t); break
     case 'sell': sellOil(a, out, t); break
+    case 'ticker': ticker(a, out, t); break
+    case 'shuffle': riffle(a, out, t); break
   }
 }
 

@@ -41,8 +41,8 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Remove 2 Hold.', flavour: 'A firm word, and a firmer grip.' },
   lawyerUp: { name: 'Lawyer Up', ap: 1, cost: 2, uses: null, family: 'Legal', power: 3, icon: 'deed', price: 4, rarity: 'Common',
     text: 'Pay $2. Remove 3 Hold.', flavour: 'The paperwork always wins (eventually).' },
-  shoreUp: { name: 'Shore Up', ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, stop: true, icon: 'timber', price: 3, rarity: 'Common',
-    text: "Stop one enemy's next move this turn.", flavour: 'More timber. More rope.' },
+  shoreUp: { name: 'Shore Up', ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, stop: true, oncePerRound: true, icon: 'timber', price: 3, rarity: 'Common',
+    text: "Stop one enemy's next move this turn. Once per round.", flavour: 'More timber. More rope.' },
   bucket: { name: 'Bucket of Water', ap: 1, cost: 0, uses: null, family: 'Water', power: 1, icon: 'bucket',
     text: 'Put out one fire.', flavour: "It won't stop the well, but it might buy a moment." },
   fireBrigade: { name: 'Fire Brigade', ap: 1, cost: 0, uses: null, family: 'Water', power: 3, icon: 'hose', price: 4, rarity: 'Common',
@@ -133,12 +133,13 @@ export const MODS: Record<ModKey, { name: string; text: string }> = {
   boomtown: { name: 'Boomtown', text: 'Oil +$1, debt +$1' },
 }
 
-export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'lookout'
+export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'lookout' | 'accountant'
 export const ITEMS: Record<ItemKey, { name: string; text: string; price: number; repeatable?: boolean; icon: Icon }> = {
   storageTank: { name: 'Storage Tank', text: '+2 oil storage', price: 4, repeatable: true, icon: 'barrels' },
   silo: { name: 'Silo', text: '+4 oil storage', price: 7, icon: 'barrels' },
   steamPump: { name: 'Steam Pump', text: '+1 AP every turn', price: 10, icon: 'derrick' },
   lookout: { name: 'Lookout', text: 'Enemies lose their opening move', price: 5, icon: 'telegraph' },
+  accountant: { name: 'Accountant', text: 'Cover you don\'t use carries over to the next turn', price: 4, icon: 'deed' },
 }
 
 // Before the boss: one small, single-use item, bought with gold. Beat the boss: a

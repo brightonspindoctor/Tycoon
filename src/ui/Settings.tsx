@@ -1,6 +1,7 @@
 // The settings panel (volume, sound on/off, install) and the gear button that opens it.
 import { useEffect, useState } from 'react'
 import { getVolume, isMuted, play, setMuted, setVolume } from '../sound'
+import { loadReplay, saveReplay, type Replay } from '../storage'
 import { install } from '../install'
 import { OPEN_SETTINGS, openSettings, useInstallable } from './settingsBus'
 
@@ -18,6 +19,7 @@ export function SettingsPanel() {
   const [open, setOpen] = useState(false)
   const [vol, setVol] = useState(getVolume())
   const [muted, setM] = useState(isMuted())
+  const [replay, setReplay] = useState<Replay>(loadReplay())
   const { installable, installed, ios } = useInstallable()
   useEffect(() => {
     const show = () => { setVol(getVolume()); setM(isMuted()); setOpen(true) }
@@ -58,6 +60,16 @@ export function SettingsPanel() {
             onClick={() => { setMuted(!muted); setM(!muted); if (muted) setTimeout(() => play('click'), 0) }}>
             <span className="switch__knob" /><span className="switch__text">{muted ? 'Off' : 'On'}</span>
           </button>
+        </div>
+
+        <div className="settings__row">
+          <span className="cl-label">Enemy turn</span>
+          <div className="segmented" role="radiogroup" aria-label="Enemy turn replay">
+            {(['normal', 'fast', 'off'] as Replay[]).map(v => (
+              <button key={v} type="button" role="radio" aria-checked={replay === v} className={replay === v ? 'is-on' : ''}
+                onClick={() => { setReplay(v); saveReplay(v); play('click') }}>{v === 'normal' ? 'Play it out' : v === 'fast' ? 'Fast' : 'Off'}</button>
+            ))}
+          </div>
         </div>
 
         <div className="settings__row">

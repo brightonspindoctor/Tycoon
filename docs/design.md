@@ -45,12 +45,15 @@ A card is offered (weighted by rarity, like the shop): take it into your deck or
 
 ### Cards changed in play-testing
 - Send a Telegram: the random attack card it adds costs no AP (any $ cost still applies). It's gone at the end of the turn.
-- Shore Up: stop one enemy's next move this turn (with two enemies, you choose). The move is skipped; the enemy's cycle carries on.
+- Shore Up: stop one enemy's next move this turn, once per round (with two enemies, you choose). The move is skipped; the enemy's cycle carries on.
 - Lawyer Up deals 3 (was 4). Bribe the Sheriff: pay $2, 5 Hold. Hired Hand and Pay Wages are Dirty.
 - Pay Wages: pay $2, remove 4 Hold (Dirty). Costs $1 to buy. No card is tied to one enemy; enemy weaknesses and resistances decide what works.
 - Hard Graft (+1 AP, 0 AP to play) can be played once per round: it then sits out until the next round. It is never destroyed. It can be bought ($4).
 - **Bribe** ($4): pay 1 gold from your fortune; 50% chance of 4 Hold (Dirty, so doubled against the Strike, Claim Jumper and Baron), otherwise it is refused and adds Bad Blood.
 - Enemies that move first show what they opened with on turn 1, above their next move.
+
+### The enemy turn
+When you end your turn, everything that happens is played back on a ticker tape, one line at a time, with the enemy (or fire, stockpile, ledger or draw pile) it concerns lit up: unplayed Must play cards, fire, each enemy's move (or "Stopped"), fines, then the new turn's debt, pumping, any reshuffle (with a riffle animation) and "Your move". Rounds open the same way. Tap to hurry, Skip to jump ahead; Settings sets it to Play it out, Fast or Off.
 
 ### Fire (a hazard, not an enemy)
 Fire is counted as a number of fires (up to 3); new outbreaks add to it. Each end of turn every fire burns 1 oil from the stockpile; with no oil it destroys the highest-numbered Well. Pumps stop while it burns. It can't touch Capital. A Bucket of Water puts out one fire and never wears out; Fire Brigade puts out every fire. Or cut a Firebreak (2 AP): lose your weakest Well (lowest output, then fewest barrels left) and every fire goes out. Sources: Claim Jumper (when beaten), Strike (round 3), Bad Blood, the Baron.
@@ -71,7 +74,7 @@ Only a few enemies resist a kind of card (the Blowout, the Railroad Agent and th
 Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown.
 
 ### Shop
-3 cards, one Prospect and one Bucket of Water ($2) per visit (they then sell out; Prospect's price rises quietly), Destroy a card from $2 (rises quietly by $1 each time), no hint of the next enemy, 1 item, the Cheap Loan, Destroy a card, Reinforce, Reroll, and Skim. Items: Storage Tank, Silo, Steam Pump, Lookout.
+3 cards, one Prospect and one Bucket of Water ($2) per visit (they then sell out; Prospect's price rises quietly), Destroy a card from $2 (rises quietly by $1 each time), no hint of the next enemy, 1 item, the Cheap Loan, Destroy a card, Reinforce, Reroll, and Skim. Items: Storage Tank, Silo, Steam Pump, Lookout, Accountant ($4: Cover you don't use carries over to the next turn within a round; Cover is used up as it blocks, and resets every round).
 
 ## Endings
 - Stage 1 Bankrupt · Stage 2 Ousted · Stage 3 Broken up · Stage 4 Stranded.

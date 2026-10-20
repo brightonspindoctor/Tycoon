@@ -36,6 +36,15 @@ export function bestScore(industry: string): number | null {
 
 const VOLUME = 'tycoon.volume'
 const INSTALL_SEEN = 'tycoon.installPromptSeen'
+const REPLAY = 'tycoon.replay'
+
+export type Replay = 'normal' | 'fast' | 'off'
+export function loadReplay(): Replay {
+  try { const v = localStorage.getItem(REPLAY); return v === 'fast' || v === 'off' ? v : 'normal' } catch { return 'normal' }
+}
+export function saveReplay(v: Replay) {
+  try { localStorage.setItem(REPLAY, v) } catch { /* ignore */ }
+}
 
 export function loadVolume(): number {
   try { const v = Number(localStorage.getItem(VOLUME)); return localStorage.getItem(VOLUME) === null || Number.isNaN(v) ? 0.8 : Math.min(1, Math.max(0, v)) } catch { return 0.8 }

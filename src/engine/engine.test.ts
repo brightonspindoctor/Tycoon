@@ -614,3 +614,54 @@ describe('sweep fixes', () => {
     expect(r.capital).toBe(20)
   })
 })
+
+describe('turn report, Shore Up once per round, Accountant', () => {
+  const one = (r: Run, kind: Parameters<typeof damageFor>[2], step = 0) => { r.threats = [{ id: 900, kind, hold: 50, maxHold: 50, step, cycle: 0, round3: false, beaten: false }]; r.capital = 50; return r }
+
+  it('ending a turn records each event in order, enemy moves named', () => {
+    let r = one(newRun(19, 'threeOil'), 'inspector', 1) // next: Fine
+    r.fire = 1; r.oil = 2
+    const seq = r.reportSeq
+    r = act(r, { type: 'endTurn' })
+    expect(r.reportSeq).toBe(seq + 1)
+    const fineAt = r.report.findIndex(b => b.title.includes('Fine'))
+    expect(r.report.findIndex(b => b.kind === 'fire')).toBeLessThan(fineAt) // fire burns before enemies act
+    const fine = r.report[fineAt]
+    expect(fine.who).toBe(900)
+    expect(r.report[r.report.length - 1].title).toBe(`Turn ${r.turn}`)
+  })
+
+  it('Shore Up plays once per round', () => {
+    let r = one(newRun(20, 'threeOil'), 'inspector')
+    const s = r.deck.find(c => c.key === 'shoreUp')!
+    r.hand = [s]; r.draw = r.draw.filter(c => c.id !== s.id); r.discard = []; r.ap = 1
+    r = act(r, { type: 'play', cardId: s.id })
+    for (let t = 0; t < 3; t++) {
+      expect([...r.hand, ...r.draw, ...r.discard].some(c => c.id === s.id)).toBe(false)
+      r.capital = 50; r = act(r, { type: 'endTurn' })
+    }
+    expect(r.deck.some(c => c.id === s.id)).toBe(true)
+  })
+
+  it('Cover resets each turn, unless you have an Accountant; then it carries over and is used up as it blocks', () => {
+    for (const accountant of [false, true]) {
+      let r = one(newRun(21, 'threeOil'), 'inspector', 0) // Audit, then Fine
+      if (accountant) r.items.push('accountant')
+      r.cover = 5
+      r = act(r, { type: 'endTurn' }) // Audit: nothing to block
+      expect(r.cover).toBe(accountant ? 5 : 0)
+      const cash = r.capital
+      r = act(r, { type: 'endTurn' }) // Fine $3
+      if (accountant) { expect(r.cover).toBe(2); expect(cash - r.capital).toBe(debtPerTurn(r)) } // the $3 Fine is blocked; only debt is paid
+    }
+  })
+})
+
+describe('Cover between rounds', () => {
+  it('never carries into the next round, even with an Accountant', () => {
+    let r = newRun(22, 'threeOil'); r.items.push('accountant'); r.cover = 6
+    r.phase = 'shop'; r.round = 1
+    r = act(r, { type: 'leaveShop' })
+    expect(r.cover).toBe(0)
+  })
+})
