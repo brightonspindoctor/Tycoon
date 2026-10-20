@@ -42,7 +42,7 @@ export function ShopScreen({ run, dispatch }: Props) {
               </div>
               <div className="prospect-slot">
                 {run.shop.prospectSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -9, key: 'prospect', uses: 1 }} price={money(run.prospectPrice, st)} playable={can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })} />}
-                <span className="res-note">One per visit. {plotsLeft === 0 ? 'No land left to claim.' : plotsLeft === 1 ? 'Only 1 plot left.' : `${plotsLeft} plots left.`}</span>
+                <span className="res-note">One per visit. {plotsLeft > 1 ? `${plotsLeft} plots left to claim.` : plotsLeft === 1 ? 'Only 1 plot left to claim.' : run.plots.some(p => !p) ? 'All land claimed; fills empty plots.' : 'All land claimed.'}</span>
               </div>
             </div>
           </section>
@@ -94,10 +94,10 @@ export function ShopScreen({ run, dispatch }: Props) {
             <span className="cl-label">Your deck · {run.deck.length} cards{mode ? ` · choose a card to ${mode}` : ''}</span>
             <div className="deck__list">
               {run.deck.map(c => {
-                const ok = mode === 'destroy' || (mode === 'reinforce' && c.uses !== null)
+                const ok = mode === 'destroy' || (mode === 'reinforce' && c.uses !== null && !CARDS[c.key].junk)
                 return <CardView key={c.id} card={c} small playable={!mode || ok} onClick={() => {
                   if (mode === 'destroy') dispatch({ type: 'destroyCard', cardId: c.id })
-                  if (mode === 'reinforce' && c.uses !== null) dispatch({ type: 'reinforce', cardId: c.id })
+                  if (mode === 'reinforce' && ok) dispatch({ type: 'reinforce', cardId: c.id })
                   if (ok) setMode(null)
                 }} />
               })}
@@ -111,7 +111,7 @@ export function ShopScreen({ run, dispatch }: Props) {
             <ul className="cl-ledger__rows">
               <li><span>Capital is your health</span><span /></li>
               {run.ledger.slice(-5).map((l, i) => <li key={i} className="ink-in"><span>{l.label}</span><span className={l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{money(l.amount, st, true)}</span></li>)}
-              <li className="next-debt"><span>Debt in round {run.round + 1}, per turn</span><span className="cl-minus">({money(-run.debt, st)})</span></li>
+              <li className="next-debt"><span>Debt in round {run.round + 1}, per turn</span><span className="cl-minus">{run.debt ? `(${money(-run.debt, st)})` : 'None'}</span></li>
             </ul>
           </section>
           <section className="fortune fortune--skim">

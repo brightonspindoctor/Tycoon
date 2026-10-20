@@ -1,0 +1,131 @@
+// Rules fuzzer: plays thousands of runs with random (often silly) actions and checks,
+// after every single action, that the game never reaches an impossible state.
+// Run with: npm run fuzz
+import { act, canPlay, intent, intentText, newRun, targetsFor, type Action, type Run } from '../src/engine/engine'
+import { BONUSES, BOONS, CARDS, REWARDS, type BonusKey } from '../src/engine/data'
+import { CONFIG } from '../src/engine/config'
+import { botShop, botTurn } from './bot'
+
+let seed = 12345
+const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
+const pick = <T,>(xs: T[]): T => xs[Math.floor(rand() * xs.length)]
+
+function randomAction(r: Run): Action {
+  if (r.phase === 'roundWon') return r.spoils ? { type: rand() < 0.5 ? 'takeSpoils' : 'sellSpoils' } : { type: 'continue' }
+  if (r.phase === 'shop') {
+    const opts: Action[] = [{ type: 'leaveShop' }, { type: 'buyProspect' }, { type: 'buyBucket' }, { type: 'buyBoon' }, { type: 'buyItem' },
+      { type: 'takeLoan' }, { type: 'reroll' }, { type: 'skim', gold: 1 + Math.floor(rand() * 3) }, { type: 'buyCard', slot: Math.floor(rand() * 3) }]
+    if (r.deck.length) { opts.push({ type: 'destroyCard', cardId: pick(r.deck).id }, { type: 'reinforce', cardId: pick(r.deck).id }) }
+    return rand() < 0.25 ? { type: 'leaveShop' } : pick(opts)
+  }
+  const opts: Action[] = [{ type: 'endTurn' }, { type: 'sellOil' }, { type: 'firebreak' }, { type: 'sellWell', plot: Math.floor(rand() * 6) - 1 }]
+  for (const c of r.hand) {
+    const ts = r.threats.map(t => t.id)
+    opts.push({ type: 'play', cardId: c.id, target: rand() < 0.7 ? pick(ts) : undefined })
+    if (canPlay(r, c).ok) opts.push({ type: 'play', cardId: c.id, target: targetsFor(r, c)[0]?.id }) // weight playable cards
+  }
+  opts.push({ type: 'play', cardId: 999999 }) // a card that doesn't exist
+  return rand() < 0.15 ? { type: 'endTurn' } : pick(opts)
+}
+
+/** One action the bot would take (its first choice this turn), so chaos runs still make progress. */
+function botStep(r: Run): Action {
+  const playable = r.hand.filter(c => canPlay(r, c).ok)
+  const forced = playable.find(c => CARDS[c.key].forced)
+  if (forced) return { type: 'play', cardId: forced.id }
+  const attack = playable.find(c => targetsFor(r, c).length && c.key !== 'shoreUp')
+  if (attack) return { type: 'play', cardId: attack.id, target: targetsFor(r, attack)[0].id }
+  const any = playable[0]
+  if (any) return { type: 'play', cardId: any.id, target: targetsFor(r, any)[0]?.id }
+  if (r.oil > 0 && r.ap > 0) return { type: 'sellOil' }
+  return { type: 'endTurn' }
+}
+
+function check(r: Run, prev: Run, a: Action): string | null {
+  const piles = [...r.draw, ...r.hand, ...r.discard]
+  const ids = piles.map(c => c.id)
+  if (new Set(ids).size !== ids.length) return 'a card is in two places at once'
+  const deckIds = new Set(r.deck.map(c => c.id))
+  if (new Set(r.deck.map(c => c.id)).size !== r.deck.length) return 'duplicate card in deck'
+  for (const c of piles) if (!c.temp && !deckIds.has(c.id)) return `${c.key} in a pile but not in the deck`
+  if (r.phase === 'turn') {
+    const pileIds = new Set(ids)
+    for (const c of r.deck) if (!pileIds.has(c.id) && !CARDS[c.key].oncePerRound) return `${c.key} in the deck but in no pile`
+  }
+  for (const c of r.deck) if (c.uses !== null && c.uses <= 0) return `${c.key} with ${c.uses} uses still in the deck`
+  if (r.fire < 0 || r.fire > CONFIG.fireMax) return `fire ${r.fire}`
+  if (r.oil < 0 || r.oil > r.storage) return `oil ${r.oil} of ${r.storage}`
+  if (r.plots.length > CONFIG.maxPlots) return `${r.plots.length} plots`
+  for (const w of r.plots) if (w && (w.reserve <= 0 || w.output <= 0)) return `well ${JSON.stringify(w)}`
+  if (r.gold < 0) return `gold ${r.gold}`
+  if (r.ap < 0) return `ap ${r.ap}`
+  if (r.phase !== 'lost' && r.capital <= 0) return `capital ${r.capital} but phase ${r.phase}`
+  if (r.round < 1 || r.round > 4) return `round ${r.round}`
+  if (r.phase === 'stageComplete' && r.round !== 4) return 'stage complete before round 4'
+  if (r.phase === 'roundWon' && r.round >= 4) return 'roundWon in round 4'
+  if ((r.phase === 'roundWon' || r.phase === 'stageComplete') && r.threats.some(t => !t.beaten)) return 'round won with an enemy standing'
+  if (r.phase === 'turn' && !r.threats.some(t => !t.beaten)) return 'turn with no enemy standing'
+  for (const t of r.threats) {
+    if (t.hold > t.maxHold) return `${t.kind} hold ${t.hold}/${t.maxHold}`
+    if (t.beaten !== (t.hold <= 0)) return `${t.kind} beaten=${t.beaten} hold=${t.hold}`
+    if (!t.beaten && r.phase === 'turn') { if (!intent(r, t)) return `${t.kind} has no move`; if (!intentText(r, t)) return `${t.kind} move has no text` }
+  }
+  if (r.marked !== null && (r.marked < 0 || r.marked >= r.plots.length)) return `marked plot ${r.marked}`
+  if (a.type === 'endTurn' && r.phase === 'turn' && prev.phase === 'turn') {
+    const extra = r.round === 4 && r.turn === 1 && r.boon === 'spareRigs' ? 2 : 0
+    if (r.hand.length > CONFIG.handSize + extra) return `hand of ${r.hand.length} after drawing`
+  }
+  if (JSON.stringify(r).includes('null,"amount"') || /NaN|Infinity/.test(JSON.stringify({ c: r.capital, g: r.gold, o: r.oil, f: r.fire, ap: r.ap }))) return 'NaN somewhere'
+  if (!Number.isFinite(r.capital) || !Number.isFinite(r.ap)) return 'non-finite number'
+  if (r.shop.cards.length > 3) return 'shop has more than 3 cards'
+  if (r.phase === 'turn' && r.ledger[0]?.label === 'Brought forward') {
+    const sum = r.ledger.reduce((s, l) => s + l.amount, 0)
+    if (sum !== r.capital) return `ledger adds up to ${sum} but capital is ${r.capital}`
+  }
+  if (r.phase === 'roundWon' && prev.phase === 'turn' && !r.spoils) return 'round won with no spoils offered'
+  if (r.phase === 'shop' && prev.phase === 'roundWon' && (r.shop.boon !== null) !== (r.round === 3)) return `pre-boss item offered after round ${r.round}`
+  if (r.phase === 'stageComplete' && prev.phase === 'turn') {
+    if (!r.reward) return 'stage complete with no reward'
+    if (r.boon && REWARDS[r.reward].type === BOONS[r.boon].type) return 'reward is the same type as the pre-boss item'
+    if (r.tempStorage) return 'temporary silo still counted after the stage'
+  }
+  if (a.type === 'play' && prev.hand.find(c => c.id === a.cardId)?.key === 'telegram' && r.hand.length > prev.hand.length - 1) {
+    const help = r.hand.find(c => c.temp && !prev.hand.some(p => p.id === c.id))
+    if (help && !help.free) return 'Telegram card is not free'
+  }
+  return null
+}
+
+const bonuses = Object.keys(BONUSES) as BonusKey[]
+const RUNS = Number(process.argv[2] ?? 3000)
+let actions = 0, problems = 0
+const ends: Record<string, number> = {}
+const seen = new Map<string, string>()
+for (let i = 0; i < RUNS; i++) {
+  let r = newRun(1 + i * 7919, bonuses[i % bonuses.length])
+  r.gold = i % 3 // some runs have gold to spend on the Bribe and the pre-boss item
+  const log: string[] = []
+  // play sensibly with the bot up to a chosen round, then act at random from there
+  const chaosFrom = 1 + (i % 4)
+  for (let g = 0; g < 400 && r.round < chaosFrom && r.phase !== 'lost' && r.phase !== 'stageComplete'; g++) {
+    const prev = r
+    if (r.phase === 'shop') r = botShop(r)
+    else if (r.phase === 'turn') r = botTurn(r)
+    else if (r.phase === 'roundWon') r = act(act(r, { type: 'takeSpoils' }), { type: 'continue' })
+    const bad = check(r, prev, { type: 'continue' })
+    if (bad) { if (!seen.has(bad)) seen.set(bad, `run ${i} (bot) round ${r.round} turn ${r.turn}`); problems++; break }
+  }
+  for (let step = 0; step < 1500 && r.phase !== 'lost' && r.phase !== 'stageComplete'; step++) {
+    const a = rand() < 0.5 && r.phase === 'turn' ? botStep(r) : randomAction(r)
+    let next: Run
+    try { next = act(r, a) } catch (e) { const k = `crash: ${(e as Error).message}`; if (!seen.has(k)) seen.set(k, `${log.slice(-6).join(' > ')} > ${JSON.stringify(a)}`); problems++; break }
+    actions++
+    log.push(`${a.type}${'cardId' in a ? ':' + (r.hand.find(c => c.id === a.cardId)?.key ?? '?') : ''}`)
+    const bad = check(next, r, a)
+    if (bad) { if (!seen.has(bad)) seen.set(bad, `run ${i} round ${next.round} turn ${next.turn}: ${log.slice(-6).join(' > ')}`); problems++; break }
+    r = next
+  }
+  ends[r.phase] = (ends[r.phase] ?? 0) + 1
+}
+console.log(`${RUNS} runs, ${actions} actions, ${problems} problems. Ended: ${JSON.stringify(ends)}`)
+for (const [k, v] of seen) console.log(`- ${k}\n    ${v}`)

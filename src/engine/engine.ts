@@ -277,7 +277,7 @@ function shopAction(r: Run, a: Action) {
     }
     case 'reinforce': {
       const c = r.deck.find(x => x.id === a.cardId)
-      if (!c || c.uses === null || !pay(r, 2, `Reinforce ${CARDS[c.key].name}`)) return
+      if (!c || c.uses === null || CARDS[c.key].junk || !pay(r, 2, `Reinforce ${CARDS[c.key].name}`)) return
       c.uses += 1
       return
     }
@@ -442,7 +442,7 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   const d = CARDS[c.key]
   if (r.phase !== 'turn') return { ok: false }
   if (d.ap === null) return { ok: false, why: "Can't be played" }
-  const forced = r.hand.some(x => CARDS[x.key].forced)
+  const forced = r.hand.some(x => CARDS[x.key].forced && apCost(r, x) <= r.ap)
   if (forced && !d.forced) return { ok: false, why: 'Play your Must play cards first' }
   if (apCost(r, c) > r.ap) return { ok: false, why: 'Not enough AP' }
   if (d.cost && r.capital - d.cost < 1 && !d.forced) return { ok: false, why: 'Not enough Capital' }
@@ -574,6 +574,14 @@ function firebreak(r: Run) {
   say(r, `Firebreak: Well No. ${i + 1} sacrificed. Every fire is out.`)
 }
 
+/** What the Baron's Lease takes: your most valuable card by shop price (never junk). */
+export function mostValuable(r: Run): Card | null {
+  const value = (c: Card) => CARDS[c.key].price ?? 0
+  const real = r.deck.filter(c => !CARDS[c.key].junk && value(c) > 0)
+  if (!real.length) return null
+  return real.reduce((a, b) => (value(b) > value(a) ? b : a))
+}
+
 // --------------------------------------------------------------- end turn
 export function intent(_r: Run, t: Threat): string {
   const d = THREATS[t.kind]
@@ -602,7 +610,7 @@ export function intentText(r: Run, t: Threat): string {
     case 'Margin Call': return 'Adds a Margin Call to your next hand.'
     case 'Rumours': return 'Adds Bad Blood to your deck.'
     case 'Paper Promise': return 'Adds an IOU to your hand.'
-    case 'Lease': return 'Removes your most expensive card for good.'
+    case 'Lease': { const v = mostValuable(r); return v ? `Takes your ${CARDS[v.key].name} for good.` : 'Looks for something to take.' }
     case 'Arson': return `Starts ${fires(Math.min(CONFIG.fireMax, 2 + c))}.`
   }
   return a
@@ -678,8 +686,8 @@ function endTurn(r: Run) {
       case 'Rumours': addJunk(r, 'badBlood'); say(r, 'Rumours: Bad Blood added to your deck.'); break
       case 'Paper Promise': r.hand.push(card(r, 'iou', true)); break
       case 'Lease': {
-        const costly = [...r.deck].filter(x => CARDS[x.key].ap).sort((a, b) => (CARDS[b.key].ap! - CARDS[a.key].ap!))
-        if (costly.length) { removeFromDeck(r, costly[0]); say(r, `Hostile Lease: ${CARDS[costly[0].key].name} taken for good.`) }
+        const v = mostValuable(r)
+        if (v) { removeFromDeck(r, v); say(r, `Hostile Lease: ${CARDS[v.key].name} taken for good.`) }
         break
       }
       case 'Arson': startFire(r, Math.min(CONFIG.fireMax, 2 + c)); break

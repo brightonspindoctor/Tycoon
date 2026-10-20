@@ -63,7 +63,7 @@ export function MobileGame({ run, dispatch }: Props) {
           <span className="m-hud__cap">
             <span className="cl-label">Capital</span>
             <b className={`cl-num ${run.capital <= debtPerTurn(run) * 2 ? 'cl-minus' : ''}`}>{money(run.capital, st)}</b>
-            <span className="m-hud__debt cl-num">{money(-nextDebt, st)} next turn</span>
+            <span className="m-hud__debt cl-num">{nextDebt ? `${money(-nextDebt, st)} next turn` : 'No debt'}</span>
           </span>
           <span className="m-hud__gold">
             <span className="cl-label">Fortune</span>
@@ -223,7 +223,7 @@ export function MobileGame({ run, dispatch }: Props) {
               <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className="cl-ledger__total">{money(run.capital, st)}</span></div>
               <ul className="cl-ledger__rows">
                 {run.ledger.map((l, i) => <li key={i}><span>{l.label}</span><span className={l.label === 'Brought forward' ? '' : l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{l.label === 'Brought forward' ? money(l.amount, st) : money(l.amount, st, true)}</span></li>)}
-                <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">({money(-nextDebt, st)})</span></li>
+                <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">{nextDebt ? `(${money(-nextDebt, st)})` : 'None'}</span></li>
               </ul>
             </section>
             <section className="fortune">

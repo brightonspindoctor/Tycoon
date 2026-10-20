@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, apCost, canPlay, damageFor, debtPerTurn, intent, isAttack, netPrice, newRun, targetsFor, type Run } from './engine'
+import { act, apCost, canPlay, damageFor, debtPerTurn, intent, intentText, isAttack, netPrice, newRun, targetsFor, type Run } from './engine'
 import { lossStreak, type RunRecord } from '../storage'
 import { CONFIG } from './config'
 import { money } from './format'
@@ -580,5 +580,37 @@ describe('Send a Telegram', () => {
     const hold = r.threats[0].hold
     r = act(r, { type: 'play', cardId: help.id })
     expect(r.threats[0].hold).toBeLessThan(hold)
+  })
+})
+
+describe('sweep fixes', () => {
+  it("the Baron's Lease takes your most valuable card by price, never junk", () => {
+    let r = newRun(16, 'threeOil')
+    r.threats = [{ id: 900, kind: 'baron', hold: 50, maxHold: 50, step: 1, cycle: 0, round3: false, beaten: false }] // next: Lease
+    r.capital = 50
+    const wild = { id: 8400, key: 'wildcat' as const, uses: 1 }
+    r.deck.push(wild); r.draw.push(wild)
+    expect(intentText(r, r.threats[0])).toContain('Wildcat Well')
+    r = act(r, { type: 'endTurn' })
+    expect(r.deck.some(c => c.id === 8400)).toBe(false)
+    expect(r.deck.some(c => c.key === 'prospect')).toBe(true) // the old version always took the Prospect
+  })
+
+  it('a Must play card you cannot afford in AP does not block your free cards', () => {
+    const r = newRun(17, 'threeOil')
+    const mc = { id: 8500, key: 'marginCall' as const, uses: 1, temp: true }
+    const g = r.deck.find(c => c.key === 'hardGraft')!
+    r.hand = [mc, g]; r.ap = 0
+    expect(canPlay(r, g).ok).toBe(true)
+    r.ap = 1
+    expect(canPlay(r, g).ok).toBe(false) // now it can be paid, so it comes first
+  })
+
+  it("junk can't be reinforced", () => {
+    let r = newRun(18, 'threeOil'); r.phase = 'shop'; r.capital = 20
+    const bb = { id: 8600, key: 'badBlood' as const, uses: 2 }; r.deck.push(bb)
+    r = act(r, { type: 'reinforce', cardId: 8600 })
+    expect(r.deck.find(c => c.id === 8600)!.uses).toBe(2)
+    expect(r.capital).toBe(20)
   })
 })

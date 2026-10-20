@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "sim": "vite-node tools/sim.ts",
+    "fuzz": "vite-node tools/fuzz.ts",
     "lint": "eslint ."
   },
   "dependencies": {

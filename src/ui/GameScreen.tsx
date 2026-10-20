@@ -121,7 +121,7 @@ export function GameScreen({ run, dispatch }: Props) {
             <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className={`cl-ledger__total ${run.capital <= debtPerTurn(run) * 2 ? 'cl-minus' : ''}`}>{money(run.capital, st)}</span></div>
             <ul className="cl-ledger__rows">
               {run.ledger.slice(-6).map((l, i) => <li key={`${run.turn}-${i}`} className="ink-in"><span>{l.label}</span><span className={l.label === 'Brought forward' ? '' : l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{l.label === 'Brought forward' ? money(l.amount, st) : money(l.amount, st, true)}</span></li>)}
-              <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">({money(-debtPerTurn(run) * (run.pending.audit ? 2 : 1), st)})</span></li>
+              <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">{debtPerTurn(run) ? `(${money(-debtPerTurn(run) * (run.pending.audit ? 2 : 1), st)})` : 'None'}</span></li>
             </ul>
           </section>
           <section className="fortune">

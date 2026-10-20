@@ -556,3 +556,4 @@ button.m-threat { cursor: pointer; }
 .warn--stopped, .m-intent--stopped { background: var(--ink-muted); }
 .warn--stopped s, .m-intent--stopped s { opacity: .8; }
 .card-once { font-size: 10px; font-weight: 700; color: var(--ink-muted); }
+.m-sell { font-size: 10px; letter-spacing: .02em; padding-left: 8px; padding-right: 8px; }
