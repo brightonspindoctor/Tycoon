@@ -32,7 +32,7 @@ function report(label: string, o: AdminStart) {
   const reach = [0, 0, 0, 0, 0], reasons: Record<string, number> = {}, killers: Record<string, number> = {}
   const byEnemy: Record<string, { n: number; won: number; turns: number; cap: number }> = {}
   const turnsByRound = [0, 0, 0, 0, 0], countByRound = [0, 0, 0, 0, 0], shop = [0, 0, 0, 0], shopN = [0, 0, 0, 0]
-  let wins = 0, gold = 0, exposure = 0, expAll = 0, quick = 0
+  let wins = 0, gold = 0, exposure = 0, quick = 0
   for (let i = 0; i < N; i++) {
     const { r, fights, shopCap } = play(5000 + i, o)
     for (const f of fights) {
@@ -41,7 +41,6 @@ function report(label: string, o: AdminStart) {
       turnsByRound[f.round] += f.turns; countByRound[f.round]++
     }
     shopCap.forEach((c, k) => { if (c !== undefined) { shop[k] += c; shopN[k]++ } })
-    expAll += r.exposure
     if (r.phase === 'stageComplete') { wins++; gold += r.gold; exposure += r.exposure }
     else { reasons[r.loss?.reason ?? '?'] = (reasons[r.loss?.reason ?? '?'] ?? 0) + 1; const k = `R${r.round} ${r.loss?.by[0] ?? r.loss?.reason}`; killers[k] = (killers[k] ?? 0) + 1 }
   }
