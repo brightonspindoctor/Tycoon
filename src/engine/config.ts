@@ -71,5 +71,6 @@ export const CONFIG = {
   destroyCost: 2, // rises by $1 each time (players find out)
   prospectPrice: 3,
   turnLimit: 25,
+  claimJumperFires: 1, // fires the Claim Jumper starts as he's beaten
   oilCarriesOver: true,
 } as const

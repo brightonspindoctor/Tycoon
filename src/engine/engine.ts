@@ -148,7 +148,7 @@ export function price(r: Run): number {
 }
 /** What you get per barrel after freight; never below the floor. */
 export const netPrice = (r: Run) => Math.max(CONFIG.oilFloor, price(r) - freight(r))
-export const freight = (r: Run) => (r.items.includes('pipeline') ? 0 : r.freight)
+export const freight = (r: Run) => r.freight
 
 export function debtPerTurn(r: Run): number {
   let d = r.debt
@@ -593,7 +593,7 @@ function threatBeaten(r: Run, t: Threat) {
   say(r, `${THREATS[t.kind].name} is beaten.`)
   switch (t.kind) {
     case 'inspector': addJunk(r, 'looseThread'); addJunk(r, 'looseThread'); say(r, 'He filed his report: 2 Loose Threads added to your deck.'); break
-    case 'claimJumper': startFire(r, 2); break
+    case 'claimJumper': startFire(r, CONFIG.claimJumperFires); break
     case 'blowout': r.oil = Math.min(r.storage, r.oil + 3); say(r, 'Gusher! +3 oil.'); break
     case 'speculator': r.short = 0; break
     case 'railroad': r.freight = 0; break
@@ -900,7 +900,7 @@ export function intentText(r: Run, t: Threat): string {
     case 'Headline': return `Lose $${cash(r, CONFIG.headline)}.`
     case 'Front Page': return '+2 Board Exposure.'
     case 'Price War': return 'Oil price −$1.'
-    case 'Rail Deal': return r.items.includes('pipeline') ? 'A secret deal with the railway. Your Pipeline makes it pointless.' : 'A secret deal with the railway: you get $1 less for every barrel you sell.'
+    case 'Rail Deal': return 'A secret deal with the railway: you get $1 less for every barrel you sell.'
     case 'Squeeze': return `Lose $${cash(r, CONFIG.squeeze)}.`
     case 'Minutes': return '+1 Board Exposure.'
     case 'Clawback': return exposureHigh(r) ? `Exposure is high: takes ${CONFIG.clawbackGold} gold from your fortune.` : `Lose $${cash(r, CONFIG.clawbackCash)}. (At ${CONFIG.exposureHigh}+ Exposure, takes ${CONFIG.clawbackGold} gold instead.)`
@@ -1046,7 +1046,7 @@ function endTurn(r: Run) {
       case 'Expose': takeGold(r, CONFIG.muckrakerGold, name); break
       case 'Headline': dmg += cash(r, CONFIG.headline); break
       case 'Price War': r.short += 1; break
-      case 'Rail Deal': if (!r.items.includes('pipeline')) r.freight += 1; break
+      case 'Rail Deal': r.freight += 1; break
       case 'Squeeze': dmg += cash(r, CONFIG.squeeze); break
       case 'Clawback': if (exposureHigh(r)) takeGold(r, CONFIG.clawbackGold, name); else dmg += cash(r, CONFIG.clawbackCash); break
       case 'Cease and Desist': r.pending.cease += 1; break

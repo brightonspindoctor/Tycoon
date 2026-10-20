@@ -231,7 +231,7 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   strike: { role: 'engine', name: 'The Strike', hold: 8, weak: 'Dirty', cycle: ['Picket', 'Sabotage'], round3: 'Torch', movesFirst: 'Walkout', portrait: 'strike' },
   inspector: { role: 'cash', name: 'The Bank Inspector', hold: 6, weak: 'Legal', immune: 'Dirty', cycle: ['Audit', 'Fine'], whenBeaten: '2 Loose Threads', portrait: 'inspector' },
   railroad: { role: 'cash', name: 'The Railroad Agent', hold: 7, resist: 'Legal', cycle: ['Raise Rates', 'Refuse'], portrait: 'railroad' },
-  claimJumper: { role: 'engine', name: 'The Claim Jumper', hold: 6, weak: 'Dirty', cycle: ['Jump', 'Scout'], movesFirst: 'Scout', whenBeaten: 'Starts 2 fires', portrait: 'claimJumper' },
+  claimJumper: { role: 'engine', name: 'The Claim Jumper', hold: 6, weak: 'Dirty', cycle: ['Jump', 'Scout'], movesFirst: 'Scout', whenBeaten: 'Starts a fire', portrait: 'claimJumper' },
   speculator: { role: 'cash', name: 'The Speculator', hold: 7, weak: 'Legal', cycle: ['Short', 'Margin Call', 'Rumours'], round3: 'Paper Promise', whenBeaten: 'Price recovers', portrait: 'speculator' },
   baron: { role: 'boss', name: 'The Rival Baron', hold: 20, weak: 'Dirty', resist: 'Legal', cycle: ['Sabotage', 'Lease', 'Arson'], movesFirst: 'Arson', portrait: 'baron' },
   // stage 2
@@ -263,7 +263,7 @@ export const MODS: Record<ModKey, { name: string; text: string; stages?: number[
   boomtown: { name: 'Boomtown', text: 'Oil +$1, debt +$1' },
 }
 
-export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'lookout' | 'accountant' | 'refinery' | 'pipeline' | 'offshore' | 'boardGrudge' | 'loyalDirectors'
+export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'lookout' | 'accountant' | 'refinery' | 'offshore' | 'boardGrudge' | 'loyalDirectors'
   | 'pumpingStation' | 'pressOffice' | 'fillingStations' | 'auditingFirm'
 // stages: which stages' shops sell it (all if unset); never: a residue item, only ever given
 export const ITEMS: Record<ItemKey, { name: string; text: string; price: number; repeatable?: boolean; icon: Icon; stages?: number[]; never?: boolean; negative?: boolean }> = {
@@ -273,7 +273,6 @@ export const ITEMS: Record<ItemKey, { name: string; text: string; price: number;
   lookout: { name: 'Lookout', text: 'Enemies lose their opening move', price: 5, icon: 'telegraph', stages: [1] },
   accountant: { name: 'Accountant', text: 'Cover you don\'t use carries over to the next turn', price: 4, icon: 'deed', stages: [1] },
   refinery: { name: 'Refinery', text: 'Oil sells +$1', price: 10, icon: 'refinery', stages: [2] },
-  pipeline: { name: 'Pipeline', text: 'No freight charges', price: 6, icon: 'pipeline', stages: [2] },
   offshore: { name: 'Offshore Account', text: 'Enemies take 1 less gold from your fortune', price: 5, icon: 'offshore', stages: [2] },
   pumpingStation: { name: 'Pumping Station', text: '+1 AP every turn', price: 12, icon: 'pumpingStation', stages: [2] },
   pressOffice: { name: 'Press Office', text: 'Board Exposure −1 as each round begins', price: 9, icon: 'pressOffice', stages: [2] },
