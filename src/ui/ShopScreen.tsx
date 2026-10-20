@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { BOONS, CARDS, ITEMS, PROSPECT_FOR, WATER_FOR } from '../engine/data'
-import { canUpgrade, skimRate, waterPrice, type Action, type Run } from '../engine/engine'
+import { canDuplicate, canUpgrade, skimRate, waterPrice, type Action, type Run } from '../engine/engine'
 import { ERA_THEME, SHOP_NAME, money, units } from '../engine/format'
 import { ExposureMeter } from './Exposure'
 import { CONFIG } from '../engine/config'
@@ -8,7 +8,7 @@ import { CardView } from './CardView'
 import { SettingsButton } from './Settings'
 
 interface Props { run: Run; dispatch: (a: Action) => void }
-type Mode = null | 'destroy' | 'upgrade'
+type Mode = null | 'destroy' | 'upgrade' | 'duplicate'
 
 export function ShopScreen({ run, dispatch }: Props) {
   const [mode, setMode] = useState<Mode>(null)
@@ -76,12 +76,12 @@ export function ShopScreen({ run, dispatch }: Props) {
                 <button type="button" className="cl-btn" disabled={!can(ITEMS[run.shop.item].price)} onClick={() => dispatch({ type: 'buyItem' })}>Buy</button>
               </div>
             ) : <div className="cl-slot slot sold">Item sold</div>}
-            <div className="cl-slot slot">
+            {!stage2 && <div className="cl-slot slot">
               <span className="cl-tag">{money(8, st, true)}</span>
               <div className="cl-slot__name">Cheap Loan</div>
               <div className="cl-slot__desc"><span className="cl-plus">{money(8, st, true)} Capital now.</span> <span className="cl-minus">Bank Debt rises by {money(1, st)} a turn, for good.</span></div>
               <button type="button" className="cl-btn" disabled={run.shop.loanTaken} onClick={() => dispatch({ type: 'takeLoan' })}>{run.shop.loanTaken ? 'Signed' : 'Sign'}</button>
-            </div>
+            </div>}
             <div className="cl-slot slot">
               <span className="cl-tag">{money(run.destroyCost, st)}</span>
               <div className="cl-slot__name">Destroy a card</div>
@@ -100,8 +100,16 @@ export function ShopScreen({ run, dispatch }: Props) {
               <div className="cl-slot slot">
                 <span className="cl-tag">{money(CONFIG.silo2Price, st)}</span>
                 <div className="cl-slot__name">Silo</div>
-                <div className="cl-slot__desc">+{CONFIG.silo2Storage} oil storage, for good. Now {run.storage}.</div>
-                <button type="button" className="cl-btn" disabled={!!run.shop.siloSold || !can(CONFIG.silo2Price)} onClick={() => dispatch({ type: 'buySilo' })}>{run.shop.siloSold ? 'Built' : 'Build'}</button>
+                <div className="cl-slot__desc">+{CONFIG.silo2Storage} oil storage, for good. Now {run.storage}. {CONFIG.silo2Max - (run.silos ?? 0)} of {CONFIG.silo2Max} left to build.</div>
+                <button type="button" className="cl-btn" disabled={!!run.shop.siloSold || (run.silos ?? 0) >= CONFIG.silo2Max || !can(CONFIG.silo2Price)} onClick={() => dispatch({ type: 'buySilo' })}>{(run.silos ?? 0) >= CONFIG.silo2Max ? 'All built' : run.shop.siloSold ? 'Built' : 'Build'}</button>
+              </div>
+            )}
+            {stage2 && (
+              <div className="cl-slot slot">
+                <span className="cl-tag">Card's price</span>
+                <div className="cl-slot__name">Duplicate a card</div>
+                <div className="cl-slot__desc">A second copy, upgrade and all. Once per visit.</div>
+                <button type="button" className="cl-btn" disabled={!!run.shop.duplicated || !run.deck.some(c => canDuplicate(c) && can(CARDS[c.key].price!))} onClick={() => setMode(mode === 'duplicate' ? null : 'duplicate')}>{run.shop.duplicated ? 'Done' : mode === 'duplicate' ? 'Cancel' : 'Choose'}</button>
               </div>
             )}
             {stage2 && (
@@ -118,10 +126,12 @@ export function ShopScreen({ run, dispatch }: Props) {
             <span className="cl-label">Your deck · {run.deck.length} cards{mode ? ` · choose a card to ${mode}` : ''}</span>
             <div className="deck__list">
               {run.deck.map(c => {
-                const ok = mode === 'destroy' || (mode === 'upgrade' && canUpgrade(c))
-                return <CardView key={c.id} card={c} small stage={st} playable={!mode || ok} marked={ok && mode ? mode : undefined} onClick={() => {
+                const ok = mode === 'destroy' || (mode === 'upgrade' && canUpgrade(c)) || (mode === 'duplicate' && canDuplicate(c) && can(CARDS[c.key].price!))
+                return <CardView key={c.id} card={c} small stage={st} playable={!mode || ok} marked={ok && mode ? (mode === 'duplicate' ? 'upgrade' : mode) : undefined}
+                  price={mode === 'duplicate' && canDuplicate(c) ? money(CARDS[c.key].price!, st) : undefined} onClick={() => {
                   if (mode === 'destroy') dispatch({ type: 'destroyCard', cardId: c.id })
                   if (mode === 'upgrade' && ok) dispatch({ type: 'upgradeCard', cardId: c.id })
+                  if (mode === 'duplicate' && ok) dispatch({ type: 'duplicateCard', cardId: c.id })
                   if (ok) setMode(null)
                 }} />
               })}

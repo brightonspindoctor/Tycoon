@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { act, canPlay, cardDef, incorporate, intentText, netPrice, newRun, production, skimRate, type Card, type Run } from './engine'
 import { CONFIG } from './config'
-import { CARDS, THREATS, type CardKey, type ThreatKind } from './data'
+import { CARDS, ITEMS, THREATS, type CardKey, type ThreatKind } from './data'
 
 /** A run that has just beaten the Baron. */
 function afterBaron(seed = 3): Run {
@@ -335,13 +335,15 @@ describe('fire in stage 2', () => {
 })
 
 describe('the Exchange Silo', () => {
-  it('adds 2 storage, once a visit', () => {
+  it('adds 2 storage, once a visit, 2 at most', () => {
     let r = inStage2([])
-    r.phase = 'shop'; r.shop.siloSold = false; r.capital = 30
+    r.phase = 'shop'; r.shop.siloSold = false; r.capital = 60
     const st = r.storage
     r = act(r, { type: 'buySilo' })
     r = act(r, { type: 'buySilo' })
     expect(r.storage).toBe(st + 2)
+    for (let i = 0; i < 3; i++) { r.shop.siloSold = false; r = act(r, { type: 'buySilo' }) }
+    expect(r.storage).toBe(st + 4)
   })
 })
 
@@ -375,7 +377,7 @@ describe('reworked stage 2 enemies', () => {
   })
 
   it("the Railroad Commission is weak: Inspection takes 2 AP, Leaky Tanks takes the oil and a quarter of Capital", () => {
-    expect(THREATS.commission.hold).toBe(6)
+    expect(THREATS.commission.hold).toBe(8)
     let r = inStage2([], 'commission')
     r.threats[0].step = 1
     r = act(r, { type: 'endTurn' })
@@ -394,5 +396,58 @@ describe('reworked stage 2 enemies', () => {
     r = act(r, { type: 'endTurn' })
     expect(r.exposure).toBe(before.exp)
     expect(r.deck.length).toBe(before.deck)
+  })
+})
+
+describe('the Exchange, tidied', () => {
+  const shop = () => { const r = inStage2([]); r.phase = 'shop'; r.capital = 60; r.shop.loanTaken = false; r.shop.duplicated = false; return r }
+  it('has no Cheap Loan', () => {
+    const r = shop()
+    expect(act(r, { type: 'takeLoan' }).capital).toBe(r.capital)
+  })
+  it('duplicates a card, upgrade and all, for its price, once a visit', () => {
+    let r = shop()
+    const lawyer = r.deck.find(c => c.key === 'payDividend')!
+    lawyer.up = true
+    r = act(r, { type: 'duplicateCard', cardId: lawyer.id })
+    const copies = r.deck.filter(c => c.key === 'payDividend')
+    expect(copies).toHaveLength(2)
+    expect(copies.every(c => c.up)).toBe(true)
+    expect(r.capital).toBe(60 - CARDS.payDividend.price!)
+    r = act(r, { type: 'duplicateCard', cardId: lawyer.id })
+    expect(r.deck.filter(c => c.key === 'payDividend')).toHaveLength(2)
+  })
+  it('sells only stage 2 items, and the Refinery costs 10K', () => {
+    expect(ITEMS.refinery.price).toBe(10)
+    for (const k of ['storageTank', 'silo', 'steamPump', 'lookout', 'accountant'] as const) expect(ITEMS[k].stages).toEqual([1])
+    for (let seed = 1; seed < 30; seed++) {
+      let r = inStage2(['lawyerUp'], 'muckraker', seed)
+      r.threats[0].hold = 1
+      r = act(act(act(r, { type: 'play', cardId: inHand(r, 'lawyerUp').id }), { type: 'sellSpoils' }), { type: 'continue' })
+      if (r.shop.item) expect(ITEMS[r.shop.item].stages).toEqual([2])
+    }
+  })
+})
+
+describe('fire in stage 2 comes from Bad Blood', () => {
+  it("the Saboteur's Lit Fuse and the Combine's Hired Muscle put Bad Blood in your next hand", () => {
+    for (const [kind, step] of [['saboteur', 1], ['combine', 3]] as const) {
+      let r = inStage2([], kind)
+      r.threats[0].step = step
+      r = act(r, { type: 'endTurn' })
+      expect(r.hand.some(c => c.key === 'badBlood')).toBe(true)
+      expect(r.deck.some(c => c.key === 'badBlood')).toBe(true)
+    }
+  })
+  it('every stage 2 enemy has 2 more Hold than before', () => {
+    expect([THREATS.muckraker.hold, THREATS.combine.hold, THREATS.clawback.hold, THREATS.patentHolder.hold, THREATS.saboteur.hold, THREATS.commission.hold, THREATS.proxyFight.hold])
+      .toEqual([11, 11, 10, 12, 10, 8, 26])
+  })
+  it('R&D Sprint counts every Well and Field', () => {
+    let r = inStage2(['rdSprint'])
+    r.plots = [{ output: 1, reserve: 0, field: true }, { output: 1, reserve: 0, lasting: true }]
+    r.oil = 0; r.storage = 9
+    r = act(r, { type: 'play', cardId: inHand(r, 'rdSprint').id })
+    expect(r.oil).toBe(2)
   })
 })

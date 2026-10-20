@@ -121,7 +121,7 @@ export const CARDS: Record<CardKey, CardDef> = {
   poachEngineer: { name: 'Poach an Engineer', era: 2, ap: 1, cost: 0, uses: null, family: 'Dirty', power: 5, draw: 1, icon: 'wages', price: 6, rarity: 'Common',
     text: 'Remove 5 Hold. Draw 1 card.', flavour: 'Double the salary. Half the scruples.' },
   rdSprint: { name: 'R&D Sprint', era: 2, ap: 1, cost: 0, uses: null, family: 'Production', power: 1, icon: 'barrels', price: 6, rarity: 'Uncommon',
-    text: '+1 oil from every Field now.', flavour: 'Results by Friday.' },
+    text: '+1 oil from every Well and Field now.', flavour: 'Results by Friday.' },
   payDividend: { name: 'Pay a Dividend', era: 2, ap: 1, cost: 3, uses: null, family: 'Board', power: 0, exposure: -1, icon: 'shares', price: 4, rarity: 'Common',
     text: 'Pay $3. −1 Board Exposure.', flavour: 'Gentlemen, a token of our esteem.' },
   personalLawyer: { name: 'Personal Lawyer', era: 2, ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, icon: 'deed', price: 5, rarity: 'Common',
@@ -175,7 +175,7 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   patentThicket: { power: 10, text: 'Pay $2. Remove 10 Hold.' },
   espionage: { power: 12, text: 'Remove 12 Hold. +1 Board Exposure.' },
   poachEngineer: { power: 7, text: 'Remove 7 Hold. Draw 1 card.' },
-  rdSprint: { power: 2, text: '+2 oil from every Field now.' },
+  rdSprint: { power: 2, text: '+2 oil from every Well and Field now.' },
   payDividend: { exposure: -2, text: 'Pay $3. −2 Board Exposure.' },
   personalLawyer: { ap: 0, text: 'Your fortune is safe this turn: the next gold an enemy takes is blocked. Costs no AP.' },
   derrick: { ap: 0, text: 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty. Costs no AP.' },
@@ -236,13 +236,13 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   speculator: { role: 'cash', name: 'The Speculator', hold: 7, weak: 'Legal', cycle: ['Short', 'Margin Call', 'Rumours'], round3: 'Paper Promise', whenBeaten: 'Price recovers', portrait: 'speculator' },
   baron: { role: 'boss', name: 'The Rival Baron', hold: 20, weak: 'Dirty', resist: 'Legal', cycle: ['Sabotage', 'Lease', 'Arson'], movesFirst: 'Arson', portrait: 'baron' },
   // stage 2
-  muckraker: { role: 'cash', name: 'The Muckraker', hold: 9, weak: 'Legal', cycle: ['Dig', 'Expose', 'Headline'], round3: 'Front Page', whenBeaten: 'Retraction: −1 Board Exposure', portrait: 'muckraker' },
-  combine: { role: 'cash', name: 'The Combine', hold: 9, resist: 'Legal', cycle: ['Price War', 'Rail Deal', 'Squeeze'], whenBeaten: 'Prices and freight recover', portrait: 'combine' },
-  clawback: { role: 'cash', name: 'The Clawback Committee', hold: 8, weak: 'Dirty', cover: 2, cycle: ['Clawback', 'Clawback', 'Minutes'], whenBeaten: '−1 Board Exposure', portrait: 'clawback' },
-  patentHolder: { role: 'engine', name: 'The Patent Holder', hold: 10, weak: 'Legal', cycle: ['Cease and Desist', 'New Patent Claim', 'Royalty'], portrait: 'patentHolder' },
-  saboteur: { role: 'engine', name: 'The Saboteur', hold: 8, weak: 'Dirty', cycle: ['Wreck', 'Infiltrate'], movesFirst: 'Infiltrate', whenBeaten: 'Starts a fire', portrait: 'saboteur' },
-  commission: { role: 'engine', name: 'The Railroad Commission', hold: 6, weak: 'Dirty', cycle: ['Proration', 'Inspection', 'Leaky Tanks'], portrait: 'commission' },
-  proxyFight: { role: 'boss', name: 'The Proxy Fight', hold: 24, weak: 'Legal', resist: 'Dirty', cycle: ['Hostile Bid', 'Proxy Meeting', 'The Vote'], movesFirst: 'Canvass', portrait: 'proxyFight' },
+  muckraker: { role: 'cash', name: 'The Muckraker', hold: 11, weak: 'Legal', cycle: ['Dig', 'Expose', 'Headline'], round3: 'Front Page', whenBeaten: 'Retraction: −1 Board Exposure', portrait: 'muckraker' },
+  combine: { role: 'cash', name: 'The Combine', hold: 11, resist: 'Legal', cycle: ['Price War', 'Rail Deal', 'Squeeze', 'Hired Muscle'], whenBeaten: 'Prices and freight recover', portrait: 'combine' },
+  clawback: { role: 'cash', name: 'The Clawback Committee', hold: 10, weak: 'Dirty', cover: 2, cycle: ['Clawback', 'Clawback', 'Minutes'], whenBeaten: '−1 Board Exposure', portrait: 'clawback' },
+  patentHolder: { role: 'engine', name: 'The Patent Holder', hold: 12, weak: 'Legal', cycle: ['Cease and Desist', 'New Patent Claim', 'Royalty'], portrait: 'patentHolder' },
+  saboteur: { role: 'engine', name: 'The Saboteur', hold: 10, weak: 'Dirty', cycle: ['Wreck', 'Lit Fuse', 'Infiltrate'], movesFirst: 'Infiltrate', whenBeaten: 'Starts a fire', portrait: 'saboteur' },
+  commission: { role: 'engine', name: 'The Railroad Commission', hold: 8, weak: 'Dirty', cycle: ['Proration', 'Inspection', 'Leaky Tanks'], portrait: 'commission' },
+  proxyFight: { role: 'boss', name: 'The Proxy Fight', hold: 26, weak: 'Legal', resist: 'Dirty', cycle: ['Hostile Bid', 'Proxy Meeting', 'The Vote'], movesFirst: 'Canvass', portrait: 'proxyFight' },
 }
 
 // Round 1 takes your cash, round 2 breaks your engine, round 3 sends one of each.
@@ -265,16 +265,21 @@ export const MODS: Record<ModKey, { name: string; text: string; stages?: number[
 }
 
 export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'lookout' | 'accountant' | 'refinery' | 'pipeline' | 'offshore' | 'boardGrudge' | 'loyalDirectors'
+  | 'pumpingStation' | 'pressOffice' | 'fillingStations' | 'auditingFirm'
 // stages: which stages' shops sell it (all if unset); never: a residue item, only ever given
 export const ITEMS: Record<ItemKey, { name: string; text: string; price: number; repeatable?: boolean; icon: Icon; stages?: number[]; never?: boolean; negative?: boolean }> = {
-  storageTank: { name: 'Storage Tank', text: '+2 oil storage', price: 4, repeatable: true, icon: 'barrels' },
-  silo: { name: 'Silo', text: '+4 oil storage', price: 7, icon: 'barrels' },
-  steamPump: { name: 'Steam Pump', text: '+1 AP every turn', price: 10, icon: 'derrick' },
-  lookout: { name: 'Lookout', text: 'Enemies lose their opening move', price: 5, icon: 'telegraph' },
-  accountant: { name: 'Accountant', text: 'Cover you don\'t use carries over to the next turn', price: 4, icon: 'deed' },
-  refinery: { name: 'Refinery', text: 'Oil sells +$1', price: 8, icon: 'barrels', stages: [2] },
+  storageTank: { name: 'Storage Tank', text: '+2 oil storage', price: 4, repeatable: true, icon: 'barrels', stages: [1] },
+  silo: { name: 'Silo', text: '+4 oil storage', price: 7, icon: 'barrels', stages: [1] },
+  steamPump: { name: 'Steam Pump', text: '+1 AP every turn', price: 10, icon: 'derrick', stages: [1] },
+  lookout: { name: 'Lookout', text: 'Enemies lose their opening move', price: 5, icon: 'telegraph', stages: [1] },
+  accountant: { name: 'Accountant', text: 'Cover you don\'t use carries over to the next turn', price: 4, icon: 'deed', stages: [1] },
+  refinery: { name: 'Refinery', text: 'Oil sells +$1', price: 10, icon: 'barrels', stages: [2] },
   pipeline: { name: 'Pipeline', text: 'No freight charges', price: 6, icon: 'barrels', stages: [2] },
   offshore: { name: 'Offshore Account', text: 'Enemies take 1 less gold from your fortune', price: 5, icon: 'cashbox', stages: [2] },
+  pumpingStation: { name: 'Pumping Station', text: '+1 AP every turn', price: 12, icon: 'derrick', stages: [2] },
+  pressOffice: { name: 'Press Office', text: 'Board Exposure −1 as each round begins', price: 9, icon: 'telegraph', stages: [2] },
+  fillingStations: { name: 'Filling Stations', text: '+$1 every turn', price: 8, icon: 'coins', stages: [2] },
+  auditingFirm: { name: 'Auditing Firm', text: "Cover you don't use carries over to the next turn", price: 6, icon: 'deed', stages: [2] },
   boardGrudge: { name: 'Board Grudge', text: 'The board takes $1 every shop visit', price: 0, icon: 'redtape', never: true, negative: true },
   loyalDirectors: { name: 'Loyal Directors', text: '+1 AP in boss fights', price: 0, icon: 'shares', never: true },
 }

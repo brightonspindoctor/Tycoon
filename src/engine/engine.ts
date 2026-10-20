@@ -26,6 +26,7 @@ export interface ShopOffer {
   boon: BoonKey | null // before the boss: one small item for gold
   dividendPaid: boolean // the shop's dividend, once per visit (stage 2 on)
   siloSold?: boolean // the Exchange's Silo, once per visit
+  duplicated?: boolean // the Exchange's duplicate, once per visit
 }
 
 export interface Run {
@@ -55,7 +56,7 @@ export interface Run {
   modifier: ModKey | null
   short: number
   freight: number
-  pending: { ap: number; audit: boolean; refuse: boolean; margin: number; cease: number; prorate: boolean; claims?: number }
+  pending: { ap: number; audit: boolean; refuse: boolean; margin: number; cease: number; prorate: boolean; claims?: number; badBlood?: number }
   current: { audit: boolean; refuse: boolean; prorate: boolean }
   items: ItemKey[]
   destroyCost: number
@@ -79,6 +80,7 @@ export interface Run {
   upgradeCost: number
   residue: ItemKey | null // left behind by the stage's meter
   stageGold: number // gold at the start of this stage
+  silos?: number // Exchange Silos built (at most silo2Max)
   admin?: boolean // a playtest run started from admin mode: never recorded
 }
 
@@ -107,6 +109,7 @@ export type Action =
   | { type: 'upgradeCard'; cardId: number }
   | { type: 'payDividends' }
   | { type: 'buySilo' }
+  | { type: 'duplicateCard'; cardId: number }
   | { type: 'admin'; op: AdminOp; card?: CardKey; target?: number }
   | { type: 'leaveShop' }
   | { type: 'continue' }
@@ -122,6 +125,8 @@ export function cardDef(c: { key: CardKey; up?: boolean }): CardDef {
   return { ...d, ...UPGRADES[c.key], name: `${d.name}+` }
 }
 export const canUpgrade = (c: Card) => !c.up && !c.temp && !!UPGRADES[c.key]
+/** The Exchange can copy any card with a shop price (not junk), upgrade and all, for that price. */
+export const canDuplicate = (c: Card) => !c.temp && !CARDS[c.key].junk && !!CARDS[c.key].price
 export const isProspect = (k: CardKey) => PROSPECTS.includes(k)
 
 export const waterPrice = (r: Run) => (r.stage >= 2 ? CONFIG.bucketPrice2 : CONFIG.bucketPrice)
@@ -166,6 +171,8 @@ export const production = (r: Run) => {
   return r.current.prorate ? Math.min(CONFIG.prorationCap, made) : made
 }
 export const fieldCount = (r: Run) => r.plots.filter(w => w?.field).length
+/** What R&D Sprint counts: every Well and Field in stage 2 (Fields only, in theory, before). */
+const sprintWells = (r: Run) => (r.stage >= 2 ? wellCount(r) : fieldCount(r))
 
 function money(r: Run, label: string, amount: number) {
   if (amount === 0) return
@@ -357,7 +364,7 @@ function shopAction(r: Run, a: Action) {
       return
     }
     case 'takeLoan':
-      if (r.shop.loanTaken) return
+      if (r.shop.loanTaken || (r.phase === 'shop' && r.stage >= 2)) return // no Cheap Loan at the Exchange
       if (r.phase === 'incorporate') { money(r, 'Incorporation loan', CONFIG.stage2Loan); r.debt += CONFIG.stage2LoanDebt }
       else { money(r, 'Cheap Loan', 8); r.debt += 1 }
       r.shop.loanTaken = true
@@ -371,10 +378,17 @@ function shopAction(r: Run, a: Action) {
       return
     }
     case 'buySilo':
-      if (r.stage < 2 || r.phase !== 'shop' || r.shop.siloSold || !pay(r, CONFIG.silo2Price, 'Silo')) return
-      r.storage += CONFIG.silo2Storage; r.shop.siloSold = true
+      if (r.stage < 2 || r.phase !== 'shop' || r.shop.siloSold || (r.silos ?? 0) >= CONFIG.silo2Max || !pay(r, CONFIG.silo2Price, 'Silo')) return
+      r.storage += CONFIG.silo2Storage; r.shop.siloSold = true; r.silos = (r.silos ?? 0) + 1
       say(r, `Silo built: storage for ${r.storage} oil.`)
       return
+    case 'duplicateCard': {
+      const c = r.deck.find(x => x.id === a.cardId)
+      if (!c || r.stage < 2 || r.phase !== 'shop' || r.shop.duplicated || !canDuplicate(c) || !pay(r, CARDS[c.key].price!, `Duplicate ${CARDS[c.key].name}`)) return
+      r.deck.push({ ...card(r, c.key), up: c.up, uses: CARDS[c.key].uses }); r.shop.duplicated = true
+      say(r, `${cardDef(c).name}: a second copy is in your deck.`)
+      return
+    }
     case 'payDividends':
       if (r.stage < 2 || r.phase !== 'shop' || r.shop.dividendPaid || r.exposure === 0 || !pay(r, CONFIG.dividendCost, 'Dividends to the board')) return
       r.shop.dividendPaid = true
@@ -445,6 +459,7 @@ function startRound(r: Run, round: number) {
   for (const t of r.threats) { say(r, `${THREATS[t.kind].name} arrives.`); beat(r, 'enemy', `Round ${round}`, `${THREATS[t.kind].name} arrives.`, t.id) }
   if (r.modifier) { say(r, `${MODS[r.modifier].name}: ${MODS[r.modifier].text}.`); beat(r, 'info', MODS[r.modifier].name, `${MODS[r.modifier].text}.`) }
   if (r.modifier === 'scandal') expose(r, 1, 'Scandal')
+  if (r.items.includes('pressOffice')) expose(r, -1, 'Press Office')
   // opening moves
   if (!r.items.includes('lookout')) {
     for (const t of r.threats) {
@@ -483,12 +498,13 @@ function startRound(r: Run, round: number) {
 function beginTurn(r: Run) {
   r.turn += 1
   r.ledger = [{ label: 'Brought forward', amount: r.capital }]
-  if (!r.items.includes('accountant')) r.cover = 0
+  if (!r.items.includes('accountant') && !r.items.includes('auditingFirm')) r.cover = 0
   r.current = { audit: r.pending.audit, refuse: r.pending.refuse, prorate: r.pending.prorate }
   const apPenalty = r.pending.ap
   const margins = r.pending.margin
   const ceases = r.pending.cease
   const claims = r.pending.claims ?? 0
+  const fuses = r.pending.badBlood ?? 0
   r.pending = { ap: 0, audit: false, refuse: false, margin: 0, cease: 0, prorate: false }
   for (const t of liveThreats(r)) t.cover = THREATS[t.kind].cover // enemy Cover: fresh each turn, never stacks
   r.boost = 0
@@ -496,6 +512,7 @@ function beginTurn(r: Run) {
   const d = debtPerTurn(r) * (r.current.audit ? 2 : 1)
   money(r, r.current.audit ? 'Bank debt (audited)' : 'Bank debt', -d)
   if (d && r.turn > 1) beat(r, 'money', r.current.audit ? 'Bank debt · audited' : 'Bank debt', `−$${d}.`)
+  if (r.items.includes('fillingStations')) money(r, 'Filling Stations', 1)
   const ious = r.hand.filter(c => c.key === 'iou').length
   if (ious) { money(r, 'IOU', -ious); beat(r, 'money', 'IOU', `−$${ious}.`) }
   if (checkBankrupt(r)) return
@@ -514,13 +531,15 @@ function beginTurn(r: Run) {
   for (let i = 0; i < margins; i++) r.hand.push(card(r, 'marginCall', true))
   if (margins) beat(r, 'cards', 'Margin Call', `${margins > 1 ? `${margins} Margin Calls` : 'A Margin Call'} in your hand.`)
   for (let i = 0; i < ceases; i++) r.hand.push(card(r, 'ceaseDesist', true))
+  for (let i = 0; i < fuses; i++) { const b = card(r, 'badBlood'); r.deck.push(b); r.hand.push(b) } // lasts until it decays
+  if (fuses) beat(r, 'cards', 'Bad Blood', `${fuses > 1 ? `${fuses} Bad Blood cards` : 'A Bad Blood card'} in your hand: 1 in 3 chance of a fire.`)
   for (let i = 0; i < claims; i++) r.hand.push(card(r, 'patentClaim', true))
   if (claims) beat(r, 'cards', 'New Patent Claim', 'A New Patent Claim is clogging your hand.')
   if (ceases) beat(r, 'cards', 'Cease and Desist', `${ceases > 1 ? `${ceases} Cease and Desist letters` : 'A Cease and Desist letter'} in your hand.`)
   const n = CONFIG.handSize - (r.modifier === 'badWeather' ? 1 : 0)
   drawUpTo(r, n)
   const loyal = r.round === 4 && r.items.includes('loyalDirectors') ? 1 : 0
-  r.ap = Math.max(0, CONFIG.baseAP + (r.items.includes('steamPump') ? 1 : 0) + loyal - apPenalty)
+  r.ap = Math.max(0, CONFIG.baseAP + (r.items.includes('steamPump') ? 1 : 0) + (r.items.includes('pumpingStation') ? 1 : 0) + loyal - apPenalty)
 }
 
 function drawOne(r: Run): boolean {
@@ -648,7 +667,7 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (isProspect(c.key) && (d.plots ?? 0) > 0 && r.plots.length >= CONFIG.maxPlots && freePlot(r) < 0) return { ok: false, why: 'No land left to claim' }
   if (isProspect(c.key) && !d.plots && !canBuild(r)) return { ok: false, why: 'No empty plot' }
   if (c.key === 'rotaryRig' && rigTarget(r) < 0) return { ok: false, why: 'No Well to convert' }
-  if (c.key === 'rdSprint' && !fieldCount(r)) return { ok: false, why: 'No Fields' }
+  if (c.key === 'rdSprint' && !sprintWells(r)) return { ok: false, why: 'No Wells' }
   if (d.scrap === 'one' && !handTargetsFor(r, c).length) return { ok: false, why: 'Nothing to destroy' }
   if (d.scrap === 'junk' && !r.hand.some(x => x.id !== c.id && CARDS[x.key].junk)) return { ok: false, why: 'No junk in hand' }
   if (c.key === 'payDividend' && r.exposure === 0) return { ok: false, why: 'The board is happy' }
@@ -739,7 +758,7 @@ function play(r: Run, cardId: number, target?: number) {
       }
       case 'rotaryRig': { const i = rigTarget(r); if (i >= 0) { r.plots[i]!.field = true; say(r, `Rotary Rig: Well No. ${i + 1} is now a Field.`) } break }
       case 'rdSprint': {
-        const made = fieldCount(r) * d.power
+        const made = sprintWells(r) * d.power
         const got = Math.min(made, r.storage - r.oil)
         r.oil += got
         say(r, got < made ? `R&D Sprint: +${got} oil. Storage full: ${made - got} lost.` : `R&D Sprint: +${got} oil.`)
@@ -876,6 +895,8 @@ export function intentText(r: Run, t: Threat): string {
     case 'New Patent Claim': return "Adds a New Patent Claim to your next hand: it can't be played and takes a slot."
     case 'Leaky Tanks': return `Lose all your stored oil (${r.oil}) and ${Math.round(CONFIG.leakyTanksShare * 100)}% of your Capital (${leakyLoss(r)}).`
     case 'Proxy Meeting': return 'Nothing. The shareholders talk among themselves.'
+    case 'Lit Fuse': return 'Puts a Bad Blood card in your next hand: 1 in 3 chance of a fire each time it\'s played.'
+    case 'Hired Muscle': return 'Puts a Bad Blood card in your next hand: 1 in 3 chance of a fire each time it\'s played.'
     case 'Wreck': {
       const m = r.marked
       if (m === null || !r.plots[m]) return 'Looks for something to wreck.'
@@ -1012,6 +1033,7 @@ function endTurn(r: Run) {
         break
       }
       case 'Proxy Meeting': break
+      case 'Lit Fuse': case 'Hired Muscle': r.pending.badBlood = (r.pending.badBlood ?? 0) + 1; break
       case 'Wreck': {
         const m = r.marked
         if (m !== null && r.plots[m]) { say(r, `${plotName(r, m)} wrecked.`); loseWell(r, m, 'lost') }

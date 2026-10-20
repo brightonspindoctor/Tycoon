@@ -2,7 +2,7 @@
 // after every single action, that the game never reaches an impossible state.
 // Run with: npm run fuzz
 import { act, canPlay, handTargetsFor, intent, intentText, newRun, targetsFor, type Action, type Run } from '../src/engine/engine'
-import { BONUSES, BOONS, CARDS, REWARDS, type BonusKey } from '../src/engine/data'
+import { BONUSES, BOONS, CARDS, ITEMS, REWARDS, type BonusKey } from '../src/engine/data'
 import { CONFIG } from '../src/engine/config'
 import { botIncorporate, botShop, botTurn } from './bot'
 
@@ -15,6 +15,7 @@ function randomAction(r: Run): Action {
   if (r.phase === 'stageComplete') return { type: 'continue' }
   if (r.phase === 'incorporate') {
     const opts: Action[] = [{ type: 'leaveShop' }, { type: 'takeLoan' }, { type: 'skim', gold: 1 }, { type: 'buyCard', slot: 0 }, { type: 'payDividends' }, { type: 'buySilo' }]
+    if (r.deck.length) opts.push({ type: 'duplicateCard', cardId: pick(r.deck).id })
     if (r.deck.length) opts.push({ type: 'destroyCard', cardId: pick(r.deck).id }, { type: 'upgradeCard', cardId: pick(r.deck).id })
     return rand() < 0.2 ? { type: 'leaveShop' } : pick(opts)
   }
@@ -73,6 +74,8 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.stage === 2 && r.deck.some(c => c.key === 'prospect')) return 'a fresh Prospect in stage 2'
   if (r.stage === 2 && r.plots.some(w => w && (w.output !== CONFIG.stage2Output || !(w.field || w.lasting)))) return 'a stage 2 Well that pumps other than 1 or runs dry'
   if (r.stage === 2 && r.phase === 'shop' && r.shop.cards.some(k => k && (CARDS[k].era ?? 1) < 2)) return 'a stage 1 card in the stage 2 shop'
+  if (r.stage === 2 && r.phase === 'shop' && r.shop.item && !(ITEMS[r.shop.item].stages ?? []).includes(2)) return 'a stage 1 item in the stage 2 shop'
+  if ((r.silos ?? 0) > CONFIG.silo2Max) return 'too many Silos'
   if (r.loss?.reason === 'ousted' && r.exposure < CONFIG.exposureMax) return 'ousted below the top'
   if (r.loss?.reason === 'ruined' && r.gold >= 0) return 'ruined with gold left'
   if (r.ap < 0) return `ap ${r.ap}`
