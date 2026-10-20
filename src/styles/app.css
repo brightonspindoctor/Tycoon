@@ -608,3 +608,17 @@ button.m-threat { cursor: pointer; }
 .tape__foot { background: rgba(18, 15, 11, .82); color: #f6efdc; padding: 5px 6px 5px 12px; border-radius: 999px; text-shadow: none; }
 .tape__foot .cl-btn { background: #f6efdc; }
 .m .shop__deals > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+/* ---------- first-run welcome ---------- */
+.welcome { justify-content: center; align-items: center; gap: 34px; text-align: center; cursor: default; }
+.welcome__lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.welcome__lines li { display: flex; align-items: baseline; justify-content: center; gap: 18px; font-size: 64px; line-height: 70px; opacity: 0; transform: translateY(10px) scale(1.06); transition: opacity .35s ease-out, transform .35s cubic-bezier(.2, 1.4, .4, 1); }
+.welcome__lines li.is-in { opacity: 1; transform: none; }
+.welcome__lines li:last-child { color: var(--accent); }
+.welcome__no { font-size: 18px; line-height: 18px; width: 34px; height: 34px; display: inline-grid; place-items: center; border: 2px solid currentColor; border-radius: 50%; transform: translateY(-10px); }
+.welcome__go { padding: 16px 48px; font-size: 18px; opacity: 0; pointer-events: none; transition: opacity .3s; }
+.welcome__go.is-in { opacity: 1; pointer-events: auto; }
+.m .welcome { justify-content: center; min-height: 100dvh; gap: 28px; }
+.m .welcome__lines li { font-size: 36px; line-height: 42px; gap: 12px; }
+.m .welcome__no { width: 26px; height: 26px; font-size: 13px; transform: translateY(-6px); }
+.m .welcome__go { width: 100%; }

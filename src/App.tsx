@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { act, newRun, roundsReached, type Action, type Beat, type Run } from './engine/engine'
 import type { BonusKey } from './engine/data'
-import { loadReplay, saveRun, trustFundOffered } from './storage'
+import { loadReplay, markWelcomed, saveRun, trustFundOffered, welcomeSeen } from './storage'
+import { Welcome } from './ui/Welcome'
 import { TickerTape } from './ui/TickerTape'
 import { CONFIG } from './engine/config'
 import { ERA_THEME } from './engine/format'
@@ -17,7 +18,7 @@ import { RoundSummary } from './ui/RoundSummary'
 import { CrashOut, StageComplete } from './ui/EndScreens'
 import { BonusPick, History, Intro } from './ui/MenuScreens'
 
-type Screen = 'intro' | 'bonus' | 'run' | 'history'
+type Screen = 'intro' | 'bonus' | 'welcome' | 'run' | 'history'
 
 // Phones held upright get their own layout; anything wider gets the 1440×900 board scaled to fit.
 const MOBILE_MAX = 760
@@ -103,7 +104,9 @@ export default function App() {
     }
   }, [run])
 
+  const [pendingBonus, setPendingBonus] = useState<BonusKey | null>(null)
   function start(bonus: BonusKey) {
+    if (!welcomeSeen()) { setPendingBonus(bonus); setScreen('welcome'); return }
     const r = newRun(Math.floor(Math.random() * 2 ** 31), bonus)
     setRun(r)
     setScreen('run')
@@ -117,6 +120,7 @@ export default function App() {
   else if (previewPage === 'sounds') body = <SoundBoard />
   else if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
   else if (screen === 'bonus') body = <BonusPick onPick={start} onBack={() => setScreen('intro')} />
+  else if (screen === 'welcome') body = <Welcome onBegin={() => { markWelcomed(); start(pendingBonus ?? 'threeOil') }} />
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />
   else if (run.phase === 'shop' && !tape) body = <ShopScreen run={run} dispatch={dispatch} />
   else if (run.phase === 'lost' && !tape) body = <CrashOut run={run} bailout={bailout} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} />

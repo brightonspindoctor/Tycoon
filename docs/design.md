@@ -52,6 +52,9 @@ A card is offered (weighted by rarity, like the shop): take it into your deck or
 - **Bribe** ($4): pay 1 gold from your fortune; 50% chance of 4 Hold (Dirty, so doubled against the Strike, Claim Jumper and Baron), otherwise it is refused and adds Bad Blood.
 - Enemies that move first show what they opened with on turn 1, above their next move.
 
+### First run
+Before your first run ever, after picking a starting bonus, a screen stamps out the game in four lines (Prospect fields. Build wells. Sell oil. Grow your capital.) with a Begin button. It never shows again.
+
 ### The enemy turn
 When you end your turn, everything that happens is played back on a ticker tape, one line at a time, with the enemy (or fire, stockpile, ledger or draw pile) it concerns lit up: unplayed Must play cards, fire, each enemy's move (or "Stopped"), fines, then the new turn's debt, pumping, any reshuffle (with a riffle animation) and "Your move". Rounds open the same way. Tap to hurry, Skip to jump ahead; Settings sets it to Play it out, Fast or Off.
 

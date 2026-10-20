@@ -37,6 +37,15 @@ export function bestScore(industry: string): number | null {
 const VOLUME = 'tycoon.volume'
 const INSTALL_SEEN = 'tycoon.installPromptSeen'
 const REPLAY = 'tycoon.replay'
+const WELCOMED = 'tycoon.welcomed'
+
+/** The welcome screen shows once, before your first run ever. */
+export function welcomeSeen(): boolean {
+  try { return localStorage.getItem(WELCOMED) === '1' || loadRuns().length > 0 } catch { return true }
+}
+export function markWelcomed() {
+  try { localStorage.setItem(WELCOMED, '1') } catch { /* ignore */ }
+}
 
 export type Replay = 'normal' | 'fast' | 'off'
 export function loadReplay(): Replay {
