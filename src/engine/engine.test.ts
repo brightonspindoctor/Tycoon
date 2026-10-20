@@ -606,13 +606,6 @@ describe('sweep fixes', () => {
     expect(canPlay(r, g).ok).toBe(false) // now it can be paid, so it comes first
   })
 
-  it("junk can't be reinforced", () => {
-    let r = newRun(18, 'threeOil'); r.phase = 'shop'; r.capital = 20
-    const bb = { id: 8600, key: 'badBlood' as const, uses: 2 }; r.deck.push(bb)
-    r = act(r, { type: 'reinforce', cardId: 8600 })
-    expect(r.deck.find(c => c.id === 8600)!.uses).toBe(2)
-    expect(r.capital).toBe(20)
-  })
 })
 
 describe('turn report, Shore Up once per round, Accountant', () => {

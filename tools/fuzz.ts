@@ -15,7 +15,7 @@ function randomAction(r: Run): Action {
   if (r.phase === 'shop') {
     const opts: Action[] = [{ type: 'leaveShop' }, { type: 'buyProspect' }, { type: 'buyBucket' }, { type: 'buyBoon' }, { type: 'buyItem' },
       { type: 'takeLoan' }, { type: 'reroll' }, { type: 'skim', gold: 1 + Math.floor(rand() * 3) }, { type: 'buyCard', slot: Math.floor(rand() * 3) }]
-    if (r.deck.length) { opts.push({ type: 'destroyCard', cardId: pick(r.deck).id }, { type: 'reinforce', cardId: pick(r.deck).id }) }
+    if (r.deck.length) { opts.push({ type: 'destroyCard', cardId: pick(r.deck).id }) }
     return rand() < 0.25 ? { type: 'leaveShop' } : pick(opts)
   }
   const opts: Action[] = [{ type: 'endTurn' }, { type: 'sellOil' }, { type: 'firebreak' }, { type: 'sellWell', plot: Math.floor(rand() * 6) - 1 }]

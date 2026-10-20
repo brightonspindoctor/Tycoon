@@ -89,7 +89,6 @@ export type Action =
   | { type: 'buyItem' }
   | { type: 'takeLoan' }
   | { type: 'destroyCard'; cardId: number }
-  | { type: 'reinforce'; cardId: number }
   | { type: 'reroll' }
   | { type: 'skim'; gold: number }
   | { type: 'leaveShop' }
@@ -281,12 +280,6 @@ function shopAction(r: Run, a: Action) {
       const c = r.deck.find(x => x.id === a.cardId)
       if (!c || !pay(r, r.destroyCost, `Destroy ${CARDS[c.key].name}`)) return
       removeFromDeck(r, c); r.destroyCost += 1
-      return
-    }
-    case 'reinforce': {
-      const c = r.deck.find(x => x.id === a.cardId)
-      if (!c || c.uses === null || CARDS[c.key].junk || !pay(r, 2, `Reinforce ${CARDS[c.key].name}`)) return
-      c.uses += 1
       return
     }
     case 'reroll':

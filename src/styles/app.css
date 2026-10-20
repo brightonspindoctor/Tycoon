@@ -607,3 +607,4 @@ button.m-threat { cursor: pointer; }
 .segmented button.is-on { background: var(--ink); color: var(--paper-raised); }
 .tape__foot { background: rgba(18, 15, 11, .82); color: #f6efdc; padding: 5px 6px 5px 12px; border-radius: 999px; text-shadow: none; }
 .tape__foot .cl-btn { background: #f6efdc; }
+.m .shop__deals > :last-child:nth-child(odd) { grid-column: 1 / -1; }

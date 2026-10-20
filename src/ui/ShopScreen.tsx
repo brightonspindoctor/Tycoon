@@ -7,7 +7,7 @@ import { CardView } from './CardView'
 import { SettingsButton } from './Settings'
 
 interface Props { run: Run; dispatch: (a: Action) => void }
-type Mode = null | 'destroy' | 'reinforce'
+type Mode = null | 'destroy'
 
 export function ShopScreen({ run, dispatch }: Props) {
   const [mode, setMode] = useState<Mode>(null)
@@ -82,22 +82,15 @@ export function ShopScreen({ run, dispatch }: Props) {
               <div className="cl-slot__desc">Remove it for good.</div>
               <button type="button" className="cl-btn" disabled={!can(run.destroyCost)} onClick={() => setMode(mode === 'destroy' ? null : 'destroy')}>{mode === 'destroy' ? 'Cancel' : 'Choose'}</button>
             </div>
-            <div className="cl-slot slot">
-              <span className="cl-tag">{money(2, st)}</span>
-              <div className="cl-slot__name">Reinforce</div>
-              <div className="cl-slot__desc">+1 use on a card that wears out.</div>
-              <button type="button" className="cl-btn" disabled={!can(2)} onClick={() => setMode(mode === 'reinforce' ? null : 'reinforce')}>{mode === 'reinforce' ? 'Cancel' : 'Choose'}</button>
-            </div>
           </section>
 
           <section className="deck">
             <span className="cl-label">Your deck · {run.deck.length} cards{mode ? ` · choose a card to ${mode}` : ''}</span>
             <div className="deck__list">
               {run.deck.map(c => {
-                const ok = mode === 'destroy' || (mode === 'reinforce' && c.uses !== null && !CARDS[c.key].junk)
+                const ok = mode === 'destroy'
                 return <CardView key={c.id} card={c} small playable={!mode || ok} onClick={() => {
                   if (mode === 'destroy') dispatch({ type: 'destroyCard', cardId: c.id })
-                  if (mode === 'reinforce' && ok) dispatch({ type: 'reinforce', cardId: c.id })
                   if (ok) setMode(null)
                 }} />
               })}
