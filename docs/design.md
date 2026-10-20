@@ -13,7 +13,7 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 - Money gets a unit per stage but keeps its value: $15 → $15K → $15M → $15B.
 - Each stage adds one meter that lasts only for that stage, and leaves a residue item behind:
   - Stage 1: none. Capital only.
-  - Stage 2: Board Exposure (skimming raises it; full = ousted).
+  - Stage 2: Board Exposure, 0 to 8 (5+ is high; 8 = ousted).
   - Stage 3: Heat (costs Capital each turn; full = broken up).
   - Stage 4: The Truth vs Influence (The Truth advances every turn; full = stranded).
 - From stage 2, some enemies attack your personal fortune. Below 0 gold you lose.
@@ -82,15 +82,78 @@ Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtow
 ### Shop
 3 cards, one Prospect and one Bucket of Water ($2) per visit (they then sell out; Prospect's price rises quietly), Destroy a card from $2 (rises quietly by $1 each time), no hint of the next enemy, 1 item, the Cheap Loan, Destroy a card, Reroll, and Skim. Items: Storage Tank, Silo, Steam Pump, Lookout, Accountant ($4: Cover you don't use carries over to the next turn within a round; Cover is used up as it blocks, and resets every round).
 
+## Stage 2 rules (as built) · 1901–1930 · Technical race · Art Deco
+### Incorporation (between stages)
+Beating the Baron pays **3 gold** (every boss does). Then the company incorporates:
+- Every standing Well becomes a **Field**: same output, never runs dry. Unstable is cleared. A Field sells for $8. New Wells built in stage 2 still run dry.
+- Every Prospect left in your deck becomes a **Worn Prospect** (2 AP: 1 Well card, no new land; needs an empty plot). One fresh **Survey** (2 AP: claim 1 plot, 1 Well card) and one **Pay a Dividend** join your deck.
+- The bank offers a **10K loan**: +$10K now, Bank Debt +$1K a turn for good. Take it or leave it.
+- You can **upgrade** cards (from $3, rising $1 each time; once per card) and **destroy** cards (the usual rising price).
+- Board Exposure starts at 1 for every 3 gold skimmed in stage 1, up to 3.
+- The Trust Fund's debt relief ends: normal Bank Debt from here.
+
+### Economy
+- Oil sells at **$4** (the motor car arrives). Skim rates: $2, $2, $3, $4, $5 per gold.
+- The shop is **The Exchange**. Its Prospect is the Survey: one per visit, from $5, rising $2 each time.
+- Exchange extras: **Upgrade a card**, and **Pay dividends** ($4: Exposure −2, once per visit).
+- Items: Refinery ($8: oil +$1), Pipeline ($6: no freight), Offshore Account ($5: enemies take 1 less gold), plus the stage 1 items.
+
+### Board Exposure (0 to 8)
+- **Rises:** +1 per skim at the shop (any amount; refused if it would reach 8), +1 per Petty Cash, Shred the Files and Industrial Espionage, +1 when a round ends with less Capital than it started (a bad quarter), and from enemies.
+- **Falls:** Pay a Dividend card (−1; upgraded −2), the Exchange's dividends (−2), +Capital over a round (a good quarter, −1), beating the Muckraker or the Clawback Committee (−1). The quarter check doesn't apply after the boss.
+- **High at 5+:** the Clawback Committee takes gold instead of cash.
+- **At 8: ousted.**
+- **Residue** at the end of stage 2: 5+ leaves **Board Grudge** (the board takes $1 every shop visit); 2 or less leaves **Loyal Directors** (+1 AP in boss fights). Both apply from stage 3.
+
+### Your fortune
+From stage 2 some enemies take gold. **Below 0 gold you're ruined** (run over). Personal Lawyer blocks the next gold taken that turn; Offshore Account takes 1 off each theft.
+
+### Upgrades
+Each card can be upgraded once (shown with a +). Attacks hit harder (Hired Hand 3, Lawyer Up 5, Pay Wages 6, Dynamite 9, Patent Thicket 7, Espionage 8, Poach 4), Bribe the Sheriff loses its Bad Blood, Bribe lands 75%, Shore Up adds 2 Cover, Bucket puts out 2 fires, Fire Brigade/Streamline/Clean House/Rotary Rig/Personal Lawyer cost 0 AP, Improve Gear is free for 4 Cover, Hard Graft gives +2 AP, Petty Cash stops raising Exposure, Dividends pays $5, Telegram costs $1, draw cards draw one more, Night Shift gives +3, Scrap for Parts pays $2, Shred the Files stops raising Exposure, R&D Sprint makes 2 per Field, Pay a Dividend takes 2, a Worn Prospect claims a plot again, Prospect and Survey cost 1 AP.
+
+### Stage 2 cards (Exchange pool)
+| Card | Cost | Effect |
+|---|---|---|
+| Telegraph Line | 0 AP | Draw 1 |
+| Ticker Tape | 1 AP | Draw 2. Oil +$1 this turn |
+| Night Shift | 0 AP | +2 AP now, −1 AP next turn |
+| Efficiency Expert | 1 AP, $2 | Draw 3 |
+| Streamline | 1 AP | Destroy a card in hand (you choose) |
+| Shred the Files | 0 AP | Destroy a card in hand. +1 Exposure |
+| Scrap for Parts | 0 AP | Destroy a card in hand. +$1 |
+| Clean House | 1 AP | Destroy every junk card in hand, draw that many |
+| Patent Thicket | 1 AP, $2 | Legal, remove 5 Hold |
+| Industrial Espionage | 1 AP | Dirty, remove 6 Hold. +1 Exposure |
+| Poach an Engineer | 1 AP | Dirty, remove 3 Hold. Draw 1 |
+| R&D Sprint | 1 AP | +1 oil from every Field now |
+| Rotary Rig | 1 AP, single use | Turn your best Well into a Field |
+| Pay a Dividend | 1 AP, $3 | −1 Exposure |
+| Personal Lawyer | 1 AP | Block the next gold an enemy takes this turn |
+Destroy cards can be played even with a Must play card in hand (so they can destroy it). Plus Lawyer Up, Shore Up, Fire Brigade and Hard Graft.
+
+### Stage 2 enemies
+| Enemy | Role | Hold | Weak | Resists | Cycle | Notes |
+|---|---|---|---|---|---|---|
+| The Muckraker | Cash | 9 | Legal | — | Dig (+1 Exposure) → Expose (−1 gold) → Headline (−$4) (+ Front Page: +2 Exposure in R3) | Beaten: −1 Exposure |
+| The Combine | Cash | 9 | — | Legal | Price War (oil −$1) → Rebate (freight +$1) → Squeeze (−$3) | Beaten: prices and freight recover |
+| The Clawback Committee | Cash | 8 | Dirty | — | Clawback (−$4, or −2 gold at 5+ Exposure) → Minutes (+1 Exposure) | Moves first: Minutes. Beaten: −1 Exposure |
+| The Patent Holder | Engine | 10 | Legal | — | Cease and Desist (must-play junk: 1 AP, does nothing) → Royalty (−$1 per Well/Field) (+ Injunction: −1 AP in R3) | |
+| The Saboteur | Engine | 8 | Dirty | — | Wreck (marked Field becomes a Well with 3 barrels; a marked Well is destroyed) → Infiltrate (marks your best Field) | Moves first: Infiltrate. Beaten: starts a fire |
+| The Railroad Commission | Engine | 10 | Dirty | — | Proration (next turn pump 2 at most) → Inspection (−1 AP) (+ Shut-in: a Well pumps nothing this round, in R3) | |
+| **The Proxy Fight** (boss) | Boss | 24 | Legal | Dirty | Hostile Bid (−$3, +1 each cycle) → Proxy Ballot (must-play junk: +1 Exposure) → The Vote (+1 Exposure, +1 each cycle) | Moves first: Canvass (+1 Exposure) |
+Round 2 modifiers in stage 2: Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown, Scandal (+1 Exposure). Dry Season is stage 1 only.
+
 ## Endings
-- Stage 1 Bankrupt · Stage 2 Ousted · Stage 3 Broken up · Stage 4 Stranded.
+- Bankrupt (Capital 0) · Ousted (Exposure 8, stage 2) · Ruined (gold below 0, stage 2 on) · Out of time · later: Broken up (stage 3), Stranded (stage 4).
+- Stage 1 complete continues into stage 2. Stage 2 complete ends the playtest for now, showing the residue item.
 - Finishing: retire as Chairman, then a reveal of the hidden totals (emissions, years of delay, the patent you buried).
 
 ## Later stages (ideas agreed so far)
-- Stage 2 shop: draw cards (Telegraph Line, Night Shift, Efficiency Expert, Ticker Tape) and destroy-in-hand cards (Streamline, Shred the Files, Scrap for Parts, Clean House). Bosses: the Proxy Fight.
 - Stage 3: diversify (plastics, gas, concessions). Boss: the Trust-Buster.
 - Stage 4: greenwashing items built on the seven sins of greenwashing; the Breakthrough clean-power card you must bury. Boss: The Truth.
 - Mixed cards (Upside and Catch) and forced junk cards appear more as the game goes on.
 
 ## Balance
-`npm run sim` plays 2,000 runs per starting bonus with a simple bot. Current target: a careful player wins stage 1 about a quarter to a third of the time.
+`npm run sim` plays 2,000 runs per starting bonus with a simple bot, through stage 1 and on into stage 2, and reports each round for both. Current target: a careful player wins stage 1 about a quarter to a third of the time; the bot beats stage 2 about a third of the time it gets there, with the Proxy Fight the main wall and about a quarter of stage 2 losses by being ousted.
+`npm run fuzz` plays thousands of random runs through both stages checking the rules never reach an impossible state.
+Preview pages for design checks: `?preview=incorporate`, `?preview=complete2`, `?preview=crash2`, and any of shop, bossshop, summary, round3, boss with `&stage=2`.

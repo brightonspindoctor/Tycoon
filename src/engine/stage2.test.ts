@@ -195,7 +195,7 @@ describe('Board Exposure', () => {
 
   it('is high from 5', () => {
     const r = inStage2([], 'clawback')
-    r.exposure = 4; r.threats[0].step = 1
+    r.exposure = 4; r.threats[0].step = 0
     expect(intentText(r, r.threats[0])).toMatch(/Lose \$4/)
     r.exposure = 5
     expect(intentText(r, r.threats[0])).toMatch(/takes 2 gold/)

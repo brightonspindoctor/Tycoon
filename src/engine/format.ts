@@ -1,6 +1,17 @@
 // Money grows a unit every stage (same value underneath): $15 → $15K → $15M → $15B.
 const UNITS = ['', '', 'K', 'M', 'B']
 
+/** Puts the stage's unit on every "$N" in a line of game text: "Lose $4." → "Lose $4K." */
+export function units(text: string, stage = 1): string {
+  const unit = UNITS[Math.min(stage, 4)]
+  return unit ? text.replace(/\$(\d+)(?![KMB\d])/g, `$$$1${unit}`) : text
+}
+
+export const STAGE_TITLE: Record<number, string> = { 1: 'The Wildcat Years', 2: 'The Boardroom Years' }
+export const FIELD_PLACE: Record<number, string> = { 1: 'Titusville', 2: 'Spindletop' }
+export const SHOP_NAME: Record<number, string> = { 1: 'The Land Office', 2: 'The Exchange' }
+export const ERA_LABEL: Record<number, string> = { 1: '1860s', 2: '1900s', 3: '1950s', 4: '1990s' }
+
 export function money(n: number, stage = 1, sign = false): string {
   const unit = UNITS[Math.min(stage, 4)]
   const s = `$${Math.abs(n)}${unit}`

@@ -1,5 +1,7 @@
 import { ROLE_LABEL, THREATS } from '../engine/data'
 import { intent, intentText, type Run, type Threat } from '../engine/engine'
+import { units } from '../engine/format'
+import { Portrait } from './Portrait'
 
 interface Props {
   run: Run
@@ -18,7 +20,7 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget 
     <Tag className={`threat ${threat.beaten ? 'threat--beaten' : ''} ${targeting ? 'threat--target' : ''} ${acting ? 'is-acting' : ''}`} onClick={targeting ? onTarget : undefined}
       aria-label={`${d.name}, Hold ${threat.hold} of ${threat.maxHold}`}>
       <div className="threat__head">
-        <img className="threat__portrait" src={`${import.meta.env.BASE_URL}art/enemies/${d.portrait}.jpg`} alt="" />
+        <Portrait className="threat__portrait" name={d.name} portrait={d.portrait} />
         <div className="threat__title">
           <span className="cl-label">{ROLE_LABEL[d.role]}{d.movesFirst ? ' · Moves first' : ''}</span>
           <h2 className="threat__name">{d.name}</h2>
@@ -29,16 +31,16 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget 
           {targeting && preview && <span className="cl-label threat__preview">{preview}</span>}
         </div>
       </div>
-      {threat.opened && run.turn === 1 && !threat.beaten && <div className="opened"><b>Opened with</b> {threat.opened}</div>}
+      {threat.opened && run.turn === 1 && !threat.beaten && <div className="opened"><b>Opened with</b> {units(threat.opened, run.stage)}</div>}
       {threat.beaten ? <div className="warn warn--done">Beaten</div> : threat.stopped ? (
         <div className="warn warn--stopped">
           <b>Stopped this turn · {intent(run, threat)}</b>
-          <span><s>{intentText(run, threat)}</s></span>
+          <span><s>{units(intentText(run, threat), run.stage)}</s></span>
         </div>
       ) : (
         <div className="warn">
           <b>Next · end of turn · {intent(run, threat)}</b>
-          <span>{intentText(run, threat)}</span>
+          <span>{units(intentText(run, threat), run.stage)}</span>
         </div>
       )}
       <dl className="threat__traits">

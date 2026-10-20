@@ -628,3 +628,53 @@ button.m-threat { cursor: pointer; }
 .settings__confirm-buttons { display: flex; gap: 8px; }
 .settings__confirm-buttons .cl-btn { flex: 1; }
 .cl-btn--danger { background: var(--loss); border-color: var(--loss); color: var(--paper-raised); }
+
+/* ---------------------------------------------------------------- stage 2 */
+/* Board Exposure: 8 segments, hot from 5 */
+.exposure { border: 2px solid var(--board); border-radius: var(--cl-radius); background: var(--paper-raised); padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.exposure__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.exposure__head .cl-label { color: var(--board); }
+.exposure__head b { color: var(--board); font-size: 22px; }
+.exposure__bar { display: flex; gap: 3px; }
+.exposure .seg { height: 12px; border-color: var(--board); }
+.exposure .seg.is-hot { border-style: dashed; }
+.exposure .seg.is-on { background: var(--board); border-style: solid; }
+.exposure .seg.is-on.is-hot { background: var(--loss); border-color: var(--loss); }
+.exposure .seg.is-last { border-color: var(--loss); }
+.exposure.is-high { border-color: var(--loss); }
+.exposure.is-high .exposure__head b { color: var(--loss); }
+.exposure .res-note { font-size: 12px; line-height: 16px; }
+.exposure--compact { padding: 8px 12px; gap: 4px; margin: 0 0 10px; }
+.exposure--compact .exposure__head b { font-size: 18px; }
+.exposure.is-acting { box-shadow: 0 0 0 3px var(--accent); transition: box-shadow .2s; }
+.fortune.is-acting, .m-hud__gold.is-acting { box-shadow: 0 0 0 3px var(--accent); }
+
+/* Fields never run dry */
+.plot--field { border-color: var(--gain); border-width: 2px; }
+.plot__forever { color: var(--gain); font-weight: 700; }
+
+/* Upgraded cards and cards you can pick for a destroy or an upgrade */
+.card { position: relative; }
+.card-up { position: absolute; top: -9px; left: -9px; z-index: 2; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--on-accent);
+  font-family: var(--font-figures); font-weight: 700; font-size: 16px; line-height: 22px; text-align: center; border: 1.5px solid var(--paper-raised); }
+.card--up .cl-card__name { color: var(--accent); }
+.card--destroy { outline: 2px dashed var(--loss); outline-offset: 2px; }
+.card--upgrade { outline: 2px dashed var(--gain); outline-offset: 2px; }
+.hand-prompt { text-align: center; color: var(--loss); margin-bottom: 4px; }
+
+/* Enemies without art yet */
+.portrait--blank { display: grid; place-items: center; background: var(--ink); color: var(--paper-raised); }
+.portrait--blank .cl-display { font-size: 28px; letter-spacing: .04em; }
+.m-threat__portrait.portrait--blank .cl-display { font-size: 22px; }
+
+/* Incorporation */
+.incorporate__stamp { position: static; display: inline-block; font-size: 28px; padding: 6px 16px; }
+.incorporate__tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.incorporate__board { display: flex; flex-direction: column; gap: 8px; }
+.incorporate__board .res-note { margin: 0; }
+.incorporate .end__sub { margin: 4px 0 0; }
+.unlock--neg { border-color: var(--loss); }
+.unlock--neg .cl-label, .unlock--neg b { color: var(--loss); }
+.m .incorporate__tiles { grid-template-columns: 1fr; }
+.m .incorporate__stamp { font-size: 20px; padding: 4px 12px; }
+.m .shop .exposure, .m .incorporate__board { order: 3; }

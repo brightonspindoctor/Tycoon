@@ -79,8 +79,8 @@ export interface Run {
   stageGold: number // gold at the start of this stage
 }
 
-export interface Snapshot { capital: number; gold: number; wells: number; oil: number; deck: number }
-export const snapshot = (r: Run): Snapshot => ({ capital: r.capital, gold: r.gold, wells: wellCount(r), oil: r.oil, deck: r.deck.length })
+export interface Snapshot { capital: number; gold: number; wells: number; oil: number; deck: number; exposure: number }
+export const snapshot = (r: Run): Snapshot => ({ capital: r.capital, gold: r.gold, wells: wellCount(r), oil: r.oil, deck: r.deck.length, exposure: r.exposure ?? 0 })
 
 export type Action =
   | { type: 'play'; cardId: number; target?: number }
@@ -259,7 +259,7 @@ export function newRun(seed: number, bonus: BonusKey): Run {
     items: [], destroyCost: CONFIG.destroyCost, prospectPrice: CONFIG.prospectPrice,
     shop: { cards: [], item: null, loanTaken: false, prospectSold: false, bucketSold: false, boon: null, dividendPaid: false }, ledger: [], events: [],
     stats: { oilSold: 0, earned: 0, spent: 0, wellsBuilt: 0, wellsBurnt: 0, wellsStolen: 0, wellsLost: 0, wellsDry: 0, skims: 0 },
-    roundStart: { capital: CONFIG.startCapital, gold: 0, wells: 0, oil: 0, deck: 0 },
+    roundStart: { capital: CONFIG.startCapital, gold: 0, wells: 0, oil: 0, deck: 0, exposure: 0 },
     boon: null, reward: null, tempStorage: 0, spoils: null, report: [], reportSeq: 0, shoredUp: false,
     exposure: 0, goldShield: false, boost: 0, upgradeCost: CONFIG.upgradeCost, residue: null, stageGold: 0,
   }
@@ -758,7 +758,7 @@ function sellOil(r: Run) {
 }
 
 /** What a Well sells for: $1 for every barrel still in it. */
-export const wellValue = (w: Well) => w.reserve * CONFIG.sellPerBarrel
+export const wellValue = (w: Well) => (w.field ? CONFIG.fieldValue : w.reserve * CONFIG.sellPerBarrel)
 
 function sellWell(r: Run, plot: number) {
   const w = r.plots[plot]
@@ -766,7 +766,7 @@ function sellWell(r: Run, plot: number) {
   r.ap -= 1
   const value = wellValue(w)
   loseWell(r, plot, 'lost')
-  money(r, `Sold Well No. ${plot + 1} (${w.reserve} bbl left)`, value)
+  money(r, w.field ? `Sold Field No. ${plot + 1}` : `Sold Well No. ${plot + 1} (${w.reserve} bbl left)`, value)
 }
 
 /** The Well a Firebreak costs you: the lowest output, then the fewest barrels left. */

@@ -4,11 +4,12 @@ import { CARDS } from '../engine/data'
 import type { Card } from '../engine/engine'
 import { CardView } from './CardView'
 
-export function PileView({ title, cards, onClose }: { title: string; cards: Card[]; onClose: () => void }) {
+export function PileView({ title, cards, onClose, stage = 1 }: { title: string; cards: Card[]; onClose: () => void; stage?: number }) {
   const groups = new Map<string, { card: Card; n: number }>()
   for (const c of cards) {
-    const g = groups.get(c.key + ':' + c.uses)
-    if (g) g.n++; else groups.set(c.key + ':' + c.uses, { card: c, n: 1 })
+    const id = `${c.key}:${c.uses}:${c.up ? 1 : 0}`
+    const g = groups.get(id)
+    if (g) g.n++; else groups.set(id, { card: c, n: 1 })
   }
   const list = [...groups.values()].sort((a, b) => CARDS[a.card.key].name.localeCompare(CARDS[b.card.key].name))
   return (
@@ -22,7 +23,7 @@ export function PileView({ title, cards, onClose }: { title: string; cards: Card
           <div className="pile-view__grid">
             {list.map(({ card, n }) => (
               <div key={card.id} className="pile-view__item">
-                <CardView card={card} small playable />
+                <CardView card={card} small playable stage={stage} />
                 {n > 1 && <span className="pile-view__count cl-num">×{n}</span>}
               </div>
             ))}

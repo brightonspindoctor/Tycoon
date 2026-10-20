@@ -3,7 +3,7 @@ import { type Action, type Run, snapshot } from '../engine/engine'
 import { CARDS } from '../engine/data'
 import { CONFIG } from '../engine/config'
 import { CardView } from './CardView'
-import { money, year } from '../engine/format'
+import { ERA_THEME, SHOP_NAME, money, year } from '../engine/format'
 import { play } from '../sound'
 
 /** Counts a number from `from` to `to` over `ms`, starting after `delay`. */
@@ -50,19 +50,20 @@ export function RoundSummary({ run, onContinue, dispatch }: { run: Run; onContin
   const m = (n: number) => money(n, st)
   return (
     <div className="overlay" role="dialog" aria-label={`Round ${run.round} complete`}>
-      <div className="summary" data-theme="victorian">
+      <div className="summary" data-theme={ERA_THEME[st] ?? 'victorian'}>
         <span className="cl-label">Stage {st} · Round {run.round} complete</span>
         <div className="summary__year cl-display">{y}</div>
         <ul className="summary__rows">
           <Row label="Capital" from={a.capital} to={b.capital} delay={500} fmt={m} />
           <Row label="Your fortune (gold)" from={a.gold} to={b.gold} delay={800} fmt={n => `${n}`} />
-          <Row label="Wells" from={a.wells} to={b.wells} delay={1100} fmt={n => `${n}`} />
+          <Row label={st >= 2 ? 'Wells and Fields' : 'Wells'} from={a.wells} to={b.wells} delay={1100} fmt={n => `${n}`} />
           <Row label="Oil in stock" from={a.oil} to={b.oil} delay={1400} fmt={n => `${n}`} />
           <Row label="Cards in deck" from={a.deck} to={b.deck} delay={1700} fmt={n => `${n}`} />
+          {st >= 2 && <Row label="Board Exposure" from={a.exposure} to={b.exposure} delay={2000} fmt={n => `${n}/${CONFIG.exposureMax}`} />}
         </ul>
         {offered && (
           <section className="spoils" aria-label="Spoils">
-            <CardView card={{ id: -50, key: offered, uses: CARDS[offered].uses }} playable small />
+            <CardView card={{ id: -50, key: offered, uses: CARDS[offered].uses }} playable small stage={st} />
             <div className="spoils__side">
               <span className="cl-label">Spoils of the round</span>
               {choice === null ? <>
@@ -75,7 +76,7 @@ export function RoundSummary({ run, onContinue, dispatch }: { run: Run; onContin
             </div>
           </section>
         )}
-        <button type="button" className="cl-btn cl-btn--primary summary__go" disabled={!!offered && choice === null} onClick={onContinue}>To the Land Office</button>
+        <button type="button" className="cl-btn cl-btn--primary summary__go" disabled={!!offered && choice === null} onClick={onContinue}>To {SHOP_NAME[st] ?? SHOP_NAME[2]}</button>
       </div>
     </div>
   )

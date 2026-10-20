@@ -7,7 +7,7 @@ import { openSettings } from './settingsBus'
 
 const INDUSTRIES = ['Oil', 'Fishing', 'Pharma', 'Tech']
 // a run that died, rather than one that finished a stage or the game
-const ended = (r: RunRecord) => r.outcome === 'Bankrupt' || r.outcome === 'Out of time' || r.outcome === 'Quit'
+const ended = (r: RunRecord) => ['Bankrupt', 'Out of time', 'Quit', 'Ousted', 'Ruined'].includes(r.outcome)
 
 export function Intro({ onBegin, onHistory }: { onBegin: () => void; onHistory: () => void }) {
   const done = completedIndustries()

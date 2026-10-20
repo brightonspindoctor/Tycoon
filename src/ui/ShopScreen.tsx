@@ -1,13 +1,14 @@
 import { useState } from 'react'
-import { BOONS, CARDS, ITEMS } from '../engine/data'
-import { skimRate, type Action, type Run } from '../engine/engine'
-import { ERA_THEME, money } from '../engine/format'
+import { BOONS, CARDS, ITEMS, PROSPECT_FOR } from '../engine/data'
+import { canUpgrade, skimRate, type Action, type Run } from '../engine/engine'
+import { ERA_THEME, SHOP_NAME, money, units } from '../engine/format'
+import { ExposureMeter } from './Exposure'
 import { CONFIG } from '../engine/config'
 import { CardView } from './CardView'
 import { SettingsButton } from './Settings'
 
 interface Props { run: Run; dispatch: (a: Action) => void }
-type Mode = null | 'destroy'
+type Mode = null | 'destroy' | 'upgrade'
 
 export function ShopScreen({ run, dispatch }: Props) {
   const [mode, setMode] = useState<Mode>(null)
@@ -16,13 +17,16 @@ export function ShopScreen({ run, dispatch }: Props) {
   const nextRate = CONFIG.skimRate[run.round + 1] ?? rate
   const plotsLeft = CONFIG.maxPlots - run.plots.length
   const can = (cost: number) => run.capital - cost >= 1
+  const stage2 = st >= 2
+  const prospectKey = PROSPECT_FOR[st] ?? 'survey'
+  const skimBlocked = stage2 && run.exposure + 1 >= CONFIG.exposureMax
 
   return (
     <div className="screen shop" data-theme={ERA_THEME[st] ?? 'victorian'}>
       <header className="game__head">
         <div>
           <span className="cl-label">Stage {st} · {run.round === 0 ? 'Before you start' : `After round ${run.round}`}</span>
-          <h1 className="cl-display game__title">The Land Office</h1>
+          <h1 className="cl-display game__title">{SHOP_NAME[st] ?? SHOP_NAME[2]}</h1>
         </div>
         <div className="shop__head-right"><SettingsButton /><div className="shop__next"><span className="cl-label">Next: Round {run.round + 1}</span></div></div>
       </header>
@@ -33,16 +37,16 @@ export function ShopScreen({ run, dispatch }: Props) {
             <div className="shop__row-head"><span className="cl-label">Cards</span><button type="button" className="cl-btn cl-btn--small" disabled={!can(1)} onClick={() => dispatch({ type: 'reroll' })}>Reroll · {money(1, st)}</button></div>
             <div className="shop__cards">
               {run.shop.cards.map((k, i) => k ? (
-                <CardView key={i} card={{ id: -i - 1, key: k, uses: CARDS[k].uses }} price={money(CARDS[k].price!, st)} playable={can(CARDS[k].price!)}
+                <CardView key={i} card={{ id: -i - 1, key: k, uses: CARDS[k].uses }} stage={st} price={money(CARDS[k].price!, st)} playable={can(CARDS[k].price!)}
                   why={can(CARDS[k].price!) ? undefined : 'Too expensive'} onClick={() => dispatch({ type: 'buyCard', slot: i })} />
               ) : <div key={i} className="sold">Sold</div>)}
               <div className="prospect-slot">
-                {run.shop.bucketSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -8, key: 'bucket', uses: null }} price={money(CONFIG.bucketPrice, st)} playable={can(CONFIG.bucketPrice)} onClick={() => dispatch({ type: 'buyBucket' })} />}
+                {run.shop.bucketSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -8, key: 'bucket', uses: null }} stage={st} price={money(CONFIG.bucketPrice, st)} playable={can(CONFIG.bucketPrice)} onClick={() => dispatch({ type: 'buyBucket' })} />}
                 <span className="res-note">One per visit.</span>
               </div>
               <div className="prospect-slot">
-                {run.shop.prospectSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -9, key: 'prospect', uses: 1 }} price={money(run.prospectPrice, st)} playable={can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })} />}
-                <span className="res-note">One per visit. {plotsLeft > 1 ? `${plotsLeft} plots left to claim.` : plotsLeft === 1 ? 'Only 1 plot left to claim.' : run.plots.some(p => !p) ? 'All land claimed; fills empty plots.' : 'All land claimed.'}</span>
+                {run.shop.prospectSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -9, key: prospectKey, uses: 1 }} stage={st} price={money(run.prospectPrice, st)} playable={can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })} />}
+                <span className="res-note">One per visit{stage2 ? `, and the price climbs ${money(CONFIG.surveyStep, st)} each time` : ''}. {plotsLeft > 1 ? `${plotsLeft} plots left to claim.` : plotsLeft === 1 ? 'Only 1 plot left to claim.' : run.plots.some(p => !p) ? 'All land claimed; fills empty plots.' : 'All land claimed.'}</span>
               </div>
             </div>
           </section>
@@ -51,22 +55,22 @@ export function ShopScreen({ run, dispatch }: Props) {
             <section className="boon" aria-label="Before the Baron">
               <img src={`${import.meta.env.BASE_URL}art/icons/${BOONS[run.shop.boon].icon}.png`} alt="" />
               <div className="boon__text">
-                <span className="cl-label">Before the Baron · one offer</span>
+                <span className="cl-label">Before the boss · one offer</span>
                 <b className="cl-display">{BOONS[run.shop.boon].name}</b>
-                <span>{BOONS[run.shop.boon].text}</span>
+                <span>{units(BOONS[run.shop.boon].text, st)}</span>
               </div>
               <button type="button" className="cl-btn cl-btn--skim" disabled={run.gold < CONFIG.boonGold} onClick={() => dispatch({ type: 'buyBoon' })}>
                 {run.gold < CONFIG.boonGold ? `Needs ${CONFIG.boonGold} gold` : `Buy · ${CONFIG.boonGold} gold`}
               </button>
             </section>
           )}
-          {run.boon && run.round === 3 && !run.shop.boon && <div className="boon boon--bought"><span className="cl-label">Bought for the Baron</span><b className="cl-display">{BOONS[run.boon].name}</b></div>}
+          {run.boon && run.round === 3 && !run.shop.boon && <div className="boon boon--bought"><span className="cl-label">Bought for the boss</span><b className="cl-display">{BOONS[run.boon].name}</b></div>}
           <section className="shop__deals">
             {run.shop.item ? (
               <div className="cl-slot slot">
                 <span className="cl-tag">{money(ITEMS[run.shop.item].price, st)}</span>
                 <div className="cl-slot__name">{ITEMS[run.shop.item].name}</div>
-                <div className="cl-slot__desc">{ITEMS[run.shop.item].text}</div>
+                <div className="cl-slot__desc">{units(ITEMS[run.shop.item].text, st)}</div>
                 <button type="button" className="cl-btn" disabled={!can(ITEMS[run.shop.item].price)} onClick={() => dispatch({ type: 'buyItem' })}>Buy</button>
               </div>
             ) : <div className="cl-slot slot sold">Item sold</div>}
@@ -82,15 +86,32 @@ export function ShopScreen({ run, dispatch }: Props) {
               <div className="cl-slot__desc">Remove it for good.</div>
               <button type="button" className="cl-btn" disabled={!can(run.destroyCost)} onClick={() => setMode(mode === 'destroy' ? null : 'destroy')}>{mode === 'destroy' ? 'Cancel' : 'Choose'}</button>
             </div>
+            {stage2 && (
+              <div className="cl-slot slot">
+                <span className="cl-tag">{money(run.upgradeCost, st)}</span>
+                <div className="cl-slot__name">Upgrade a card</div>
+                <div className="cl-slot__desc">Once per card. The price rises each time.</div>
+                <button type="button" className="cl-btn" disabled={!can(run.upgradeCost) || !run.deck.some(canUpgrade)} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
+              </div>
+            )}
+            {stage2 && (
+              <div className="cl-slot slot">
+                <span className="cl-tag">{money(CONFIG.dividendCost, st)}</span>
+                <div className="cl-slot__name">Pay dividends</div>
+                <div className="cl-slot__desc">Board Exposure −{CONFIG.dividendDrop}. Once per visit.</div>
+                <button type="button" className="cl-btn" disabled={run.shop.dividendPaid || run.exposure === 0 || !can(CONFIG.dividendCost)} onClick={() => dispatch({ type: 'payDividends' })}>{run.shop.dividendPaid ? 'Paid' : 'Pay'}</button>
+              </div>
+            )}
           </section>
 
           <section className="deck">
             <span className="cl-label">Your deck · {run.deck.length} cards{mode ? ` · choose a card to ${mode}` : ''}</span>
             <div className="deck__list">
               {run.deck.map(c => {
-                const ok = mode === 'destroy'
-                return <CardView key={c.id} card={c} small playable={!mode || ok} onClick={() => {
+                const ok = mode === 'destroy' || (mode === 'upgrade' && canUpgrade(c))
+                return <CardView key={c.id} card={c} small stage={st} playable={!mode || ok} marked={ok && mode ? mode : undefined} onClick={() => {
                   if (mode === 'destroy') dispatch({ type: 'destroyCard', cardId: c.id })
+                  if (mode === 'upgrade' && ok) dispatch({ type: 'upgradeCard', cardId: c.id })
                   if (ok) setMode(null)
                 }} />
               })}
@@ -102,19 +123,20 @@ export function ShopScreen({ run, dispatch }: Props) {
           <section className="cl-ledger ledger">
             <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className="cl-ledger__total">{money(run.capital, st)}</span></div>
             <ul className="cl-ledger__rows">
-              {run.ledger.slice(-5).map((l, i) => <li key={i} className="ink-in"><span>{l.label}</span><span className={l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{money(l.amount, st, true)}</span></li>)}
+              {run.ledger.slice(-5).map((l, i) => <li key={i} className="ink-in"><span>{units(l.label, st)}</span><span className={l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{money(l.amount, st, true)}</span></li>)}
               <li className="next-debt"><span>Debt in round {run.round + 1}, per turn</span><span className="cl-minus">{run.debt ? `(${money(-run.debt, st)})` : 'None'}</span></li>
             </ul>
           </section>
+          <ExposureMeter run={run} />
           <section className="fortune fortune--skim">
             <div><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b></div>
-            <p>Gold can't buy anything here. Every dollar you skim comes off the company's health.</p>
+            <p>{stage2 ? (skimBlocked ? 'The board is watching too closely to skim. Pay dividends first.' : 'Every skim also raises Board Exposure by 1, however much you take.') : "Gold can't buy anything here. Every dollar you skim comes off the company's health."}</p>
             <span className="res-note">Rate now: <b>{money(rate, st)} → 1 gold</b>{nextRate !== rate ? ` · Round ${run.round + 1}: ${money(nextRate, st)}` : ''}</span>
             <div className="skim-buttons">
-              {[1, 2, 3].map(g => <button key={g} type="button" className="cl-btn cl-btn--skim" disabled={!can(g * rate)} onClick={() => dispatch({ type: 'skim', gold: g })}>{g} gold · {money(g * rate, st)}</button>)}
+              {[1, 2, 3].map(g => <button key={g} type="button" className="cl-btn cl-btn--skim" disabled={!can(g * rate) || skimBlocked} onClick={() => dispatch({ type: 'skim', gold: g })}>{g} gold · {money(g * rate, st)}</button>)}
             </div>
           </section>
-          <div className="events">{run.events.slice(0, 2).map((e, i) => <p key={i}>{e}</p>)}</div>
+          <div className="events">{run.events.slice(0, 2).map((e, i) => <p key={i}>{units(e, st)}</p>)}</div>
           <button type="button" className="cl-btn cl-btn--primary leave" onClick={() => dispatch({ type: 'leaveShop' })}>{run.round === 0 ? 'Begin round 1' : 'Leave shop'}</button>
         </aside>
       </div>
