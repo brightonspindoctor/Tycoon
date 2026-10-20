@@ -36,7 +36,7 @@ export function IncorporateScreen({ run, dispatch }: { run: Run; dispatch: (a: A
           <section className="end__tiles incorporate__tiles" aria-label="What carried over">
             <div className="tile"><span className="cl-label">Fields</span><b className="cl-num">{fields}</b><span className="res-note">{fields ? `Your ${fields === 1 ? 'Well is now a Field' : `${fields} Wells are now Fields`}: 1 oil a turn, never dry.` : 'No Wells were standing.'} New Wells never run dry either.</span></div>
             <div className="tile"><span className="cl-label">Prospecting is over</span><b className="cl-num">{worn ? `${worn} worn` : 'Wells'}</b><span className="res-note">The Exchange sells Wells now, not Prospects. A Steel Derrick is in your deck{worn ? '; old Prospects just add a Well' : ''}.</span></div>
-            <div className="tile"><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b><span className="res-note">{CONFIG.bossGold} for the Baron. Some enemies can take gold now. Below 0, you're ruined.</span></div>
+            <div className="tile"><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b><span className="res-note">Some enemies can take gold now. Below 0, you're ruined.</span></div>
           </section>
 
           <section className="incorporate__board">

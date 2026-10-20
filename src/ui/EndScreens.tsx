@@ -90,19 +90,32 @@ export function StageComplete({ run, onMenu, onHistory, onContinue }: { run: Run
       </header>
       <div className="end__grid">
         <div className="end__main">
+          <section className="winnings" role="status" aria-label="What you won">
+            <span className="cl-label winnings__head">{st === 1 ? 'For beating the Baron' : 'For winning the proxy fight'}, you win</span>
+            <div className="winnings__row">
+              <div className="winnings__prize winnings__prize--gold">
+                <b className="cl-num">+{CONFIG.bossGold}</b>
+                <span className="cl-label">gold</span>
+                <span className="res-note">into your own fortune</span>
+              </div>
+              {run.reward && (
+                <div className="winnings__prize">
+                  <img src={`${import.meta.env.BASE_URL}art/icons/${REWARDS[run.reward].icon}.png`} alt="" />
+                  <div>
+                    <b className="cl-display">{REWARDS[run.reward].name}</b>
+                    <span>{units(REWARDS[run.reward].text, st)}</span>
+                    <span className="res-note">{last ? 'Yours for stage 3.' : 'Yours for stage 2.'}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
           <div className="end__progress"><div className="end__progress-head"><span className="cl-label">How far you got</span><span className="cl-num">Round {st * 4} of 16</span></div><Progress reached={st * 4} dead={false} /></div>
           <div className="end__tiles">
             <div className="tile"><span className="cl-label">Capital</span><b className="cl-num">{money(run.capital, st)}</b><span className="res-note">{last ? 'left in the company' : `carried into stage 2${run.bonus === 'trustFund' ? '. The Trust Fund ends here: Bank Debt starts in stage 2.' : ''}`}</span></div>
             <div className="tile"><span className="cl-label">{st === 1 ? 'Wells standing' : 'Fields and Wells'}</span><b className="cl-num">{wells}</b><span className="res-note">{st === 1 ? (wells ? 'They become Fields: never running dry.' : `${run.stats.wellsBuilt} built in total`) : `${run.plots.filter(w => w?.field).length} of them Fields`}</span></div>
             <div className="tile"><span className="cl-label">Oil sold</span><b className="cl-num">{run.stats.oilSold} bbl</b><span className="res-note">{money(run.stats.earned, st)} earned</span></div>
           </div>
-          {run.reward && (
-            <div className="unlock reward" role="status">
-              <span className="cl-label">{st === 1 ? "The Baron's assets" : 'The spoils of the fight'} · yours for stage {st + 1}</span>
-              <b className="cl-display">{REWARDS[run.reward].name}</b>
-              <span>{units(REWARDS[run.reward].text, st)}</span>
-            </div>
-          )}
           {st >= 2 && (
             <div className={`unlock ${run.residue === 'boardGrudge' ? 'unlock--neg' : 'reward'}`} role="status">
               <span className="cl-label">The board remembers · Board Exposure ended at {run.exposure} / {CONFIG.exposureMax}</span>
@@ -110,7 +123,7 @@ export function StageComplete({ run, onMenu, onHistory, onContinue }: { run: Run
               <span>{run.residue ? units(ITEMS[run.residue].text, st) : `Neither high nor low: nothing follows you. (${CONFIG.exposureHigh}+ leaves a Board Grudge; ${CONFIG.exposureLow} or less, Loyal Directors.)`}</span>
             </div>
           )}
-          <div className="fortune"><div><span className="cl-label">Your fortune so far</span><p>{last ? 'Stage 3 is still being drilled. This playtest ends here.' : `${CONFIG.bossGold} gold for the Baron is in it.`}</p></div><b className="cl-num">{run.gold} gold</b></div>
+          <div className="fortune"><div><span className="cl-label">Your fortune</span>{last && <p>Stage 3 is still being drilled. This playtest ends here.</p>}</div><b className="cl-num">{run.gold} gold</b></div>
           <div className="end__buttons">
             {last ? <button type="button" className="cl-btn cl-btn--primary" onClick={onMenu}>Back to the start</button>
               : <button type="button" className="cl-btn cl-btn--primary" onClick={onContinue}>Into the new century</button>}

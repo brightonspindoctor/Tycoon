@@ -710,3 +710,16 @@ button.m-threat { cursor: pointer; }
 .m-threat .admin-hit { position: absolute; right: 8px; bottom: 8px; min-height: 0; padding: 4px 8px; }
 .m-threat { position: relative; }
 .enemy-cover { color: var(--cover); font-weight: 700; white-space: nowrap; }
+
+/* What you won for beating a boss */
+.winnings { border: 2.5px solid var(--personal); background: var(--paper-raised); border-radius: var(--cl-radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; animation: rise .5s ease-out both .4s; }
+.winnings__head { color: var(--personal); }
+.winnings__row { display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; }
+.winnings__prize { display: flex; gap: 12px; align-items: center; flex: 1 1 220px; }
+.winnings__prize img { width: 64px; height: 64px; flex: none; }
+.winnings__prize > div { display: flex; flex-direction: column; gap: 2px; }
+.winnings__prize b.cl-display { font-size: 24px; line-height: 28px; color: var(--personal); }
+.winnings__prize--gold { flex: 0 0 auto; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 4px 18px; border-right: 1.5px solid var(--rule); }
+.winnings__prize--gold b { font-size: 44px; line-height: 46px; color: var(--personal); }
+.winnings__prize--gold .cl-label { color: var(--personal); }
+.m .winnings__prize--gold { border-right: 0; border-bottom: 1.5px solid var(--rule); flex: 1 1 100%; padding-bottom: 8px; }
