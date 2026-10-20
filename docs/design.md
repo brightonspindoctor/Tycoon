@@ -130,7 +130,7 @@ Each card can be upgraded once (shown with a +). Attacks hit harder (Hired Hand 
 | Industrial Espionage | 1 AP | Dirty, remove 9 Hold. +1 Exposure |
 | Poach an Engineer | 1 AP | Dirty, remove 5 Hold. Draw 1 |
 | R&D Sprint | 1 AP | +1 oil from every Well and Field now |
-| Security Detail | 1 AP | Stop one enemy's next move, +2 Cover. One stop card per round |
+| Security Detail | 1 AP | Block one enemy move, +2 Cover. Once per round |
 | Insurance Policy | 1 AP, $1 | +5 Cover |
 | Expense Account | 0 AP | Skim: pay the rate, 1 gold, +1 Exposure |
 | Pay a Dividend | 1 AP, $3 | −1 Exposure |
