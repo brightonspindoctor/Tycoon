@@ -882,15 +882,15 @@ export function intentText(r: Run, t: Threat): string {
     // stage 2
     case 'Dig': return '+1 Board Exposure.'
     case 'Expose': return `Takes ${CONFIG.muckrakerGold} gold from your fortune.`
-    case 'Headline': return `Lose $${CONFIG.headline}.`
+    case 'Headline': return `Lose $${cash(r, CONFIG.headline)}.`
     case 'Front Page': return '+2 Board Exposure.'
     case 'Price War': return 'Oil price −$1.'
     case 'Rail Deal': return r.items.includes('pipeline') ? 'A secret deal with the railway. Your Pipeline makes it pointless.' : 'A secret deal with the railway: you get $1 less for every barrel you sell.'
-    case 'Squeeze': return `Lose $${CONFIG.squeeze}.`
+    case 'Squeeze': return `Lose $${cash(r, CONFIG.squeeze)}.`
     case 'Minutes': return '+1 Board Exposure.'
-    case 'Clawback': return exposureHigh(r) ? `Exposure is high: takes ${CONFIG.clawbackGold} gold from your fortune.` : `Lose $${CONFIG.clawbackCash}. (At ${CONFIG.exposureHigh}+ Exposure, takes ${CONFIG.clawbackGold} gold instead.)`
+    case 'Clawback': return exposureHigh(r) ? `Exposure is high: takes ${CONFIG.clawbackGold} gold from your fortune.` : `Lose $${cash(r, CONFIG.clawbackCash)}. (At ${CONFIG.exposureHigh}+ Exposure, takes ${CONFIG.clawbackGold} gold instead.)`
     case 'Cease and Desist': return 'Adds a Cease and Desist to your next hand: must play, 1 AP, does nothing.'
-    case 'Royalty': return `Lose $${CONFIG.royaltyPer} for each Well and Field you own ($${royalty(r)}).`
+    case 'Royalty': return `Lose $${cash(r, CONFIG.royaltyPer)} for each Well and Field you own ($${royalty(r)}).`
     case 'Injunction': return '−1 AP next turn.'
     case 'New Patent Claim': return "Adds a New Patent Claim to your next hand: it can't be played and takes a slot."
     case 'Leaky Tanks': return `Lose all your stored oil (${r.oil}) and ${Math.round(CONFIG.leakyTanksShare * 100)}% of your Capital (${leakyLoss(r)}).`
@@ -906,7 +906,7 @@ export function intentText(r: Run, t: Threat): string {
     case 'Proration': return `Next turn you can pump only ${CONFIG.prorationCap} oil.`
     case 'Inspection': return `−${CONFIG.inspectionAP} AP next turn.`
     case 'Shut-in': { const i = rumbleTarget(r); return i >= 0 ? `Shuts in ${plotName(r, i)}: it pumps nothing this round.` : 'Looks for a Well to shut in.' }
-    case 'Hostile Bid': return `Lose $${hostileBid(c)}.`
+    case 'Hostile Bid': return `Lose $${cash(r, hostileBid(c))}.`
     case 'Proxy Ballot': return 'Adds a Proxy Ballot to your deck: must play, +1 Board Exposure.'
     case 'The Vote': return `+${1 + c} Board Exposure.`
     case 'Canvass': return '+1 Board Exposure.'
@@ -918,9 +918,11 @@ export function intentText(r: Run, t: Threat): string {
 export const leakyLoss = (r: Run) => `$${Math.floor(r.capital * CONFIG.leakyTanksShare)}`
 
 /** The Proxy Fight's Hostile Bid grows every cycle. */
+/** Stage 2 cash attacks hit twice as hard from round 2. */
+export const cash = (r: Run, base: number) => base * (r.round >= CONFIG.cashDoubleFrom ? 2 : 1)
 export const hostileBid = (cycle: number) => CONFIG.hostileBid + CONFIG.hostileBidStep * cycle
 /** The Patent Holder's Royalty: $2 per Well and Field, at least $2. */
-export const royalty = (r: Run) => CONFIG.royaltyPer * Math.max(1, wellCount(r))
+export const royalty = (r: Run) => cash(r, CONFIG.royaltyPer) * Math.max(1, wellCount(r))
 
 export function fireTarget(r: Run): string {
   if (!r.fire) return ''
@@ -1017,11 +1019,11 @@ function endTurn(r: Run) {
       case 'Dig': case 'Minutes': case 'Canvass': expose(r, 1, a, t.id); break
       case 'Front Page': expose(r, 2, a, t.id); break
       case 'Expose': takeGold(r, CONFIG.muckrakerGold, name); break
-      case 'Headline': dmg += CONFIG.headline; break
+      case 'Headline': dmg += cash(r, CONFIG.headline); break
       case 'Price War': r.short += 1; break
       case 'Rail Deal': if (!r.items.includes('pipeline')) r.freight += 1; break
-      case 'Squeeze': dmg += CONFIG.squeeze; break
-      case 'Clawback': if (exposureHigh(r)) takeGold(r, CONFIG.clawbackGold, name); else dmg += CONFIG.clawbackCash; break
+      case 'Squeeze': dmg += cash(r, CONFIG.squeeze); break
+      case 'Clawback': if (exposureHigh(r)) takeGold(r, CONFIG.clawbackGold, name); else dmg += cash(r, CONFIG.clawbackCash); break
       case 'Cease and Desist': r.pending.cease += 1; break
       case 'Royalty': dmg += royalty(r); break
       case 'Injunction': r.pending.ap += 1; break
@@ -1045,7 +1047,7 @@ function endTurn(r: Run) {
       case 'Infiltrate': { const i = infiltrateTarget(r); r.marked = i >= 0 ? i : null; break }
       case 'Proration': r.pending.prorate = true; break
       case 'Shut-in': { const i = rumbleTarget(r); if (i >= 0) { r.plots[i]!.unstable = true; say(r, `${plotName(r, i)} is shut in this round.`) } break }
-      case 'Hostile Bid': dmg += hostileBid(c); break
+      case 'Hostile Bid': dmg += cash(r, hostileBid(c)); break
       case 'Proxy Ballot': addJunk(r, 'proxyBallot'); say(r, 'A Proxy Ballot is in your deck.'); break
       case 'The Vote': expose(r, 1 + c, 'The Vote', t.id); break
     }

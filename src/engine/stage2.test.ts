@@ -213,7 +213,7 @@ describe('Board Exposure', () => {
   it('is high from 5', () => {
     const r = inStage2([], 'clawback')
     r.exposure = 4; r.threats[0].step = 0
-    expect(intentText(r, r.threats[0])).toMatch(/Lose \$8/)
+    expect(intentText(r, r.threats[0])).toMatch(/Lose \$4/)
     r.exposure = 5
     expect(intentText(r, r.threats[0])).toMatch(/takes 2 gold/)
   })
@@ -453,8 +453,13 @@ describe('fire in stage 2 comes from Bad Blood', () => {
 })
 
 describe('after the playtest', () => {
-  it('doubles the stage 2 cash attacks', () => {
-    expect([CONFIG.headline, CONFIG.squeeze, CONFIG.clawbackCash, CONFIG.royaltyPer, CONFIG.hostileBid]).toEqual([8, 6, 8, 2, 6])
+  it('stage 2 cash attacks hit at their old strength in round 1 and twice as hard from round 2', () => {
+    const r = inStage2([], 'clawback')
+    expect(intentText(r, r.threats[0])).toMatch(/Lose \$4\./)
+    r.round = 2
+    expect(intentText(r, r.threats[0])).toMatch(/Lose \$8\./)
+    r.threats = [{ id: 1, kind: 'proxyFight', hold: 26, maxHold: 26, step: 0, cycle: 0, round3: false, beaten: false }]; r.round = 4
+    expect(intentText(r, r.threats[0])).toBe('Lose $6.')
   })
   it('never gives the Steam Pump for beating a boss', () => {
     for (let seed = 1; seed < 60; seed++) {

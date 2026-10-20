@@ -140,13 +140,13 @@ Destroy cards can be played even with a Must play card in hand (so they can dest
 ### Stage 2 enemies
 | Enemy | Role | Hold | Weak | Resists | Cycle | Notes |
 |---|---|---|---|---|---|---|
-| The Muckraker | Cash | 11 | Legal | — | Dig (+1 Exposure) → Expose (−1 gold) → Headline (−$8) (+ Front Page: +2 Exposure in R3) | Beaten: −1 Exposure |
-| The Combine | Cash | 11 | — | Legal | Price War (oil −$1) → Rail Deal (freight +$1: you get $1 less a barrel sold; a Pipeline blocks it) → Squeeze (−$6) → Hired Muscle (Bad Blood in your next hand) | Beaten: prices and freight recover |
-| The Clawback Committee | Cash | 10 | Dirty | — | Clawback → Clawback (each −$8, or −2 gold at 5+ Exposure) → Minutes (+1 Exposure) | 2 Cover every turn (blocks 2 of your damage; never stacks). Beaten: −1 Exposure |
-| The Patent Holder | Engine | 12 | Legal | — | Cease and Desist (must-play card in your next hand: 1 AP, does nothing) → New Patent Claim (an unplayable card takes a slot in your next hand) → Royalty (−$2 per Well/Field) | |
+| The Muckraker | Cash | 11 | Legal | — | Dig (+1 Exposure) → Expose (−1 gold) → Headline (−$4; −$8 from round 2) (+ Front Page: +2 Exposure in R3) | Beaten: −1 Exposure |
+| The Combine | Cash | 11 | — | Legal | Price War (oil −$1) → Rail Deal (freight +$1: you get $1 less a barrel sold; a Pipeline blocks it) → Squeeze (−$3; −$6 from round 2) → Hired Muscle (Bad Blood in your next hand) | Beaten: prices and freight recover |
+| The Clawback Committee | Cash | 10 | Dirty | — | Clawback → Clawback (each −$4, −$8 from round 2; or −2 gold at 5+ Exposure) → Minutes (+1 Exposure) | 2 Cover every turn (blocks 2 of your damage; never stacks). Beaten: −1 Exposure |
+| The Patent Holder | Engine | 12 | Legal | — | Cease and Desist (must-play card in your next hand: 1 AP, does nothing) → New Patent Claim (an unplayable card takes a slot in your next hand) → Royalty (−$1 per Well/Field; −$2 from round 2) | |
 | The Saboteur | Engine | 10 | Dirty | — | Wreck (destroys the marked Field or Well) → Lit Fuse (Bad Blood in your next hand) → Infiltrate (marks your best Field) | Moves first: Infiltrate. Beaten: starts a fire |
 | The Railroad Commission | Engine | 8 (a weak enemy) | Dirty | — | Proration (next turn pump 2 at most) → Inspection (−2 AP next turn) → Leaky Tanks (lose all stored oil and 25% of Capital) | |
-| **The Proxy Fight** (boss) | Boss | 26 | Legal | Dirty | Hostile Bid (−$6, +2 each cycle) → Proxy Meeting (does nothing) → The Vote (+1 Exposure, +1 each cycle) | Moves first: Canvass (+1 Exposure) |
+| **The Proxy Fight** (boss) | Boss | 26 | Legal | Dirty | Hostile Bid (−$6, +$2 each cycle) → Proxy Meeting (does nothing) → The Vote (+1 Exposure, +1 each cycle) | Moves first: Canvass (+1 Exposure) |
 Round 2 modifiers in stage 2: Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown, Scandal (+1 Exposure). Dry Season is stage 1 only.
 
 ## Endings

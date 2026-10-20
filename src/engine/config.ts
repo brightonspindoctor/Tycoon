@@ -57,12 +57,13 @@ export const CONFIG = {
   dividendDrop: 2,
   upgradeCost: 3, // rises by $1 each time
   muckrakerGold: 1, // the Muckraker's Expose
-  headline: 8, // stage 2 cash attacks (doubled after the playtest)
-  squeeze: 6,
-  clawbackCash: 8,
-  royaltyPer: 2, // per Well and Field
-  hostileBid: 6, // the Proxy Fight, +hostileBidStep each cycle
-  hostileBidStep: 2,
+  headline: 4, // stage 2 cash attacks at round 1 strength; doubled from cashDoubleFrom
+  squeeze: 3,
+  clawbackCash: 4,
+  royaltyPer: 1, // per Well and Field
+  hostileBid: 3, // the Proxy Fight, +hostileBidStep each cycle (doubled too: it's round 4)
+  hostileBidStep: 1,
+  cashDoubleFrom: 2, // the round from which stage 2 cash attacks hit twice as hard
   clawbackGold: 2, // the Clawback Committee, when Exposure is high
   inspectionAP: 2, // the Railroad Commission's Inspection takes this much AP next turn
   leakyTanksShare: 0.25, // Leaky Tanks: all your stored oil, and this share of your Capital
