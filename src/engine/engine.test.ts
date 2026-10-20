@@ -665,3 +665,23 @@ describe('Cover between rounds', () => {
     expect(r.cover).toBe(0)
   })
 })
+
+describe('the Strike', () => {
+  it('opens with Walkout (−1 AP); Picket costs $2, not AP', () => {
+    let r = newRun(23, 'threeOil')
+    for (let seed = 1; seed < 200; seed++) { // find a round 2 that draws the Strike
+      r = newRun(seed, 'threeOil'); r.phase = 'shop'; r.round = 1
+      r = act(r, { type: 'leaveShop' })
+      if (r.threats[0].kind === 'strike' && r.modifier !== 'bankSqueeze' && r.modifier !== 'boomtown') break
+    }
+    const strike = r.threats.find(t => t.kind === 'strike')!
+    expect(r.ap).toBe(CONFIG.baseAP - 1) // Walkout
+    expect(intent(r, strike)).toBe('Picket')
+    expect(intentText(r, strike)).toBe('Lose $2.')
+    r.capital = 30; r.cover = 0; r.modifier = null
+    const cash = r.capital
+    r = act(r, { type: 'endTurn' })
+    expect(r.ap).toBe(CONFIG.baseAP) // no AP lost
+    expect(cash - r.capital).toBe(2 + debtPerTurn(r))
+  })
+})

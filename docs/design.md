@@ -64,7 +64,7 @@ Only a few enemies resist a kind of card (the Blowout, the Railroad Agent and th
 | Enemy | Role | Hold | Weak | Resists | Cycle | Notes |
 |---|---|---|---|---|---|---|
 | Blowout | Engine | 5 | — | Legal | Rumble → Spray → Blow | Beaten = +3 oil |
-| Strike | Engine | 8 | Dirty | — | Picket → Sabotage (a random Well) (+ Torch in R3) | Moves first: Walkout (−1 AP) |
+| Strike | Engine | 8 | Dirty | — | Picket (lose $2) → Sabotage (a random Well) (+ Torch in R3) | Moves first: Walkout (−1 AP) |
 | Bank Inspector | Cash | 6 | Legal | Dirty (immune) | Audit → Fine | Ending a turn with $12+ removes 2 of his Hold; beaten = 2 Loose Threads |
 | Railroad Agent | Cash | 7 | — | Legal | Raise Rates → Refuse | Owns the railway: freight is her toll per barrel sold, and Raise Rates adds $1 to it |
 | Claim Jumper | Engine | 6 | Dirty | — | Jump → Scout | Moves first: Scout. Beaten = 2 fires |

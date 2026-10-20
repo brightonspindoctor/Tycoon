@@ -611,7 +611,7 @@ export function intentText(r: Run, t: Threat): string {
     case 'Rumble': return hw >= 0 ? `Well No. ${hw + 1} becomes Unstable.` : 'The ground rumbles.'
     case 'Spray': return 'Lose $2 and 1 oil.'
     case 'Blow': { const u = r.plots.findIndex(w => w?.unstable); return u >= 0 ? `Well No. ${u + 1} is destroyed.` : 'Pressure builds.' }
-    case 'Picket': return '−1 AP next turn.'
+    case 'Picket': return 'Lose $2.'
     case 'Sabotage': return wellCount(r) ? 'Destroys a random Well.' : 'Looks for a Well to wreck.'
     case 'Torch': return 'Starts a fire.'
     case 'Audit': return 'Your debt doubles next turn.'
@@ -689,7 +689,7 @@ function endTurn(r: Run) {
         const i = highestWell(r); if (i >= 0) r.plots[i]!.unstable = true
         break
       }
-      case 'Picket': r.pending.ap += 1; break
+      case 'Picket': dmg += 2; break
       case 'Sabotage':
       { // one random Well
         const standing = r.plots.map((w, i) => (w ? i : -1)).filter(i => i >= 0)
