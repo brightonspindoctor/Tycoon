@@ -77,7 +77,10 @@ export interface Run {
   upgradeCost: number
   residue: ItemKey | null // left behind by the stage's meter
   stageGold: number // gold at the start of this stage
+  admin?: boolean // a playtest run started from admin mode: never recorded
 }
+
+export type AdminOp = 'cash' | 'gold' | 'exposureUp' | 'exposureDown' | 'ap' | 'winRound' | 'addCard'
 
 export interface Snapshot { capital: number; gold: number; wells: number; oil: number; deck: number; exposure: number }
 export const snapshot = (r: Run): Snapshot => ({ capital: r.capital, gold: r.gold, wells: wellCount(r), oil: r.oil, deck: r.deck.length, exposure: r.exposure ?? 0 })
@@ -101,6 +104,7 @@ export type Action =
   | { type: 'skim'; gold: number }
   | { type: 'upgradeCard'; cardId: number }
   | { type: 'payDividends' }
+  | { type: 'admin'; op: AdminOp; card?: CardKey }
   | { type: 'leaveShop' }
   | { type: 'continue' }
 
@@ -1023,8 +1027,22 @@ export function incorporate(r: Run) {
 }
 const INCORPORATE_ACTIONS: Action['type'][] = ['takeLoan', 'upgradeCard', 'destroyCard', 'leaveShop']
 
+/** Playtest tools, only on admin runs. */
+function adminAction(r: Run, op: AdminOp, key?: CardKey) {
+  switch (op) {
+    case 'cash': money(r, 'Admin', 10); break
+    case 'gold': r.gold += 1; break
+    case 'exposureUp': expose(r, 1, 'Admin'); break
+    case 'exposureDown': expose(r, -1, 'Admin'); break
+    case 'ap': if (r.phase === 'turn') r.ap += 1; break
+    case 'winRound': if (r.phase === 'turn') for (const t of liveThreats(r)) hit(r, t, t.hold); break
+    case 'addCard': if (key && r.phase === 'turn') { const c = card(r, key); r.deck.push(c); r.hand.push(c); say(r, `Admin: ${CARDS[key].name} added to your hand.`) } else if (key) { r.deck.push(card(r, key)); say(r, `Admin: ${CARDS[key].name} added to your deck.`) } break
+  }
+}
+
 export function act(prev: Run, a: Action): Run {
   const r = clone(prev)
+  if (a.type === 'admin') { if (r.admin && r.phase !== 'lost') adminAction(r, a.op, a.card); return r }
   if (r.phase === 'shop') { shopAction(r, a); return r }
   if (r.phase === 'incorporate') { if (INCORPORATE_ACTIONS.includes(a.type)) shopAction(r, a); return r }
   if (r.phase === 'stageComplete' && a.type === 'continue' && r.stage === 1) { incorporate(r); return r }

@@ -4,12 +4,14 @@ import { bestScore, completedIndustries, loadRuns, trustFundOffered, type RunRec
 import { CONFIG } from '../engine/config'
 import { play } from '../sound'
 import { openSettings } from './settingsBus'
+import { AdminStartPanel } from './AdminPanel'
+import type { AdminStart } from '../engine/admin'
 
 const INDUSTRIES = ['Oil', 'Fishing', 'Pharma', 'Tech']
 // a run that died, rather than one that finished a stage or the game
 const ended = (r: RunRecord) => ['Bankrupt', 'Out of time', 'Quit', 'Ousted', 'Ruined'].includes(r.outcome)
 
-export function Intro({ onBegin, onHistory }: { onBegin: () => void; onHistory: () => void }) {
+export function Intro({ onBegin, onHistory, admin, onAdminStart }: { onBegin: () => void; onHistory: () => void; admin?: boolean; onAdminStart?: (o: AdminStart) => void }) {
   const done = completedIndustries()
   const best = bestScore('Oil')
   // each industry is revealed when the one before it is finished
@@ -24,7 +26,7 @@ export function Intro({ onBegin, onHistory }: { onBegin: () => void; onHistory: 
           {INDUSTRIES.map(name => open.includes(name) ? (
             <button key={name} type="button" className="industry" disabled={name !== 'Oil'} onClick={() => { play('click'); onBegin() }}>
               <span className="cl-display industry__name">{name}</span>
-              <span className="res-note">{name === 'Oil' ? (best !== null ? `Best: ${best} gold` : 'Stage 1 playable') : 'Coming soon'}</span>
+              <span className="res-note">{name === 'Oil' ? (best !== null ? `Best: ${best} gold` : 'Stages 1 and 2 playable') : 'Coming soon'}</span>
               <span className="cl-btn cl-btn--primary">Begin</span>
             </button>
           ) : (
@@ -33,6 +35,7 @@ export function Intro({ onBegin, onHistory }: { onBegin: () => void; onHistory: 
           <div className="industry industry--sealed industry--hidden"><span className="cl-display industry__name">? ? ?</span><span className="cl-label">Sealed</span></div>
           <span className="res-note">Finish an industry as Chairman to unseal the next.</span>
         </div>
+        {admin && onAdminStart && <AdminStartPanel onStart={onAdminStart} />}
         <div className="intro__menu">
           <button type="button" className="cl-btn" onClick={onHistory}>Run history</button>
           <button type="button" className="cl-btn" onClick={() => { play('click'); openSettings() }}>Settings</button>

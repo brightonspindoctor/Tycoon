@@ -678,3 +678,18 @@ button.m-threat { cursor: pointer; }
 .m .incorporate__tiles { grid-template-columns: 1fr; }
 .m .incorporate__stamp { font-size: 20px; padding: 4px 12px; }
 .m .shop .exposure, .m .incorporate__board { order: 3; }
+
+/* Admin mode */
+.admin { border: 2px dashed var(--accent); border-radius: var(--cl-radius); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; background: var(--paper-raised); }
+.admin__head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.admin__head .cl-label { color: var(--accent); }
+.admin__starts button { font-size: 11px; padding: 8px 2px; }
+.admin__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.admin__field { display: flex; flex-direction: column; gap: 4px; }
+.admin__stepper { display: flex; align-items: center; gap: 8px; }
+.admin__stepper b { min-width: 2.2em; text-align: center; font-size: 18px; }
+.admin__stepper .cl-btn { min-width: 32px; padding: 4px 0; }
+.admin__row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.admin__select { font: inherit; font-size: 14px; padding: 6px 8px; border: 1.5px solid var(--ink); border-radius: var(--cl-radius); background: var(--paper); color: var(--ink); max-width: 100%; }
+.admin-tools__buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.admin-badge { position: fixed; left: 50%; top: calc(4px + env(safe-area-inset-top)); transform: translateX(-50%); z-index: 50; background: var(--accent); color: var(--on-accent); padding: 2px 10px; border-radius: 3px; pointer-events: none; font-size: 10px; }

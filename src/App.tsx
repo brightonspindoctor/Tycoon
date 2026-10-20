@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { act, newRun, roundsReached, type Action, type Beat, type Run } from './engine/engine'
-import type { BonusKey } from './engine/data'
-import { loadReplay, markWelcomed, saveRun, trustFundOffered, welcomeSeen } from './storage'
+import { act, newRun, roundsReached, type Action, type AdminOp, type Beat, type Run } from './engine/engine'
+import type { BonusKey, CardKey } from './engine/data'
+import { loadAdmin, loadReplay, markWelcomed, saveAdmin, saveRun, trustFundOffered, welcomeSeen } from './storage'
+import { adminStart, type AdminStart } from './engine/admin'
 import { Welcome } from './ui/Welcome'
 import { TickerTape } from './ui/TickerTape'
 import { CONFIG } from './engine/config'
@@ -41,6 +42,11 @@ export default function App() {
   const [run, setRun] = useState<Run | null>(null)
   const [shake, setShake] = useState(false)
   const [bailout, setBailout] = useState(false) // a losing streak earns the Trust Fund next run
+  const [admin, setAdmin] = useState(() => {
+    const q = new URLSearchParams(location.search).get('admin')
+    if (q === '1' || q === '0') saveAdmin(q === '1')
+    return loadAdmin()
+  })
   // the enemy turn being played back: the board stays as it was until the tape has run
   const [tape, setTape] = useState<{ beats: Beat[]; frozen: Run } | null>(null)
   const [acting, setActing] = useState<Beat | null>(null)
@@ -110,7 +116,7 @@ export default function App() {
 
   // record finished runs once
   useEffect(() => {
-    if (!run || saved.current === run.seed) return
+    if (!run || saved.current === run.seed || run.admin) return // admin playtests are never recorded
     // stage 1 complete carries on into stage 2, so a run is recorded when it ends or when stage 2 (the last one built) is done
     if (run.phase === 'lost' || (run.phase === 'stageComplete' && run.stage >= 2)) {
       saved.current = run.seed
@@ -122,6 +128,14 @@ export default function App() {
       setBailout(trustFundOffered(CONFIG.trustFundStreak))
     }
   }, [run])
+
+  function startAdmin(o: AdminStart) {
+    const r = adminStart(Math.floor(Math.random() * 2 ** 31), o)
+    saved.current = null
+    setRun(r)
+    setScreen('run')
+    setTimeout(() => replay(r, r), 0)
+  }
 
   const [pendingBonus, setPendingBonus] = useState<BonusKey | null>(null)
   function start(bonus: BonusKey) {
@@ -137,7 +151,7 @@ export default function App() {
   let body: JSX.Element
   if (previewPage === 'cards') body = <CardGallery />
   else if (previewPage === 'sounds') body = <SoundBoard />
-  else if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
+  else if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} admin={admin} onAdminStart={startAdmin} />
   else if (screen === 'bonus') body = <BonusPick onPick={start} onBack={() => setScreen('intro')} />
   else if (screen === 'welcome') body = <Welcome onBegin={() => { markWelcomed(); start(pendingBonus ?? 'threeOil') }} />
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />
@@ -163,10 +177,16 @@ export default function App() {
   function quitRun() {
     if (!run) return
     saved.current = run.seed
-    saveRun({ id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run), outcome: 'Quit', gold: null, completed: false, stageGold: run.gold })
+    if (!run.admin) saveRun({ id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run), outcome: 'Quit', gold: null, completed: false, stageGold: run.gold })
     setTape(null); setActing(null); setRun(null); setScreen('intro')
   }
-  const overlays = <><SettingsPanel onQuit={inRun ? quitRun : undefined} /><InstallPrompt /></>
+  const adminProps = {
+    onToggle: setAdmin,
+    onAdmin: run?.admin && screen === 'run' && !tape ? (op: AdminOp, card?: CardKey) => dispatch({ type: 'admin', op, card }) : undefined,
+    inTurn: run?.phase === 'turn', stage: run?.stage ?? 1,
+  }
+  const badge = run?.admin && screen === 'run' ? <span className="admin-badge cl-label">Admin playtest</span> : null
+  const overlays = <><SettingsPanel onQuit={inRun ? quitRun : undefined} admin={adminProps} /><InstallPrompt />{badge}</>
   if (mobile) return <div className={`m ${shake ? 'is-shaking' : ''}`} data-theme={ERA_THEME[run?.stage ?? 1] ?? 'victorian'}>{fade}{overlays}</div>
 
   return (

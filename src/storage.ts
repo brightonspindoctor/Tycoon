@@ -89,3 +89,12 @@ export function lossStreak(runs: RunRecord[]): number {
 
 /** The Trust Fund is offered after enough stage 1 losses in a row. */
 export const trustFundOffered = (needed: number) => lossStreak(loadRuns()) >= needed
+
+const ADMIN = 'tycoon.admin'
+/** Admin mode: playtest tools. Turned on in Settings, or with ?admin=1 (?admin=0 turns it off). */
+export function loadAdmin(): boolean {
+  try { return localStorage.getItem(ADMIN) === '1' } catch { return false }
+}
+export function saveAdmin(on: boolean) {
+  try { localStorage.setItem(ADMIN, on ? '1' : '0') } catch { /* ignore */ }
+}

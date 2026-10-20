@@ -1,7 +1,10 @@
 // The settings panel (volume, sound on/off, install) and the gear button that opens it.
 import { useEffect, useState } from 'react'
 import { getVolume, isMuted, play, setMuted, setVolume } from '../sound'
-import { loadReplay, saveReplay, type Replay } from '../storage'
+import { loadAdmin, loadReplay, saveAdmin, saveReplay, type Replay } from '../storage'
+import type { AdminOp } from '../engine/engine'
+import type { CardKey } from '../engine/data'
+import { AdminTools } from './AdminPanel'
 import { install } from '../install'
 import { OPEN_SETTINGS, openSettings, useInstallable } from './settingsBus'
 
@@ -16,7 +19,9 @@ export function SettingsButton({ className = '' }: { className?: string }) {
 
 /** Mounted once by App; opens whenever a SettingsButton is pressed. */
 /** onQuit is passed while a run is in progress: the panel then offers to quit it. */
-export function SettingsPanel({ onQuit }: { onQuit?: () => void }) {
+interface AdminProps { onToggle: (on: boolean) => void; onAdmin?: (op: AdminOp, card?: CardKey) => void; inTurn: boolean; stage: number }
+export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: AdminProps }) {
+  const [adminOn, setAdminOn] = useState(loadAdmin())
   const [open, setOpen] = useState(false)
   const [vol, setVol] = useState(getVolume())
   const [muted, setM] = useState(isMuted())
@@ -81,6 +86,14 @@ export function SettingsPanel({ onQuit }: { onQuit?: () => void }) {
             : ios ? <p className="res-note">In Safari, tap Share <ShareIcon />, then <b>Add to Home Screen</b>.</p>
             : <p className="res-note">Use your browser's menu to install or add it to your home screen.</p>}
         </div>
+        <div className="settings__row settings__row--inline">
+          <span className="cl-label">Admin mode</span>
+          <button type="button" role="switch" aria-checked={adminOn} className={`switch ${adminOn ? 'is-on' : ''}`}
+            onClick={() => { const v = !adminOn; setAdminOn(v); saveAdmin(v); admin?.onToggle(v); play('click') }}>
+            <span className="switch__knob" /><span className="switch__text">{adminOn ? 'On' : 'Off'}</span>
+          </button>
+        </div>
+        {adminOn && admin?.onAdmin && <AdminTools onAdmin={admin.onAdmin} inTurn={admin.inTurn} stage={admin.stage} />}
         {onQuit && (
           <div className="settings__row settings__quit">
             <span className="cl-label">This run</span>
