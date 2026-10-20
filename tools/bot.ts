@@ -4,6 +4,9 @@ import { CARDS, PROSPECT_FOR, type CardKey } from '../src/engine/data'
 import { CONFIG } from '../src/engine/config'
 
 // which cards are worth upgrading first
+/** How the bot plays the money: for the stage 2 playtest. */
+export const botStyle = { skim: 'normal' as 'none' | 'normal' | 'greedy' }
+
 const UPGRADE_ORDER: CardKey[] = ['lawyerUp', 'payWages', 'hiredHand', 'patentThicket', 'espionage', 'dynamite', 'payDividend', 'expenseAccount', 'improveGear', 'shoreUp', 'insurance']
 
 /** Stage 1 → 2: take the loan when cash is short, upgrade the best cards, drop junk. */
@@ -61,7 +64,8 @@ export function botTurn(r: Run): Run {
     const stop = find('shoreUp') ?? find('securityDetail')
     const draw = find('telegraphLine') ?? find('tickerTape') ?? (r.capital > 8 ? find('efficiencyExpert') : undefined)
     const rig = find('rotaryRig') ?? find('derrick')
-    const expense = r.exposure <= 3 && r.capital > skimRate(r) + 12 ? find('expenseAccount') : undefined
+    const skimOK = botStyle.skim === 'greedy' ? r.exposure <= 5 && r.capital > skimRate(r) + 6 : botStyle.skim === 'normal' ? r.exposure <= 3 && r.capital > skimRate(r) + 12 : false
+    const expense = skimOK ? find('expenseAccount') : undefined
     const sprint = find('rdSprint')
     const night = find('nightShift')
     const dividend = r.exposure >= 4 && r.capital > 8 ? find('payDividend') : undefined
