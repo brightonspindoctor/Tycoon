@@ -15,7 +15,7 @@ export type CardKey =
   | 'survey' | 'oldProspect' | 'rotaryRig' | 'telegraphLine' | 'tickerTape' | 'nightShift' | 'efficiencyExpert'
   | 'streamline' | 'shredFiles' | 'scrapParts' | 'cleanHouse' | 'patentThicket' | 'espionage' | 'poachEngineer'
   | 'rdSprint' | 'payDividend' | 'personalLawyer' | 'ceaseDesist' | 'proxyBallot'
-  | 'derrick' | 'extinguisher' | 'securityDetail' | 'insurance' | 'expenseAccount' | 'patentClaim'
+  | 'derrick' | 'securityDetail' | 'insurance' | 'expenseAccount' | 'patentClaim'
 
 export interface CardDef {
   name: string
@@ -136,8 +136,6 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: "Can't be played. Does nothing. Gone at the end of the turn.", flavour: 'Patent pending. Everything pending.' },
   derrick: { name: 'Steel Derrick', era: 2, ap: 1, cost: 0, uses: 1, family: 'Production', power: 1, icon: 'derrick', price: CONFIG.derrickPrice,
     text: 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty.', flavour: 'Riveted, not nailed.' },
-  extinguisher: { name: 'Chemical Engine', era: 2, ap: 1, cost: 0, uses: null, family: 'Water', power: 2, icon: 'hose', price: CONFIG.bucketPrice2,
-    text: 'Put out two fires.', flavour: 'Soda, acid, and a brass bell.' },
   securityDetail: { name: 'Security Detail', era: 2, ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, stop: true, oncePerRound: true, cover: 2, icon: 'securityDetail', price: 6, rarity: 'Common',
     text: 'Block one enemy move. +2 Cover.', flavour: 'Men in good suits, standing very still.' },
   insurance: { name: 'Insurance Policy', era: 2, ap: 1, cost: 1, uses: null, family: 'Defence', power: 0, cover: 5, icon: 'insurance', price: 5, rarity: 'Common',
@@ -181,7 +179,6 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   payDividend: { exposure: -2, text: 'Pay $3. −2 Board Exposure.' },
   personalLawyer: { ap: 0, text: 'Your fortune is safe this turn: the next gold an enemy takes is blocked. Costs no AP.' },
   derrick: { ap: 0, text: 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty. Costs no AP.' },
-  extinguisher: { power: 3, text: 'Put out every fire.' },
   securityDetail: { cover: 4, text: 'Block one enemy move. +4 Cover.' },
   insurance: { cost: 0, cover: 7, text: '+7 Cover this turn.' },
   expenseAccount: { exposure: 0, text: 'Skim: pay the rate, get 1 gold. The board never sees it.' },
@@ -196,7 +193,7 @@ export const shopPool = (stage: number): CardKey[] => (stage >= 2 ? SHOP_POOL_2 
 /** The land card each stage's shop always stocks: a Prospect in stage 1, a Steel Derrick (a Well) from stage 2. */
 export const PROSPECT_FOR: Record<number, CardKey> = { 1: 'prospect', 2: 'derrick' }
 /** The fire card each stage's shop always stocks. */
-export const WATER_FOR: Record<number, CardKey> = { 1: 'bucket', 2: 'extinguisher' }
+export const WATER_FOR: Record<number, CardKey> = { 1: 'bucket' }
 export const PROSPECTS: CardKey[] = ['prospect', 'survey', 'oldProspect']
 export const ATTACK_CARDS: CardKey[] = ['hiredHand', 'lawyerUp', 'dynamite']
 

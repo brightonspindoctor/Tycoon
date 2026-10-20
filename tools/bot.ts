@@ -55,7 +55,7 @@ export function botTurn(r: Run): Run {
     const playable = r.hand.filter(c => canPlay(r, c).ok)
     const forced = playable.find(c => CARDS[c.key].forced)
     const find = (k: string) => playable.find(c => c.key === k)
-    const water = find('fireBrigade') ?? find('extinguisher') ?? find('bucket')
+    const water = find('fireBrigade') ?? find('bucket')
     const attack = playable.find(c => isAttack(c.key))
     const building = playable.find(c => c.key === 'well' || c.key === 'wildcat')
     const prospect = playable.find(c => ['prospect', 'survey', 'oldProspect'].includes(c.key))

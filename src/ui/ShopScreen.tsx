@@ -19,7 +19,7 @@ export function ShopScreen({ run, dispatch }: Props) {
   const can = (cost: number) => run.capital - cost >= 1
   const stage2 = st >= 2
   const prospectKey = PROSPECT_FOR[st] ?? 'derrick'
-  const waterKey = WATER_FOR[st] ?? 'extinguisher'
+  const waterKey = WATER_FOR[st] // stage 2 sells no fire card
 
   return (
     <div className="screen shop" data-theme={ERA_THEME[st] ?? 'victorian'}>
@@ -40,10 +40,10 @@ export function ShopScreen({ run, dispatch }: Props) {
                 <CardView key={i} card={{ id: -i - 1, key: k, uses: CARDS[k].uses }} stage={st} price={money(CARDS[k].price!, st)} playable={can(CARDS[k].price!)}
                   why={can(CARDS[k].price!) ? undefined : 'Too expensive'} onClick={() => dispatch({ type: 'buyCard', slot: i })} />
               ) : <div key={i} className="sold">Sold</div>)}
-              <div className="prospect-slot">
-                {run.shop.bucketSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -8, key: waterKey, uses: CARDS[waterKey].uses }} stage={st} price={money(waterPrice(run), st)} playable={can(waterPrice(run))} onClick={() => dispatch({ type: 'buyBucket' })} />}
+              {waterKey && <div className="prospect-slot">
+                {run.shop.bucketSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -8, key: waterKey, uses: CARDS[waterKey].uses }} stage={st} price={money(waterPrice(), st)} playable={can(waterPrice())} onClick={() => dispatch({ type: 'buyBucket' })} />}
                 <span className="res-note">One per visit.</span>
-              </div>
+              </div>}
               <div className="prospect-slot">
                 {run.shop.prospectSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -9, key: prospectKey, uses: CARDS[prospectKey].uses }} stage={st} price={money(run.prospectPrice, st)} playable={can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })} />}
                 <span className="res-note">{stage2

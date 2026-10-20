@@ -129,7 +129,8 @@ export const canUpgrade = (c: Card) => !c.up && !c.temp && !!UPGRADES[c.key]
 export const canDuplicate = (c: Card) => !c.temp && !CARDS[c.key].junk && !!CARDS[c.key].price
 export const isProspect = (k: CardKey) => PROSPECTS.includes(k)
 
-export const waterPrice = (r: Run) => (r.stage >= 2 ? CONFIG.bucketPrice2 : CONFIG.bucketPrice)
+// only stage 1 sells a fire card
+export const waterPrice = () => CONFIG.bucketPrice
 /** Can a Well card be built? Stage 1 needs an empty plot; from stage 2 a Well claims a new plot if there's none. */
 export const canBuild = (r: Run) => freePlot(r) >= 0 || (r.stage >= 2 && r.plots.length < CONFIG.maxPlots)
 const BUILDS: CardKey[] = ['well', 'wildcat', 'derrick']
@@ -334,8 +335,8 @@ function shopAction(r: Run, a: Action) {
       return
     }
     case 'buyBucket': {
-      const k = WATER_FOR[r.stage] ?? 'extinguisher'
-      if (r.shop.bucketSold || !pay(r, waterPrice(r), CARDS[k].name)) return
+      const k = WATER_FOR[r.stage] // stage 2 sells no fire card
+      if (!k || r.shop.bucketSold || !pay(r, waterPrice(), CARDS[k].name)) return
       r.deck.push(card(r, k)); r.shop.bucketSold = true
       return
     }
@@ -673,7 +674,7 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (c.key === 'payDividend' && r.exposure === 0) return { ok: false, why: 'The board is happy' }
   if (c.key === 'personalLawyer' && r.goldShield) return { ok: false, why: 'Already retained' }
   if (BUILDS.includes(c.key) && !canBuild(r)) return { ok: false, why: 'No free plot' }
-  if ((c.key === 'bucket' || c.key === 'fireBrigade' || c.key === 'extinguisher') && !r.fire) return { ok: false, why: 'No fire' }
+  if ((c.key === 'bucket' || c.key === 'fireBrigade' ) && !r.fire) return { ok: false, why: 'No fire' }
   if (d.family === 'Skim' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
   if (d.stop && r.shoredUp) return { ok: false, why: 'Once per round' }
   if (d.stop && !targetsFor(r, c).length) return { ok: false, why: 'Every move is already stopped' }
@@ -779,7 +780,6 @@ function play(r: Run, cardId: number, target?: number) {
         say(r, `Well No. ${i + 1} built.`)
         break
       }
-      case 'extinguisher':
       case 'bucket': r.fire = Math.max(0, r.fire - d.power); say(r, r.fire ? `${d.power > 1 ? 'Two fires' : 'One fire'} out. ${fires(r.fire)} still burning.` : 'Fire out. Pumps restart next turn.'); break
       case 'fireBrigade': r.fire = 0; say(r, 'Every fire is out. Pumps restart next turn.'); break
       case 'improveGear': break

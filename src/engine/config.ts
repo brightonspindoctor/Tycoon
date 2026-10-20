@@ -42,7 +42,6 @@ export const CONFIG = {
   silo2Price: 5, // the Exchange's Silo: +silo2Storage oil storage, offered every visit
   silo2Storage: 2,
   silo2Max: 2, // at most this many Exchange Silos in stage 2
-  bucketPrice2: 3, // the Chemical Engine, the Exchange's fire card
   stage2Output: 1, // every Well and Field pumps this in stage 2, and none runs dry
   fieldValue: 8, // selling a Field
   wreckReserve: 3, // a wrecked Field becomes a Well with this many barrels
