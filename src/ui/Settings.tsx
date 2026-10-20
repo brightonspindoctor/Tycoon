@@ -15,14 +15,16 @@ export function SettingsButton({ className = '' }: { className?: string }) {
 }
 
 /** Mounted once by App; opens whenever a SettingsButton is pressed. */
-export function SettingsPanel() {
+/** onQuit is passed while a run is in progress: the panel then offers to quit it. */
+export function SettingsPanel({ onQuit }: { onQuit?: () => void }) {
   const [open, setOpen] = useState(false)
   const [vol, setVol] = useState(getVolume())
   const [muted, setM] = useState(isMuted())
   const [replay, setReplay] = useState<Replay>(loadReplay())
+  const [confirmQuit, setConfirmQuit] = useState(false)
   const { installable, installed, ios } = useInstallable()
   useEffect(() => {
-    const show = () => { setVol(getVolume()); setM(isMuted()); setOpen(true) }
+    const show = () => { setVol(getVolume()); setM(isMuted()); setConfirmQuit(false); setOpen(true) }
     window.addEventListener(OPEN_SETTINGS, show)
     return () => window.removeEventListener(OPEN_SETTINGS, show)
   }, [])
@@ -79,6 +81,20 @@ export function SettingsPanel() {
             : ios ? <p className="res-note">In Safari, tap Share <ShareIcon />, then <b>Add to Home Screen</b>.</p>
             : <p className="res-note">Use your browser's menu to install or add it to your home screen.</p>}
         </div>
+        {onQuit && (
+          <div className="settings__row settings__quit">
+            <span className="cl-label">This run</span>
+            {!confirmQuit
+              ? <button type="button" className="cl-btn" onClick={() => setConfirmQuit(true)}>Quit run</button>
+              : <div className="settings__confirm">
+                  <p>Walk away from this run? It's recorded as a quit in your history.</p>
+                  <div className="settings__confirm-buttons">
+                    <button type="button" className="cl-btn" onClick={() => setConfirmQuit(false)}>Keep playing</button>
+                    <button type="button" className="cl-btn cl-btn--danger" onClick={() => { setOpen(false); setConfirmQuit(false); onQuit() }}>Quit run</button>
+                  </div>
+                </div>}
+          </div>
+        )}
       </section>
     </div>
   )

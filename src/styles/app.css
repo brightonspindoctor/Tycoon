@@ -622,3 +622,9 @@ button.m-threat { cursor: pointer; }
 .m .welcome__lines li { font-size: 36px; line-height: 42px; gap: 12px; }
 .m .welcome__no { width: 26px; height: 26px; font-size: 13px; transform: translateY(-6px); }
 .m .welcome__go { width: 100%; }
+.settings__quit { border-top: 1.5px solid var(--rule); padding-top: 14px; }
+.settings__confirm { display: flex; flex-direction: column; gap: 10px; }
+.settings__confirm p { margin: 0; font-size: 14px; line-height: 20px; }
+.settings__confirm-buttons { display: flex; gap: 8px; }
+.settings__confirm-buttons .cl-btn { flex: 1; }
+.cl-btn--danger { background: var(--loss); border-color: var(--loss); color: var(--paper-raised); }

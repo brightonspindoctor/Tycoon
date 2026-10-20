@@ -139,7 +139,14 @@ export default function App() {
   )
 
   const fade = <div key={`${screen}-${run?.phase}-${run?.round}`} className="screen-fade">{body}</div>
-  const overlays = <><SettingsPanel /><InstallPrompt /></>
+  const inRun = screen === 'run' && !!run && (run.phase === 'turn' || run.phase === 'shop' || run.phase === 'roundWon')
+  function quitRun() {
+    if (!run) return
+    saved.current = run.seed
+    saveRun({ id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run), outcome: 'Quit', gold: null, completed: false, stageGold: run.gold })
+    setTape(null); setActing(null); setRun(null); setScreen('intro')
+  }
+  const overlays = <><SettingsPanel onQuit={inRun ? quitRun : undefined} /><InstallPrompt /></>
   if (mobile) return <div className={`m ${shake ? 'is-shaking' : ''}`} data-theme={ERA_THEME[run?.stage ?? 1] ?? 'victorian'}>{fade}{overlays}</div>
 
   return (

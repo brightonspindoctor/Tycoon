@@ -52,6 +52,9 @@ A card is offered (weighted by rarity, like the shop): take it into your deck or
 - **Bribe** ($4): pay 1 gold from your fortune; 50% chance of 4 Hold (Dirty, so doubled against the Strike, Claim Jumper and Baron), otherwise it is refused and adds Bad Blood.
 - Enemies that move first show what they opened with on turn 1, above their next move.
 
+### Settings during a run
+The gear on the board and in the Land Office opens Settings (volume, sound, enemy-turn replay) plus Quit run, which asks to confirm, records the run as "Quit" in history and returns to the title. A quit neither counts towards nor breaks the Trust Fund losing streak.
+
 ### First run
 Before your first run ever, after picking a starting bonus, a screen stamps out the game in four lines (Prospect fields. Build wells. Sell oil. Grow your capital.) with a Begin button. It never shows again.
 

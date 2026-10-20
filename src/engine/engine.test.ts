@@ -707,3 +707,11 @@ describe('Shore Up limit', () => {
     expect(r.shoredUp).toBe(false)
   })
 })
+
+describe('quitting a run', () => {
+  it("doesn't break or extend the losing streak", () => {
+    const rec = (outcome: string): RunRecord => ({ id: outcome + Math.random(), date: '', industry: 'Oil', rounds: 2, outcome, gold: null, completed: false, stageGold: 0 })
+    expect(lossStreak([rec('Bankrupt'), rec('Quit'), rec('Bankrupt'), rec('Out of time')])).toBe(3)
+    expect(lossStreak([rec('Quit'), rec('Quit')])).toBe(0)
+  })
+})

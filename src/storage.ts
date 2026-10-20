@@ -79,6 +79,7 @@ export function saveMuted(m: boolean) {
 export function lossStreak(runs: RunRecord[]): number {
   let n = 0
   for (const r of runs) { // newest first
+    if (r.outcome === 'Quit') continue // walking away doesn't count either way
     const lostInStage1 = !r.completed && r.rounds <= 4 && (r.outcome === 'Bankrupt' || r.outcome === 'Out of time')
     if (!lostInStage1) break
     n++
