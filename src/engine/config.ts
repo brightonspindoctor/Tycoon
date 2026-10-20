@@ -7,6 +7,7 @@ export const CONFIG = {
   baseAP: 2,
   handSize: 5,
   oilPrice: 3, // starting price per barrel
+  oilPrice2: 4, // stage 2: the motor car arrives
   oilFloor: 1, // the price never drops below this, freight included
   startStorage: 3,
   maxPlots: 5,
@@ -29,7 +30,28 @@ export const CONFIG = {
   badBloodFireChance: 1 / 3,
   inspectorReserve: 12, // end a turn holding this much and the Inspector loses Hold
   inspectorReserveDamage: 2,
-  skimRate: { 0: 1, 1: 1, 2: 2, 3: 3, 4: 4 } as Record<number, number>, // $ per gold, by round
+  skimRate: { 0: 1, 1: 1, 2: 2, 3: 3, 4: 4 } as Record<number, number>, // $ per gold, by round (stage 1)
+  skimRate2: { 0: 2, 1: 2, 2: 3, 3: 4, 4: 5 } as Record<number, number>, // stage 2
+  bossGold: 3, // gold for beating a stage's boss
+  // stage 2
+  stage2Loan: 10, // offered at incorporation
+  stage2LoanDebt: 1, // Bank Debt it adds per turn
+  surveyPrice: 5, // the stage 2 Prospect (Survey); rises by surveyStep each time
+  surveyStep: 2,
+  fieldValue: 8, // selling a Field
+  wreckReserve: 3, // a wrecked Field becomes a Well with this many barrels
+  exposureMax: 8, // Board Exposure at this: ousted
+  exposureHigh: 5, // 5 or more counts as high
+  exposureLow: 2, // 2 or less at the end of stage 2: Loyal Directors
+  exposureStartCap: 3, // stage 2 starts with 1 Exposure per exposureStartPer gold skimmed in stage 1, up to this
+  exposureStartPer: 3,
+  dividendCost: 4, // the shop's dividend: $ for −dividendDrop Exposure, once per visit
+  dividendDrop: 2,
+  upgradeCost: 3, // rises by $1 each time
+  muckrakerGold: 1, // the Muckraker's Expose
+  clawbackGold: 2, // the Clawback Committee, when Exposure is high
+  prorationCap: 2, // production cap under the Railroad Commission's Proration
+
   destroyCost: 2, // rises by $1 each time (players find out)
   prospectPrice: 3,
   turnLimit: 25,

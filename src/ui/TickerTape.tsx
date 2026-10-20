@@ -6,7 +6,7 @@ import type { Beat } from '../engine/engine'
 import { play, type Cue } from '../sound'
 import type { Replay } from '../storage'
 
-const CUE: Record<Beat['kind'], Cue | null> = { enemy: 'ticker', fire: 'fire', money: 'hit', cards: 'ticker', shuffle: 'shuffle', oil: 'ink', info: 'click' }
+const CUE: Record<Beat['kind'], Cue | null> = { enemy: 'ticker', fire: 'fire', money: 'hit', cards: 'ticker', shuffle: 'shuffle', oil: 'ink', info: 'click', board: 'stamp', gold: 'hit' }
 
 interface Props { beats: Beat[]; speed: Replay; onBeat: (b: Beat | null) => void; onDone: () => void }
 

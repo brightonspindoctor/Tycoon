@@ -514,8 +514,9 @@ describe('oil price', () => {
 })
 
 describe('resists', () => {
-  it('only the Railroad Agent and the Baron resist anything; the Blowout is immune to Legal', () => {
-    expect(Object.entries(THREATS).filter(([, t]) => t.resist).map(([k]) => k).sort()).toEqual(['baron', 'railroad'])
+  it('in stage 1 only the Railroad Agent and the Baron resist anything; the Blowout is immune to Legal', () => {
+    const stage1 = ['blowout', 'strike', 'inspector', 'railroad', 'claimJumper', 'speculator', 'baron']
+    expect(Object.entries(THREATS).filter(([k, t]) => stage1.includes(k) && t.resist).map(([k]) => k).sort()).toEqual(['baron', 'railroad'])
   })
 })
 

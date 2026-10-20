@@ -1,10 +1,10 @@
 // Rules fuzzer: plays thousands of runs with random (often silly) actions and checks,
 // after every single action, that the game never reaches an impossible state.
 // Run with: npm run fuzz
-import { act, canPlay, intent, intentText, newRun, targetsFor, type Action, type Run } from '../src/engine/engine'
+import { act, canPlay, handTargetsFor, intent, intentText, newRun, targetsFor, type Action, type Run } from '../src/engine/engine'
 import { BONUSES, BOONS, CARDS, REWARDS, type BonusKey } from '../src/engine/data'
 import { CONFIG } from '../src/engine/config'
-import { botShop, botTurn } from './bot'
+import { botIncorporate, botShop, botTurn } from './bot'
 
 let seed = 12345
 const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
@@ -12,16 +12,24 @@ const pick = <T,>(xs: T[]): T => xs[Math.floor(rand() * xs.length)]
 
 function randomAction(r: Run): Action {
   if (r.phase === 'roundWon') return r.spoils ? { type: rand() < 0.5 ? 'takeSpoils' : 'sellSpoils' } : { type: 'continue' }
+  if (r.phase === 'stageComplete') return { type: 'continue' }
+  if (r.phase === 'incorporate') {
+    const opts: Action[] = [{ type: 'leaveShop' }, { type: 'takeLoan' }, { type: 'skim', gold: 1 }, { type: 'buyCard', slot: 0 }, { type: 'payDividends' }]
+    if (r.deck.length) opts.push({ type: 'destroyCard', cardId: pick(r.deck).id }, { type: 'upgradeCard', cardId: pick(r.deck).id })
+    return rand() < 0.2 ? { type: 'leaveShop' } : pick(opts)
+  }
   if (r.phase === 'shop') {
     const opts: Action[] = [{ type: 'leaveShop' }, { type: 'buyProspect' }, { type: 'buyBucket' }, { type: 'buyBoon' }, { type: 'buyItem' },
-      { type: 'takeLoan' }, { type: 'reroll' }, { type: 'skim', gold: 1 + Math.floor(rand() * 3) }, { type: 'buyCard', slot: Math.floor(rand() * 3) }]
-    if (r.deck.length) { opts.push({ type: 'destroyCard', cardId: pick(r.deck).id }) }
+      { type: 'takeLoan' }, { type: 'reroll' }, { type: 'skim', gold: 1 + Math.floor(rand() * 3) }, { type: 'buyCard', slot: Math.floor(rand() * 3) }, { type: 'payDividends' }]
+    if (r.deck.length) { opts.push({ type: 'destroyCard', cardId: pick(r.deck).id }, { type: 'upgradeCard', cardId: pick(r.deck).id }) }
     return rand() < 0.25 ? { type: 'leaveShop' } : pick(opts)
   }
   const opts: Action[] = [{ type: 'endTurn' }, { type: 'sellOil' }, { type: 'firebreak' }, { type: 'sellWell', plot: Math.floor(rand() * 6) - 1 }]
   for (const c of r.hand) {
     const ts = r.threats.map(t => t.id)
     opts.push({ type: 'play', cardId: c.id, target: rand() < 0.7 ? pick(ts) : undefined })
+    const hs = handTargetsFor(r, c)
+    if (hs.length) opts.push({ type: 'play', cardId: c.id, target: pick(hs).id })
     if (canPlay(r, c).ok) opts.push({ type: 'play', cardId: c.id, target: targetsFor(r, c)[0]?.id }) // weight playable cards
   }
   opts.push({ type: 'play', cardId: 999999 }) // a card that doesn't exist
@@ -56,11 +64,20 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.fire < 0 || r.fire > CONFIG.fireMax) return `fire ${r.fire}`
   if (r.oil < 0 || r.oil > r.storage) return `oil ${r.oil} of ${r.storage}`
   if (r.plots.length > CONFIG.maxPlots) return `${r.plots.length} plots`
-  for (const w of r.plots) if (w && (w.reserve <= 0 || w.output <= 0)) return `well ${JSON.stringify(w)}`
-  if (r.gold < 0) return `gold ${r.gold}`
+  for (const w of r.plots) if (w && ((!w.field && w.reserve <= 0) || w.output <= 0)) return `well ${JSON.stringify(w)}`
+  if (r.gold < 0 && !(r.phase === 'lost' && r.loss?.reason === 'ruined')) return `gold ${r.gold}`
+  if (r.gold < 0 && r.phase !== 'lost') return `gold ${r.gold} but still playing`
+  if (r.exposure < 0 || r.exposure > CONFIG.exposureMax) return `exposure ${r.exposure}`
+  if (r.exposure >= CONFIG.exposureMax && r.phase !== 'lost') return `exposure ${r.exposure} but not ousted`
+  if (r.stage === 1 && r.exposure !== 0) return 'Board Exposure in stage 1'
+  if (r.stage === 2 && r.deck.some(c => c.key === 'prospect')) return 'a fresh Prospect in stage 2'
+  if (r.loss?.reason === 'ousted' && r.exposure < CONFIG.exposureMax) return 'ousted below the top'
+  if (r.loss?.reason === 'ruined' && r.gold >= 0) return 'ruined with gold left'
   if (r.ap < 0) return `ap ${r.ap}`
   if (r.phase !== 'lost' && r.capital <= 0) return `capital ${r.capital} but phase ${r.phase}`
-  if (r.round < 1 || r.round > 4) return `round ${r.round}`
+  if ((r.round < 1 && r.phase !== 'incorporate') || r.round > 4) return `round ${r.round}`
+  if (r.phase === 'incorporate' && (r.stage !== 2 || r.round !== 0)) return 'incorporating mid-stage'
+  if (r.phase === 'incorporate' && prev.phase === 'stageComplete' && r.plots.some(w => w && !w.field)) return 'a Well that did not become a Field'
   if (r.phase === 'stageComplete' && r.round !== 4) return 'stage complete before round 4'
   if (r.phase === 'roundWon' && r.round >= 4) return 'roundWon in round 4'
   if ((r.phase === 'roundWon' || r.phase === 'stageComplete') && r.threats.some(t => !t.beaten)) return 'round won with an enemy standing'
@@ -83,6 +100,7 @@ function check(r: Run, prev: Run, a: Action): string | null {
     if (sum !== r.capital) return `ledger adds up to ${sum} but capital is ${r.capital}`
   }
   if (r.phase === 'roundWon' && prev.phase === 'turn' && !r.spoils) return 'round won with no spoils offered'
+  if (r.phase === 'stageComplete' && prev.phase === 'turn' && r.gold < prev.gold + CONFIG.bossGold - 3) return 'no gold for beating the boss'
   if (r.phase === 'shop' && prev.phase === 'roundWon' && (r.shop.boon !== null) !== (r.round === 3)) return `pre-boss item offered after round ${r.round}`
   if (r.phase === 'stageComplete' && prev.phase === 'turn') {
     if (!r.reward) return 'stage complete with no reward'
@@ -107,15 +125,20 @@ for (let i = 0; i < RUNS; i++) {
   const log: string[] = []
   // play sensibly with the bot up to a chosen round, then act at random from there
   const chaosFrom = 1 + (i % 4)
-  for (let g = 0; g < 400 && r.round < chaosFrom && r.phase !== 'lost' && r.phase !== 'stageComplete'; g++) {
+  // half the runs play sensibly through stage 1 first, so chaos also reaches stage 2
+  const chaosStage = i % 2 === 0 ? 1 : 2
+  const before = (x: Run) => x.stage < chaosStage || (x.stage === chaosStage && x.round < chaosFrom)
+  for (let g = 0; g < 900 && before(r) && r.phase !== 'lost' && !(r.phase === 'stageComplete' && r.stage === 2); g++) {
     const prev = r
     if (r.phase === 'shop') r = botShop(r)
     else if (r.phase === 'turn') r = botTurn(r)
+    else if (r.phase === 'incorporate') r = botIncorporate(r)
+    else if (r.phase === 'stageComplete') r = act(r, { type: 'continue' })
     else if (r.phase === 'roundWon') r = act(act(r, { type: 'takeSpoils' }), { type: 'continue' })
     const bad = check(r, prev, { type: 'continue' })
     if (bad) { if (!seen.has(bad)) seen.set(bad, `run ${i} (bot) round ${r.round} turn ${r.turn}`); problems++; break }
   }
-  for (let step = 0; step < 1500 && r.phase !== 'lost' && r.phase !== 'stageComplete'; step++) {
+  for (let step = 0; step < 3000 && r.phase !== 'lost' && !(r.phase === 'stageComplete' && r.stage === 2); step++) {
     const a = rand() < 0.5 && r.phase === 'turn' ? botStep(r) : randomAction(r)
     let next: Run
     try { next = act(r, a) } catch (e) { const k = `crash: ${(e as Error).message}`; if (!seen.has(k)) seen.set(k, `${log.slice(-6).join(' > ')} > ${JSON.stringify(a)}`); problems++; break }
@@ -125,7 +148,7 @@ for (let i = 0; i < RUNS; i++) {
     if (bad) { if (!seen.has(bad)) seen.set(bad, `run ${i} round ${next.round} turn ${next.turn}: ${log.slice(-6).join(' > ')}`); problems++; break }
     r = next
   }
-  ends[r.phase] = (ends[r.phase] ?? 0) + 1
+  ends[`${r.phase} S${r.stage}`] = (ends[`${r.phase} S${r.stage}`] ?? 0) + 1
 }
 console.log(`${RUNS} runs, ${actions} actions, ${problems} problems. Ended: ${JSON.stringify(ends)}`)
 for (const [k, v] of seen) console.log(`- ${k}\n    ${v}`)
