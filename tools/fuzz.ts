@@ -89,7 +89,8 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.phase === 'stageComplete' && r.round !== 4) return 'stage complete before round 4'
   if (r.phase === 'roundWon' && r.round >= 4) return 'roundWon in round 4'
   if ((r.phase === 'roundWon' || r.phase === 'stageComplete') && r.threats.some(t => !t.beaten)) return 'round won with an enemy standing'
-  if (r.phase === 'turn' && !r.threats.some(t => !t.beaten)) return 'turn with no enemy standing'
+  if (r.phase === 'turn' && !r.threats.some(t => !t.beaten) && !r.fire) return 'turn with no enemy standing and no fire'
+  if ((r.phase === 'roundWon' || r.phase === 'stageComplete') && prev.phase === 'turn' && r.fire) return 'round ended with a fire burning'
   for (const t of r.threats) {
     if (t.hold > t.maxHold) return `${t.kind} hold ${t.hold}/${t.maxHold}`
     if (t.beaten !== (t.hold <= 0)) return `${t.kind} beaten=${t.beaten} hold=${t.hold}`

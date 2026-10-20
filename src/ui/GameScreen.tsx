@@ -73,7 +73,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
             <section className={`hazard ${lit('fire')}`} aria-label={`${fires(run.fire)} burning`}>
               <div className="hazard__head"><img src={`${import.meta.env.BASE_URL}art/icons/fire.png`} alt="" /><span className="cl-label">{fires(run.fire)} burning</span><span className="cl-num hazard__level">max {CONFIG.fireMax}</span></div>
               <div className="warn warn--heat"><b>End of turn</b><span>{fireNext}</span></div>
-              <span className="hazard__note">Pumps stopped.</span>
+              <span className="hazard__note">{live.length ? 'Pumps stopped.' : 'Every enemy is beaten. Put the fire out to end the round.'}</span>
             </section>
           )}
         </section>

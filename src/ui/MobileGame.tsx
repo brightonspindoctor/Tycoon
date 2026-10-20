@@ -82,6 +82,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
         {run.modifier && <div className="m-chip"><b>{MODS[run.modifier].name}</b> · {units(MODS[run.modifier].text, st)}</div>}
 
         <section className="m-threats" aria-label="Opposition">
+          {run.fire > 0 && !run.threats.some(t => !t.beaten) && <span className="cl-label m-prompt">Every enemy is beaten. Put the fire out to end the round.</span>}
           {needsTarget && <span className="cl-label m-prompt">{stopping ? 'Tap the move to stop' : 'Tap an enemy to hit'}</span>}
           {run.threats.map(t => {
             const d = THREATS[t.kind]

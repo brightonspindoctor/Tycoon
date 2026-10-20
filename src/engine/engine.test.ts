@@ -737,3 +737,37 @@ describe('The Blowout', () => {
     expect(r.plots.some(w => w?.unstable)).toBe(false)
   })
 })
+
+describe('fire holds the round open', () => {
+  const lastHit = (seed: number) => {
+    const r = newRun(seed, 'threeOil'); r.capital = 50
+    r.threats = [{ id: 950, kind: 'strike', hold: 1, maxHold: 8, step: 0, cycle: 0, round3: false, beaten: false }]
+    r.plots = [{ output: 1, reserve: 6 }, { output: 1, reserve: 6 }]
+    r.fire = 1
+    const hand = r.deck.find(c => c.key === 'hiredHand')!
+    r.hand = [hand, ...r.deck.filter(c => c.key === 'bucket').slice(0, 1)]; r.ap = 2
+    return { r, hand }
+  }
+  it('beating the last enemy while a fire burns keeps you in the round', () => {
+    const { r, hand } = lastHit(31)
+    const after = act(r, { type: 'play', cardId: hand.id })
+    expect(after.threats[0].beaten).toBe(true)
+    expect(after.phase).toBe('turn')
+  })
+  it('putting the fire out then ends the round', () => {
+    const { r, hand } = lastHit(32)
+    let after = act(r, { type: 'play', cardId: hand.id })
+    const bucket = after.hand.find(c => c.key === 'bucket')!
+    after = act(after, { type: 'play', cardId: bucket.id })
+    expect(after.fire).toBe(0)
+    expect(after.phase).toBe('roundWon')
+  })
+  it('a fire left burning keeps doing damage on later turns, then the round ends once it is out', () => {
+    const { r, hand } = lastHit(33)
+    r.oil = 0
+    let after = act(r, { type: 'play', cardId: hand.id })
+    after = act(after, { type: 'endTurn' }) // stage 1: the fire takes a Well
+    expect(after.plots.filter(Boolean).length).toBe(1)
+    expect(after.phase).toBe('turn')
+  })
+})

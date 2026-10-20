@@ -603,6 +603,16 @@ function threatBeaten(r: Run, t: Threat) {
     case 'saboteur': startFire(r, 1); say(r, 'The Saboteur left a parting gift.'); break
   }
   if (!liveThreats(r).length && r.phase !== 'lost') {
+    if (r.fire) { say(r, `Put the fire out to end the round.`); return }
+    endRound(r)
+  }
+}
+
+/** After a fire goes out with every enemy already beaten, the round ends. */
+function fireOut(r: Run) { if (r.phase === 'turn' && !r.fire && !liveThreats(r).length) endRound(r) }
+/** Every enemy beaten and no fire burning: the round is over. */
+function endRound(r: Run) {
+  {
     // a quick win impresses the board, the boss included
     if (r.stage >= 2 && r.turn <= CONFIG.quickWinTurns) expose(r, -CONFIG.quickWinDrop, `Won in ${r.turn} turn${r.turn === 1 ? '' : 's'}`)
     // the board reads the quarter: Capital up, Exposure falls; Capital down, it rises (not after the boss)
@@ -679,8 +689,10 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if ((c.key === 'bucket' || c.key === 'fireBrigade' ) && !r.fire) return { ok: false, why: 'No fire' }
   if (d.family === 'Skim' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
   if (d.stop && r.shoredUp) return { ok: false, why: 'Once per round' }
+  if (d.stop && !liveThreats(r).length) return { ok: false, why: 'No enemies left' }
   if (d.stop && !targetsFor(r, c).length) return { ok: false, why: 'Every move is already stopped' }
   if (c.key === 'pettyCash' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
+  if (isAttack(c.key) && !liveThreats(r).length) return { ok: false, why: 'No enemies left' }
   if (isAttack(c.key) && !liveThreats(r).some(t => damageFor(d.family, d.power, t.kind) > 0)) return { ok: false, why: 'No effect on these enemies' }
   return { ok: true }
 }
@@ -782,8 +794,8 @@ function play(r: Run, cardId: number, target?: number) {
         say(r, `Well No. ${i + 1} built.`)
         break
       }
-      case 'bucket': r.fire = Math.max(0, r.fire - d.power); say(r, r.fire ? `${d.power > 1 ? 'Two fires' : 'One fire'} out. ${fires(r.fire)} still burning.` : 'Fire out. Pumps restart next turn.'); break
-      case 'fireBrigade': r.fire = 0; say(r, 'Every fire is out. Pumps restart next turn.'); break
+      case 'bucket': r.fire = Math.max(0, r.fire - d.power); say(r, r.fire ? `${d.power > 1 ? 'Two fires' : 'One fire'} out. ${fires(r.fire)} still burning.` : 'Fire out. Pumps restart next turn.'); fireOut(r); break
+      case 'fireBrigade': r.fire = 0; say(r, 'Every fire is out. Pumps restart next turn.'); fireOut(r); break
       case 'improveGear': break
       case 'hardGraft': r.ap += d.power; break
       case 'pettyCash': case 'expenseAccount': {
@@ -841,6 +853,7 @@ function firebreak(r: Run) {
   loseWell(r, i, 'lost')
   r.fire = 0
   say(r, `Firebreak: Well No. ${i + 1} sacrificed. Every fire is out.`)
+  fireOut(r)
 }
 
 /** What the Baron's Lease takes: your most valuable card by shop price (never junk). */
@@ -966,6 +979,13 @@ function endTurn(r: Run) {
       if (i < 0) { r.fire = 0; say(r, 'The fire burnt itself out.'); beat(r, 'fire', title, 'Nothing left to burn. It went out.') }
       else { loseWell(r, i, 'burnt'); say(r, `Fire destroyed Well No. ${i + 1}.`); beat(r, 'fire', title, `Destroyed Well No. ${i + 1}.`) }
     }
+  }
+  if (!liveThreats(r).length) { // every enemy is beaten; only the fire is left
+    if (!r.fire) { endRound(r); return }
+    if (checkBankrupt(r)) return
+    beginTurn(r)
+    if (r.phase === 'turn') beat(r, 'info', `Turn ${r.turn}`, `The fire is still burning. Put it out to end the round. ${r.ap} AP, ${r.hand.length} cards.`)
+    return
   }
   // enemies act
   let dmg = 0
