@@ -3,6 +3,7 @@ import { CONFIG } from './config'
 
 export type Family = 'Legal' | 'Dirty' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Junk'
 export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'shovels' | 'coins' | 'telegraph' | 'dynamite' | 'gear' | 'timber' | 'hose' | 'envelope' | 'graft'
+  | 'wages' | 'sheriff' | 'will' | 'shares' | 'cashbox' | 'redtape' | 'iou' | 'phone'
 
 export type CardKey =
   | 'prospect' | 'well' | 'wildcat' | 'hiredHand' | 'lawyerUp' | 'shoreUp' | 'bucket' | 'fireBrigade'
@@ -51,29 +52,29 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $1. +3 Cover this turn.', flavour: 'Stronger timber, fewer accidents.' },
   hardGraft: { name: 'Hard Graft', ap: 0, cost: 0, uses: null, oncePerRound: true, family: 'Tempo', power: 1, icon: 'graft', price: 4, rarity: 'Uncommon',
     text: '+1 AP. Once per round.', flavour: 'Sleep is for shareholders.' },
-  pettyCash: { name: 'Petty Cash', ap: 0, cost: 0, uses: 3, family: 'Skim', power: 1, icon: 'coins',
+  pettyCash: { name: 'Petty Cash', ap: 0, cost: 0, uses: 3, family: 'Skim', power: 1, icon: 'cashbox',
     text: 'Skim 1 gold.', flavour: 'Necessary expenses.' },
-  payWages: { name: 'Pay Wages', ap: 1, cost: 2, uses: null, family: 'Dirty', power: 4, icon: 'coins', price: 1, rarity: 'Common',
+  payWages: { name: 'Pay Wages', ap: 1, cost: 2, uses: null, family: 'Dirty', power: 4, icon: 'wages', price: 1, rarity: 'Common',
     text: 'Pay $2. Remove 4 Hold.', flavour: 'Loyalty, by the week.' },
   dynamite: { name: 'Dynamite', ap: 1, cost: 0, uses: 1, family: 'Dirty', badBlood: true, power: 6, icon: 'dynamite', price: 5, rarity: 'Uncommon',
     text: 'Remove 6 Hold. Adds Bad Blood to your discard pile.', flavour: 'An unfortunate accident.' },
-  bribe: { name: 'Bribe the Sheriff', ap: 1, cost: 2, uses: null, family: 'Dirty', badBlood: true, power: 5, icon: 'coins', price: 5, rarity: 'Uncommon',
+  bribe: { name: 'Bribe the Sheriff', ap: 1, cost: 2, uses: null, family: 'Dirty', badBlood: true, power: 5, icon: 'sheriff', price: 5, rarity: 'Uncommon',
     text: 'Pay $2. Remove 5 Hold. Adds Bad Blood to your discard pile.', flavour: 'A contribution to local order.' },
   payOff: { name: 'Bribe', ap: 1, cost: 0, gold: CONFIG.bribeGold, chance: CONFIG.bribeChance, uses: null, family: 'Dirty', power: CONFIG.bribeDamage, icon: 'envelope', price: 4, rarity: 'Uncommon',
     text: `Pay ${CONFIG.bribeGold} gold. ${Math.round(CONFIG.bribeChance * 100)}% chance: remove ${CONFIG.bribeDamage} Hold. If refused: Bad Blood.`, flavour: 'Everyone has a price. Most of them remember it.' },
-  inheritance: { name: 'Inheritance', ap: 0, cost: 0, uses: 1, family: 'Tempo', power: 0, icon: 'coins',
+  inheritance: { name: 'Inheritance', ap: 0, cost: 0, uses: 1, family: 'Tempo', power: 0, icon: 'will',
     text: `+$${CONFIG.inheritance}. Then it's gone.`, flavour: 'Grandfather would have wanted you to have it.' },
-  dividends: { name: 'Dividends', ap: 1, cost: 0, uses: null, family: 'Tempo', power: 0, icon: 'coins',
+  dividends: { name: 'Dividends', ap: 1, cost: 0, uses: null, family: 'Tempo', power: 0, icon: 'shares',
     text: `+$${CONFIG.dividends}.`, flavour: 'Paid to the people who matter.' },
   telegram: { name: 'Send a Telegram', ap: 1, cost: 3, uses: 1, family: 'Tempo', power: 0, icon: 'telegraph', price: 3, rarity: 'Common',
     text: 'Pay $3. Add a random attack card to your hand. It costs no AP.', flavour: 'STOP. SEND HELP. STOP.' },
-  looseThread: { name: 'Loose Thread', ap: 0, cost: 1, uses: null, family: 'Junk', power: 0, icon: 'deed', forced: true, junk: true,
+  looseThread: { name: 'Loose Thread', ap: 0, cost: 1, uses: null, family: 'Junk', power: 0, icon: 'redtape', forced: true, junk: true,
     text: 'Must play. Lose $1.', flavour: 'Someone kept a copy.' },
   badBlood: { name: 'Bad Blood', ap: 0, cost: 0, uses: 2, family: 'Junk', power: 0, icon: 'fire', forced: true, junk: true,
     text: 'Must play. 1 in 3 chance of a fire. Gone after 2 plays.', flavour: 'They remember. For a while.' },
-  marginCall: { name: 'Margin Call', ap: 1, cost: 2, uses: 1, family: 'Junk', power: 0, icon: 'telegraph', forced: true, junk: true,
+  marginCall: { name: 'Margin Call', ap: 1, cost: 2, uses: 1, family: 'Junk', power: 0, icon: 'phone', forced: true, junk: true,
     text: 'Must play. Pay $2.', flavour: 'Payable on demand.' },
-  iou: { name: 'IOU', ap: 1, cost: 1, uses: 1, family: 'Junk', power: 0, icon: 'deed', junk: true,
+  iou: { name: 'IOU', ap: 1, cost: 1, uses: 1, family: 'Junk', power: 0, icon: 'iou', junk: true,
     text: '−$1 each turn it stays in hand. Pay $1 to clear it.', flavour: 'Signed in haste.' },
 }
 
@@ -150,13 +151,13 @@ export const BOONS: Record<BoonKey, { name: string; text: string; type: BoonType
   spareHand: { name: 'A Spare Hand', text: '+1 AP on your first turn against the Baron.', type: 'ap', icon: 'cudgels' },
   spareRigs: { name: 'Spare Rigs', text: '2 Well cards in your first hand against the Baron.', type: 'wells', icon: 'derrick' },
   fireBrigade: { name: 'Fire Brigade', text: 'A Fire Brigade card for your deck.', type: 'fire', icon: 'hose' },
-  inheritance: { name: 'Inheritance', text: `A card that gives $${CONFIG.inheritance} once, then is gone.`, type: 'cash', icon: 'coins' },
+  inheritance: { name: 'Inheritance', text: `A card that gives $${CONFIG.inheritance} once, then is gone.`, type: 'cash', icon: 'will' },
   tempSilo: { name: 'Temporary Silo', text: `+${CONFIG.tempSilo} oil storage for the fight with the Baron.`, type: 'storage', icon: 'barrels' },
 }
 export type RewardKey = 'steamPump' | 'dividends' | 'silo' | 'wildcatRights'
 export const REWARDS: Record<RewardKey, { name: string; text: string; type: BoonType; icon: Icon }> = {
   steamPump: { name: 'Steam Pump', text: '+1 AP every turn.', type: 'ap', icon: 'derrick' },
-  dividends: { name: 'Dividends', text: `A card that gives $${CONFIG.dividends} every time you play it.`, type: 'cash', icon: 'coins' },
+  dividends: { name: 'Dividends', text: `A card that gives $${CONFIG.dividends} every time you play it.`, type: 'cash', icon: 'shares' },
   silo: { name: 'Silo', text: '+4 oil storage, for good.', type: 'storage', icon: 'barrels' },
   wildcatRights: { name: 'Wildcat Rights', text: '2 Wildcat Well cards for your deck.', type: 'wells', icon: 'derrick' },
 }
