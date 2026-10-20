@@ -340,8 +340,8 @@ describe('Pay Wages and Sabotage', () => {
 })
 
 describe('families, shop limits and the boss items', () => {
-  it('only Legal and Dirty deal damage, and one Lawyer Up no longer finishes the Speculator', () => {
-    const fams = new Set(Object.values(CARDS).filter(c => isAttack(Object.keys(CARDS).find(k => CARDS[k as CardKey] === c) as CardKey)).map(c => c.family))
+  it('only Legal and Dirty deal damage before stage 3, and one Lawyer Up no longer finishes the Speculator', () => {
+    const fams = new Set(Object.values(CARDS).filter(c => (c.era ?? 1) < 3 && isAttack(Object.keys(CARDS).find(k => CARDS[k as CardKey] === c) as CardKey)).map(c => c.family))
     expect([...fams].sort()).toEqual(['Dirty', 'Legal'])
     expect(damageFor('Legal', CARDS.lawyerUp.power, 'speculator')).toBeLessThan(THREATS.speculator.hold)
   })

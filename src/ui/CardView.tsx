@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 import { CARDS } from '../engine/data'
 import { cardDef, type Card } from '../engine/engine'
 import { ERA_LABEL, ERA_THEME, units } from '../engine/format'
+import { iconUrl } from './icons'
 
 interface Props {
   card: Card
@@ -19,11 +20,13 @@ interface Props {
 export function CardView({ card, apCost, playable = true, why, selected, onClick, price, small, stage = 1, marked }: Props) {
   const d = cardDef(card)
   const era = d.era ?? 1 // a card keeps the look of the era it came from
-  const cls = ['cl-card', 'card', d.forced ? 'cl-card--forced' : '', d.junk && !d.forced ? 'card--junk' : '', selected ? 'cl-card--selected' : '', playable ? 'card--playable' : 'card--dim', small ? 'card--small' : '', d.family === 'Skim' ? 'card--skim' : '', card.up ? 'card--up' : '', marked ? `card--${marked}` : '']
+  const cls = ['cl-card', 'card', card.faded ? 'card--faded' : '', d.forced ? 'cl-card--forced' : '', d.junk && !d.forced ? 'card--junk' : '', selected ? 'cl-card--selected' : '', playable ? 'card--playable' : 'card--dim', small ? 'card--small' : '', d.family === 'Skim' ? 'card--skim' : '', card.up ? 'card--up' : '', marked ? `card--${marked}` : '']
   const ap = apCost ?? d.ap
   // from stage 2 every Well pumps 1 and never runs dry, old Well cards included
   const builds = stage >= 2 && (card.key === 'well' || card.key === 'wildcat')
-  const text = units(builds ? 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty.' : d.text, stage)
+  // there's no board in stage 3: cards from the 1900s stop mentioning it
+  const plain = (t: string) => (stage >= 3 ? t.replace(/ ?[+−]\d Board Exposure\./g, '').replace(/ The board never sees it\./, '') : t)
+  const text = plain(units(builds ? (stage >= 3 ? 'Build a Rig: 1 oil a turn, never runs dry.' : 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty.') : d.text, stage))
   const base = CARDS[card.key].uses
   // a long text steps its font down until it fits the card's fixed text box
   const effect = useRef<HTMLDivElement>(null)
@@ -44,12 +47,13 @@ export function CardView({ card, apCost, playable = true, why, selected, onClick
       aria-label={`${d.name}${ap !== null ? `, costs ${ap} AP` : ''}. ${text}${why ? ` (${why})` : ''}`} title={why}>
       {d.forced && <span className="cl-stamp cl-stamp--loss card-stamp">Must play</span>}
       {card.up && !d.forced && <span className="card-up" aria-hidden="true">+</span>}
+      {card.faded && <span className="cl-stamp cl-stamp--muted card-stamp card-stamp--faded">Faded</span>}
       {price && <span className="cl-tag card-price">{price}</span>}
       <div className="cl-card__top">
         <div className="cl-card__cost">{ap ?? '–'}</div>
         <div className="cl-card__name">{d.name}</div>
       </div>
-      <div className="cl-card__art"><img src={`${import.meta.env.BASE_URL}art/icons/${d.icon}.png`} alt="" draggable={false} /></div>
+      <div className="cl-card__art"><img src={iconUrl(d.icon)} alt="" draggable={false} /></div>
       <div className="cl-card__band">{d.family}<span className="cl-card__era"> · {ERA_LABEL[era]}</span></div>
       <div className="cl-card__effect" ref={effect}>{text}</div>
       <div className="cl-card__foot">

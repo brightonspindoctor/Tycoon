@@ -1,10 +1,11 @@
 // Rules fuzzer: plays thousands of runs with random (often silly) actions and checks,
 // after every single action, that the game never reaches an impossible state.
 // Run with: npm run fuzz
-import { act, canPlay, handTargetsFor, intent, intentText, newRun, targetsFor, wellValue, type Action, type Run } from '../src/engine/engine'
+import { act, canPlay, handSize, handTargetsFor, intent, intentText, newRun, targetsFor, wellValue, type Action, type Run } from '../src/engine/engine'
 import { BONUSES, BOONS, CARDS, ITEMS, REWARDS, type BonusKey } from '../src/engine/data'
 import { CONFIG } from '../src/engine/config'
 import { botIncorporate, botShop, botTurn } from './bot'
+import { adminStart, ADMIN_DEFAULTS } from '../src/engine/admin'
 
 let seed = 12345
 const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
@@ -27,6 +28,8 @@ function randomAction(r: Run): Action {
     return rand() < 0.25 ? { type: 'leaveShop' } : pick(opts)
   }
   const opts: Action[] = [{ type: 'endTurn' }, { type: 'sellOil' }, { type: 'firebreak' }, { type: 'sellWell', plot: Math.floor(rand() * 6) - 1 }]
+  for (const t of r.threats) opts.push({ type: 'buyOut', target: t.id })
+  if (r.hand.length) opts.push({ type: 'shred', cardId: pick(r.hand).id })
   for (const c of r.hand) {
     const ts = r.threats.map(t => t.id)
     opts.push({ type: 'play', cardId: c.id, target: rand() < 0.7 ? pick(ts) : undefined })
@@ -68,12 +71,24 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.plots.length > CONFIG.maxPlots) return `${r.plots.length} plots`
   for (const w of r.plots) if (w && wellValue(w) <= 0) return `a plot that sells for nothing: ${JSON.stringify(w)}`
   if (a.type === 'duplicateCard' && r.phase === 'shop' && r.shop.duplicated && !prev.shop.duplicated && r.deck.length !== prev.deck.length + 1) return 'duplicate did not add exactly one card'
-  for (const w of r.plots) if (w && ((!w.field && !w.lasting && w.reserve <= 0) || w.output <= 0)) return `well ${JSON.stringify(w)}`
+  for (const w of r.plots) if (w && ((!w.field && !w.lasting && !w.rig && w.reserve <= 0) || w.output <= 0)) return `well ${JSON.stringify(w)}`
   if (r.gold < 0 && !(r.phase === 'lost' && r.loss?.reason === 'ruined')) return `gold ${r.gold}`
   if (r.gold < 0 && r.phase !== 'lost') return `gold ${r.gold} but still playing`
   if (r.exposure < 0 || r.exposure > CONFIG.exposureMax) return `exposure ${r.exposure}`
   if (r.exposure >= CONFIG.exposureMax && r.phase !== 'lost') return `exposure ${r.exposure} but not ousted`
   if (r.stage === 1 && r.exposure !== 0) return 'Board Exposure in stage 1'
+  if (r.stage !== 3 && r.heat !== 0) return `Heat ${r.heat} outside stage 3`
+  if (r.heat < 0 || r.heat > CONFIG.heatMax) return `heat ${r.heat}`
+  if (r.heat >= CONFIG.heatMax && r.phase !== 'lost') return 'Heat at the top but not broken up'
+  if (r.loss?.reason === 'brokenUp' && r.heat < CONFIG.heatMax) return 'broken up below the top'
+  if (r.stage === 3 && r.fire) return 'a fire in stage 3'
+  if (r.stage === 3 && r.deck.some(c => c.key === 'badBlood')) return 'Bad Blood in stage 3'
+  if (r.stage === 3 && r.plots.some(w => w && !w.rig)) return 'a stage 3 plot that is not a Rig'
+  if (r.stage === 3 && r.storage - r.tempStorage > CONFIG.maxStorage) return `storage ${r.storage}`
+  if (r.stage === 3 && r.phase === 'shop' && r.shop.cards.some(k => k && (CARDS[k].era ?? 1) < 3 && k !== 'tickerTape')) return 'an old card in the stage 3 shop'
+  if (r.stage === 3 && r.phase === 'shop' && r.shop.item && !(ITEMS[r.shop.item].stages ?? []).includes(3)) return 'an old item in the stage 3 shop'
+  if (r.deck.some(c => c.faded && c.up)) return 'a faded card that is upgraded'
+  if (r.stage < 3 && r.deck.some(c => c.faded)) return 'a faded card before stage 3'
   if (r.stage === 2 && r.deck.some(c => c.key === 'prospect')) return 'a fresh Prospect in stage 2'
   if (r.stage === 2 && r.plots.some(w => w && (w.output !== CONFIG.stage2Output || !(w.field || w.lasting)))) return 'a stage 2 Well that pumps other than 1 or runs dry'
   if (r.stage === 2 && r.phase === 'shop' && r.shop.cards.some(k => k && (CARDS[k].era ?? 1) < 2)) return 'a stage 1 card in the stage 2 shop'
@@ -84,8 +99,10 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.ap < 0) return `ap ${r.ap}`
   if (r.phase !== 'lost' && r.capital <= 0) return `capital ${r.capital} but phase ${r.phase}`
   if ((r.round < 1 && r.phase !== 'incorporate') || r.round > 4) return `round ${r.round}`
-  if (r.phase === 'incorporate' && (r.stage !== 2 || r.round !== 0)) return 'incorporating mid-stage'
-  if (r.phase === 'incorporate' && prev.phase === 'stageComplete' && r.plots.some(w => w && !w.field)) return 'a Well that did not become a Field'
+  if (r.phase === 'incorporate' && (r.stage < 2 || r.round !== 0)) return 'incorporating mid-stage'
+  if (r.phase === 'incorporate' && r.stage === 2 && prev.phase === 'stageComplete' && r.plots.some(w => w && !w.field)) return 'a Well that did not become a Field'
+  if (r.phase === 'incorporate' && r.stage === 3 && prev.phase === 'stageComplete' && r.plots.length !== prev.plots.filter(Boolean).length) return 'a Field that did not become a Rig'
+  if (r.phase === 'incorporate' && r.stage === 3 && r.deck.some(c => ['prospect', 'survey', 'oldProspect', 'derrick', 'well', 'bucket', 'shoreUp'].includes(c.key))) return 'an old land or fire card survived going multinational'
   if (r.phase === 'stageComplete' && r.round !== 4) return 'stage complete before round 4'
   if (r.phase === 'roundWon' && r.round >= 4) return 'roundWon in round 4'
   if ((r.phase === 'roundWon' || r.phase === 'stageComplete') && r.threats.some(t => !t.beaten)) return 'round won with an enemy standing'
@@ -99,7 +116,7 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.marked !== null && (r.marked < 0 || r.marked >= r.plots.length)) return `marked plot ${r.marked}`
   if (a.type === 'endTurn' && r.phase === 'turn' && prev.phase === 'turn') {
     const extra = r.round === 4 && r.turn === 1 && r.boon === 'spareRigs' ? 2 : 0
-    if (r.hand.length > CONFIG.handSize + extra) return `hand of ${r.hand.length} after drawing`
+    if (r.hand.length > handSize(r) + extra) return `hand of ${r.hand.length} after drawing`
   }
   if (JSON.stringify(r).includes('null,"amount"') || /NaN|Infinity/.test(JSON.stringify({ c: r.capital, g: r.gold, o: r.oil, f: r.fire, ap: r.ap }))) return 'NaN somewhere'
   if (!Number.isFinite(r.capital) || !Number.isFinite(r.ap)) return 'non-finite number'
@@ -129,15 +146,18 @@ let actions = 0, problems = 0
 const ends: Record<string, number> = {}
 const seen = new Map<string, string>()
 for (let i = 0; i < RUNS; i++) {
-  let r = newRun(1 + i * 7919, bonuses[i % bonuses.length])
-  r.gold = i % 3 // some runs have gold to spend on the Bribe and the pre-boss item
+  // a third of the runs start straight in stage 3 (as admin mode does), so stage 3 gets real coverage
+  const s3 = i % 3 === 2
+  let r = s3 ? adminStart(1 + i * 7919, { ...ADMIN_DEFAULTS, stage: 3, start: i % 2 ? 'incorporate' : 1 + (i % 4) as 1 | 2 | 3 | 4, wells: i % 6, capital: 10 + (i % 5) * 10, gold: i % 7, deck: i % 2 ? 'strong' : 'starter' }) : newRun(1 + i * 7919, bonuses[i % bonuses.length])
+  if (s3) r.admin = false // checked like a normal run
+  if (!s3) r.gold = i % 3 // some runs have gold to spend on the Bribe and the pre-boss item
   const log: string[] = []
   // play sensibly with the bot up to a chosen round, then act at random from there
   const chaosFrom = 1 + (i % 4)
-  // half the runs play sensibly through stage 1 first, so chaos also reaches stage 2
-  const chaosStage = i % 2 === 0 ? 1 : 2
+  // some runs play sensibly through stage 1 (and 2) first, so chaos also reaches stages 2 and 3
+  const chaosStage = s3 ? 3 : 1 + (i % 3)
   const before = (x: Run) => x.stage < chaosStage || (x.stage === chaosStage && x.round < chaosFrom)
-  for (let g = 0; g < 900 && before(r) && r.phase !== 'lost' && !(r.phase === 'stageComplete' && r.stage === 2); g++) {
+  for (let g = 0; g < 1400 && before(r) && r.phase !== 'lost' && !(r.phase === 'stageComplete' && r.stage === 3); g++) {
     const prev = r
     if (r.phase === 'shop') r = botShop(r)
     else if (r.phase === 'turn') r = botTurn(r)
@@ -147,7 +167,7 @@ for (let i = 0; i < RUNS; i++) {
     const bad = check(r, prev, { type: 'continue' })
     if (bad) { if (!seen.has(bad)) seen.set(bad, `run ${i} (bot) round ${r.round} turn ${r.turn}`); problems++; break }
   }
-  for (let step = 0; step < 3000 && r.phase !== 'lost' && !(r.phase === 'stageComplete' && r.stage === 2); step++) {
+  for (let step = 0; step < 3000 && r.phase !== 'lost' && !(r.phase === 'stageComplete' && r.stage === 3); step++) {
     const a = rand() < 0.5 && r.phase === 'turn' ? botStep(r) : randomAction(r)
     let next: Run
     try { next = act(r, a) } catch (e) { const k = `crash: ${(e as Error).message}`; if (!seen.has(k)) seen.set(k, `${log.slice(-6).join(' > ')} > ${JSON.stringify(a)}`); problems++; break }

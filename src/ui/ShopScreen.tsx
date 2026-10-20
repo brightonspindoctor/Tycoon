@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { BOONS, CARDS, ITEMS, PROSPECT_FOR, WATER_FOR } from '../engine/data'
-import { canDuplicate, canUpgrade, skimRate, waterPrice, type Action, type Run } from '../engine/engine'
+import { canBuild, canDuplicate, canUpgrade, rigCount, skimRate, waterPrice, type Action, type Run } from '../engine/engine'
 import { ERA_THEME, SHOP_NAME, money, units } from '../engine/format'
 import { ExposureMeter } from './Exposure'
+import { HeatMeter } from './Heat'
 import { CONFIG } from '../engine/config'
 import { CardView } from './CardView'
+import { iconUrl } from './icons'
 import { SettingsButton } from './Settings'
 
 interface Props { run: Run; dispatch: (a: Action) => void }
@@ -14,10 +16,12 @@ export function ShopScreen({ run, dispatch }: Props) {
   const [mode, setMode] = useState<Mode>(null)
   const st = run.stage
   const rate = skimRate(run)
-  const nextRate = (st >= 2 ? CONFIG.skimRate2 : CONFIG.skimRate)[run.round + 1] ?? rate
+  const nextRate = (st >= 3 ? CONFIG.skimRate3 : st >= 2 ? CONFIG.skimRate2 : CONFIG.skimRate)[run.round + 1] ?? rate
   const plotsLeft = CONFIG.maxPlots - run.plots.length
   const can = (cost: number) => run.capital - cost >= 1
   const stage2 = st >= 2
+  const only2 = st === 2 // the Silo and dividends belong to the board years
+  const stage3 = st >= 3
   const prospectKey = PROSPECT_FOR[st] ?? 'derrick'
   const waterKey = WATER_FOR[st] // stage 2 sells no fire card
 
@@ -44,18 +48,29 @@ export function ShopScreen({ run, dispatch }: Props) {
                 {run.shop.bucketSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -8, key: waterKey, uses: CARDS[waterKey].uses }} stage={st} price={money(waterPrice(), st)} playable={can(waterPrice())} onClick={() => dispatch({ type: 'buyBucket' })} />}
                 <span className="res-note">One per visit.</span>
               </div>}
-              <div className="prospect-slot">
+              {stage3 ? <div className="prospect-slot">
+                {run.shop.prospectSold ? <div className="sold">Built</div> : (
+                  <button type="button" className={`cl-card card rig-slot ${canBuild(run) && can(run.prospectPrice) ? 'card--playable' : 'card--dim'}`} disabled={!canBuild(run) || !can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })}>
+                    <span className="cl-tag card-price">{money(run.prospectPrice, st)}</span>
+                    <div className="cl-card__top"><div className="cl-card__cost">–</div><div className="cl-card__name">Offshore Rig</div></div>
+                    <div className="cl-card__art"><img src={iconUrl('rig')} alt="" /></div>
+                    <div className="cl-card__band">Production</div>
+                    <div className="cl-card__effect">Built at once: 1 oil a turn, never runs dry.</div>
+                  </button>
+                )}
+                <span className="res-note">One per visit. {rigCount(run)} of {CONFIG.maxPlots} Rigs. The price climbs {money(CONFIG.rigStep, st)} each time.</span>
+              </div> : <div className="prospect-slot">
                 {run.shop.prospectSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -9, key: prospectKey, uses: CARDS[prospectKey].uses }} stage={st} price={money(run.prospectPrice, st)} playable={can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })} />}
                 <span className="res-note">{stage2
                   ? `One per visit. The price climbs ${money(CONFIG.derrickStep, st)} each time. ${run.plots.length >= CONFIG.maxPlots && !run.plots.some(p => !p) ? 'All 5 plots are working.' : 'Claims its own plot.'}`
                   : `One per visit. ${plotsLeft > 1 ? `${plotsLeft} plots left to claim.` : plotsLeft === 1 ? 'Only 1 plot left to claim.' : run.plots.some(p => !p) ? 'All land claimed; fills empty plots.' : 'All land claimed.'}`}</span>
-              </div>
+              </div>}
             </div>
           </section>
 
           {run.shop.boon && (
             <section className="boon" aria-label="Before the Baron">
-              <img src={`${import.meta.env.BASE_URL}art/icons/${BOONS[run.shop.boon].icon}.png`} alt="" />
+              <img src={iconUrl(BOONS[run.shop.boon].icon)} alt="" />
               <div className="boon__text">
                 <span className="cl-label">Before the boss · one offer</span>
                 <b className="cl-display">{BOONS[run.shop.boon].name}</b>
@@ -96,7 +111,7 @@ export function ShopScreen({ run, dispatch }: Props) {
                 <button type="button" className="cl-btn" disabled={!can(run.upgradeCost) || !run.deck.some(canUpgrade)} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
               </div>
             )}
-            {stage2 && (
+            {only2 && (
               <div className="cl-slot slot">
                 <span className="cl-tag">{money(CONFIG.silo2Price, st)}</span>
                 <div className="cl-slot__name">Silo</div>
@@ -112,7 +127,15 @@ export function ShopScreen({ run, dispatch }: Props) {
                 <button type="button" className="cl-btn" disabled={!!run.shop.duplicated || !run.deck.some(c => canDuplicate(c) && can(CARDS[c.key].price!))} onClick={() => setMode(mode === 'duplicate' ? null : 'duplicate')}>{run.shop.duplicated ? 'Done' : mode === 'duplicate' ? 'Cancel' : 'Choose'}</button>
               </div>
             )}
-            {stage2 && (
+            {stage3 && (
+              <div className="cl-slot slot">
+                <span className="cl-tag">{money(CONFIG.lobbyFirmCost, st)}</span>
+                <div className="cl-slot__name">Hire a lobbying firm</div>
+                <div className="cl-slot__desc">Heat −{CONFIG.lobbyFirmDrop}. Once per visit.</div>
+                <button type="button" className="cl-btn" disabled={run.shop.dividendPaid || run.heat === 0 || !can(CONFIG.lobbyFirmCost)} onClick={() => dispatch({ type: 'payDividends' })}>{run.shop.dividendPaid ? 'Retained' : 'Retain'}</button>
+              </div>
+            )}
+            {only2 && (
               <div className="cl-slot slot">
                 <span className="cl-tag">{money(CONFIG.dividendCost, st)}</span>
                 <div className="cl-slot__name">Pay dividends</div>
@@ -148,9 +171,10 @@ export function ShopScreen({ run, dispatch }: Props) {
             </ul>
           </section>
           <ExposureMeter run={run} />
+          <HeatMeter run={run} />
           <section className="fortune fortune--skim">
             <div><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b></div>
-            <p>{stage2 ? 'Skimming is done with an Expense Account card during a round: one gold at a time, +1 Board Exposure each.' : "Gold can't buy anything here. Every dollar you skim comes off the company's health."}</p>
+            <p>{stage3 ? 'Skim with an Expense Account card during a round. Personal Guarantee and Dip into the Trust turn gold back into Capital.' : stage2 ? 'Skimming is done with an Expense Account card during a round: one gold at a time, +1 Board Exposure each.' : "Gold can't buy anything here. Every dollar you skim comes off the company's health."}</p>
             <span className="res-note">Rate now: <b>{money(rate, st)} → 1 gold</b>{nextRate !== rate ? ` · Round ${run.round + 1}: ${money(nextRate, st)}` : ''}</span>
             {!stage2 && <div className="skim-buttons">
               {[1, 2, 3].map(g => <button key={g} type="button" className="cl-btn cl-btn--skim" disabled={!can(g * rate)} onClick={() => dispatch({ type: 'skim', gold: g })}>{g} gold · {money(g * rate, st)}</button>)}

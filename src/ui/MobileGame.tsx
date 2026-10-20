@@ -6,13 +6,15 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, MODS, ROLE_LABEL, THREATS } from '../engine/data'
 import {
-  apCost, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, buyoutPrice, canBuyOut, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run, type Threat,
 } from '../engine/engine'
 import { FIELD_PLACE, money, units, year } from '../engine/format'
 import { ExposureMeter } from './Exposure'
+import { HeatMeter } from './Heat'
 import { Portrait } from './Portrait'
 import { CardView } from './CardView'
+import { iconUrl } from './icons'
 import { SettingsButton } from './Settings'
 import { PileView } from './PileView'
 
@@ -25,6 +27,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
   const [plotMenu, setPlotMenu] = useState<number | null>(null)
   const [sheet, setSheet] = useState(false)
   const [pile, setPile] = useState<'draw' | 'discard' | null>(null)
+  const [shredding, setShredding] = useState(false)
   const st = run.stage
   const sel = run.hand.find(c => c.id === selected) ?? null
   const selDef = sel ? cardDef(sel) : null
@@ -46,6 +49,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
   }
   function tapCard(id: number) {
     setPlotMenu(null)
+    if (shredding) { dispatch({ type: 'shred', cardId: id }); setShredding(false); return }
     if (scrapping && sel && id !== sel.id) { dispatch({ type: 'play', cardId: sel.id, target: id }); setSelected(null); return }
     if (selected === id) { if (selCheck?.ok && !needsTarget && !scrapping) playSelected(); else setSelected(null); return }
     setSelected(id)
@@ -60,7 +64,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
     <div className="m-game">
       <header className="m-hud">
         <div className="m-hud__when">
-          <span className="cl-label">Round {run.round}/4 · Turn {run.turn}{st >= 2 && run.turn <= CONFIG.quickWinTurns ? ` · −${CONFIG.quickWinDrop} if won by ${CONFIG.quickWinTurns}` : ''}</span>
+          <span className="cl-label">Round {run.round}/4 · Turn {run.turn}{st === 2 && run.turn <= CONFIG.quickWinTurns ? ` · −${CONFIG.quickWinDrop} if won by ${CONFIG.quickWinTurns}` : ''}</span>
           <div className="m-hud__year"><b className="cl-display">{year(st, run.round)}</b><SettingsButton /></div>
           <div className="m-pips">{[1, 2, 3, 4].map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 ? 'is-boss' : ''}`} />)}</div>
         </div>
@@ -110,6 +114,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                     {[d.weak && `Weak: ${d.weak}`, d.resist && `Resists: ${d.resist}`, d.immune && `Immune: ${d.immune}`].filter(Boolean).join(' · ')}
                   </div>
                 </div>
+                {d.buyout && run.phase === 'turn' && !t.beaten && !needsTarget && <button type="button" className="cl-btn cl-btn--small buyout" disabled={!canBuyOut(run, t)} onClick={e => { e.stopPropagation(); setSelected(null); dispatch({ type: 'buyOut', target: t.id }) }}>{d.buyout} · 1 AP · {money(buyoutPrice(t), st)}</button>}
                 {run.admin && run.phase === 'turn' && !t.beaten && !needsTarget && <button type="button" className="cl-btn cl-btn--small admin-hit" onClick={e => { e.stopPropagation(); dispatch({ type: 'admin', op: 'hold20', target: t.id }) }}>−20</button>}
                 {needsTarget && !t.beaten && <span className={`m-threat__dmg ${can ? '' : 'is-none'}`}>{stopping ? (can ? 'Stop' : 'Stopped') : can ? `−${dmgOn(t)} Hold` : 'No effect'}</span>}
               </Tag>
@@ -125,11 +130,12 @@ export function MobileGame({ run, dispatch, acting }: Props) {
         )}
 
         <ExposureMeter run={run} compact lit={acting?.kind === 'board'} />
+        <HeatMeter run={run} compact lit={acting?.kind === 'board'} />
 
         <section aria-label="Your field">
           <div className="m-label"><span className="cl-label">Your {st >= 2 ? 'fields' : 'field'} · {FIELD_PLACE[st] ?? FIELD_PLACE[1]}</span>{run.current.prorate && <span className="cl-label cl-minus">Prorated</span>}{run.fire > 0 && <span className="cl-label field__fireway">Fire burns ←</span>}</div>
           <div className="m-field">
-            {run.plots.length === 0 && <div className="m-plot m-plot--none">{st >= 2 ? 'No land. Play a Survey to claim a plot.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
+            {run.plots.length === 0 && <div className="m-plot m-plot--none">{st >= 3 ? 'No Rigs. Build one at the Trading Floor.' : st >= 2 ? 'No land. Play a Survey to claim a plot.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
             {run.plots.map((w, i) => {
               const marked = run.marked === i && !!w
               const burning = burnsWell && i === lastWell
@@ -139,11 +145,11 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                   <span className="m-plot__no cl-num">{i + 1}</span>
                   {w ? (
                     <button type="button" className="plot__well" onClick={() => { setSelected(null); setPlotMenu(plotMenu === i ? null : i) }} aria-label={`${plotName(run, i)}, ${state}. Tap to sell`}>
-                      <img src={art('icons/derrick.png')} alt="" />
+                      <img src={iconUrl(w.rig ? 'rig' : 'derrick')} alt="" />
                     </button>
                   ) : <div className="m-plot__hole" />}
                   <span className="m-plot__state">{state}</span>
-                  {w && (neverDry(w) ? <span className="m-plot__state plot__forever">{w.field ? 'Field' : 'Lasting'}</span> : <span className={`m-plot__state ${w.reserve <= w.output * 2 ? 'cl-minus' : ''}`}>{w.reserve} left</span>)}
+                  {w && (neverDry(w) ? <span className="m-plot__state plot__forever">{w.rig ? 'Rig' : w.field ? 'Field' : 'Lasting'}</span> : <span className={`m-plot__state ${w.reserve <= w.output * 2 ? 'cl-minus' : ''}`}>{w.reserve} left</span>)}
                   {marked && <span className="m-flag">Marked</span>}
                   {burning && <span className="m-flag m-flag--fire">Burns</span>}
                 </div>
@@ -168,7 +174,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
           <div>
             <span className="cl-label">Oil price</span>
             <b className="cl-num">{money(netPrice(run), st)}</b>
-            <span className="res-note">{freight(run) ? `${money(price(run), st)} − ${money(freight(run), st)} freight` : run.boost ? `+${money(run.boost, st)} this turn` : 'per barrel'}</span>
+            <span className="res-note">{freight(run) ? `${money(price(run), st)} − ${money(freight(run), st)} freight` : run.boost || run.roundBoost ? `+${money(run.boost + run.roundBoost, st)} now` : 'per barrel'}</span>
           </div>
           <div>
             <span className="cl-label">Production</span>
@@ -199,6 +205,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
             <button type="button" className={`cl-btn cl-btn--small m-pilebtn ${lit('shuffle')}`} onClick={() => setPile('draw')}>Draw {run.draw.length}</button>
             <button type="button" className="cl-btn cl-btn--small m-pilebtn" onClick={() => setPile('discard')}>Discard {run.discard.length}</button>
             {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose No. {weakestWell(run) + 1}</button>}
+            {run.items.includes('paperShredder') && <button type="button" className="cl-btn cl-btn--small" disabled={run.shredded || !run.hand.length} onClick={() => setShredding(!shredding)}>{run.shredded ? 'Shredded' : shredding ? 'Cancel shred' : 'Shred a card'}</button>}
             {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
           </div>
         )}
@@ -208,7 +215,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
           {run.hand.map((c, i) => {
             const chk = canPlay(run, c)
             return <div key={c.id} className="hand__slot" style={{ animationDelay: `${i * 50}ms` }}>
-              <CardView card={c} stage={st} apCost={apCost(run, c)} playable={chk.ok || (scrapping && c.id !== selected)} why={chk.why} selected={selected === c.id} marked={scrapping && c.id !== selected ? 'destroy' : undefined} onClick={() => tapCard(c.id)} />
+              <CardView card={c} stage={st} apCost={apCost(run, c)} playable={chk.ok || shredding || (scrapping && c.id !== selected)} why={chk.why} selected={selected === c.id} marked={shredding || (scrapping && c.id !== selected) ? 'destroy' : undefined} onClick={() => tapCard(c.id)} />
             </div>
           })}
         </div>
@@ -238,6 +245,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
               </ul>
             </section>
             <ExposureMeter run={run} />
+            <HeatMeter run={run} />
             <section className="fortune">
               <div><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b></div>
               <span className="res-note">{run.goldShield ? 'Personal Lawyer on retainer this turn.' : st >= 2 ? 'Enemies can take gold now. Below 0, you are ruined.' : `Skim rate: ${money(skimRate(run), st)} → 1 gold`}</span>
@@ -246,7 +254,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
               <span className="cl-label">Items</span>
               <div className="items__row">
                 {run.debt > 0 && <div className="cl-item cl-item--neg"><div className="cl-item__disc">−{run.debt}</div><div className="cl-item__name">Bank Debt</div><div className="cl-item__fx">{money(-run.debt, st)} a turn</div></div>}
-                {run.items.map((k, i) => <div key={i} className={`cl-item ${ITEMS[k].negative ? 'cl-item--neg' : ''}`}><div className="cl-item__disc"><img src={art(`icons/${ITEMS[k].icon}.png`)} alt="" /></div><div className="cl-item__name">{ITEMS[k].name}</div><div className="cl-item__fx">{units(ITEMS[k].text, st)}</div></div>)}
+                {run.items.map((k, i) => <div key={i} className={`cl-item ${ITEMS[k].negative ? 'cl-item--neg' : ''}`}><div className="cl-item__disc"><img src={iconUrl(ITEMS[k].icon)} alt="" /></div><div className="cl-item__name">{ITEMS[k].name}</div><div className="cl-item__fx">{units(ITEMS[k].text, st)}</div></div>)}
               </div>
             </section>
             <button type="button" className="cl-btn" onClick={() => setSheet(false)}>Close</button>

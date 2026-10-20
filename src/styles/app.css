@@ -733,3 +733,41 @@ button.m-threat { cursor: pointer; }
 .winnings__prize--gold b { font-size: 44px; line-height: 46px; color: var(--personal); }
 .winnings__prize--gold .cl-label { color: var(--personal); }
 .m .winnings__prize--gold { border-right: 0; border-bottom: 1.5px solid var(--rule); flex: 1 1 100%; padding-bottom: 8px; }
+
+/* ---------- Stage 3: the 1970s ----------
+   The one loud thing is the stripe: brown, orange, mustard, with rounded ends. It sits under
+   the stage header and fills the Heat meter. Everything else stays oatmeal and espresso. */
+[data-theme="seventies"] { --stripe: linear-gradient(to bottom, var(--ink) 0 33.3%, var(--accent) 33.3% 66.6%, var(--mustard) 66.6% 100%); }
+[data-theme="seventies"] .game__head { border-bottom: 0; position: relative; padding-bottom: 20px; }
+[data-theme="seventies"] .game__head::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 12px; border-radius: 999px; background: var(--stripe); }
+[data-theme="seventies"] .game__title { color: var(--accent); }
+[data-theme="seventies"] .cl-btn--primary { border-radius: 999px; }
+[data-theme="seventies"] .cl-card__cost { background: var(--accent); color: var(--on-accent); }
+
+.heat { border: 2px solid var(--heat); border-radius: var(--cl-radius); background: var(--paper-raised); padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.heat__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.heat__head .cl-label { color: var(--heat); }
+.heat__head b { color: var(--heat); font-size: 22px; }
+.heat__bar { position: relative; height: 16px; border-radius: 999px; border: 2px solid var(--ink); background: var(--paper); overflow: hidden; }
+.heat__fill { position: absolute; inset: 0 auto 0 0; background: var(--stripe, var(--heat)); border-radius: 999px; transition: width .4s ease-out; }
+.heat__mark { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink-muted); opacity: .5; }
+.heat__mark--hot { background: var(--loss); opacity: .8; }
+.heat.is-high { border-color: var(--loss); }
+.heat.is-high .heat__head b, .heat.is-high .heat__head .cl-label { color: var(--loss); }
+.heat .res-note { font-size: 12px; line-height: 16px; }
+.heat--compact { padding: 8px 12px; gap: 4px; margin: 0 0 10px; }
+.heat--compact .heat__head b { font-size: 18px; }
+.heat.is-acting { box-shadow: 0 0 0 3px var(--accent); transition: box-shadow .2s; }
+@media (prefers-reduced-motion: reduce) { .heat__fill { transition: none; } }
+
+.buyout { margin-top: 8px; width: 100%; border-color: var(--personal); color: var(--personal); }
+.m-threat .buyout { width: auto; margin-top: 6px; }
+.card--faded .cl-card__art img { filter: grayscale(.8); opacity: .55; }
+.card-stamp--faded { top: 40%; }
+.rig-slot { cursor: pointer; text-align: left; font: inherit; }
+.rig-slot:disabled { cursor: not-allowed; }
+.m .shop .heat, .m .multinational .heat { order: 3; }
+/* the money column's items scroll sideways rather than spill into the hand once there are many */
+.col-money .items__row { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.col-money .items .cl-item { flex: none; width: 96px; }
+.col-money .items .cl-item__fx { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

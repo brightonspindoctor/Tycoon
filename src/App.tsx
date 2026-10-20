@@ -18,6 +18,7 @@ import { ShopScreen } from './ui/ShopScreen'
 import { RoundSummary } from './ui/RoundSummary'
 import { CrashOut, StageComplete } from './ui/EndScreens'
 import { IncorporateScreen } from './ui/Incorporate'
+import { MultinationalScreen } from './ui/Multinational'
 import { EraTransition } from './ui/EraTransition'
 import { units } from './engine/format'
 import { BonusPick, History, Intro } from './ui/MenuScreens'
@@ -80,18 +81,19 @@ export default function App() {
   }
 
   // ?preview=summary | crash | complete | shop | bossshop | round3 | boss jumps to a screen (for design checks);
-  // add &stage=2 to find it in stage 2, or use incorporate | complete2 | crash2
+  // add &stage=2 or &stage=3 to find it in a later stage, or use incorporate | complete2 | crash2 | multinational | complete3 | crash3
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     let want = params.get('preview')
     if (!want) return
     let wantStage = Number(params.get('stage') ?? 1)
     if (want === 'incorporate' || want === 'complete2' || want === 'crash2') { wantStage = 2; if (want !== 'incorporate') want = want.slice(0, -1) }
+    if (want === 'multinational' || want === 'complete3' || want === 'crash3') { wantStage = 3; want = want === 'multinational' ? 'incorporate' : want.slice(0, -1) }
     void import('../tools/bot').then(({ botIncorporate, botShop, botTurn }) => {
       for (let seed = 1; seed < 600; seed++) {
         let r = newRun(seed, 'threeOil')
-        for (let i = 0; i < 900; i++) {
-          if (want === 'incorporate' && r.phase === 'incorporate') break
+        for (let i = 0; i < 1600; i++) {
+          if (want === 'incorporate' && r.phase === 'incorporate' && r.stage === wantStage) break
           if (r.stage < wantStage) {
             if (r.phase === 'stageComplete') { r = act(r, { type: 'continue' }); continue }
             if (r.phase === 'incorporate') { r = botIncorporate(r); continue }
@@ -120,10 +122,10 @@ export default function App() {
   // record finished runs once
   useEffect(() => {
     if (!run || saved.current === run.seed || run.admin) return // admin playtests are never recorded
-    // stage 1 complete carries on into stage 2, so a run is recorded when it ends or when stage 2 (the last one built) is done
-    if (run.phase === 'lost' || (run.phase === 'stageComplete' && run.stage >= 2)) {
+    // a finished stage carries on into the next, so a run is recorded when it ends or when stage 3 (the last one built) is done
+    if (run.phase === 'lost' || (run.phase === 'stageComplete' && run.stage >= 3)) {
       saved.current = run.seed
-      const LOST = { bankrupt: 'Bankrupt', stalemate: 'Out of time', ousted: 'Ousted', ruined: 'Ruined' }
+      const LOST = { bankrupt: 'Bankrupt', stalemate: 'Out of time', ousted: 'Ousted', ruined: 'Ruined', brokenUp: 'Broken up' }
       saveRun({
         id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run),
         outcome: run.phase === 'stageComplete' ? `Stage ${run.stage} complete` : LOST[run.loss?.reason ?? 'bankrupt'], gold: null, completed: false, stageGold: run.gold,
@@ -161,7 +163,7 @@ export default function App() {
   else if (run.phase === 'shop' && !tape) body = <ShopScreen run={run} dispatch={dispatch} />
   else if (run.phase === 'lost' && !tape) body = <CrashOut run={run} bailout={bailout} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
   else if (run.phase === 'stageComplete' && !tape) body = <StageComplete run={run} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} onContinue={() => dispatch({ type: 'continue' })} />
-  else if (run.phase === 'incorporate') body = <>{<IncorporateScreen run={run} dispatch={dispatch} />}{eraTo && <EraTransition to={eraTo} onDone={() => setEraTo(null)} />}</>
+  else if (run.phase === 'incorporate') body = <>{run.stage >= 3 ? <MultinationalScreen run={run} dispatch={dispatch} /> : <IncorporateScreen run={run} dispatch={dispatch} />}{eraTo && <EraTransition to={eraTo} onDone={() => setEraTo(null)} />}</>
   else if (tape) body = (
     <>
       {mobile ? <MobileGame run={tape.frozen} dispatch={() => {}} acting={acting} /> : <GameScreen run={tape.frozen} dispatch={() => {}} acting={acting} />}
@@ -176,7 +178,7 @@ export default function App() {
   )
 
   const fade = <div key={`${screen}-${run?.phase}-${run?.round}`} className="screen-fade">{body}</div>
-  const inRun = screen === 'run' && !!run && (run.phase === 'turn' || run.phase === 'shop' || run.phase === 'roundWon' || run.phase === 'incorporate' || (run.phase === 'stageComplete' && run.stage < 2))
+  const inRun = screen === 'run' && !!run && (run.phase === 'turn' || run.phase === 'shop' || run.phase === 'roundWon' || run.phase === 'incorporate' || (run.phase === 'stageComplete' && run.stage < 3))
   function quitRun() {
     if (!run) return
     saved.current = run.seed

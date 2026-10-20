@@ -7,10 +7,10 @@ export function units(text: string, stage = 1): string {
   return unit ? text.replace(/\$(\d+)(?![KMB\d])/g, `$$$1${unit}`) : text
 }
 
-export const STAGE_TITLE: Record<number, string> = { 1: 'The Wildcat Years', 2: 'The Boardroom Years' }
-export const FIELD_PLACE: Record<number, string> = { 1: 'Titusville', 2: 'Spindletop' }
-export const SHOP_NAME: Record<number, string> = { 1: 'The Land Office', 2: 'The Exchange' }
-export const ERA_LABEL: Record<number, string> = { 1: '1860s', 2: '1900s', 3: '1950s', 4: '1990s' }
+export const STAGE_TITLE: Record<number, string> = { 1: 'The Wildcat Years', 2: 'The Boardroom Years', 3: 'The Multinational Years' }
+export const FIELD_PLACE: Record<number, string> = { 1: 'Titusville', 2: 'Spindletop', 3: 'Gulf of Mexico' }
+export const SHOP_NAME: Record<number, string> = { 1: 'The Land Office', 2: 'The Exchange', 3: 'The Trading Floor' }
+export const ERA_LABEL: Record<number, string> = { 1: '1860s', 2: '1900s', 3: '1970s', 4: '1990s' }
 
 export function money(n: number, stage = 1, sign = false): string {
   const unit = UNITS[Math.min(stage, 4)]
@@ -23,11 +23,11 @@ export function money(n: number, stage = 1, sign = false): string {
 const YEARS: Record<number, number[]> = {
   1: [1863, 1870, 1880, 1890],
   2: [1901, 1910, 1920, 1930],
-  3: [1946, 1955, 1965, 1973],
+  3: [1970, 1973, 1976, 1979], // the boss is the 1979 climate conference in Geneva
   4: [1988, 1997, 2009, 2026],
 }
 export function year(stage: number, round: number): number {
   return YEARS[stage]?.[Math.max(0, Math.min(3, round - 1))] ?? 1863
 }
 
-export const ERA_THEME: Record<number, string> = { 1: 'victorian', 2: 'deco', 3: 'midcentury', 4: 'greenwash' }
+export const ERA_THEME: Record<number, string> = { 1: 'victorian', 2: 'deco', 3: 'seventies', 4: 'greenwash' }

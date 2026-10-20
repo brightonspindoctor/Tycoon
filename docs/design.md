@@ -9,12 +9,12 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 ## Structure
 - 4 stages × 4 rounds. Round 4 of each stage is a boss. A shop follows every round (there is none before round 1: picking a starting bonus goes straight into the first fight); the shop after a boss has a new card pool.
 - Rounds get harder: round 1 one threat (weaker pool); round 2 one threat and a modifier; round 3 two threats; round 4 the boss.
-- Stages are eras, and the whole look changes: Victorian (1860s–90s), Art Deco (1900s–30s), mid-century (1940s–70s), corporate greenwash (1980s–now). Cards keep the look of the era they came from.
+- Stages are eras, and the whole look changes: Victorian (1860s–90s), Art Deco (1900s–30s), 1970s flower power (1970–79), corporate greenwash (1980s–now). Cards keep the look of the era they came from.
 - Money gets a unit per stage but keeps its value: $15 → $15K → $15M → $15B.
 - Each stage adds one meter that lasts only for that stage, and leaves a residue item behind:
   - Stage 1: none. Capital only.
   - Stage 2: Board Exposure, 0 to 8 (5+ is high; 8 = ousted).
-  - Stage 3: Heat (costs Capital each turn; full = broken up).
+  - Stage 3: Heat, 0 to 100 (every AP spent adds 2; 100 = broken up).
   - Stage 4: The Truth vs Influence (The Truth advances every turn; full = stranded).
 - From stage 2, some enemies attack your personal fortune. Below 0 gold you lose.
 
@@ -149,18 +149,77 @@ Destroy cards can be played even with a Must play card in hand (so they can dest
 | **The Proxy Fight** (boss) | Boss | 26 | Legal | Dirty | Hostile Bid (−$6, +$2 each cycle) → Proxy Meeting (does nothing) → The Vote (+1 Exposure, +1 each cycle) | Moves first: Canvass (+1 Exposure) |
 Round 2 modifiers in stage 2: Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown, Scandal (+1 Exposure). Dry Season is stage 1 only.
 
+## Stage 3 rules (as built) · 1970–1979 · Diversifying · 1970s flower power
+Money is in millions ($M). Rounds are 1970, 1973, 1976 and 1979. The shop is **the Trading Floor**. The look is 1970s flower power: oatmeal paper, espresso ink, burnt orange, mustard and avocado, a rounded brown–orange–mustard stripe under the header (and filling the Heat meter), and Fraunces at 900 with its Soft axis for a Cooper Black feel.
+
+### Going multinational (between stages)
+Winning the Proxy Fight pays 3 gold, then a page-turn to 1970 stamped MULTINATIONAL, then the Multinational screen:
+- Every Field and Well becomes an **offshore Rig**: 1 oil a turn, never runs dry, sells for $10. Empty plots go. At most 5 Rigs.
+- **The old deck is nearly useless.** Land cards (Prospects, Surveys, Steel Derricks, Well cards, Rotary Rig) become **Dry Leases** (1 AP, do nothing). Fire and board cards (Bucket, Fire Brigade, Shore Up, Pay a Dividend) become **Dead Weight** (unplayable). Old attacks **fade** to 1 Hold, old Cover cards to 1 Cover, Dividends to $1; faded cards lose their upgrade and can't be upgraded or duplicated. Draw, AP and skim cards are unchanged. Bad Blood is gone (no fires in stage 3).
+- **Bury Evidence**, **Lobby Congress** and **Bribe an Official** join your deck.
+- **The Oil Shock**: +$15M now, but start the stage at 15 Heat. Take it or leave it.
+- Upgrade and destroy cards, as at incorporation. Stage 2's residue applies (Board Grudge takes $1M every shop visit, never your last; Loyal Directors gives +1 AP against the summit).
+
+### Economy
+- Oil sells at **$6M**. Storage carries over; Supertankers raise it to 12 at most.
+- The Trading Floor always offers an **Offshore Rig**, built at once (from $12M, rising $4M each time, one per visit, 5 at most), and a **lobbying firm** ($15M: Heat −8, once per visit). No Silo, no dividends. Upgrade, duplicate and destroy as in stage 2.
+- Skimming is still the Expense Account: $20M a gold, rising $20M, $20M, $24M, $28M, $32M by round. It no longer raises anything but your fortune.
+- No fires, no Board Exposure. Round 2 modifiers: Glut, Bank Squeeze, Bad Weather, Boomtown.
+
+### Heat (0 to 100)
+- **Every AP you spend adds 2 Heat**: cards, selling oil, selling a Rig, buying an enemy out. 0 AP cards add none. Roughly 50 AP for the whole stage.
+- **Only Climate Science and the Geneva Climate Summit add Heat** besides that.
+- **Lobbying takes it down**: Lobby Congress (−5), Fund a Think Tank (−10), the Trading Floor's lobbying firm (−8). A card's own Heat and its AP Heat land together.
+- **At 100: broken up.** A blow that wins the round or the stage still counts if it tips Heat over (Heat holds at 99).
+- **Residue** at the end of stage 3: 75+ leaves **The Regulators** (negative, for stage 4); 40 or less leaves **Further Research Needed** (The Truth starts slower in stage 4). Neither does anything yet.
+
+### Buying enemies out
+Some stage 3 enemies can be paid off: 1 AP and $2M for every point of Hold left. The Spill (pay for the clean-up), Rival Companies (buy them out) and Diversified Assets (sell it off at a loss). Climate Science, the Bribery Scandal and the summit can't be bought.
+
+### Stage 3 cards (Trading Floor pool)
+New families: **Bury** (hiding evidence) and **Lobby** (Washington). Enemies are weak to or resist them like Legal and Dirty.
+| Card | Cost | Effect | Upgraded |
+|---|---|---|---|
+| Embargo Rumours | 1 AP | Oil +$1M this turn | 0 AP |
+| Queues at the Pump | 2 AP | Oil +$2M for the rest of the round | 1 AP |
+| Telex | 1 AP | Draw 3 | Draw 4 |
+| Memo | 1 AP | Discard the rest of your hand, draw that many +1 | 0 AP |
+| Ticker Tape | 1 AP | (from stage 2) Draw 2, oil +$1M this turn | Draw 3 |
+| Restructure | 1 AP | Destroy a card in hand, draw 1 | **Write It Off**: also +$2M |
+| Personal Guarantee | 1 AP | Pay 1 gold: +$6M | +$8M |
+| Dip into the Trust | 0 AP, one use | Pay 3 gold: +$20M | — |
+| Bury Evidence | 1 AP | Bury, remove 6 Hold | 9 |
+| Lobby Congress | 1 AP, $3M | Lobby, remove 3 Hold, −5 Heat | −8 Heat |
+| Fund a Think Tank | 1 AP, $5M | −10 Heat | $3M, −14 Heat |
+| Bribe an Official | 1 AP, $3M | Dirty, remove 8 Hold. A Bribery Scandal on the board gains 3 Hold | 11 |
+| Retain Counsel | 1 AP, $2M | Legal, remove 7 Hold | 10 |
+Every bribe (Bribe the Sheriff, Bribe, Bribe an Official) feeds a Bribery Scandal. Junk: Dead Weight, Dry Lease, Draft Declaration (the summit's: must play, 1 AP, does nothing).
+
+### Stage 3 items
+Rolodex ($7M: +1 hand size, up to 7, buy more than one), Paper Shredder ($6M: once a round, destroy a card in hand for free), Supertanker ($7M: +4 storage, up to 12).
+
+### Stage 3 enemies
+| Enemy | Role | Hold | Weak | Resists | Cycle | Buy out | Notes |
+|---|---|---|---|---|---|---|---|
+| Rival Companies | Cash | 22 | Legal | Dirty | Price War (oil −$1M) → Undercut (−$4M) → Poach Contracts (−$6M) | Yes | Beaten: prices recover |
+| Diversified Assets | Cash | 18 | — | Legal | Running Costs (−$4M) → Bad Quarter (−$4M) → Write-down (−$8M) | Yes | The Montgomery Ward problem |
+| The Bribery Scandal | Cash | 18 | Legal | Lobby | Leak (−1 gold) → Hearing (−$5M) → Exposé (−$8M) (+ Indictment: −2 gold in R3) | No | Grows 3 Hold for every bribe you pay |
+| The Spill | Engine | 22 | Bury | — | Slick (lose 2 stored oil) → Shut Down (a Rig pumps nothing next turn) → Clean-up Bill (−$5M) | Yes | |
+| Climate Science | Engine | 24 | Bury | Dirty | Measure (+5 Heat) → Publish (+8 Heat) → Peer Review (regains 3 Hold) (+ Consensus: +10 Heat in R3) | No | |
+| **The Geneva Climate Summit** (boss, 1979) | Boss | 50 | Lobby | Dirty | Expert Testimony (+8 Heat, +4 each cycle) → Draft Declaration (must-play junk in your next hand) → Resolution (−$6M, +$2M each cycle) | No | Moves first: Opening Session (+6 Heat) |
+
 ## Endings
-- Bankrupt (Capital 0) · Ousted (Exposure 8, stage 2) · Ruined (gold below 0, stage 2 on) · Out of time · later: Broken up (stage 3), Stranded (stage 4).
-- Stage 1 complete continues into stage 2. Stage 2 complete ends the playtest for now, showing the residue item.
+- Bankrupt (Capital 0) · Ousted (Exposure 8, stage 2) · Ruined (gold below 0, stage 2 on) · Broken up (Heat 100, stage 3) · Out of time · later: Stranded (stage 4).
+- Each stage complete continues into the next. Stage 3 complete ends the playtest for now, showing the residue item.
 - Finishing: retire as Chairman, then a reveal of the hidden totals (emissions, years of delay, the patent you buried).
 
 ## Later stages (ideas agreed so far)
-- Stage 3: diversify (plastics, gas, concessions). Boss: the Trust-Buster.
 - Stage 4: greenwashing items built on the seven sins of greenwashing; the Breakthrough clean-power card you must bury. Boss: The Truth.
 - Mixed cards (Upside and Catch) and forced junk cards appear more as the game goes on.
 
 ## Balance
-`npm run sim` plays 2,000 runs per starting bonus with a simple bot, through stage 1 and on into stage 2, and reports each round for both. Current target: a careful player wins stage 1 about a quarter to a third of the time; the bot beats stage 2 about a third of the time it gets there, with the Proxy Fight the main wall and about a quarter of stage 2 losses by being ousted.
-`npm run fuzz` plays thousands of random runs through both stages checking the rules never reach an impossible state.
-**Admin mode** (playtesting): turn it on in Settings (or open the game with `?admin=1`; `?admin=0` turns it off). The title screen then shows **Admin · jump in**: pick stage 1 or 2, where to start (stage 2: incorporation, round 1–3 or the boss), Wells/Fields, Capital, gold, Board Exposure, the bonus and a starter or strong deck. During an admin run, Settings has tools: +10 Capital, +1 gold, Exposure ±1, +1 AP, win the round, and add any card. Admin runs are never recorded in history and don't touch the Trust Fund streak.
-Preview pages for design checks: `?preview=incorporate`, `?preview=complete2`, `?preview=crash2`, and any of shop, bossshop, summary, round3, boss with `&stage=2`.
+`npm run sim` plays 2,000 runs per starting bonus with a simple bot, through stages 1, 2 and 3, and reports each round. Current target: a careful player wins stage 1 about a quarter to a third of the time; the bot beats stage 2 about a third of the time it gets there, with the Proxy Fight the main wall and about a quarter of stage 2 losses by being ousted; the bot beats stage 3 about 60% of the time it gets there (players who reach it are strong), with the Geneva Climate Summit the wall and most losses broken up by Heat.
+`npx vite-node tools/stage3.ts` plays stage 3 from a middling admin start ($30M, 3 Rigs, starter deck) and breaks it down by round and enemy; `npx vite-node tools/trace3.ts [seed]` prints one stage 3 run turn by turn.
+`npm run fuzz` plays thousands of random runs through all three stages (a third of them start in stage 3) checking the rules never reach an impossible state.
+**Admin mode** (playtesting): turn it on in Settings (or open the game with `?admin=1`; `?admin=0` turns it off). The title screen then shows **Admin · jump in**: pick stage 1, 2 or 3, where to start (incorporation or going multinational, round 1–3 or the boss), Wells/Fields/Rigs, Capital, gold, Board Exposure or Heat, the bonus and a starter or strong deck. During an admin run, Settings has tools: +10 Capital, +1 gold, Exposure ±1, Heat ±10, +1 AP, win the round, and add any card. Admin runs are never recorded in history and don't touch the Trust Fund streak.
+Preview pages for design checks: `?preview=incorporate`, `?preview=complete2`, `?preview=crash2`, `?preview=multinational`, `?preview=complete3`, `?preview=crash3`, and any of shop, bossshop, summary, round3, boss with `&stage=2` or `&stage=3`.

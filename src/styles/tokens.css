@@ -56,6 +56,26 @@
   --on-truth: #ffffff;
   --influence: var(--accent);
 }
+[data-theme="seventies"] {
+  --paper: #efe0bf;
+  --paper-raised: #f8edd3;
+  --ink: #3a2314;
+  --ink-muted: #6e4b32;
+  --rule: #c9a577;
+  --accent: #c4501a;
+  --on-accent: #fbf3e0;
+  --loss: #a3271a;
+  --gain: #4f5f17;
+  --personal: #855c00;
+  --cover: #2f5b6b;
+  --oil: #3a2314;
+  --heat: #c4501a;
+  --mustard: #d9a21b;
+  --board: #6b3f73;
+  --truth: #111111;
+  --on-truth: #ffffff;
+  --influence: var(--accent);
+}
 [data-theme="greenwash"] {
   --paper: #f2f9f4;
   --paper-raised: #ffffff;
@@ -92,6 +112,8 @@
   --font-display-1860: "IM Fell English", "Libre Caslon Text", Georgia, serif;
   --font-display-1900: Limelight, "Libre Caslon Text", Georgia, serif;
   --font-display-1950: "Alfa Slab One", Rockwell, Georgia, serif;
+  --font-display-1970: Fraunces, "Cooper Black", Georgia, serif;
+  --radius-1970: 14px;
   --font-display-1990: Quicksand, "Trebuchet MS", system-ui, sans-serif;
   --font-truth: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 }

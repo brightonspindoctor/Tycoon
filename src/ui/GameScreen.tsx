@@ -7,7 +7,9 @@ import {
 } from '../engine/engine'
 import { ERA_THEME, FIELD_PLACE, STAGE_TITLE, money, units, year } from '../engine/format'
 import { ExposureMeter } from './Exposure'
+import { HeatMeter } from './Heat'
 import { CardView } from './CardView'
+import { iconUrl } from './icons'
 import { ThreatPanel } from './ThreatPanel'
 import { SettingsButton } from './Settings'
 import { PileView } from './PileView'
@@ -19,6 +21,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
   const [selected, setSelected] = useState<number | null>(null)
   const [plotMenu, setPlotMenu] = useState<number | null>(null)
   const [pile, setPile] = useState<'draw' | 'discard' | null>(null)
+  const [shredding, setShredding] = useState(false) // the Paper Shredder is waiting for a card
   const st = run.stage
   const live = liveThreats(run)
   const sel = run.hand.find(c => c.id === selected)
@@ -28,6 +31,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
   const scrapping = !!sel && handTargetsFor(run, sel).length > 0 // choose a card in your hand to destroy
 
   function clickCard(id: number) {
+    if (shredding) { dispatch({ type: 'shred', cardId: id }); setShredding(false); return }
     // a destroy card is waiting for its victim
     if (sel && scrapping && id !== sel.id) { dispatch({ type: 'play', cardId: sel.id, target: id }); setSelected(null); return }
     const c = run.hand.find(x => x.id === id)!
@@ -51,7 +55,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
         </div>
         <div className="game__meta">
           <div className="round-track" aria-label={`Round ${run.round} of 4`}>
-            <span className="cl-label">Round {run.round} of 4 · Turn {run.turn}{st >= 2 && run.turn <= CONFIG.quickWinTurns ? ` · Win by turn ${CONFIG.quickWinTurns}: Exposure −${CONFIG.quickWinDrop}` : ''}</span>
+            <span className="cl-label">Round {run.round} of 4 · Turn {run.turn}{st === 2 && run.turn <= CONFIG.quickWinTurns ? ` · Win by turn ${CONFIG.quickWinTurns}: Exposure −${CONFIG.quickWinDrop}` : ''}</span>
             <div>{[1, 2, 3, 4].map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 ? 'is-boss' : ''}`} />)}</div>
           </div>
           <SettingsButton />
@@ -67,7 +71,8 @@ export function GameScreen({ run, dispatch, acting }: Props) {
               targeting={targeting && targets.some(x => x.id === t.id)}
               preview={!sel ? undefined : stopping ? (t.stopped ? 'Already stopped' : 'Stop this move') : (n => (n > 0 ? `−${n} Hold` : 'No effect'))(damageOn(t, cardDef(sel).family, cardDef(sel).power))}
               onTarget={() => { dispatch({ type: 'play', cardId: sel!.id, target: t.id }); setSelected(null) }}
-              onAdminHit={run.admin && run.phase === 'turn' ? () => dispatch({ type: 'admin', op: 'hold20', target: t.id }) : undefined} />
+              onAdminHit={run.admin && run.phase === 'turn' ? () => dispatch({ type: 'admin', op: 'hold20', target: t.id }) : undefined}
+              onBuyOut={run.phase === 'turn' ? () => { setSelected(null); dispatch({ type: 'buyOut', target: t.id }) } : undefined} />
           ))}
           {run.fire > 0 && (
             <section className={`hazard ${lit('fire')}`} aria-label={`${fires(run.fire)} burning`}>
@@ -81,16 +86,16 @@ export function GameScreen({ run, dispatch, acting }: Props) {
         <section className="col-field" aria-label="Your field">
           <div className="field__label"><span className="cl-label">Your {st >= 2 ? 'fields' : 'field'} · {FIELD_PLACE[st] ?? FIELD_PLACE[1]}</span>{run.current.prorate && <span className="cl-label cl-minus">Prorated: {CONFIG.prorationCap} oil a turn at most</span>}{run.fire > 0 && <span className="cl-label field__fireway">Fire burns ←</span>}</div>
           <div className="field">
-            {run.plots.length === 0 && <div className="plot plot--empty-field">{st >= 2 ? 'No land. Play a Survey to claim a plot.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
+            {run.plots.length === 0 && <div className="plot plot--empty-field">{st >= 3 ? 'No Rigs. Build one at the Trading Floor.' : st >= 2 ? 'No land. Play a Survey to claim a plot.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
             {run.plots.map((w, i) => {
               const marked = run.marked === i && !!w
               const burning = burnsWell && i === run.plots.reduce((m, p, k) => (p ? k : m), -1)
               const state = !w ? 'Empty plot' : w.unstable ? (st >= 2 ? 'Shut in' : 'Unstable') : run.fire ? 'Pump stopped' : `${w.output} oil / turn`
               return (
-                <div key={i} className={`plot ${!w ? 'plot--empty' : ''} ${w?.field ? 'plot--field' : ''} ${w?.unstable ? 'plot--unstable' : ''} ${marked ? 'plot--marked' : ''} ${burning ? 'plot--burning' : ''} ${run.fire && w ? 'plot--stopped' : ''}`}>
+                <div key={i} className={`plot ${!w ? 'plot--empty' : ''} ${w?.field || w?.rig ? 'plot--field' : ''} ${w?.rig ? 'plot--rig' : ''} ${w?.unstable ? 'plot--unstable' : ''} ${marked ? 'plot--marked' : ''} ${burning ? 'plot--burning' : ''} ${run.fire && w ? 'plot--stopped' : ''}`}>
                   <span className="cl-label">Plot {i + 1}</span>
                   {w ? <button type="button" className="plot__well" onClick={() => setPlotMenu(plotMenu === i ? null : i)} aria-label={`${plotName(run, i)}, ${state}`}>
-                    <img src={`${import.meta.env.BASE_URL}art/icons/derrick.png`} alt="" />
+                    <img src={iconUrl(w.rig ? 'rig' : 'derrick')} alt="" />
                   </button> : <div className="plot__hole" />}
                   <span className="plot__name">{w ? plotName(run, i) : '—'}</span>
                   <span className="plot__state">{state}</span>
@@ -99,7 +104,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
                   {burning && <span className="plot__flag plot__flag--fire">Burns next</span>}
                   {plotMenu === i && w && (
                     <div className="plot__menu">
-                      <button type="button" className="cl-btn" disabled={run.ap < 1} onClick={() => { dispatch({ type: 'sellWell', plot: i }); setPlotMenu(null) }}>Sell {w.field ? 'Field' : 'Well'} · 1 AP · {money(wellValue(w), st, true)}</button>
+                      <button type="button" className="cl-btn" disabled={run.ap < 1} onClick={() => { dispatch({ type: 'sellWell', plot: i }); setPlotMenu(null) }}>Sell {w.rig ? 'Rig' : w.field ? 'Field' : 'Well'} · 1 AP · {money(wellValue(w), st, true)}</button>
                     </div>
                   )}
                 </div>
@@ -114,9 +119,9 @@ export function GameScreen({ run, dispatch, acting }: Props) {
           </div>
 
           <div className="resources">
-            <div><span className="cl-label">Oil price</span><b className="cl-num">{money(netPrice(run), st)}</b><span className="res-note">{freight(run) ? `${money(price(run), st)} − freight ${money(freight(run), st)}` : run.boost ? `+${money(run.boost, st)} this turn` : 'per barrel'}</span></div>
-            <div><span className="cl-label">Production</span><b className={`cl-num ${production(run) === 0 && run.plots.some(Boolean) ? 'cl-minus' : ''}`}>{production(run)}</b><span className="res-note">{run.fire ? 'pumps stopped' : st >= 2 ? `${run.plots.filter(w => w?.field).length} Fields · ${run.plots.filter(w => w && !w.field).length} Wells` : `${run.plots.filter(Boolean).length} Wells`}</span></div>
-            <div><span className="cl-label">Storage</span><b className="cl-num">{run.storage}</b><span className="res-note">barrels</span></div>
+            <div><span className="cl-label">Oil price</span><b className="cl-num">{money(netPrice(run), st)}</b><span className="res-note">{freight(run) ? `${money(price(run), st)} − freight ${money(freight(run), st)}` : run.boost || run.roundBoost ? [run.boost && `+${money(run.boost, st)} this turn`, run.roundBoost && `+${money(run.roundBoost, st)} this round`].filter(Boolean).join(' · ') : 'per barrel'}</span></div>
+            <div><span className="cl-label">Production</span><b className={`cl-num ${production(run) === 0 && run.plots.some(Boolean) ? 'cl-minus' : ''}`}>{production(run)}</b><span className="res-note">{run.fire ? 'pumps stopped' : st >= 3 ? `${run.plots.filter(Boolean).length} of ${CONFIG.maxPlots} Rigs${run.current.shutdown ? ` · ${run.current.shutdown} shut down` : ''}` : st >= 2 ? `${run.plots.filter(w => w?.field).length} Fields · ${run.plots.filter(w => w && !w.field).length} Wells` : `${run.plots.filter(Boolean).length} Wells`}</span></div>
+            <div><span className="cl-label">Storage</span><b className="cl-num">{run.storage}</b><span className="res-note">{st >= 3 ? `barrels · up to ${CONFIG.maxStorage}` : 'barrels'}</span></div>
           </div>
 
           <div className="events" aria-live="polite">{run.events.slice(0, 3).map((e, i) => <p key={`${run.turn}-${i}-${e}`} className={i === 0 ? 'is-new' : ''}>{units(e, st)}</p>)}</div>
@@ -131,15 +136,16 @@ export function GameScreen({ run, dispatch, acting }: Props) {
             </ul>
           </section>
           <ExposureMeter run={run} lit={acting?.kind === 'board'} />
+          <HeatMeter run={run} compact lit={acting?.kind === 'board'} />
           <section className={`fortune ${lit('gold')}`}>
             <div><span className="cl-label">Your fortune</span><b className={`cl-num ${st >= 2 && run.gold === 0 ? 'cl-minus' : ''}`}>{run.gold} gold</b></div>
-            <span className="res-note">{run.goldShield ? 'Personal Lawyer on retainer this turn.' : st >= 2 ? 'Enemies can take gold now. Below 0, you are ruined.' : `Skim rate: ${money(skimRate(run), st)} → 1 gold`}</span>
+            <span className="res-note">{run.goldShield ? 'Personal Lawyer on retainer this turn.' : st >= 3 ? 'The Bribery Scandal takes gold. Below 0, you are ruined.' : st >= 2 ? 'Enemies can take gold now. Below 0, you are ruined.' : `Skim rate: ${money(skimRate(run), st)} → 1 gold`}</span>
           </section>
           <section className="items">
             <span className="cl-label">Items</span>
             <div className="items__row">
               {run.debt > 0 && <div className="cl-item cl-item--neg"><div className="cl-item__disc">−{run.debt}</div><div className="cl-item__name">Bank Debt</div><div className="cl-item__fx">{money(-run.debt, st)} a turn</div></div>}
-              {run.items.map((k, i) => <div key={i} className={`cl-item ${ITEMS[k].negative ? 'cl-item--neg' : ''}`}><div className="cl-item__disc"><img src={`${import.meta.env.BASE_URL}art/icons/${ITEMS[k].icon}.png`} alt="" /></div><div className="cl-item__name">{ITEMS[k].name}</div><div className="cl-item__fx">{units(ITEMS[k].text, st)}</div></div>)}
+              {run.items.map((k, i) => <div key={i} title={`${ITEMS[k].name}: ${units(ITEMS[k].text, st)}`} className={`cl-item ${ITEMS[k].negative ? 'cl-item--neg' : ''}`}><div className="cl-item__disc"><img src={iconUrl(ITEMS[k].icon)} alt="" /></div><div className="cl-item__name">{ITEMS[k].name}</div><div className="cl-item__fx">{units(ITEMS[k].text, st)}</div></div>)}
             </div>
           </section>
         </aside>
@@ -159,23 +165,24 @@ export function GameScreen({ run, dispatch, acting }: Props) {
           </button>
           {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
           <div className="action-strip__actions">
+            {run.items.includes('paperShredder') && <button type="button" className="cl-btn" disabled={run.shredded || !run.hand.length} onClick={() => { setSelected(null); setShredding(!shredding) }}>{run.shredded ? 'Shredder used this round' : shredding ? 'Cancel' : 'Paper Shredder · free · once a round'}</button>}
             {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose Well No. {weakestWell(run) + 1}, put out every fire</button>}
           </div>
         </div>
-        {scrapping && <div className="hand-prompt cl-label">Choose a card in your hand to destroy</div>}
+        {(scrapping || shredding) && <div className="hand-prompt cl-label">Choose a card in your hand to destroy</div>}
         <div className="hand-row">
           <button type="button" className={`pile pile--btn ${lit('shuffle')}`} title="See what's left to draw" onClick={() => setPile('draw')}><span className="pile__card cl-num">{run.draw.length}</span><span className="cl-label">Draw</span></button>
           <div className={`hand ${lit('cards')}`}>
             {run.hand.map((c, i) => {
               const chk = canPlay(run, c)
               return <div key={c.id} className="hand__slot" style={{ animationDelay: `${i * 60}ms` }}>
-                <CardView card={c} stage={st} apCost={apCost(run, c)} playable={chk.ok || (scrapping && c.id !== selected)} why={chk.why} selected={selected === c.id} marked={scrapping && c.id !== selected ? 'destroy' : undefined} onClick={() => clickCard(c.id)} />
+                <CardView card={c} stage={st} apCost={apCost(run, c)} playable={chk.ok || shredding || (scrapping && c.id !== selected)} why={chk.why} selected={selected === c.id} marked={shredding || (scrapping && c.id !== selected) ? 'destroy' : undefined} onClick={() => clickCard(c.id)} />
               </div>
             })}
           </div>
           <div className="pile-col">
             <button type="button" className="pile pile--btn" title="See the discard pile" onClick={() => setPile('discard')}><span className="pile__card pile__card--discard cl-num">{run.discard.length}</span><span className="cl-label">Discard</span></button>
-            <button type="button" className={`cl-btn end-turn ${endReady ? 'cl-btn--primary' : ''}`} onClick={() => { setSelected(null); dispatch({ type: 'endTurn' }) }}>End turn</button>
+            <button type="button" className={`cl-btn end-turn ${endReady ? 'cl-btn--primary' : ''}`} onClick={() => { setSelected(null); setShredding(false); dispatch({ type: 'endTurn' }) }}>End turn</button>
           </div>
         </div>
       </footer>

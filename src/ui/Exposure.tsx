@@ -3,7 +3,7 @@ import { CONFIG } from '../engine/config'
 import type { Run } from '../engine/engine'
 
 export function ExposureMeter({ run, compact, lit }: { run: Run; compact?: boolean; lit?: boolean }) {
-  if (run.stage < 2) return null
+  if (run.stage !== 2) return null
   const e = run.exposure
   const high = e >= CONFIG.exposureHigh
   return (
