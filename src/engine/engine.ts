@@ -10,7 +10,7 @@ import { next, pick, shuffle } from './rng'
 export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean; free?: boolean; up?: boolean } // free: costs no AP · up: upgraded
 export interface Well { output: number; reserve: number; unstable?: boolean; field?: boolean; lasting?: boolean } // a Field (an old Well) and a stage 2 Well (lasting) never run dry
 export const neverDry = (w: Well) => !!(w.field || w.lasting)
-export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string; stopped?: boolean }
+export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string; stopped?: boolean; cover?: number }
 export interface LedgerLine { label: string; amount: number }
 /** One line of the end-of-turn report, played back on the ticker tape. */
 export interface Beat { kind: 'enemy' | 'fire' | 'money' | 'cards' | 'shuffle' | 'oil' | 'info' | 'board' | 'gold'; title: string; text: string; who?: number }
@@ -55,7 +55,7 @@ export interface Run {
   modifier: ModKey | null
   short: number
   freight: number
-  pending: { ap: number; audit: boolean; refuse: boolean; margin: number; cease: number; prorate: boolean }
+  pending: { ap: number; audit: boolean; refuse: boolean; margin: number; cease: number; prorate: boolean; claims?: number }
   current: { audit: boolean; refuse: boolean; prorate: boolean }
   items: ItemKey[]
   destroyCost: number
@@ -215,6 +215,8 @@ export function damageFor(family: Family, power: number, kind: ThreatKind): numb
   if (t.resist === family) return Math.floor(power / 2)
   return power
 }
+/** Hold an attack would actually remove from this enemy now, after its Cover. */
+export const damageOn = (t: Threat, family: Family, power: number) => Math.max(0, damageFor(family, power, t.kind) - (t.cover ?? 0))
 export const isAttack = (key: CardKey) => ['Legal', 'Dirty'].includes(CARDS[key].family)
 
 export const fires = (n: number) => `${n} fire${n === 1 ? '' : 's'}`
@@ -486,7 +488,9 @@ function beginTurn(r: Run) {
   const apPenalty = r.pending.ap
   const margins = r.pending.margin
   const ceases = r.pending.cease
+  const claims = r.pending.claims ?? 0
   r.pending = { ap: 0, audit: false, refuse: false, margin: 0, cease: 0, prorate: false }
+  for (const t of liveThreats(r)) t.cover = THREATS[t.kind].cover // enemy Cover: fresh each turn, never stacks
   r.boost = 0
   r.goldShield = false
   const d = debtPerTurn(r) * (r.current.audit ? 2 : 1)
@@ -510,6 +514,8 @@ function beginTurn(r: Run) {
   for (let i = 0; i < margins; i++) r.hand.push(card(r, 'marginCall', true))
   if (margins) beat(r, 'cards', 'Margin Call', `${margins > 1 ? `${margins} Margin Calls` : 'A Margin Call'} in your hand.`)
   for (let i = 0; i < ceases; i++) r.hand.push(card(r, 'ceaseDesist', true))
+  for (let i = 0; i < claims; i++) r.hand.push(card(r, 'patentClaim', true))
+  if (claims) beat(r, 'cards', 'New Patent Claim', 'A New Patent Claim is clogging your hand.')
   if (ceases) beat(r, 'cards', 'Cease and Desist', `${ceases > 1 ? `${ceases} Cease and Desist letters` : 'A Cease and Desist letter'} in your hand.`)
   const n = CONFIG.handSize - (r.modifier === 'badWeather' ? 1 : 0)
   drawUpTo(r, n)
@@ -591,7 +597,7 @@ function threatBeaten(r: Run, t: Threat) {
 }
 
 function grantReward(r: Run) {
-  if (r.tempStorage) { r.storage -= r.tempStorage; r.tempStorage = 0 }
+  if (r.tempStorage) { r.storage -= r.tempStorage; r.tempStorage = 0; r.oil = Math.min(r.oil, r.storage) } // the temporary silo is dismantled; what doesn't fit is sold off with it
   r.gold += CONFIG.bossGold
   say(r, `${CONFIG.bossGold} gold for you.`)
   if (r.stage >= 2) { // the meter leaves its mark
@@ -609,7 +615,8 @@ function grantReward(r: Run) {
 }
 
 /** Damage to an enemy. Cards marked badBlood put a Bad Blood card in your discard pile. */
-function hit(r: Run, t: Threat, dmg: number, badBlood = false) {
+function hit(r: Run, t: Threat, dmg: number, badBlood = false, ignoreCover = false) {
+  if (t.cover && !ignoreCover) { const blocked = Math.min(t.cover, dmg); t.cover -= blocked; dmg -= blocked; if (blocked) say(r, `${THREATS[t.kind].name}'s Cover blocked ${blocked}.`) }
   t.hold -= dmg
   if (badBlood) { addJunk(r, 'badBlood', 'discard'); say(r, 'Bad Blood added to your discard pile.') }
   if (t.hold <= 0) threatBeaten(r, t)
@@ -859,13 +866,16 @@ export function intentText(r: Run, t: Threat): string {
     case 'Headline': return 'Lose $4.'
     case 'Front Page': return '+2 Board Exposure.'
     case 'Price War': return 'Oil price −$1.'
-    case 'Rebate': return r.items.includes('pipeline') ? 'Wants a railway rebate. Your Pipeline makes it pointless.' : 'Secret railway rebates: freight +$1 a barrel.'
+    case 'Rail Deal': return r.items.includes('pipeline') ? 'A secret deal with the railway. Your Pipeline makes it pointless.' : 'A secret deal with the railway: you get $1 less for every barrel you sell.'
     case 'Squeeze': return 'Lose $3.'
     case 'Minutes': return '+1 Board Exposure.'
     case 'Clawback': return exposureHigh(r) ? `Exposure is high: takes ${CONFIG.clawbackGold} gold from your fortune.` : `Lose $4. (At ${CONFIG.exposureHigh}+ Exposure, takes ${CONFIG.clawbackGold} gold instead.)`
     case 'Cease and Desist': return 'Adds a Cease and Desist to your next hand: must play, 1 AP, does nothing.'
     case 'Royalty': return `Lose $1 for each Well and Field you own (${royalty(r)}).`
     case 'Injunction': return '−1 AP next turn.'
+    case 'New Patent Claim': return "Adds a New Patent Claim to your next hand: it can't be played and takes a slot."
+    case 'Leaky Tanks': return `Lose all your stored oil (${r.oil}) and ${Math.round(CONFIG.leakyTanksShare * 100)}% of your Capital (${leakyLoss(r)}).`
+    case 'Proxy Meeting': return 'Nothing. The shareholders talk among themselves.'
     case 'Wreck': {
       const m = r.marked
       if (m === null || !r.plots[m]) return 'Looks for something to wreck.'
@@ -873,7 +883,7 @@ export function intentText(r: Run, t: Threat): string {
     }
     case 'Infiltrate': { const i = infiltrateTarget(r); return i >= 0 ? `Marks ${plotName(r, i)}.` : 'Watches your fields.' }
     case 'Proration': return `Next turn you can pump only ${CONFIG.prorationCap} oil.`
-    case 'Inspection': return '−1 AP next turn.'
+    case 'Inspection': return `−${CONFIG.inspectionAP} AP next turn.`
     case 'Shut-in': { const i = rumbleTarget(r); return i >= 0 ? `Shuts in ${plotName(r, i)}: it pumps nothing this round.` : 'Looks for a Well to shut in.' }
     case 'Hostile Bid': return `Lose $${3 + c}.`
     case 'Proxy Ballot': return 'Adds a Proxy Ballot to your deck: must play, +1 Board Exposure.'
@@ -882,6 +892,9 @@ export function intentText(r: Run, t: Threat): string {
   }
   return a
 }
+
+/** Leaky Tanks takes a quarter of your Capital. */
+export const leakyLoss = (r: Run) => `$${Math.floor(r.capital * CONFIG.leakyTanksShare)}`
 
 /** The Patent Holder's Royalty: $1 per Well and Field, at least $1. */
 export const royalty = (r: Run) => Math.max(1, wellCount(r))
@@ -983,12 +996,22 @@ function endTurn(r: Run) {
       case 'Expose': takeGold(r, CONFIG.muckrakerGold, name); break
       case 'Headline': dmg += 4; break
       case 'Price War': r.short += 1; break
-      case 'Rebate': if (!r.items.includes('pipeline')) r.freight += 1; break
+      case 'Rail Deal': if (!r.items.includes('pipeline')) r.freight += 1; break
       case 'Squeeze': dmg += 3; break
       case 'Clawback': if (exposureHigh(r)) takeGold(r, CONFIG.clawbackGold, name); else dmg += 4; break
       case 'Cease and Desist': r.pending.cease += 1; break
       case 'Royalty': dmg += royalty(r); break
-      case 'Injunction': case 'Inspection': r.pending.ap += 1; break
+      case 'Injunction': r.pending.ap += 1; break
+      case 'Inspection': r.pending.ap += CONFIG.inspectionAP; break
+      case 'New Patent Claim': r.pending.claims = (r.pending.claims ?? 0) + 1; break
+      case 'Leaky Tanks': {
+        const lost = Math.floor(r.capital * CONFIG.leakyTanksShare)
+        if (r.oil) say(r, `Leaky tanks: ${r.oil} oil lost.`)
+        r.oil = 0
+        if (lost) { money(r, 'Leaky tanks', -lost); say(r, `Leaky tanks: −$${lost}.`) }
+        break
+      }
+      case 'Proxy Meeting': break
       case 'Wreck': {
         const m = r.marked
         if (m !== null && r.plots[m]) { say(r, `${plotName(r, m)} wrecked.`); loseWell(r, m, 'lost') }
@@ -1054,7 +1077,7 @@ function adminAction(r: Run, op: AdminOp, key?: CardKey, target?: number) {
   switch (op) {
     case 'hold20': { // 0 AP, ignores weaknesses and immunities
       const t = liveThreats(r).find(x => x.id === target) ?? liveThreats(r)[0]
-      if (r.phase === 'turn' && t) { say(r, `Admin: ${THREATS[t.kind].name} −20 Hold.`); hit(r, t, Math.min(20, t.hold)) }
+      if (r.phase === 'turn' && t) { say(r, `Admin: ${THREATS[t.kind].name} −20 Hold.`); hit(r, t, Math.min(20, t.hold), false, true) }
       break
     }
     case 'cash': money(r, 'Admin', 10); break
@@ -1062,7 +1085,7 @@ function adminAction(r: Run, op: AdminOp, key?: CardKey, target?: number) {
     case 'exposureUp': expose(r, 1, 'Admin'); break
     case 'exposureDown': expose(r, -1, 'Admin'); break
     case 'ap': if (r.phase === 'turn') r.ap += 1; break
-    case 'winRound': if (r.phase === 'turn') for (const t of liveThreats(r)) hit(r, t, t.hold); break
+    case 'winRound': if (r.phase === 'turn') for (const t of liveThreats(r)) hit(r, t, t.hold, false, true); break
     case 'addCard': if (key && r.phase === 'turn') { const c = card(r, key); r.deck.push(c); r.hand.push(c); say(r, `Admin: ${CARDS[key].name} added to your hand.`) } else if (key) { r.deck.push(card(r, key)); say(r, `Admin: ${CARDS[key].name} added to your deck.`) } break
   }
 }

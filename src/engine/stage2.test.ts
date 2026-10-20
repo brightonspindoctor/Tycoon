@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { act, canPlay, cardDef, incorporate, intentText, netPrice, newRun, production, skimRate, type Card, type Run } from './engine'
 import { CONFIG } from './config'
-import { CARDS, type CardKey, type ThreatKind } from './data'
+import { CARDS, THREATS, type CardKey, type ThreatKind } from './data'
 
 /** A run that has just beaten the Baron. */
 function afterBaron(seed = 3): Run {
@@ -342,5 +342,57 @@ describe('the Exchange Silo', () => {
     r = act(r, { type: 'buySilo' })
     r = act(r, { type: 'buySilo' })
     expect(r.storage).toBe(st + 2)
+  })
+})
+
+describe('reworked stage 2 enemies', () => {
+  it('the Clawback Committee has 2 Cover each turn, never stacking, and claws back twice', () => {
+    let r = inStage2([], 'clawback')
+    r = act(r, { type: 'endTurn' }) // a new turn: fresh Cover
+    expect(r.threats[0].cover).toBe(2)
+    const hand: Card = { id: 7100, key: 'hiredHand', uses: null }
+    r.hand = [hand]; r.deck.push(hand); r.ap = 2
+    const hold = r.threats[0].hold
+    r = act(r, { type: 'play', cardId: hand.id }) // Dirty 2, doubled to 4: Cover takes 2
+    expect(r.threats[0].hold).toBe(hold - 2)
+    expect(r.threats[0].cover).toBe(0)
+    r = act(r, { type: 'endTurn' })
+    expect(r.threats[0].cover).toBe(2)
+    r = act(r, { type: 'endTurn' })
+    expect(r.threats[0].cover).toBe(2) // doesn't stack
+    expect(THREATS.clawback.cycle).toEqual(['Clawback', 'Clawback', 'Minutes'])
+  })
+
+  it("the Patent Holder's New Patent Claim clogs your next hand and can't be played", () => {
+    let r = inStage2([], 'patentHolder')
+    r.threats[0].step = 1
+    r = act(r, { type: 'endTurn' })
+    const claim = r.hand.find(c => c.key === 'patentClaim')!
+    expect(claim).toBeTruthy()
+    expect(canPlay(r, claim).ok).toBe(false)
+    r = act(r, { type: 'endTurn' })
+    expect(r.deck.some(c => c.key === 'patentClaim')).toBe(false)
+  })
+
+  it("the Railroad Commission is weak: Inspection takes 2 AP, Leaky Tanks takes the oil and a quarter of Capital", () => {
+    expect(THREATS.commission.hold).toBe(6)
+    let r = inStage2([], 'commission')
+    r.threats[0].step = 1
+    r = act(r, { type: 'endTurn' })
+    expect(r.ap).toBe(Math.max(0, CONFIG.baseAP - 2))
+    r.oil = 3; r.capital = 40
+    r = act(r, { type: 'endTurn' })
+    expect(r.oil).toBeLessThanOrEqual(r.plots.filter(Boolean).length) // only what pumped since
+    expect(r.events.some(e => e === 'Leaky tanks: −$10.')).toBe(true)
+  })
+
+  it('the Proxy Fight holds a Proxy Meeting that does nothing, and no longer adds ballots', () => {
+    expect(THREATS.proxyFight.cycle).toEqual(['Hostile Bid', 'Proxy Meeting', 'The Vote'])
+    let r = inStage2([], 'proxyFight')
+    r.threats[0].step = 1
+    const before = { cap: r.capital, exp: r.exposure, deck: r.deck.length }
+    r = act(r, { type: 'endTurn' })
+    expect(r.exposure).toBe(before.exp)
+    expect(r.deck.length).toBe(before.deck)
   })
 })

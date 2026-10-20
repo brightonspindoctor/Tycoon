@@ -13,7 +13,7 @@ export type CardKey =
   | 'survey' | 'oldProspect' | 'rotaryRig' | 'telegraphLine' | 'tickerTape' | 'nightShift' | 'efficiencyExpert'
   | 'streamline' | 'shredFiles' | 'scrapParts' | 'cleanHouse' | 'patentThicket' | 'espionage' | 'poachEngineer'
   | 'rdSprint' | 'payDividend' | 'personalLawyer' | 'ceaseDesist' | 'proxyBallot'
-  | 'derrick' | 'extinguisher' | 'securityDetail' | 'insurance' | 'expenseAccount'
+  | 'derrick' | 'extinguisher' | 'securityDetail' | 'insurance' | 'expenseAccount' | 'patentClaim'
 
 export interface CardDef {
   name: string
@@ -130,6 +130,8 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Must play. Does nothing.', flavour: 'Pursuant to patent No. 1,042,117.' },
   proxyBallot: { name: 'Proxy Ballot', era: 2, ap: 0, cost: 0, uses: 1, family: 'Junk', power: 0, exposure: 1, icon: 'envelope', forced: true, junk: true,
     text: 'Must play. +1 Board Exposure. Then it\'s gone.', flavour: 'Signed on behalf of a widow in Ohio.' },
+  patentClaim: { name: 'New Patent Claim', era: 2, ap: null, cost: 0, uses: 1, family: 'Junk', power: 0, icon: 'redtape', junk: true,
+    text: "Can't be played. Does nothing. Gone at the end of the turn.", flavour: 'Patent pending. Everything pending.' },
   derrick: { name: 'Steel Derrick', era: 2, ap: 1, cost: 0, uses: 1, family: 'Production', power: 1, icon: 'derrick', price: CONFIG.derrickPrice,
     text: 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty.', flavour: 'Riveted, not nailed.' },
   extinguisher: { name: 'Chemical Engine', era: 2, ap: 1, cost: 0, uses: null, family: 'Water', power: 2, icon: 'hose', price: CONFIG.bucketPrice2,
@@ -220,6 +222,7 @@ export interface ThreatDef {
   cycle: string[]
   round3?: string // extra step added in round 3
   movesFirst?: string
+  cover?: number // Cover it gets each turn: blocks that much of your damage (doesn't stack)
   whenBeaten?: string
   portrait: string
 }
@@ -234,12 +237,12 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   baron: { role: 'boss', name: 'The Rival Baron', hold: 20, weak: 'Dirty', resist: 'Legal', cycle: ['Sabotage', 'Lease', 'Arson'], movesFirst: 'Arson', portrait: 'baron' },
   // stage 2
   muckraker: { role: 'cash', name: 'The Muckraker', hold: 9, weak: 'Legal', cycle: ['Dig', 'Expose', 'Headline'], round3: 'Front Page', whenBeaten: 'Retraction: −1 Board Exposure', portrait: 'muckraker' },
-  combine: { role: 'cash', name: 'The Combine', hold: 9, resist: 'Legal', cycle: ['Price War', 'Rebate', 'Squeeze'], whenBeaten: 'Prices and freight recover', portrait: 'combine' },
-  clawback: { role: 'cash', name: 'The Clawback Committee', hold: 8, weak: 'Dirty', cycle: ['Clawback', 'Minutes'], movesFirst: 'Minutes', whenBeaten: '−1 Board Exposure', portrait: 'clawback' },
-  patentHolder: { role: 'engine', name: 'The Patent Holder', hold: 10, weak: 'Legal', cycle: ['Cease and Desist', 'Royalty'], round3: 'Injunction', portrait: 'patentHolder' },
+  combine: { role: 'cash', name: 'The Combine', hold: 9, resist: 'Legal', cycle: ['Price War', 'Rail Deal', 'Squeeze'], whenBeaten: 'Prices and freight recover', portrait: 'combine' },
+  clawback: { role: 'cash', name: 'The Clawback Committee', hold: 8, weak: 'Dirty', cover: 2, cycle: ['Clawback', 'Clawback', 'Minutes'], whenBeaten: '−1 Board Exposure', portrait: 'clawback' },
+  patentHolder: { role: 'engine', name: 'The Patent Holder', hold: 10, weak: 'Legal', cycle: ['Cease and Desist', 'New Patent Claim', 'Royalty'], portrait: 'patentHolder' },
   saboteur: { role: 'engine', name: 'The Saboteur', hold: 8, weak: 'Dirty', cycle: ['Wreck', 'Infiltrate'], movesFirst: 'Infiltrate', whenBeaten: 'Starts a fire', portrait: 'saboteur' },
-  commission: { role: 'engine', name: 'The Railroad Commission', hold: 10, weak: 'Dirty', cycle: ['Proration', 'Inspection'], round3: 'Shut-in', portrait: 'commission' },
-  proxyFight: { role: 'boss', name: 'The Proxy Fight', hold: 24, weak: 'Legal', resist: 'Dirty', cycle: ['Hostile Bid', 'Proxy Ballot', 'The Vote'], movesFirst: 'Canvass', portrait: 'proxyFight' },
+  commission: { role: 'engine', name: 'The Railroad Commission', hold: 6, weak: 'Dirty', cycle: ['Proration', 'Inspection', 'Leaky Tanks'], portrait: 'commission' },
+  proxyFight: { role: 'boss', name: 'The Proxy Fight', hold: 24, weak: 'Legal', resist: 'Dirty', cycle: ['Hostile Bid', 'Proxy Meeting', 'The Vote'], movesFirst: 'Canvass', portrait: 'proxyFight' },
 }
 
 // Round 1 takes your cash, round 2 breaks your engine, round 3 sends one of each.

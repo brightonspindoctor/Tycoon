@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, MODS, ROLE_LABEL, THREATS } from '../engine/data'
 import {
-  apCost, canPlay, cardDef, damageFor, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run, type Threat,
 } from '../engine/engine'
 import { FIELD_PLACE, money, units, year } from '../engine/format'
@@ -29,7 +29,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
   const sel = run.hand.find(c => c.id === selected) ?? null
   const selDef = sel ? cardDef(sel) : null
   const selCheck = sel ? canPlay(run, sel) : null
-  const dmgOn = (t: Threat) => (selDef ? damageFor(selDef.family, selDef.power, t.kind) : 0)
+  const dmgOn = (t: Threat) => (selDef ? damageOn(t, selDef.family, selDef.power) : 0)
   const targets = sel ? targetsFor(run, sel) : []
   const stopping = !!selDef?.stop
   const needsTarget = !!sel && !!selCheck?.ok && targets.length > 1
@@ -96,7 +96,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                   <span className="cl-label m-threat__role">{ROLE_LABEL[d.role]}{d.movesFirst ? ' · Moves first' : ''}</span>
                   <div className="m-threat__top">
                     <h2 className="m-threat__name">{d.name}</h2>
-                    <span className="cl-num m-threat__hold">{Math.max(0, t.hold)}/{t.maxHold}</span>
+                    <span className="cl-num m-threat__hold">{t.cover && !t.beaten ? <span className="enemy-cover">Cover {t.cover} · </span> : null}{Math.max(0, t.hold)}/{t.maxHold}</span>
                   </div>
                   <span className="hold-bar"><span style={{ width: `${Math.max(0, (t.hold / t.maxHold) * 100)}%` }} /></span>
                   {t.opened && run.turn === 1 && !t.beaten && <div className="opened"><b>Opened with</b> {units(t.opened, st)}</div>}

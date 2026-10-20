@@ -28,6 +28,7 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget,
           <div className="threat__hold">
             <span className="hold-bar"><span style={{ width: `${pct}%` }} /></span>
             <span className="cl-num">{Math.max(0, threat.hold)} / {threat.maxHold}</span>
+            {!!threat.cover && !threat.beaten && <span className="enemy-cover cl-num" title="Blocks this much of your damage this turn">Cover {threat.cover}</span>}
           </div>
           {targeting && preview && <span className="cl-label threat__preview">{preview}</span>}
         </div>
