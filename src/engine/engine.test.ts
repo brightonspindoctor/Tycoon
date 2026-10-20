@@ -693,3 +693,17 @@ describe('the Blowout', () => {
     expect(intentText(r, r.threats[0])).toBe('Well No. 1 shakes again.')
   })
 })
+
+describe('Shore Up limit', () => {
+  it('only one Shore Up can be played each round, however many you own', () => {
+    let r = newRun(25, 'threeOil'); r.capital = 50
+    r.threats = [{ id: 900, kind: 'inspector', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false },
+      { id: 901, kind: 'railroad', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
+    const a = r.deck.find(c => c.key === 'shoreUp')!, b = { id: 8700, key: 'shoreUp' as const, uses: null }
+    r.deck.push(b); r.hand = [a, b]; r.ap = 2
+    r = act(r, { type: 'play', cardId: a.id, target: 900 })
+    expect(canPlay(r, r.hand.find(c => c.id === 8700)!).ok).toBe(false)
+    r.phase = 'shop'; r.round = 1; r = act(r, { type: 'leaveShop' }) // next round: allowed again
+    expect(r.shoredUp).toBe(false)
+  })
+})

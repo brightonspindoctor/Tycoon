@@ -45,7 +45,7 @@ A card is offered (weighted by rarity, like the shop): take it into your deck or
 
 ### Cards changed in play-testing
 - Send a Telegram: the random attack card it adds costs no AP (any $ cost still applies). It's gone at the end of the turn.
-- Shore Up: stop one enemy's next move this turn, once per round (with two enemies, you choose). The move is skipped; the enemy's cycle carries on.
+- Shore Up: stop one enemy's next move this turn; only one Shore Up per round, however many you own (with two enemies, you choose). The move is skipped; the enemy's cycle carries on.
 - Lawyer Up deals 3 (was 4). Bribe the Sheriff: pay $2, 5 Hold. Hired Hand and Pay Wages are Dirty.
 - Pay Wages: pay $2, remove 4 Hold (Dirty). Costs $1 to buy. No card is tied to one enemy; enemy weaknesses and resistances decide what works.
 - Hard Graft (+1 AP, 0 AP to play) can be played once per round: it then sits out until the next round. It is never destroyed. It can be bought ($4).

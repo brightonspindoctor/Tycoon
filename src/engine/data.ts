@@ -42,7 +42,7 @@ export const CARDS: Record<CardKey, CardDef> = {
   lawyerUp: { name: 'Lawyer Up', ap: 1, cost: 2, uses: null, family: 'Legal', power: 3, icon: 'deed', price: 4, rarity: 'Common',
     text: 'Pay $2. Remove 3 Hold.', flavour: 'The paperwork always wins (eventually).' },
   shoreUp: { name: 'Shore Up', ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, stop: true, oncePerRound: true, icon: 'timber', price: 3, rarity: 'Common',
-    text: "Stop one enemy's next move this turn. Once per round.", flavour: 'More timber. More rope.' },
+    text: "Stop one enemy's next move this turn. One Shore Up per round.", flavour: 'More timber. More rope.' },
   bucket: { name: 'Bucket of Water', ap: 1, cost: 0, uses: null, family: 'Water', power: 1, icon: 'bucket',
     text: 'Put out one fire.', flavour: "It won't stop the well, but it might buy a moment." },
   fireBrigade: { name: 'Fire Brigade', ap: 1, cost: 0, uses: null, family: 'Water', power: 3, icon: 'hose', price: 4, rarity: 'Common',
