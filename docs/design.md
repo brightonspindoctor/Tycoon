@@ -38,7 +38,7 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 
 ### Before and after the boss
 - After round 3 the Land Office offers one small, single-use item for **1 gold**: A Spare Hand (+1 AP on the first boss turn), Spare Rigs (2 Well cards), Fire Brigade (card), Inheritance (a card: +$5 once) or Temporary Silo (+4 storage for the boss round).
-- Beating the Baron gives a lasting item of a **different type** from the one bought: Steam Pump (+1 AP every turn), Dividends (a card: +$3 each play), Silo (+4 storage) or Wildcat Rights (2 Wildcat Well cards).
+- Beating the Baron gives a lasting item of a **different type** from the one bought (never the Steam Pump: no third AP from a boss): Dividends (a card: +$3 each play), Silo (+4 storage) or Wildcat Rights (2 Wildcat Well cards).
 
 ### After each round
 A card is offered (weighted by rarity, like the shop): take it into your deck or turn it down for $3. What happens when an enemy is beaten is not shown in advance.
@@ -96,7 +96,7 @@ Beating the Baron pays **3 gold** (every boss does). Then the company incorporat
 ### Economy
 - Oil sells at **$4** (the motor car arrives).
 - **Every Well pumps 1 oil and never runs dry** in stage 2, old Well and Wildcat cards included. A Well card claims a new plot if none is empty (5 plots at most).
-- **Skimming is a card**: the Expense Account (0 AP, pay the rate for 1 gold, +1 Exposure; $5 in the shop). The rate starts at $4 a gold and rises each round: $4, $4, $5, $6, $7. The Exchange has no skim buttons.
+- **Skimming is a card**: the Expense Account (0 AP, pay the rate for 1 gold, +1 Exposure; $5 in the shop). The rate starts at $10 a gold and rises each round: $10, $10, $12, $14, $16. The Exchange has no skim buttons.
 - **Fire only burns oil** and stops the pumps; it never destroys a Well or Field. With no oil left, one fire dies down each turn.
 - The shop is **The Exchange**. It always offers a **Silo** ($5: +2 oil storage, once a visit, 2 in the whole stage), **Duplicate a card** (a second copy, upgrade and all, for the card's shop price; once a visit), and sells **only stage 2 cards**, stronger and dearer than stage 1's ($4–8). Its staples: a **Steel Derrick** (a Well) one per visit from $6, rising $2 each time, and a **Chemical Engine** ($3: put out two fires).
 - Exchange extras: **Upgrade a card**, and **Pay dividends** ($4: Exposure −2, once per visit). No Cheap Loan.
@@ -140,13 +140,13 @@ Destroy cards can be played even with a Must play card in hand (so they can dest
 ### Stage 2 enemies
 | Enemy | Role | Hold | Weak | Resists | Cycle | Notes |
 |---|---|---|---|---|---|---|
-| The Muckraker | Cash | 11 | Legal | — | Dig (+1 Exposure) → Expose (−1 gold) → Headline (−$4) (+ Front Page: +2 Exposure in R3) | Beaten: −1 Exposure |
-| The Combine | Cash | 11 | — | Legal | Price War (oil −$1) → Rail Deal (freight +$1: you get $1 less a barrel sold; a Pipeline blocks it) → Squeeze (−$3) → Hired Muscle (Bad Blood in your next hand) | Beaten: prices and freight recover |
-| The Clawback Committee | Cash | 10 | Dirty | — | Clawback → Clawback (each −$4, or −2 gold at 5+ Exposure) → Minutes (+1 Exposure) | 2 Cover every turn (blocks 2 of your damage; never stacks). Beaten: −1 Exposure |
-| The Patent Holder | Engine | 12 | Legal | — | Cease and Desist (must-play card in your next hand: 1 AP, does nothing) → New Patent Claim (an unplayable card takes a slot in your next hand) → Royalty (−$1 per Well/Field) | |
+| The Muckraker | Cash | 11 | Legal | — | Dig (+1 Exposure) → Expose (−1 gold) → Headline (−$8) (+ Front Page: +2 Exposure in R3) | Beaten: −1 Exposure |
+| The Combine | Cash | 11 | — | Legal | Price War (oil −$1) → Rail Deal (freight +$1: you get $1 less a barrel sold; a Pipeline blocks it) → Squeeze (−$6) → Hired Muscle (Bad Blood in your next hand) | Beaten: prices and freight recover |
+| The Clawback Committee | Cash | 10 | Dirty | — | Clawback → Clawback (each −$8, or −2 gold at 5+ Exposure) → Minutes (+1 Exposure) | 2 Cover every turn (blocks 2 of your damage; never stacks). Beaten: −1 Exposure |
+| The Patent Holder | Engine | 12 | Legal | — | Cease and Desist (must-play card in your next hand: 1 AP, does nothing) → New Patent Claim (an unplayable card takes a slot in your next hand) → Royalty (−$2 per Well/Field) | |
 | The Saboteur | Engine | 10 | Dirty | — | Wreck (destroys the marked Field or Well) → Lit Fuse (Bad Blood in your next hand) → Infiltrate (marks your best Field) | Moves first: Infiltrate. Beaten: starts a fire |
 | The Railroad Commission | Engine | 8 (a weak enemy) | Dirty | — | Proration (next turn pump 2 at most) → Inspection (−2 AP next turn) → Leaky Tanks (lose all stored oil and 25% of Capital) | |
-| **The Proxy Fight** (boss) | Boss | 26 | Legal | Dirty | Hostile Bid (−$3, +1 each cycle) → Proxy Meeting (does nothing) → The Vote (+1 Exposure, +1 each cycle) | Moves first: Canvass (+1 Exposure) |
+| **The Proxy Fight** (boss) | Boss | 26 | Legal | Dirty | Hostile Bid (−$6, +2 each cycle) → Proxy Meeting (does nothing) → The Vote (+1 Exposure, +1 each cycle) | Moves first: Canvass (+1 Exposure) |
 Round 2 modifiers in stage 2: Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown, Scandal (+1 Exposure). Dry Season is stage 1 only.
 
 ## Endings

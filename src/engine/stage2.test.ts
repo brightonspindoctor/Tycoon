@@ -139,13 +139,13 @@ describe('stage 2 economy', () => {
 })
 
 describe('Board Exposure', () => {
-  it('skimming is a card from stage 2: from $4 a gold, +1 Exposure each time', () => {
+  it('skimming is a card from stage 2: from $10 a gold, +1 Exposure each time', () => {
     let r = inStage2(['expenseAccount'])
     const cap = r.capital, gold = r.gold
-    expect(skimRate(r)).toBe(4)
+    expect(skimRate(r)).toBe(10)
     r = act(r, { type: 'play', cardId: inHand(r, 'expenseAccount').id })
     expect(r.gold).toBe(gold + 1)
-    expect(r.capital).toBe(cap - 4)
+    expect(r.capital).toBe(cap - 10)
     expect(r.exposure).toBe(1)
     r.phase = 'shop'
     const g = r.gold
@@ -213,7 +213,7 @@ describe('Board Exposure', () => {
   it('is high from 5', () => {
     const r = inStage2([], 'clawback')
     r.exposure = 4; r.threats[0].step = 0
-    expect(intentText(r, r.threats[0])).toMatch(/Lose \$4/)
+    expect(intentText(r, r.threats[0])).toMatch(/Lose \$8/)
     r.exposure = 5
     expect(intentText(r, r.threats[0])).toMatch(/takes 2 gold/)
   })
@@ -449,5 +449,19 @@ describe('fire in stage 2 comes from Bad Blood', () => {
     r.oil = 0; r.storage = 9
     r = act(r, { type: 'play', cardId: inHand(r, 'rdSprint').id })
     expect(r.oil).toBe(2)
+  })
+})
+
+describe('after the playtest', () => {
+  it('doubles the stage 2 cash attacks', () => {
+    expect([CONFIG.headline, CONFIG.squeeze, CONFIG.clawbackCash, CONFIG.royaltyPer, CONFIG.hostileBid]).toEqual([8, 6, 8, 2, 6])
+  })
+  it('never gives the Steam Pump for beating a boss', () => {
+    for (let seed = 1; seed < 60; seed++) {
+      let r = inStage2(['lawyerUp'], 'proxyFight', seed)
+      r.round = 4; r.threats[0].hold = 1
+      r = act(r, { type: 'play', cardId: inHand(r, 'lawyerUp').id })
+      expect(r.reward).not.toBe('steamPump')
+    }
   })
 })

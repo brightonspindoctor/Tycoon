@@ -31,7 +31,7 @@ export const CONFIG = {
   inspectorReserve: 12, // end a turn holding this much and the Inspector loses Hold
   inspectorReserveDamage: 2,
   skimRate: { 0: 1, 1: 1, 2: 2, 3: 3, 4: 4 } as Record<number, number>, // $ per gold, by round (stage 1)
-  skimRate2: { 0: 4, 1: 4, 2: 5, 3: 6, 4: 7 } as Record<number, number>, // stage 2: the Expense Account card, from $4 a gold
+  skimRate2: { 0: 10, 1: 10, 2: 12, 3: 14, 4: 16 } as Record<number, number>, // stage 2: the Expense Account card, from $10 a gold
   bossGold: 3, // gold for beating a stage's boss
   // stage 2
   stage2Loan: 10, // offered at incorporation
@@ -57,6 +57,12 @@ export const CONFIG = {
   dividendDrop: 2,
   upgradeCost: 3, // rises by $1 each time
   muckrakerGold: 1, // the Muckraker's Expose
+  headline: 8, // stage 2 cash attacks (doubled after the playtest)
+  squeeze: 6,
+  clawbackCash: 8,
+  royaltyPer: 2, // per Well and Field
+  hostileBid: 6, // the Proxy Fight, +hostileBidStep each cycle
+  hostileBidStep: 2,
   clawbackGold: 2, // the Clawback Committee, when Exposure is high
   inspectionAP: 2, // the Railroad Commission's Inspection takes this much AP next turn
   leakyTanksShare: 0.25, // Leaky Tanks: all your stored oil, and this share of your Capital
