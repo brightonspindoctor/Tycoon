@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import { CARDS } from '../engine/data'
 import { cardDef, type Card } from '../engine/engine'
 import { ERA_LABEL, ERA_THEME, units } from '../engine/format'
@@ -24,6 +25,20 @@ export function CardView({ card, apCost, playable = true, why, selected, onClick
   const builds = stage >= 2 && (card.key === 'well' || card.key === 'wildcat')
   const text = units(builds ? 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty.' : d.text, stage)
   const base = CARDS[card.key].uses
+  // a long text steps its font down until it fits the card's fixed text box
+  const effect = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const el = effect.current
+    if (!el) return
+    el.style.fontSize = ''; el.style.lineHeight = ''
+    if (el.closest('.m-hand')) return // the mobile hand lets its art shrink instead
+    let size = parseFloat(getComputedStyle(el).fontSize)
+    const floor = small ? 8 : 10.5
+    while (el.scrollHeight > el.clientHeight + 1 && size > floor) {
+      size -= 0.5
+      el.style.fontSize = `${size}px`; el.style.lineHeight = `${Math.round(size * 1.28)}px`
+    }
+  }, [text, small])
   return (
     <button type="button" className={cls.filter(Boolean).join(' ')} data-theme={ERA_THEME[era] ?? 'victorian'} onClick={onClick}
       aria-label={`${d.name}${ap !== null ? `, costs ${ap} AP` : ''}. ${text}${why ? ` (${why})` : ''}`} title={why}>
@@ -36,7 +51,7 @@ export function CardView({ card, apCost, playable = true, why, selected, onClick
       </div>
       <div className="cl-card__art"><img src={`${import.meta.env.BASE_URL}art/icons/${d.icon}.png`} alt="" draggable={false} /></div>
       <div className="cl-card__band">{d.family}<span className="cl-card__era"> · {ERA_LABEL[era]}</span></div>
-      <div className="cl-card__effect">{text}</div>
+      <div className="cl-card__effect" ref={effect}>{text}</div>
       <div className="cl-card__foot">
         <div className="cl-pips" aria-hidden="true">
           {d.oncePerRound ? <span className="cl-num card-once">1 / round</span> : card.uses === null ? <span className="cl-num">∞</span> : Array.from({ length: Math.max(card.uses, base ?? 0) }, (_, i) => <span key={i} className={`cl-pip ${i < card.uses! ? 'cl-pip--on' : ''}`} />)}
