@@ -10,6 +10,7 @@
     "test": "vitest run",
     "sim": "vite-node tools/sim.ts",
     "fuzz": "vite-node tools/fuzz.ts",
+    "audit": "vite-node tools/audit-enemies.ts",
     "lint": "eslint ."
   },
   "dependencies": {

@@ -23,16 +23,17 @@ function useCountUp(from: number, to: number, ms = 900, delay = 0): number {
   return v
 }
 
-function Row({ label, from, to, delay, fmt }: { label: string; from: number; to: number; delay: number; fmt: (n: number) => string }) {
+function Row({ label, from, to, delay, fmt, diffFmt = fmt, worseUp = false }: { label: string; from: number; to: number; delay: number; fmt: (n: number) => string; diffFmt?: (n: number) => string; worseUp?: boolean }) {
   const v = useCountUp(from, to, 900, delay)
   const diff = to - from
+  const good = worseUp ? diff < 0 : diff > 0 // for Exposure, down is good
   return (
     <li className="summary__row" style={{ animationDelay: `${delay}ms` }}>
       <span>{label}</span>
       <span className="cl-num summary__from">{fmt(from)}</span>
       <span className="summary__arrow">→</span>
       <b className="cl-num">{fmt(v)}</b>
-      <span className={`cl-num summary__diff ${diff < 0 ? 'cl-minus' : diff > 0 ? 'cl-plus' : ''}`}>{diff === 0 ? '—' : diff > 0 ? `+${fmt(diff)}` : `−${fmt(-diff)}`}</span>
+      <span className={`cl-num summary__diff ${diff === 0 ? '' : good ? 'cl-plus' : 'cl-minus'}`}>{diff === 0 ? '—' : diff > 0 ? `+${diffFmt(diff)}` : `−${diffFmt(-diff)}`}</span>
     </li>
   )
 }
@@ -59,7 +60,7 @@ export function RoundSummary({ run, onContinue, dispatch }: { run: Run; onContin
           <Row label={st >= 2 ? 'Wells and Fields' : 'Wells'} from={a.wells} to={b.wells} delay={1100} fmt={n => `${n}`} />
           <Row label="Oil in stock" from={a.oil} to={b.oil} delay={1400} fmt={n => `${n}`} />
           <Row label="Cards in deck" from={a.deck} to={b.deck} delay={1700} fmt={n => `${n}`} />
-          {st >= 2 && <Row label="Board Exposure" from={a.exposure} to={b.exposure} delay={2000} fmt={n => `${n}/${CONFIG.exposureMax}`} />}
+          {st >= 2 && <Row label="Board Exposure" from={a.exposure} to={b.exposure} delay={2000} fmt={n => `${n}/${CONFIG.exposureMax}`} diffFmt={n => `${n}`} worseUp />}
         </ul>
         {offered && (
           <section className="spoils" aria-label="Spoils">

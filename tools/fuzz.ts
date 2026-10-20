@@ -1,7 +1,7 @@
 // Rules fuzzer: plays thousands of runs with random (often silly) actions and checks,
 // after every single action, that the game never reaches an impossible state.
 // Run with: npm run fuzz
-import { act, canPlay, handTargetsFor, intent, intentText, newRun, targetsFor, type Action, type Run } from '../src/engine/engine'
+import { act, canPlay, handTargetsFor, intent, intentText, newRun, targetsFor, wellValue, type Action, type Run } from '../src/engine/engine'
 import { BONUSES, BOONS, CARDS, ITEMS, REWARDS, type BonusKey } from '../src/engine/data'
 import { CONFIG } from '../src/engine/config'
 import { botIncorporate, botShop, botTurn } from './bot'
@@ -21,7 +21,8 @@ function randomAction(r: Run): Action {
   }
   if (r.phase === 'shop') {
     const opts: Action[] = [{ type: 'leaveShop' }, { type: 'buyProspect' }, { type: 'buyBucket' }, { type: 'buyBoon' }, { type: 'buyItem' },
-      { type: 'takeLoan' }, { type: 'reroll' }, { type: 'skim', gold: 1 + Math.floor(rand() * 3) }, { type: 'buyCard', slot: Math.floor(rand() * 3) }, { type: 'payDividends' }]
+      { type: 'takeLoan' }, { type: 'reroll' }, { type: 'skim', gold: 1 + Math.floor(rand() * 3) }, { type: 'buyCard', slot: Math.floor(rand() * 3) }, { type: 'payDividends' }, { type: 'buySilo' }]
+    if (r.deck.length) opts.push({ type: 'duplicateCard', cardId: pick(r.deck).id })
     if (r.deck.length) { opts.push({ type: 'destroyCard', cardId: pick(r.deck).id }, { type: 'upgradeCard', cardId: pick(r.deck).id }) }
     return rand() < 0.25 ? { type: 'leaveShop' } : pick(opts)
   }
@@ -65,6 +66,8 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.fire < 0 || r.fire > CONFIG.fireMax) return `fire ${r.fire}`
   if (r.oil < 0 || r.oil > r.storage) return `oil ${r.oil} of ${r.storage}`
   if (r.plots.length > CONFIG.maxPlots) return `${r.plots.length} plots`
+  for (const w of r.plots) if (w && wellValue(w) <= 0) return `a plot that sells for nothing: ${JSON.stringify(w)}`
+  if (a.type === 'duplicateCard' && r.phase === 'shop' && r.shop.duplicated && !prev.shop.duplicated && r.deck.length !== prev.deck.length + 1) return 'duplicate did not add exactly one card'
   for (const w of r.plots) if (w && ((!w.field && !w.lasting && w.reserve <= 0) || w.output <= 0)) return `well ${JSON.stringify(w)}`
   if (r.gold < 0 && !(r.phase === 'lost' && r.loss?.reason === 'ruined')) return `gold ${r.gold}`
   if (r.gold < 0 && r.phase !== 'lost') return `gold ${r.gold} but still playing`

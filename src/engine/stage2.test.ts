@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, canPlay, cardDef, incorporate, intentText, netPrice, newRun, production, skimRate, type Card, type Run } from './engine'
+import { act, canPlay, cardDef, incorporate, intentText, netPrice, newRun, production, skimRate, wellValue, type Card, type Run } from './engine'
 import { CONFIG } from './config'
 import { CARDS, ITEMS, THREATS, type CardKey, type ThreatKind } from './data'
 
@@ -468,5 +468,14 @@ describe('after the playtest', () => {
       r = act(r, { type: 'play', cardId: inHand(r, 'lawyerUp').id })
       expect(r.reward).not.toBe('steamPump')
     }
+  })
+})
+
+describe('selling stage 2 Wells', () => {
+  it('a stage 2 Well (never dry) sells for the Field price, not $0', () => {
+    const lasting = { output: 1, reserve: 0, lasting: true }
+    expect(wellValue(lasting)).toBe(CONFIG.fieldValue)
+    expect(wellValue({ output: 1, reserve: 0, field: true })).toBe(CONFIG.fieldValue)
+    expect(wellValue({ output: 1, reserve: 5 })).toBe(5 * CONFIG.sellPerBarrel)
   })
 })

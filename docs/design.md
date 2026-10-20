@@ -86,7 +86,7 @@ Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtow
 ### Incorporation (between stages)
 Beating the Baron pays **3 gold** (every boss does). Then the company incorporates:
 - A page-turn transition: the Victorian ledger page lifts away, the year rolls 1890 → 1901, INCORPORATED is stamped (tap to skip). Then the Incorporated screen.
-- Every standing Well becomes a **Field**: 1 oil a turn, never runs dry. Unstable is cleared. A Field sells for $8.
+- Every standing Well becomes a **Field**: 1 oil a turn, never runs dry. Unstable is cleared. A Field, like any stage 2 Well, sells for $8.
 - **Prospecting is over.** Every Prospect left in your deck becomes a **Worn Prospect** (2 AP: 1 Well card). A **Steel Derrick**, a **Pay a Dividend** and an **Expense Account** join your deck.
 - The bank offers a **10K loan**: +$10K now, Bank Debt +$1K a turn for good. Take it or leave it.
 - You can **upgrade** cards (from $3, rising $1 each time; once per card) and **destroy** cards (the usual rising price).

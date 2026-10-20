@@ -812,8 +812,8 @@ function sellOil(r: Run) {
   money(r, `Sold ${n} oil @ $${each}`, n * each)
 }
 
-/** What a Well sells for: $1 for every barrel still in it. */
-export const wellValue = (w: Well) => (w.field ? CONFIG.fieldValue : w.reserve * CONFIG.sellPerBarrel)
+/** What a Well sells for: $1 for every barrel still in it; a Field or a stage 2 Well (never dry) has a set price. */
+export const wellValue = (w: Well) => (neverDry(w) ? CONFIG.fieldValue : w.reserve * CONFIG.sellPerBarrel)
 
 function sellWell(r: Run, plot: number) {
   const w = r.plots[plot]
@@ -821,7 +821,7 @@ function sellWell(r: Run, plot: number) {
   r.ap -= 1
   const value = wellValue(w)
   loseWell(r, plot, 'lost')
-  money(r, w.field ? `Sold Field No. ${plot + 1}` : `Sold Well No. ${plot + 1} (${w.reserve} bbl left)`, value)
+  money(r, w.field ? `Sold Field No. ${plot + 1}` : neverDry(w) ? `Sold Well No. ${plot + 1}` : `Sold Well No. ${plot + 1} (${w.reserve} bbl left)`, value)
 }
 
 /** The Well a Firebreak costs you: the lowest output, then the fewest barrels left. */
