@@ -716,3 +716,24 @@ describe('quitting a run', () => {
     expect(lossStreak([rec('Quit'), rec('Quit')])).toBe(0)
   })
 })
+
+describe('The Blowout', () => {
+  it('Blow destroys the Well the Rumble shook, and shakes nothing else', () => {
+    let r = newRun(26, 'threeOil'); r.capital = 50
+    r.threats = [{ id: 901, kind: 'blowout', hold: 3, maxHold: 5, step: 2, cycle: 0, round3: false, beaten: false }] // next: Blow
+    r.plots = [{ output: 1, reserve: 6, unstable: true }, { output: 1, reserve: 6 }, { output: 1, reserve: 6, unstable: true }]
+    expect(intentText(r, r.threats[0])).toBe('Well No. 3 is destroyed. +2 Hold.')
+    r = act(r, { type: 'endTurn' })
+    expect(r.plots[2]).toBeNull()
+    expect(r.plots.map(w => !!w?.unstable)).toEqual([true, false, false])
+    expect(r.threats[0].hold).toBe(5)
+  })
+  it('Blow with nothing shaking does nothing', () => {
+    let r = newRun(27, 'threeOil'); r.capital = 50
+    r.threats = [{ id: 902, kind: 'blowout', hold: 5, maxHold: 5, step: 2, cycle: 0, round3: false, beaten: false }]
+    r.plots = [{ output: 1, reserve: 6 }, { output: 1, reserve: 6 }]
+    r = act(r, { type: 'endTurn' })
+    expect(r.plots.filter(Boolean).length).toBe(2)
+    expect(r.plots.some(w => w?.unstable)).toBe(false)
+  })
+})
