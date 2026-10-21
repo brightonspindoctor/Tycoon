@@ -155,7 +155,7 @@ Money is in millions ($M). Rounds are 1970, 1973, 1976 and 1979. The shop is **t
 ### Going multinational (between stages)
 Winning the Proxy Fight pays 3 gold, then a page-turn to 1970 stamped MULTINATIONAL, then the Multinational screen:
 - Every Field and Well becomes an **offshore Rig**: 1 oil a turn, never runs dry, sells for $10. Empty plots go. At most 5 Rigs.
-- **The old deck is nearly useless.** Land cards (Prospects, Surveys, Steel Derricks, Well cards, Rotary Rig) become **Dry Leases** (1 AP, do nothing). Fire and board cards (Bucket, Fire Brigade, Shore Up, Pay a Dividend) become **Dead Weight** (unplayable). Old attacks **fade** to 1 Hold, old Cover cards to 1 Cover, Dividends to $1; faded cards lose their upgrade and can't be upgraded or duplicated. Draw, AP and skim cards are unchanged. Bad Blood is gone (no fires in stage 3).
+- **Some old cards turn to junk.** Land cards (Prospects, Surveys, Steel Derricks, Well cards, Rotary Rig) become **Dry Leases** (1 AP, do nothing, destroyed once played). Fire and board cards (Bucket, Fire Brigade, Shore Up, Pay a Dividend) become **Dead Weight** (unplayable). Every other old card works exactly as before, upgrades included; stage 3 enemies are simply far tougher. Bad Blood is gone (no fires in stage 3).
 - **Bury Evidence**, **Lobby Congress** and **Bribe an Official** join your deck.
 - **The Oil Shock**: +$15M now, but start the stage at 15 Heat. Take it or leave it.
 - Upgrade and destroy cards, as at incorporation. Stage 2's residue applies (Board Grudge takes $1M every shop visit, never your last; Loyal Directors gives +1 AP against the summit).

@@ -133,7 +133,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
         <HeatMeter run={run} compact lit={acting?.kind === 'board'} />
 
         <section aria-label="Your field">
-          <div className="m-label"><span className="cl-label">Your {st >= 2 ? 'fields' : 'field'} · {FIELD_PLACE[st] ?? FIELD_PLACE[1]}</span>{run.current.prorate && <span className="cl-label cl-minus">Prorated</span>}{run.fire > 0 && <span className="cl-label field__fireway">Fire burns ←</span>}</div>
+          <div className="m-label"><span className="cl-label">Your {st >= 3 ? 'rigs' : st >= 2 ? 'fields' : 'field'} · {FIELD_PLACE[st] ?? FIELD_PLACE[1]}</span>{run.current.prorate && <span className="cl-label cl-minus">Prorated</span>}{run.fire > 0 && <span className="cl-label field__fireway">Fire burns ←</span>}</div>
           <div className="m-field">
             {run.plots.length === 0 && <div className="m-plot m-plot--none">{st >= 3 ? 'No Rigs. Build one at the Trading Floor.' : st >= 2 ? 'No land. Play a Survey to claim a plot.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
             {run.plots.map((w, i) => {
@@ -141,7 +141,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
               const burning = burnsWell && i === lastWell
               const state = !w ? 'Empty' : w.unstable ? (st >= 2 ? 'Shut in' : 'Unstable') : run.fire ? 'Stopped' : `${w.output} oil`
               return (
-                <div key={i} className={`m-plot ${!w ? 'plot--empty' : ''} ${w?.field ? 'plot--field' : ''} ${w?.unstable ? 'plot--unstable' : ''} ${marked ? 'plot--marked' : ''} ${burning ? 'plot--burning' : ''} ${run.fire && w ? 'plot--stopped' : ''}`}>
+                <div key={i} className={`m-plot ${!w ? 'plot--empty' : ''} ${w?.field || w?.rig ? 'plot--field' : ''} ${w?.rig ? 'plot--rig' : ''} ${w?.unstable ? 'plot--unstable' : ''} ${marked ? 'plot--marked' : ''} ${burning ? 'plot--burning' : ''} ${run.fire && w ? 'plot--stopped' : ''}`}>
                   <span className="m-plot__no cl-num">{i + 1}</span>
                   {w ? (
                     <button type="button" className="plot__well" onClick={() => { setSelected(null); setPlotMenu(plotMenu === i ? null : i) }} aria-label={`${plotName(run, i)}, ${state}. Tap to sell`}>

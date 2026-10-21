@@ -84,7 +84,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
         </section>
 
         <section className="col-field" aria-label="Your field">
-          <div className="field__label"><span className="cl-label">Your {st >= 2 ? 'fields' : 'field'} · {FIELD_PLACE[st] ?? FIELD_PLACE[1]}</span>{run.current.prorate && <span className="cl-label cl-minus">Prorated: {CONFIG.prorationCap} oil a turn at most</span>}{run.fire > 0 && <span className="cl-label field__fireway">Fire burns ←</span>}</div>
+          <div className="field__label"><span className="cl-label">Your {st >= 3 ? 'rigs' : st >= 2 ? 'fields' : 'field'} · {FIELD_PLACE[st] ?? FIELD_PLACE[1]}</span>{run.current.prorate && <span className="cl-label cl-minus">Prorated: {CONFIG.prorationCap} oil a turn at most</span>}{run.fire > 0 && <span className="cl-label field__fireway">Fire burns ←</span>}</div>
           <div className="field">
             {run.plots.length === 0 && <div className="plot plot--empty-field">{st >= 3 ? 'No Rigs. Build one at the Trading Floor.' : st >= 2 ? 'No land. Play a Survey to claim a plot.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
             {run.plots.map((w, i) => {

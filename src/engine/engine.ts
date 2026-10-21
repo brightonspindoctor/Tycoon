@@ -1289,7 +1289,7 @@ export function incorporate(r: Run) {
 }
 /**
  * Stage 2 → 3: the company goes multinational. Every Field and Well becomes an offshore Rig,
- * old cards fade (land cards dry up, fire and board cards are dead weight, attacks hit for 1),
+ * land cards dry up and fire and board cards are dead weight (everything else works as before),
  * Heat arrives, and the Oil Shock is on the table.
  */
 export function goMultinational(r: Run) {
@@ -1300,9 +1300,9 @@ export function goMultinational(r: Run) {
   r.plots = r.plots.filter(Boolean).slice(0, CONFIG.maxPlots).map(() => ({ output: CONFIG.rigOutput, reserve: 0, rig: true }))
   r.deck = r.deck.filter(c => c.key !== 'badBlood' && !c.temp) // no fires in stage 3
   for (const c of r.deck) {
-    if (TO_DRY_LEASE.includes(c.key)) { c.key = 'dryLease'; c.uses = null; c.up = false }
+    if (TO_DRY_LEASE.includes(c.key)) { c.key = 'dryLease'; c.uses = CARDS.dryLease.uses; c.up = false }
     else if (TO_DEAD_WEIGHT.includes(c.key)) { c.key = 'deadWeight'; c.uses = null; c.up = false }
-    else if (!CARDS[c.key].junk && (CARDS[c.key].era ?? 1) < 3 && fadedDef(cardDef(c)) !== cardDef(c)) { c.faded = true; c.up = false } // only cards that actually weaken
+    // every other old card keeps working exactly as before
   }
   for (const k of STAGE3_CARDS) r.deck.push(card(r, k))
   r.prospectPrice = CONFIG.rigPrice

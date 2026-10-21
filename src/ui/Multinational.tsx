@@ -1,5 +1,5 @@
-// Between stage 2 and 3: the company goes multinational. Fields become offshore Rigs, the
-// old cards fade, Heat arrives, and the Oil Shock is on the table. Upgrade and destroy here too.
+// Between stage 2 and 3: the company goes multinational. Fields become offshore Rigs, old
+// land, fire and board cards turn to junk, Heat arrives, and the Oil Shock is on the table. Upgrade and destroy here too.
 import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { CARDS } from '../engine/data'
@@ -19,7 +19,6 @@ export function MultinationalScreen({ run, dispatch }: { run: Run; dispatch: (a:
   const can = (cost: number) => run.capital - cost >= 1
   const rigs = rigCount(run)
   const dead = run.deck.filter(c => CARDS[c.key].junk && !CARDS[c.key].forced).length
-  const faded = run.deck.filter(c => c.faded).length
 
   return (
     <div className="screen shop incorporate multinational" data-theme="seventies">
@@ -35,9 +34,8 @@ export function MultinationalScreen({ run, dispatch }: { run: Run; dispatch: (a:
       <div className="shop__grid">
         <div className="shop__main">
           <section className="end__tiles incorporate__tiles" aria-label="What carried over">
-            <div className="tile"><span className="cl-label">Rigs</span><b className="cl-num">{rigs} / {CONFIG.maxPlots}</b><span className="res-note">{rigs ? `Your Fields are now offshore Rigs: ${CONFIG.rigOutput} oil a turn, never dry.` : 'No Fields were standing.'} Buy more at the Trading Floor.</span></div>
-            <div className="tile"><span className="cl-label">The old stock</span><b className="cl-num">{dead + faded} cards</b><span className="res-note">{dead ? `${dead} are now Dead Weight or Dry Leases. ` : ''}{faded ? `${faded} have faded: old attacks remove 1 Hold.` : ''} Destroy them, or play around them.</span></div>
-            <div className="tile"><span className="cl-label">New in your deck</span><b className="cl-num">3 cards</b><span className="res-note">Bury Evidence, Lobby Congress and Bribe an Official. Oil sells at {m(CONFIG.oilPrice3)}.</span></div>
+            <div className="tile"><span className="cl-label">Rigs</span><b className="cl-num">{rigs} / {CONFIG.maxPlots}</b></div>
+            <div className="tile"><span className="cl-label">Dead Weight and Dry Leases</span><b className="cl-num">{dead} cards</b></div>
           </section>
 
           <section className="incorporate__board">
@@ -55,7 +53,7 @@ export function MultinationalScreen({ run, dispatch }: { run: Run; dispatch: (a:
             <div className="cl-slot slot">
               <span className="cl-tag">{m(run.upgradeCost)}</span>
               <div className="cl-slot__name">Upgrade a card</div>
-              <div className="cl-slot__desc">Once per card. Faded cards can't be upgraded.</div>
+              <div className="cl-slot__desc">Once per card. The price rises each time.</div>
               <button type="button" className="cl-btn" disabled={!can(run.upgradeCost) || !run.deck.some(canUpgrade)} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
             </div>
             <div className="cl-slot slot">

@@ -57,7 +57,7 @@ export function RoundSummary({ run, onContinue, dispatch }: { run: Run; onContin
         <ul className="summary__rows">
           <Row label="Capital" from={a.capital} to={b.capital} delay={500} fmt={m} />
           <Row label="Your fortune (gold)" from={a.gold} to={b.gold} delay={800} fmt={n => `${n}`} />
-          <Row label={st >= 2 ? 'Wells and Fields' : 'Wells'} from={a.wells} to={b.wells} delay={1100} fmt={n => `${n}`} />
+          <Row label={st >= 3 ? 'Rigs' : st >= 2 ? 'Wells and Fields' : 'Wells'} from={a.wells} to={b.wells} delay={1100} fmt={n => `${n}`} />
           <Row label="Oil in stock" from={a.oil} to={b.oil} delay={1400} fmt={n => `${n}`} />
           <Row label="Cards in deck" from={a.deck} to={b.deck} delay={1700} fmt={n => `${n}`} />
           {st >= 2 && <Row label="Board Exposure" from={a.exposure} to={b.exposure} delay={2000} fmt={n => `${n}/${CONFIG.exposureMax}`} diffFmt={n => `${n}`} worseUp />}

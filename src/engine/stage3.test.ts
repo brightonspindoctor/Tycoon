@@ -48,16 +48,22 @@ describe('going multinational (stage 2 → 3)', () => {
     expect(keys).not.toContain('badBlood') // no fires in stage 3
   })
 
-  it('fades old attacks to 1 Hold and old Cover to 1, and takes their upgrades away', () => {
+  it('leaves every other old card exactly as it was, upgrades and all', () => {
     const r = act(afterProxyFight(), { type: 'continue' })
     const lawyer = r.deck.find(c => c.key === 'lawyerUp')!
-    expect(lawyer.faded).toBe(true)
-    expect(lawyer.up).toBeFalsy()
-    expect(cardDef(lawyer).power).toBe(1)
-    expect(cardDef(r.deck.find(c => c.key === 'insurance')!).cover).toBe(1)
-    // cards that don't weaken aren't marked
-    expect(r.deck.find(c => c.key === 'telegraphLine')!.faded).toBeFalsy()
-    expect(r.deck.find(c => c.key === 'hardGraft')!.faded).toBeFalsy()
+    expect(lawyer.faded).toBeFalsy()
+    expect(lawyer.up).toBe(true)
+    expect(cardDef(lawyer).power).toBe(cardDef({ key: 'lawyerUp', up: true }).power)
+    expect(cardDef(r.deck.find(c => c.key === 'insurance')!).cover).toBe(CARDS.insurance.cover)
+    expect(r.deck.some(c => c.faded)).toBe(false)
+  })
+
+  it('a Dry Lease is destroyed once it is played', () => {
+    const r = inStage3(['dryLease'])
+    const lease = inHand(r, 'dryLease')
+    const after = act(r, { type: 'play', cardId: lease.id })
+    expect(after.deck.some(c => c.id === lease.id)).toBe(false)
+    expect(after.ap).toBe(r.ap - 1)
   })
 
   it('adds Bury Evidence, Lobby Congress and Bribe an Official, and starts Heat at 0', () => {

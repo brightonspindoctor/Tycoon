@@ -179,8 +179,8 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $2. Remove 7 Hold.', flavour: 'Billed in six-minute units.' },
   deadWeight: { name: 'Dead Weight', era: 3, ap: null, cost: 0, uses: null, family: 'Junk', power: 0, junk: true, icon: 'deadWeight',
     text: "Can't be played. Does nothing.", flavour: 'It worked in its day.' },
-  dryLease: { name: 'Dry Lease', era: 3, ap: 1, cost: 0, uses: null, family: 'Junk', power: 0, junk: true, icon: 'dryLease',
-    text: 'Does nothing.', flavour: 'The land is still yours. The oil is not.' },
+  dryLease: { name: 'Dry Lease', era: 3, ap: 1, cost: 0, uses: 1, family: 'Junk', power: 0, junk: true, icon: 'dryLease',
+    text: "Does nothing. Then it's gone.", flavour: 'The land is still yours. The oil is not.' },
   draftDeclaration: { name: 'Draft Declaration', era: 3, ap: 1, cost: 0, uses: 1, family: 'Junk', power: 0, forced: true, junk: true, icon: 'draftDeclaration',
     text: "Must play. Does nothing. Then it's gone.", flavour: 'Paragraph 4, sub-clause (c), bracketed.' },
 }

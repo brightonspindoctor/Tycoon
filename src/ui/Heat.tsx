@@ -7,7 +7,6 @@ export function HeatMeter({ run, compact, lit }: { run: Run; compact?: boolean; 
   if (run.stage !== 3) return null
   const h = run.heat
   const high = h >= CONFIG.heatHigh
-  const apLeft = Math.floor((CONFIG.heatMax - h - 1) / CONFIG.heatPerAP)
   return (
     <section className={`heat ${compact ? 'heat--compact' : ''} ${high ? 'is-high' : ''} ${lit ? 'is-acting' : ''}`} aria-label={`Heat ${h} of ${CONFIG.heatMax}`}>
       <div className="heat__head">
@@ -19,7 +18,6 @@ export function HeatMeter({ run, compact, lit }: { run: Run; compact?: boolean; 
         <span className="heat__mark" style={{ left: `${(CONFIG.heatLow / CONFIG.heatMax) * 100}%` }} />
         <span className="heat__mark heat__mark--hot" style={{ left: `${(CONFIG.heatHigh / CONFIG.heatMax) * 100}%` }} />
       </div>
-      {!compact && <span className="res-note">Every AP you spend: +{CONFIG.heatPerAP}. About {Math.max(0, apLeft)} AP left before you're broken up at {CONFIG.heatMax}. Lobbying cools it.</span>}
     </section>
   )
 }
