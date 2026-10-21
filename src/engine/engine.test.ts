@@ -696,16 +696,28 @@ describe('the Blowout', () => {
 })
 
 describe('Shore Up limit', () => {
-  it('only one Shore Up can be played each round, however many you own', () => {
+  it('each copy plays once per round, leaves the piles, and comes back next round', () => {
     let r = newRun(25, 'threeOil'); r.capital = 50
     r.threats = [{ id: 900, kind: 'inspector', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false },
       { id: 901, kind: 'railroad', hold: 50, maxHold: 50, step: 0, cycle: 0, round3: false, beaten: false }]
     const a = r.deck.find(c => c.key === 'shoreUp')!, b = { id: 8700, key: 'shoreUp' as const, uses: null }
     r.deck.push(b); r.hand = [a, b]; r.ap = 2
     r = act(r, { type: 'play', cardId: a.id, target: 900 })
-    expect(canPlay(r, r.hand.find(c => c.id === 8700)!).ok).toBe(false)
-    r.phase = 'shop'; r.round = 1; r = act(r, { type: 'leaveShop' }) // next round: allowed again
-    expect(r.shoredUp).toBe(false)
+    // a second copy can still be played this round
+    expect(canPlay(r, r.hand.find(c => c.id === 8700)!).ok).toBe(true)
+    r = act(r, { type: 'play', cardId: 8700, target: 901 })
+    const inPiles = (x: Run, id: number) => [...x.hand, ...x.draw, ...x.discard].some(c => c.id === id)
+    expect(inPiles(r, a.id)).toBe(false)
+    expect(inPiles(r, 8700)).toBe(false)
+    // not back after a reshuffle in the same round
+    for (let i = 0; i < 4 && r.phase === 'turn' && r.round === 1; i++) {
+      r = act(r, { type: 'endTurn' })
+      if (r.phase === 'turn' && r.round === 1) { expect(inPiles(r, a.id)).toBe(false); expect(inPiles(r, 8700)).toBe(false) }
+    }
+    // next round: both are back in the deck's piles
+    r.phase = 'shop'; r.round = 1; r = act(r, { type: 'leaveShop' })
+    expect(inPiles(r, a.id)).toBe(true)
+    expect(inPiles(r, 8700)).toBe(true)
   })
 })
 

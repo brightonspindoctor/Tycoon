@@ -73,7 +73,6 @@ export interface Run {
   spoils: CardKey | null // the card offered after a round is won
   report: Beat[] // what happened since you last acted, in order
   reportSeq: number // goes up each time a new report starts
-  shoredUp: boolean // a Shore Up has been played this round (only one per round, however many you own)
   exposure: number // Board Exposure, 0 to exposureMax (stage 2 only)
   goldShield: boolean // a Personal Lawyer is guarding your fortune this turn
   boost: number // oil sells this much more this turn (Ticker Tape)
@@ -363,7 +362,7 @@ export function newRun(seed: number, bonus: BonusKey): Run {
     shop: { cards: [], item: null, loanTaken: false, prospectSold: false, bucketSold: false, boon: null, dividendPaid: false }, ledger: [], events: [],
     stats: { oilSold: 0, earned: 0, spent: 0, wellsBuilt: 0, wellsBurnt: 0, wellsStolen: 0, wellsLost: 0, wellsDry: 0, skims: 0 },
     roundStart: { capital: CONFIG.startCapital, gold: 0, wells: 0, oil: 0, deck: 0, exposure: 0 },
-    boon: null, reward: null, tempStorage: 0, spoils: null, report: [], reportSeq: 0, shoredUp: false,
+    boon: null, reward: null, tempStorage: 0, spoils: null, report: [], reportSeq: 0,
     exposure: 0, goldShield: false, boost: 0, upgradeCost: CONFIG.upgradeCost, residue: null, stageGold: 0,
     heat: 0, roundBoost: 0, shredded: false,
   }
@@ -574,7 +573,6 @@ function startRound(r: Run, round: number) {
   r.phase = 'turn'
   r.events = []
   r.cover = 0
-  r.shoredUp = false
   newReport(r)
   for (const t of r.threats) { say(r, `${THREATS[t.kind].name} arrives.`); beat(r, 'enemy', `Round ${round}`, `${THREATS[t.kind].name} arrives.`, t.id) }
   if (r.modifier) { say(r, `${MODS[r.modifier].name}: ${MODS[r.modifier].text}.`); beat(r, 'info', MODS[r.modifier].name, `${MODS[r.modifier].text}.`) }
@@ -821,7 +819,6 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (BUILDS.includes(c.key) && !canBuild(r)) return { ok: false, why: 'No free plot' }
   if ((c.key === 'bucket' || c.key === 'fireBrigade' ) && !r.fire) return { ok: false, why: 'No fire' }
   if (d.family === 'Skim' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
-  if (d.stop && r.shoredUp) return { ok: false, why: 'Once per round' }
   if (d.stop && !liveThreats(r).length) return { ok: false, why: 'No enemies left' }
   if (d.stop && !targetsFor(r, c).length) return { ok: false, why: 'Every move is already stopped' }
   if (c.key === 'pettyCash' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
@@ -874,7 +871,6 @@ function play(r: Run, cardId: number, target?: number) {
     const options = targetsFor(r, c)
     const t = options.find(x => x.id === target) ?? options[0]
     spendCard(r, c)
-    r.shoredUp = true
     t.stopped = true
     if (d.cover) r.cover += d.cover
     say(r, `${d.name}: ${THREATS[t.kind].name}'s ${intent(r, t)} is stopped this turn.`)
