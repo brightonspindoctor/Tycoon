@@ -157,17 +157,18 @@ Round 2 modifiers in stage 2: Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomto
 - **No Bank Debt** in stage 3. The only clock is Heat.
 - Heat starts at 0, +5 for every 3 gold skimmed in stage 2, up to 15.
 - **Fading:** Bucket of Water and Fire Brigade become **Dead Weight** (unplayable, takes a hand slot). Well cards, Steel Derricks, Surveys and Worn Prospects become **Dry Lease** (1 AP, does nothing). Pay a Dividend becomes Heat −3. Stage 1 and 2 attacks keep their strength; stage 3 enemies are simply far tougher.
-- **Bury Evidence**, **Lobbying** and **Buy Out** join your deck.
+- **Pick 2 new cards** from 4 on offer: Bury Evidence, Lobbying, Buy Out and Advertorial. The 2 you leave are on sale at the first Trading Floor visit.
 - Upgrade and destroy cards, as in stage 2. In stage 3 a card can be upgraded **twice** (++).
 
 ### Economy
 - Oil sells at **$5M**. **Selling oil costs 2 AP.** Storage tops out at 12, so one sale pays $60M at most before boosts.
-- Skimming (Expense Account) costs **$30M a gold**, rising $30M, $30M, $35M, $40M, $45M by round.
+- Skimming (Expense Account) costs **$20M a gold**, by round $20M, $20M, $24M, $28M, $32M.
 - The shop is **the Trading Floor**: a **Rig** every visit (from $30M, +$10M each time, built at once, 5 at most), 3 stage 3 cards, 1 item, Destroy (from $10M, +$5M), Upgrade (from $10M, +$5M), Duplicate, Reroll, and **Lobby Congress** ($25M: Heat −10, once a visit).
 - **Oil Shock** ($15M, the shop sells only one per run): a single-use card, 0 AP. Your next sale this turn pays double.
 
 ### Heat (0 to 100)
 - Every AP spent adds 2 Heat. Climate Science, the Spill, the Bribery Scandal and the boss add Heat directly. Lobby cards take it away.
+- **Cover blocks Heat** in stage 3 as well as Capital loss: 1 Cover stops 1 Heat from an enemy (not the Heat from spending AP). Cover resets each turn, as before.
 - **At 100: broken up.** Heat never resets within the stage.
 - **Residue:** 70+ at the end of stage 3 leaves **On File** (The Truth starts 1 step further on); 30 or less leaves **Clean Image** (the first greenwash card each round costs 1 less).
 
@@ -179,7 +180,7 @@ Legal and Dirty as before, plus **Lobby** (every Lobby card also lowers Heat) an
 |---|---|---|
 | Bury Evidence | 1 AP | Dirty, remove 7 Hold |
 | Legal Team | 1 AP, $3M | Legal, remove 8 Hold |
-| Lobbying | 1 AP, $5M | Lobby, remove 10 Hold. Heat −6 |
+| Lobbying | 1 AP, $6M | Lobby, remove 9 Hold. Heat −6 |
 | Campaign Contribution | 0 AP, 1 gold | Lobby, remove 8 Hold. Heat −3 |
 | Buy Out | 1 AP, $8M | Buy Out, remove 14 Hold |
 | Embargo Rumours | 1 AP | Oil +$1M a barrel this turn |
@@ -191,8 +192,9 @@ Legal and Dirty as before, plus **Lobby** (every Lobby card also lowers Heat) an
 | Personal Guarantee | 1 AP | −1 gold, +$6M |
 | Dip into the Trust | 0 AP | −3 gold, +$20M. Single use |
 | Oil Shock | 0 AP | Your next sale this turn pays double. Single use; one per run |
+| Advertorial | 1 AP, $4M | +6 Cover |
 Ticker Tape carries over from stage 2. Second upgrades repeat the first upgrade's gain.
-Items: Rolodex (+1 hand size, 7 at most), Paper Shredder (once a round, destroy a card in hand for free), Supertanker (+4 storage).
+Items: Rolodex (+1 hand size, 7 at most), Paper Shredder (once a round, destroy a card in hand for free), Supertanker (+4 storage), Think Tank ($15M: +3 Cover every turn).
 
 ### Stage 3 enemies
 | Enemy | Role | Hold | Weak | Resists | Cycle | Notes |
@@ -202,7 +204,8 @@ Items: Rolodex (+1 hand size, 7 at most), Paper Shredder (once a round, destroy 
 | Climate Science | Engine | 31 | Dirty | Buy Out (immune) | Measure (+4 Heat) → Publish (+6 Heat, +2 each cycle) → Inconvenient Data (must play: 1 AP, does nothing) | Beaten: Heat −5 |
 | Diversified Assets | Cash | 27 | Legal | — | Acquisition (a Subsidiary joins your deck: must play, 0 AP, −$2M) → Losses (−$4M; −$8M from round 2) → Board Meeting (−1 AP next turn) | Each card you destroy while it's in play removes 3 of its Hold. Beaten: +$10M |
 | The Bribery Scandal | Cash | 28 | Legal | Lobby | Leak (−1 gold) → Hearings (+5 Heat) → Indictment (−2 gold) | Every gold you spend while it's in play adds 2 Hold |
-| **The Geneva Climate Summit** (boss) | Boss | 47 | Lobby | Buy Out (immune) | Expert Testimony (+6 Heat, +2 each cycle) → Draft Declaration (must play: 2 AP, does nothing) → Resolution (−$8M, +$4M each cycle) | Moves first: Opening Session (+5 Heat). Beaten: 3 gold and Further Research Needed (The Truth moves more slowly in stage 4's first round) |
+| **The Geneva Climate Summit** (boss) | Boss | 47 | — | Buy Out (immune) | Expert Testimony (+6 Heat, +2 each cycle) → Draft Declaration (must play: 2 AP, does nothing) → Resolution (−$8M, +$4M each cycle) | Moves first: Opening Session (+5 Heat). Beaten: 3 gold and Further Research Needed (The Truth moves more slowly in stage 4's first round) |
+**Every enemy move also takes Capital**, on top of its effect: Spill $2M, Rival Company $3M, Climate Science $1M, Diversified Assets $3M, Bribery Scandal $2M, the Summit $3M. Cover blocks it.
 Round 2 modifiers: Oil Shock (oil +$2M), Recession (oil −$1M), Windfall Tax (sales pay $1M less a barrel), Earth Day (+8 Heat), Gas Lines (the first sale each turn pays +$1M a barrel).
 Before the boss (1 gold): Hush Money (Heat −10), Spare Tanker (+4 storage for the boss round) or Junket (+1 AP on the first boss turn).
 
