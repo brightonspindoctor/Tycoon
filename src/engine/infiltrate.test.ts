@@ -16,7 +16,7 @@ const hold = (r: Run) => r.threats[0].hold
 describe('Infiltrate', () => {
   it('is sold in the stage 1 shop and costs 2 AP', () => {
     expect(SHOP_POOL).toContain('infiltrate')
-    let r = setup(); r.ap = 1
+    const r = setup(); r.ap = 1
     expect(canPlay(r, r.hand[0]).ok).toBe(false)
   })
 

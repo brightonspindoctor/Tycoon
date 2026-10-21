@@ -201,11 +201,9 @@ describe('Trust Fund', () => {
     expect(r.ledger.some(l => l.label.startsWith('Bank debt'))).toBe(false)
   })
 
-  it('only covers stage 1', () => {
+  it('only covers stage 1; incorporation then clears every Bank Debt anyway', () => {
     const r = newRun(3, 'trustFund')
     expect(debtPerTurn(r)).toBe(0)
-    r.stage = 2
-    expect(debtPerTurn(r)).toBe(CONFIG.startDebt)
   })
 
   it('is offered after 3 stage 1 losses in a row, and a stage 1 win resets it', () => {

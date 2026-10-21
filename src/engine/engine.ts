@@ -81,6 +81,7 @@ export interface Run {
   goldShield: boolean // a Personal Lawyer is guarding your fortune this turn
   boost: number // oil sells this much more this turn (Ticker Tape)
   upgradeCost: number
+  duplicateCost?: number // incorporation: rises with each duplicate
   residue: ItemKey | null // left behind by the stage's meter
   stageGold: number // gold at the start of this stage
   silos?: number // Exchange Silos built (at most silo2Max)
@@ -199,7 +200,6 @@ export const freight = (r: Run) => r.freight
 export function debtPerTurn(r: Run): number {
   if (r.stage >= 3) return 0 // no Bank Debt in stage 3: Heat is the clock
   let d = r.debt
-  if (r.bonus === 'trustFund' && r.stage > 1) d += CONFIG.startDebt // Father's money only covers stage 1
   if (r.modifier === 'bankSqueeze' || r.modifier === 'boomtown') d += 1
   return d
 }
@@ -491,8 +491,16 @@ function shopAction(r: Run, a: Action) {
       return
     case 'duplicateCard': {
       const c = r.deck.find(x => x.id === a.cardId)
-      if (!c || r.stage < 2 || r.phase !== 'shop' || r.shop.duplicated || !canDuplicate(c) || !pay(r, CARDS[c.key].price!, `Duplicate ${CARDS[c.key].name}`)) return
-      r.deck.push({ ...card(r, c.key), up: c.up, up2: c.up2, uses: CARDS[c.key].uses }); r.shop.duplicated = true
+      if (!c || r.stage < 2 || !canDuplicate(c)) return
+      if (r.phase === 'incorporate' && r.stage === 2) { // stage 1 → 2: as many as you like, each one dearer
+        const cost = r.duplicateCost ?? CONFIG.duplicateCost
+        if (!pay(r, cost, `Duplicate ${CARDS[c.key].name}`)) return
+        r.duplicateCost = cost + 1
+      } else {
+        if (r.phase !== 'shop' || r.shop.duplicated || !pay(r, CARDS[c.key].price!, `Duplicate ${CARDS[c.key].name}`)) return
+        r.shop.duplicated = true
+      }
+      r.deck.push({ ...card(r, c.key), up: c.up, up2: c.up2, uses: CARDS[c.key].uses })
       say(r, `${cardDef(c).name}: a second copy is in your deck.`)
       return
     }
@@ -1368,6 +1376,9 @@ export function incorporate(r: Run) {
   r.offer = [...INCORPORATE_OFFER_2]; r.picked = []
   r.skimBase = r.stats.skims
   r.prospectPrice = CONFIG.derrickPrice
+  r.debt = 0 // incorporation wipes the slate: no Bank Debt unless you sign for the new loan
+  r.duplicateCost = CONFIG.duplicateCost
+  say(r, 'Bank Debt cleared.')
   r.exposure = Math.min(CONFIG.exposureStartCap, Math.floor(r.stats.skims / CONFIG.exposureStartPer))
   r.shop = { cards: [], item: null, loanTaken: false, prospectSold: true, bucketSold: true, boon: null, dividendPaid: true }
   r.threats = []
@@ -1411,7 +1422,7 @@ export function goMultinational(r: Run) {
   r.ledger = []; r.events = []
   r.roundStart = snapshot(r)
 }
-const INCORPORATE_ACTIONS: Action['type'][] = ['takeLoan', 'upgradeCard', 'destroyCard', 'pickCard', 'leaveShop']
+const INCORPORATE_ACTIONS: Action['type'][] = ['takeLoan', 'upgradeCard', 'destroyCard', 'duplicateCard', 'pickCard', 'leaveShop']
 
 /** Playtest tools, only on admin runs. */
 function adminAction(r: Run, op: AdminOp, key?: CardKey, target?: number) {

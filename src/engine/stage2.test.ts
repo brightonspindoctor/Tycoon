@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, canPlay, cardDef, incorporate, intentText, netPrice, newRun, production, skimRate, wellValue, type Card, type Run } from './engine'
+import { act, canPlay, cardDef, debtPerTurn, incorporate, intentText, netPrice, newRun, production, skimRate, wellValue, type Card, type Run } from './engine'
 import { CONFIG } from './config'
 import { CARDS, ITEMS, THREATS, type CardKey, type ThreatKind } from './data'
 
@@ -508,5 +508,25 @@ describe('selling stage 2 Wells', () => {
     expect(wellValue(lasting)).toBe(CONFIG.fieldValue)
     expect(wellValue({ output: 1, reserve: 0, field: true })).toBe(CONFIG.fieldValue)
     expect(wellValue({ output: 1, reserve: 5 })).toBe(5 * CONFIG.sellPerBarrel)
+  })
+})
+
+describe('incorporation clean-up', () => {
+  it('wipes Bank Debt, and lets you duplicate cards at a rising price', () => {
+    let r = newRun(3, 'threeOil')
+    r.debt = 4
+    r.phase = 'stageComplete'; r.capital = 50
+    r = act(r, { type: 'continue' })
+    expect(r.phase).toBe('incorporate')
+    expect(r.debt).toBe(0)
+    expect(debtPerTurn(r)).toBe(0)
+    const hh = r.deck.find(c => c.key === 'hiredHand')!
+    const n = r.deck.length, cap = r.capital
+    r = act(r, { type: 'duplicateCard', cardId: hh.id })
+    r = act(r, { type: 'duplicateCard', cardId: hh.id })
+    expect(r.deck.length).toBe(n + 2)
+    expect(r.capital).toBe(cap - CONFIG.duplicateCost - (CONFIG.duplicateCost + 1))
+    r = act(r, { type: 'takeLoan' })
+    expect(debtPerTurn(r)).toBe(CONFIG.stage2LoanDebt)
   })
 })

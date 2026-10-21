@@ -128,7 +128,7 @@ export function StageComplete({ run, onMenu, onHistory, onContinue }: { run: Run
           )}
           <div className="end__progress"><div className="end__progress-head"><span className="cl-label">How far you got</span><span className="cl-num">Round {st * 4} of 16</span></div><Progress reached={st * 4} dead={false} /></div>
           <div className="end__tiles">
-            <div className="tile"><span className="cl-label">Capital</span><b className="cl-num">{money(run.capital, st)}</b><span className="res-note">{last ? 'left in the company' : `carried into stage ${st + 1}${st === 1 && run.bonus === 'trustFund' ? '. The Trust Fund ends here: Bank Debt starts in stage 2.' : ''}`}</span></div>
+            <div className="tile"><span className="cl-label">Capital</span><b className="cl-num">{money(run.capital, st)}</b><span className="res-note">{last ? 'left in the company' : `carried into stage ${st + 1}`}</span></div>
             <div className="tile"><span className="cl-label">{st === 1 ? 'Wells standing' : st === 2 ? 'Fields and Wells' : 'Rigs'}</span><b className="cl-num">{wells}</b><span className="res-note">{st === 1 ? (wells ? 'They become Fields: never running dry.' : `${run.stats.wellsBuilt} built in total`) : st === 2 ? `${run.plots.filter(w => w?.field).length} of them Fields. They all become offshore Rigs.` : 'pumping in the Gulf'}</span></div>
             <div className="tile"><span className="cl-label">Oil sold</span><b className="cl-num">{run.stats.oilSold} bbl</b><span className="res-note">{money(run.stats.earned, st)} earned</span></div>
           </div>

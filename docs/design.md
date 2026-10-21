@@ -33,7 +33,7 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 - Enemies have **Hold** (health). Cards remove Hold. There are two kinds, **Legal** and **Dirty**; an enemy can be weak to one (double), resist one (half) or be immune. No card is tied to one enemy.
 - Starting deck (9): Prospect, Hired Hand ×2, Lawyer Up, Shore Up, Bucket of Water ×2, Improve Gear, Hard Graft.
 - Starting bonus (pick one): Extra Prospect, 3 Oil, Petty Cash (skim 1 gold, 0 AP, 3 uses), Improve Gear + Hard Graft.
-- Bailout bonus: **Trust Fund** ($15 and no Bank Debt for stage 1; normal Bank Debt from stage 2). Offered only after 3 runs in a row lost in stage 1 (bankrupt or out of time); finishing stage 1 resets the streak.
+- Bailout bonus: **Trust Fund** ($15 and no Bank Debt for stage 1). Offered only after 3 runs in a row lost in stage 1 (bankrupt or out of time); finishing stage 1 resets the streak.
 - Junk: Loose Thread (must play, 0 AP, −$1), Bad Blood (must play, 0 AP, 1 in 3 chance of a fire, destroyed after 2 plays; Dynamite, Bribe the Sheriff and a refused Bribe put one in your discard pile; Dirty cards alone never do), Margin Call (must play, −$2), IOU (−$1 a turn until cleared).
 
 ### Before and after the boss
@@ -89,12 +89,12 @@ Beating the Baron pays **3 gold** (every boss does). Then the company incorporat
 - A page-turn transition: the Victorian ledger page lifts away, the year rolls 1890 → 1901, INCORPORATED is stamped (tap to skip). Then the Incorporated screen.
 - Every standing Well becomes a **Field**: 1 oil a turn, never runs dry. Unstable is cleared. A Field, like any stage 2 Well, sells for $8.
 - **Prospecting is over.** Every Prospect left in your deck becomes a **Worn Prospect** (2 AP: 1 Well card).
-- **Pick 2 new cards** from 4 on offer: Steel Derrick, Pay a Dividend, Patent Thicket and Ticker Tape. The ones you leave go on sale at the first Exchange visit (the Derrick is on sale every visit anyway).
+- **Pick 2 new cards** from 4 on offer: Steel Derrick, Pay a Dividend, Patent Thicket and Ticker Tape. The ones you leave go on sale at the first Exchange visit (not said on screen; the Derrick is on sale every visit anyway).
 - The **Expense Account** is the card offered after the first stage 2 fight (take it, or turn it down for $3K). It's how you skim from here on.
-- The bank offers a **10K loan**: +$10K now, Bank Debt +$1K a turn for good. Take it or leave it.
-- You can **upgrade** cards (from $3, rising $1 each time; once per card) and **destroy** cards (the usual rising price).
-- Board Exposure starts at 1 for every 3 gold skimmed in stage 1, up to 3.
-- The Trust Fund's debt relief ends: normal Bank Debt from here.
+- **Bank Debt is wiped clean**: everyone starts stage 2 owing nothing a turn. The bank offers a **10K loan**: +$10K now, Bank Debt +$1K a turn for good. Take it or leave it.
+- You can **upgrade** cards (from $3, rising $1 each time; once per card), **destroy** cards (the usual rising price) and **duplicate** cards (a second copy, upgrade and all; from $5K, rising $1K each time, as many as you can pay for).
+- Board Exposure starts at 1 for every 3 gold skimmed in stage 1, up to 3 (not explained on screen; the meter shows it).
+- The screen keeps only the Fields tile, the Exposure meter, the card pick, the loan, upgrade, duplicate and destroy. It no longer explains Wells vs Prospects, gold being at risk or the Expense Account; those show up in play.
 
 ### Economy
 - Oil sells at **$4** (the motor car arrives).
