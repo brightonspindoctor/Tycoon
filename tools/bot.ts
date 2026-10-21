@@ -70,7 +70,7 @@ export function botShop(r: Run): Run {
   if (roomForWells && wantWell && r.capital > r.prospectPrice + 6) r = act(r, { type: 'buyProspect' })
   const want = stage2
     ? ['patentThicket', 'espionage', 'poachEngineer', 'securityDetail', 'insurance', 'payDividend', 'personalLawyer', 'expenseAccount']
-    : ['payWages', 'dynamite', 'lawyerUp', 'fireBrigade', 'shoreUp']
+    : ['payWages', 'dynamite', 'infiltrate', 'lawyerUp', 'fireBrigade', 'shoreUp']
   for (let i = 0; i < r.shop.cards.length; i++) {
     const k = r.shop.cards[i]
     if (k && want.includes(k) && r.capital > (CARDS[k].price ?? 0) + 7) { r = act(r, { type: 'buyCard', slot: i }); break }

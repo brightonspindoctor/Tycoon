@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, MODS, ROLE_LABEL, THREATS } from '../engine/data'
 import {
-  apCost, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, infiltrated, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run, type Threat,
 } from '../engine/engine'
 import { FIELD_PLACE, money, units, year } from '../engine/format'
@@ -105,6 +105,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                   </div>
                   <span className="hold-bar"><span style={{ width: `${Math.max(0, (t.hold / t.maxHold) * 100)}%` }} /></span>
                   {t.opened && run.turn === 1 && !t.beaten && <div className="opened"><b>Opened with</b> {units(t.opened, st)}</div>}
+                  {!t.beaten && (n => n.length ? <div className="opened infiltrated"><b>Infiltrated</b> −{n.join(', then −')} Hold as your turns end</div> : null)(infiltrated(run, t))}
                   {t.beaten ? <div className="m-intent m-intent--done">Beaten</div> : t.stopped ? (
                     <div className="m-intent m-intent--stopped"><b>Stopped · {intent(run, t)}</b> <s>{units(intentText(run, t), st)}</s></div>
                   ) : (

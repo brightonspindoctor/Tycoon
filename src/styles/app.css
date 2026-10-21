@@ -781,3 +781,5 @@ button.m-threat { cursor: pointer; }
 .badge .cl-label { color: var(--personal); }
 .badge b { font-size: 26px; line-height: 30px; color: var(--personal); }
 .history__badge { display: block; font-size: 12px; color: var(--personal); }
+.infiltrated { border-left-color: var(--ink-muted); }
+.infiltrated b { color: var(--ink); }

@@ -51,6 +51,7 @@ A card is offered (weighted by rarity, like the shop): take it into your deck or
 - Hard Graft (+1 AP, 0 AP to play) can be played once per round: it then sits out until the next round. It is never destroyed. It can be bought ($4).
 - **Bribe** ($4): pay 1 gold from your fortune; 50% chance of 4 Hold (Dirty, so doubled against the Strike, Claim Jumper and Baron), otherwise it is refused and adds Bad Blood.
 - Enemies that move first show what they opened with on turn 1, above their next move.
+- **Infiltrate** ($4, Common, 2 AP, stage 1 shop): Dirty, remove 3 Hold now, then 2 and 1 more as your next two turns end (before the enemies move; the follow-ups go past enemy Cover). Weakness and immunity apply to every hit, so it's 6/4/2 against the Strike and useless on the Inspector. The enemy shows what's still to land. Upgraded: 4, then 3 and 2. Fair in stage 1, falls behind in stages 2–3.
 
 ### Settings during a run
 The gear on the board and in the Land Office opens Settings (volume, sound, enemy-turn replay) plus Quit run, which asks to confirm, records the run as "Quit" in history and returns to the title. A quit neither counts towards nor breaks the Trust Fund losing streak.

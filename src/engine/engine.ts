@@ -11,7 +11,9 @@ import { newTally, type Tally } from './tactics'
 export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean; free?: boolean; up?: boolean; up2?: boolean; faded?: boolean } // free: costs no AP · up: upgraded · up2: upgraded twice (stage 3) · faded: unused
 export interface Well { output: number; reserve: number; unstable?: boolean; field?: boolean; lasting?: boolean; rig?: boolean } // a Field (an old Well), a stage 2 Well (lasting) and a stage 3 Rig never run dry
 export const neverDry = (w: Well) => !!(w.field || w.lasting || w.rig)
-export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string; stopped?: boolean; cover?: number }
+export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string; stopped?: boolean; cover?: number; poison?: Poison[] }
+/** Damage still to land on an enemy as one of your turns ends (Infiltrate). */
+export interface Poison { turn: number; family: Family; power: number }
 export interface LedgerLine { label: string; amount: number }
 /** One line of the end-of-turn report, played back on the ticker tape. */
 export interface Beat { kind: 'enemy' | 'fire' | 'money' | 'cards' | 'shuffle' | 'oil' | 'info' | 'board' | 'gold'; title: string; text: string; who?: number }
@@ -873,6 +875,7 @@ function play(r: Run, cardId: number, target?: number) {
     } else {
       say(r, `${d.name}: ${THREATS[t.kind].name} −${dmg} Hold.`)
       hit(r, t, dmg, !!d.badBlood, false, d.family)
+      if (d.poison && !t.beaten) (t.poison ??= []).push(...d.poison.map((p, i) => ({ turn: r.turn + 1 + i, family: d.family, power: p })))
     }
     if (r.phase === 'turn' && d.draw) drawCards(r, d.draw)
     if (d.exposure) expose(r, d.exposure, d.name)
@@ -970,6 +973,29 @@ function play(r: Run, cardId: number, target?: number) {
   if (d.heat) heat(r, d.heat + spent * CONFIG.heatPerAP, d.name)
   else apHeat(r, spent)
   checkBankrupt(r)
+}
+
+/** What Infiltrate will still take off this enemy: this turn's end, then the turns after. */
+export const infiltrated = (r: Run, t: Threat): number[] => {
+  const by = new Map<number, number>()
+  for (const p of t.poison ?? []) by.set(p.turn, (by.get(p.turn) ?? 0) + damageFor(p.family, p.power, t.kind))
+  return [...by.entries()].sort((a, b) => a[0] - b[0]).filter(([turn]) => turn >= r.turn).map(([, n]) => n)
+}
+/** Infiltrate: the damage still owed lands as your turn ends, before the enemies move. It goes past their Cover. */
+function infiltration(r: Run) {
+  for (const t of liveThreats(r)) {
+    if (!t.poison?.length) continue
+    const due = t.poison.filter(p => p.turn === r.turn)
+    t.poison = t.poison.filter(p => p.turn > r.turn)
+    for (const p of due) {
+      if (t.beaten) break
+      const dmg = damageFor(p.family, p.power, t.kind)
+      if (!dmg) continue
+      say(r, `Infiltrate: ${THREATS[t.kind].name} −${dmg} Hold.`)
+      beat(r, 'enemy', `${THREATS[t.kind].name} · Infiltrated`, `−${dmg} Hold.`, t.id)
+      hit(r, t, dmg, false, true, p.family)
+    }
+  }
 }
 
 /** A bribe paid while a Bribery Scandal is on the board makes it bigger. */
@@ -1176,6 +1202,7 @@ function endTurn(r: Run) {
   if (checkBankrupt(r) || r.phase !== 'turn') return
   r.discard.push(...r.hand.filter(c => !c.temp))
   r.hand = r.hand.filter(c => c.temp && c.key === 'iou')
+  infiltration(r)
   // fire burns
   if (r.fire) {
     const title = `${fires(r.fire)} burning`

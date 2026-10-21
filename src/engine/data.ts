@@ -3,7 +3,7 @@ import { CONFIG } from './config'
 
 export type Family = 'Legal' | 'Dirty' | 'Bury' | 'Lobby' | 'Buy Out' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Fortune' | 'Board' | 'Scrap' | 'Junk'
 export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'shovels' | 'coins' | 'telegraph' | 'dynamite' | 'gear' | 'timber' | 'hose' | 'envelope' | 'graft'
-  | 'wages' | 'sheriff' | 'will' | 'shares' | 'cashbox' | 'redtape' | 'iou' | 'phone'
+  | 'wages' | 'sheriff' | 'will' | 'shares' | 'cashbox' | 'redtape' | 'iou' | 'phone' | 'infiltrate'
   // stage 2 (Art Deco)
   | 'telegraphLine' | 'tickerTape' | 'nightShift' | 'efficiencyExpert' | 'streamline' | 'shredFiles' | 'scrapParts' | 'cleanHouse' | 'patentThicket' | 'espionage' | 'poachEngineer' | 'rdSprint' | 'payDividend' | 'personalLawyer' | 'securityDetail' | 'insurance' | 'expenseAccount' | 'refinery' | 'pipeline' | 'offshore' | 'pumpingStation' | 'pressOffice' | 'fillingStations' | 'auditingFirm'
   // stage 3 (1970s): icons still to be drawn fall back to these names, so keep them listed
@@ -14,7 +14,7 @@ export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket'
 export type CardKey =
   | 'prospect' | 'well' | 'wildcat' | 'hiredHand' | 'lawyerUp' | 'shoreUp' | 'bucket' | 'fireBrigade'
   | 'improveGear' | 'hardGraft' | 'pettyCash' | 'payWages' | 'dynamite' | 'bribe' | 'telegram'
-  | 'looseThread' | 'badBlood' | 'marginCall' | 'iou' | 'payOff' | 'inheritance' | 'dividends'
+  | 'looseThread' | 'badBlood' | 'marginCall' | 'iou' | 'payOff' | 'infiltrate' | 'inheritance' | 'dividends'
   // stage 2
   | 'survey' | 'oldProspect' | 'rotaryRig' | 'telegraphLine' | 'tickerTape' | 'nightShift' | 'efficiencyExpert'
   | 'streamline' | 'shredFiles' | 'scrapParts' | 'cleanHouse' | 'patentThicket' | 'espionage' | 'poachEngineer'
@@ -57,6 +57,7 @@ export interface CardDef {
   roundBoost?: number // oil sells this much more for the rest of the round (Queues at the Pump)
   memo?: boolean // discard the rest of your hand, draw that many +1
   doubleSale?: boolean // your next oil sale this turn pays double (the Oil Shock)
+  poison?: number[] // more damage of the same family as each of your next turns ends (Infiltrate)
 }
 
 export const CARDS: Record<CardKey, CardDef> = {
@@ -90,6 +91,8 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $2. Remove 5 Hold. Adds Bad Blood to your discard pile.', flavour: 'A contribution to local order.' },
   payOff: { name: 'Bribe', ap: 1, cost: 0, gold: CONFIG.bribeGold, chance: CONFIG.bribeChance, uses: null, family: 'Dirty', power: CONFIG.bribeDamage, icon: 'envelope', price: 4, rarity: 'Uncommon',
     text: `Pay ${CONFIG.bribeGold} gold. ${Math.round(CONFIG.bribeChance * 100)}% chance: remove ${CONFIG.bribeDamage} Hold. If refused: Bad Blood.`, flavour: 'Everyone has a price. Most of them remember it.' },
+  infiltrate: { name: 'Infiltrate', ap: 2, cost: 0, uses: null, family: 'Dirty', power: 3, poison: [2, 1], icon: 'infiltrate', price: 4, rarity: 'Common',
+    text: 'Remove 3 Hold. Then 2 and 1 more as your next two turns end.', flavour: 'A new man on the payroll. Theirs, then ours.' },
   inheritance: { name: 'Inheritance', ap: 0, cost: 0, uses: 1, family: 'Tempo', power: 0, icon: 'will',
     text: `+$${CONFIG.inheritance}. Then it's gone.`, flavour: 'Grandfather would have wanted you to have it.' },
   dividends: { name: 'Dividends', ap: 1, cost: 0, uses: null, family: 'Tempo', power: CONFIG.dividends, icon: 'shares',
@@ -210,6 +213,7 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   oldProspect: { plots: 1, text: 'Claim 1 plot. Add 1 Well card to your hand.' },
   survey: { ap: 1, text: 'Claim 1 plot. Add 1 Well card to your hand.' },
   hiredHand: { power: 3, text: 'Remove 3 Hold.' },
+  infiltrate: { power: 4, poison: [3, 2], text: 'Remove 4 Hold. Then 3 and 2 more as your next two turns end.' },
   lawyerUp: { power: 5, text: 'Pay $2. Remove 5 Hold.' },
   shoreUp: { cover: 2, text: 'Block one enemy move. +2 Cover.' },
   bucket: { power: 2, text: 'Put out two fires.' },
@@ -259,7 +263,7 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
 }
 
 export const STARTER: CardKey[] = ['prospect', 'hiredHand', 'hiredHand', 'lawyerUp', 'shoreUp', 'bucket', 'bucket', 'improveGear', 'hardGraft']
-export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBrigade', 'payWages', 'dynamite', 'bribe', 'wildcat', 'telegram', 'hardGraft', 'payOff']
+export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBrigade', 'payWages', 'dynamite', 'bribe', 'wildcat', 'telegram', 'hardGraft', 'payOff', 'infiltrate']
 // stage 2 sells only stage 2 cards: better than stage 1's, and dearer
 export const SHOP_POOL_2: CardKey[] = ['telegraphLine', 'tickerTape', 'nightShift', 'efficiencyExpert', 'streamline', 'shredFiles', 'scrapParts', 'cleanHouse',
   'patentThicket', 'espionage', 'poachEngineer', 'rdSprint', 'payDividend', 'personalLawyer', 'securityDetail', 'insurance', 'expenseAccount']

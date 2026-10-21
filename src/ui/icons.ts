@@ -3,7 +3,7 @@
 import type { Icon } from '../engine/data'
 
 const STAND_IN: Partial<Record<Icon, Icon>> = {
-  thinkTank: 'pressOffice', draftDeclaration: 'redtape', buyOut: 'personalGuarantee', advertorial: 'pressOffice', oilShock: 'embargoRumours',
+  thinkTank: 'pressOffice', draftDeclaration: 'redtape', buyOut: 'personalGuarantee', advertorial: 'pressOffice', oilShock: 'embargoRumours', infiltrate: 'espionage',
 }
 
 export const iconUrl = (icon: Icon | string) => `${import.meta.env.BASE_URL}art/icons/${STAND_IN[icon as Icon] ?? icon}.png`

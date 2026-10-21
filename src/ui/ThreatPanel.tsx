@@ -1,5 +1,5 @@
 import { ROLE_LABEL, THREATS } from '../engine/data'
-import { intent, intentText, type Run, type Threat } from '../engine/engine'
+import { infiltrated, intent, intentText, type Run, type Threat } from '../engine/engine'
 import { units } from '../engine/format'
 import { Portrait } from './Portrait'
 
@@ -34,6 +34,7 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget,
         </div>
       </div>
       {threat.opened && run.turn === 1 && !threat.beaten && <div className="opened"><b>Opened with</b> {units(threat.opened, run.stage)}</div>}
+      {!threat.beaten && (n => n.length ? <div className="opened infiltrated"><b>Infiltrated</b> −{n.join(', then −')} Hold as your turns end</div> : null)(infiltrated(run, threat))}
       {threat.beaten ? <div className="warn warn--done">Beaten</div> : threat.stopped ? (
         <div className="warn warn--stopped">
           <b>Stopped this turn · {intent(run, threat)}</b>
