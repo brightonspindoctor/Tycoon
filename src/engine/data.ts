@@ -255,6 +255,8 @@ export const SHOP_POOL_2: CardKey[] = ['telegraphLine', 'tickerTape', 'nightShif
 // stage 3: oil price boosts, faster cycling, destroying cards, gold into Capital, and the new defences
 export const SHOP_POOL_3: CardKey[] = ['embargoRumours', 'queuesAtPump', 'telex', 'memo', 'tickerTape', 'restructure', 'personalGuarantee', 'dipTrust',
   'buryEvidence', 'lobbyCongress', 'thinkTank', 'bribeOfficial', 'retainCounsel']
+/** Stage 2 incorporation: pick incorporatePicks of these; the rest go on sale at the first Exchange visit. */
+export const INCORPORATE_OFFER_2: CardKey[] = ['derrick', 'payDividend', 'patentThicket', 'tickerTape']
 export const shopPool = (stage: number): CardKey[] => (stage >= 3 ? SHOP_POOL_3 : stage >= 2 ? SHOP_POOL_2 : SHOP_POOL)
 /** The new cards in your deck as stage 3 begins. */
 export const STAGE3_CARDS: CardKey[] = ['buryEvidence', 'lobbyCongress', 'bribeOfficial']

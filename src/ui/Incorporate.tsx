@@ -2,6 +2,7 @@
 // arrival, the bank's loan, and a chance to upgrade and destroy cards.
 import { useState } from 'react'
 import { CONFIG } from '../engine/config'
+import { CARDS } from '../engine/data'
 import { canUpgrade, debtPerTurn, type Action, type Run } from '../engine/engine'
 import { money, units, year } from '../engine/format'
 import { play } from '../sound'
@@ -19,6 +20,9 @@ export function IncorporateScreen({ run, dispatch }: { run: Run; dispatch: (a: A
   const fields = run.plots.filter(w => w?.field).length
   const worn = run.deck.filter(c => c.key === 'oldProspect').length
   const skimmed = run.stats.skims
+  const offer = run.offer ?? []
+  const picked = run.picked ?? []
+  const ready = !offer.length || picked.length >= Math.min(CONFIG.incorporatePicks, offer.length)
 
   return (
     <div className="screen shop incorporate" data-theme="deco">
@@ -35,13 +39,25 @@ export function IncorporateScreen({ run, dispatch }: { run: Run; dispatch: (a: A
         <div className="shop__main">
           <section className="end__tiles incorporate__tiles" aria-label="What carried over">
             <div className="tile"><span className="cl-label">Fields</span><b className="cl-num">{fields}</b><span className="res-note">{fields ? `Your ${fields === 1 ? 'Well is now a Field' : `${fields} Wells are now Fields`}: 1 oil a turn, never dry.` : 'No Wells were standing.'} New Wells never run dry either.</span></div>
-            <div className="tile"><span className="cl-label">Prospecting is over</span><b className="cl-num">{worn ? `${worn} worn` : 'Wells'}</b><span className="res-note">The Exchange sells Wells now, not Prospects. A Steel Derrick is in your deck{worn ? '; old Prospects just add a Well' : ''}.</span></div>
+            <div className="tile"><span className="cl-label">Prospecting is over</span><b className="cl-num">{worn ? `${worn} worn` : 'Wells'}</b><span className="res-note">The Exchange sells Wells now, not Prospects. {worn ? 'Old Prospects just add a Well.' : 'Steel Derricks build them.'}</span></div>
             <div className="tile"><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b><span className="res-note">Some enemies can take gold now. Below 0, you're ruined.</span></div>
           </section>
 
           <section className="incorporate__board">
             <ExposureMeter run={run} />
-            <p className="res-note">The new board read the old books: {skimmed ? `you skimmed ${skimmed} gold in stage 1, so Board Exposure starts at ${run.exposure}.` : 'nothing skimmed, so Board Exposure starts at 0.'} High from {CONFIG.exposureHigh}. A Pay a Dividend card is in your deck, and an Expense Account: from now on, that's how you skim (from {m(CONFIG.skimRate2[1])} a gold).</p>
+            <p className="res-note">The new board read the old books: {skimmed ? `you skimmed ${skimmed} gold in stage 1, so Board Exposure starts at ${run.exposure}.` : 'nothing skimmed, so Board Exposure starts at 0.'} High from {CONFIG.exposureHigh}. From now on you skim with an Expense Account card (from {m(CONFIG.skimRate2[1])} a gold). One is offered after your first fight.</p>
+          </section>
+
+          <section className="incorporate__pick" aria-label="New cards">
+            <span className="cl-label">Pick {CONFIG.incorporatePicks} new cards · {picked.length} of {CONFIG.incorporatePicks}</span>
+            <p className="res-note">The others go on sale at the first Exchange visit.</p>
+            <div className="deck__list">
+              {offer.map((k, i) => {
+                const on = picked.includes(k)
+                const full = !on && picked.length >= CONFIG.incorporatePicks
+                return <CardView key={k} card={{ id: -1 - i, key: k, uses: CARDS[k].uses }} stage={st} selected={on} playable={!full} onClick={() => { if (full) return; dispatch({ type: 'pickCard', key: k }); play('click') }} />
+              })}
+            </div>
           </section>
 
           <section className="shop__deals">
@@ -91,7 +107,7 @@ export function IncorporateScreen({ run, dispatch }: { run: Run; dispatch: (a: A
             {run.bonus === 'trustFund' && <p className="res-note">The Trust Fund is spent. Bank Debt starts this stage.</p>}
           </section>
           <div className="events">{run.events.slice(0, 2).map((e, i) => <p key={i}>{units(e, st)}</p>)}</div>
-          <button type="button" className="cl-btn cl-btn--primary leave" onClick={() => { dispatch({ type: 'leaveShop' }); play('click') }}>Begin round 1</button>
+          <button type="button" className="cl-btn cl-btn--primary leave" disabled={!ready} onClick={() => { dispatch({ type: 'leaveShop' }); play('click') }}>{ready ? 'Begin round 1' : `Pick ${CONFIG.incorporatePicks - picked.length} more`}</button>
         </aside>
       </div>
     </div>

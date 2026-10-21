@@ -34,6 +34,7 @@ export const CONFIG = {
   skimRate2: { 0: 10, 1: 10, 2: 12, 3: 14, 4: 16 } as Record<number, number>, // stage 2: the Expense Account card, from $10 a gold
   bossGold: 3, // gold for beating a stage's boss
   // stage 2
+  incorporatePicks: 2, // new cards you pick at incorporation, from the offer
   stage2Loan: 10, // offered at incorporation
   stage2LoanDebt: 1, // Bank Debt it adds per turn
   surveyPrice: 5, // (unused since stage 2 sells Wells instead)

@@ -12,9 +12,11 @@ function afterBaron(seed = 3): Run {
   r.gold = 3
   return r
 }
+/** At incorporation: pick the Derrick and Pay a Dividend. */
+const pick2 = (r: Run) => act(act(r, { type: 'pickCard', key: 'derrick' }), { type: 'pickCard', key: 'payDividend' })
 /** Straight into stage 2, round 1, with a hand you choose. */
 function inStage2(hand: CardKey[] = [], threat: ThreatKind = 'muckraker', seed = 3): Run {
-  let r = act(afterBaron(seed), { type: 'continue' })
+  let r = pick2(act(afterBaron(seed), { type: 'continue' }))
   r = act(r, { type: 'leaveShop' })
   r.threats = [{ id: 900, kind: threat, hold: 40, maxHold: 40, step: 0, cycle: 0, round3: false, beaten: false }]
   r.hand = hand.map((k, i) => ({ id: 5000 + i, key: k, uses: CARDS[k].uses }))
@@ -36,14 +38,43 @@ describe('incorporation (stage 1 → 2)', () => {
     expect(r.plots[2]!.unstable).toBeFalsy()
   })
 
-  it('wears out your Prospects and gives you a Steel Derrick, a Pay a Dividend and an Expense Account', () => {
+  it('wears out your Prospects and has you pick 2 of 4 new cards; the other 2 go on sale at the first visit', () => {
     const before = afterBaron()
     const prospects = before.deck.filter(c => c.key === 'prospect').length
-    const r = act(before, { type: 'continue' })
+    let r = act(before, { type: 'continue' })
     expect(r.deck.filter(c => c.key === 'prospect')).toHaveLength(0)
     expect(r.deck.filter(c => c.key === 'oldProspect')).toHaveLength(prospects)
-    for (const k of ['derrick', 'payDividend', 'expenseAccount'] as const) expect(r.deck.filter(c => c.key === k)).toHaveLength(1)
     expect(r.deck.some(c => c.key === 'survey')).toBe(false)
+    expect(r.offer).toEqual(['derrick', 'payDividend', 'patentThicket', 'tickerTape'])
+    for (const k of ['derrick', 'payDividend', 'expenseAccount'] as const) expect(r.deck.some(c => c.key === k)).toBe(false)
+    // can't leave without picking 2, and can't pick a 3rd
+    expect(act(r, { type: 'leaveShop' }).phase).toBe('incorporate')
+    r = act(r, { type: 'pickCard', key: 'payDividend' })
+    r = act(r, { type: 'pickCard', key: 'derrick' })
+    r = act(r, { type: 'pickCard', key: 'tickerTape' })
+    expect(r.picked).toEqual(['payDividend', 'derrick'])
+    r = act(r, { type: 'pickCard', key: 'derrick' }) // tap again to drop it
+    r = act(r, { type: 'pickCard', key: 'patentThicket' })
+    r = act(r, { type: 'leaveShop' })
+    expect(r.phase).toBe('turn')
+    expect(r.deck.filter(c => c.key === 'payDividend')).toHaveLength(1)
+    expect(r.deck.filter(c => c.key === 'patentThicket')).toHaveLength(1)
+    expect(r.deck.some(c => c.key === 'derrick' || c.key === 'tickerTape')).toBe(false)
+    expect(r.leftover).toEqual(['tickerTape']) // the Derrick is a staple anyway
+  })
+
+  it('offers the Expense Account after the first stage 2 fight, and the leftover cards in the first shop', () => {
+    let r = act(afterBaron(), { type: 'continue' })
+    r = act(act(r, { type: 'pickCard', key: 'derrick' }), { type: 'pickCard', key: 'payDividend' })
+    r = act(r, { type: 'leaveShop' })
+    r.admin = true
+    r = act(r, { type: 'admin', op: 'winRound' })
+    expect(r.phase).toBe('roundWon')
+    expect(r.spoils).toBe('expenseAccount')
+    r = act(act(r, { type: 'takeSpoils' }), { type: 'continue' })
+    expect(r.deck.filter(c => c.key === 'expenseAccount')).toHaveLength(1)
+    expect(r.shop.cards).toEqual(expect.arrayContaining(['patentThicket', 'tickerTape']))
+    expect(r.shop.cards.length).toBe(3)
   })
 
   it('offers a 10K loan that adds 1K a turn to Bank Debt, once', () => {
@@ -69,7 +100,7 @@ describe('incorporation (stage 1 → 2)', () => {
     const bucket = r.deck.find(c => c.key === 'bucket')!
     r = act(r, { type: 'destroyCard', cardId: bucket.id })
     expect(r.deck.some(c => c.id === bucket.id)).toBe(false)
-    r = act(r, { type: 'leaveShop' })
+    r = act(pick2(r), { type: 'leaveShop' })
     expect(r.phase).toBe('turn')
     expect(r.round).toBe(1)
   })
@@ -284,7 +315,7 @@ describe('stage 2 enemies', () => {
   })
 
   it('the Proxy Fight is the stage 2 boss and opens by canvassing the board', () => {
-    let r = act(afterBaron(), { type: 'continue' })
+    let r = pick2(act(afterBaron(), { type: 'continue' }))
     r = act(r, { type: 'leaveShop' })
     r.phase = 'shop'; r.round = 3
     r = act(r, { type: 'leaveShop' })

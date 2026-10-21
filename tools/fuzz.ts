@@ -16,8 +16,10 @@ function randomAction(r: Run): Action {
   if (r.phase === 'stageComplete') return { type: 'continue' }
   if (r.phase === 'incorporate') {
     const opts: Action[] = [{ type: 'leaveShop' }, { type: 'takeLoan' }, { type: 'skim', gold: 1 }, { type: 'buyCard', slot: 0 }, { type: 'payDividends' }, { type: 'buySilo' }]
+    if (r.offer?.length) opts.push({ type: 'pickCard', key: pick(r.offer) }, { type: 'pickCard', key: pick(r.offer) })
     if (r.deck.length) opts.push({ type: 'duplicateCard', cardId: pick(r.deck).id })
     if (r.deck.length) opts.push({ type: 'destroyCard', cardId: pick(r.deck).id }, { type: 'upgradeCard', cardId: pick(r.deck).id })
+    if (r.offer && (r.picked ?? []).length < 2 && rand() < 0.5) return { type: 'pickCard', key: pick(r.offer) }
     return rand() < 0.2 ? { type: 'leaveShop' } : pick(opts)
   }
   if (r.phase === 'shop') {

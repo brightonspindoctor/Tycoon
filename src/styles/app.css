@@ -681,6 +681,8 @@ button.m-threat { cursor: pointer; }
 .incorporate__stamp { position: static; display: inline-block; font-size: 28px; padding: 6px 16px; }
 .incorporate__tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .incorporate__board { display: flex; flex-direction: column; gap: 8px; }
+.incorporate__pick { display: flex; flex-direction: column; gap: 6px; }
+.incorporate__pick .res-note { margin: 0; }
 .incorporate__board .res-note { margin: 0; }
 .incorporate .end__sub { margin: 4px 0 0; }
 .unlock--neg { border-color: var(--loss); }

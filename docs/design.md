@@ -87,7 +87,9 @@ Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtow
 Beating the Baron pays **3 gold** (every boss does). Then the company incorporates:
 - A page-turn transition: the Victorian ledger page lifts away, the year rolls 1890 → 1901, INCORPORATED is stamped (tap to skip). Then the Incorporated screen.
 - Every standing Well becomes a **Field**: 1 oil a turn, never runs dry. Unstable is cleared. A Field, like any stage 2 Well, sells for $8.
-- **Prospecting is over.** Every Prospect left in your deck becomes a **Worn Prospect** (2 AP: 1 Well card). A **Steel Derrick**, a **Pay a Dividend** and an **Expense Account** join your deck.
+- **Prospecting is over.** Every Prospect left in your deck becomes a **Worn Prospect** (2 AP: 1 Well card).
+- **Pick 2 new cards** from 4 on offer: Steel Derrick, Pay a Dividend, Patent Thicket and Ticker Tape. The ones you leave go on sale at the first Exchange visit (the Derrick is on sale every visit anyway).
+- The **Expense Account** is the card offered after the first stage 2 fight (take it, or turn it down for $3K). It's how you skim from here on.
 - The bank offers a **10K loan**: +$10K now, Bank Debt +$1K a turn for good. Take it or leave it.
 - You can **upgrade** cards (from $3, rising $1 each time; once per card) and **destroy** cards (the usual rising price).
 - Board Exposure starts at 1 for every 3 gold skimmed in stage 1, up to 3.

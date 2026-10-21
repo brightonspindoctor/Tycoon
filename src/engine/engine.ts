@@ -2,7 +2,7 @@
 // drives the game screens, the tests and the balance simulator.
 import { CONFIG } from './config'
 import {
-  ATTACK_CARDS, BOSS, CARDS, CASH_POOLS, ENGINE_POOLS, ITEMS, MODS, PROSPECTS, PROSPECT_FOR, WATER_FOR, STARTER, THREATS, UPGRADES, shopPool,
+  ATTACK_CARDS, BOSS, CARDS, INCORPORATE_OFFER_2, CASH_POOLS, ENGINE_POOLS, ITEMS, MODS, PROSPECTS, PROSPECT_FOR, WATER_FOR, STARTER, THREATS, UPGRADES, shopPool,
   BOONS, REWARDS, BRIBES, STAGE3_CARDS, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
 } from './data'
 import { next, pick, shuffle } from './rng'
@@ -85,6 +85,9 @@ export interface Run {
   heat: number // stage 3: 0 to heatMax; every AP spent adds to it, and at the top you're broken up
   roundBoost: number // oil sells this much more for the rest of the round (Queues at the Pump)
   shredded: boolean // the Paper Shredder has been used this round
+  offer?: CardKey[] // incorporation: the new cards on offer
+  picked?: CardKey[] // incorporation: the ones chosen so far
+  leftover?: CardKey[] // offered at incorporation, not picked: on sale at the first shop visit
 }
 
 export type AdminOp = 'cash' | 'gold' | 'exposureUp' | 'exposureDown' | 'heatUp' | 'heatDown' | 'ap' | 'winRound' | 'addCard' | 'hold20'
@@ -116,6 +119,7 @@ export type Action =
   | { type: 'admin'; op: AdminOp; card?: CardKey; target?: number }
   | { type: 'buyOut'; target: number } // stage 3: pay an enemy off with Capital
   | { type: 'shred'; cardId: number } // stage 3: the Paper Shredder, once a round
+  | { type: 'pickCard'; key: CardKey }
   | { type: 'leaveShop' }
   | { type: 'continue' }
 
@@ -349,6 +353,8 @@ function stockShop(r: Run) {
   const items = (Object.keys(ITEMS) as ItemKey[]).filter(i => !ITEMS[i].never && (!ITEMS[i].stages || ITEMS[i].stages!.includes(r.stage)) && (ITEMS[i].repeatable || !r.items.includes(i))
     && !(i === 'rolodex' && handSize(r) >= CONFIG.handMax) && !(i === 'supertanker' && r.storage >= CONFIG.maxStorage))
   r.shop = { ...r.shop, cards: picks, item: items.length ? pick(r, items) : null }
+  // the cards turned down at incorporation are on sale at the first visit
+  if (r.leftover?.length) { r.shop.cards = [...r.leftover, ...picks.filter(k => !r.leftover!.includes(k))].slice(0, Math.max(3, r.leftover.length)); r.leftover = [] }
 }
 
 /** Opening the Land Office after a round: fresh stock, and before the boss, one small item for gold. */
@@ -476,8 +482,21 @@ function shopAction(r: Run, a: Action) {
       expose(r, 1, 'Skimming')
       return
     }
+    case 'pickCard': {
+      if (r.phase !== 'incorporate' || !r.offer?.includes(a.key)) return
+      const picked = r.picked ?? []
+      if (picked.includes(a.key)) r.picked = picked.filter(k => k !== a.key)
+      else if (picked.length < CONFIG.incorporatePicks) r.picked = [...picked, a.key]
+      return
+    }
     case 'leaveShop':
-      if (r.phase === 'incorporate') { r.phase = 'shop'; startRound(r, 1); return }
+      if (r.phase === 'incorporate') {
+        if (r.offer && (r.picked ?? []).length < Math.min(CONFIG.incorporatePicks, r.offer.length)) { say(r, `Pick ${CONFIG.incorporatePicks} new cards first.`); return }
+        for (const k of r.picked ?? []) r.deck.push(card(r, k))
+        r.leftover = (r.offer ?? []).filter(k => !(r.picked ?? []).includes(k) && k !== PROSPECT_FOR[2]) // the Derrick is always on sale anyway
+        r.offer = undefined; r.picked = undefined
+        r.phase = 'shop'; startRound(r, 1); return
+      }
       startRound(r, r.round + 1)
       return
   }
@@ -692,7 +711,8 @@ function endRound(r: Run) {
     }
     r.phase = r.round >= 4 ? 'stageComplete' : 'roundWon'
     if (r.phase === 'stageComplete') grantReward(r)
-    else r.spoils = weightedCard(r, [...shopPool(r.stage)]) // a card to take, or turn down for cash
+    // a card to take, or turn down for cash. After stage 2's first fight, it's the Expense Account: skimming from now on
+    else r.spoils = r.stage === 2 && r.round === 1 && !r.deck.some(c => c.key === 'expenseAccount') ? 'expenseAccount' : weightedCard(r, [...shopPool(r.stage)])
     r.plots.forEach(w => w && (w.unstable = false))
   }
 }
@@ -1276,7 +1296,7 @@ export function incorporate(r: Run) {
   r.stageGold = r.gold
   r.plots = r.plots.map(w => (w ? { output: CONFIG.stage2Output, reserve: w.reserve, field: true } : null))
   for (const c of r.deck) if (c.key === 'prospect') { c.key = 'oldProspect'; c.uses = CARDS.oldProspect.uses; c.up = false }
-  r.deck.push(card(r, 'derrick'), card(r, 'payDividend'), card(r, 'expenseAccount'))
+  r.offer = [...INCORPORATE_OFFER_2]; r.picked = []
   r.prospectPrice = CONFIG.derrickPrice
   r.exposure = Math.min(CONFIG.exposureStartCap, Math.floor(r.stats.skims / CONFIG.exposureStartPer))
   r.shop = { cards: [], item: null, loanTaken: false, prospectSold: true, bucketSold: true, boon: null, dividendPaid: true }
@@ -1315,7 +1335,7 @@ export function goMultinational(r: Run) {
   r.ledger = []; r.events = []
   r.roundStart = snapshot(r)
 }
-const INCORPORATE_ACTIONS: Action['type'][] = ['takeLoan', 'upgradeCard', 'destroyCard', 'leaveShop']
+const INCORPORATE_ACTIONS: Action['type'][] = ['takeLoan', 'upgradeCard', 'destroyCard', 'pickCard', 'leaveShop']
 
 /** Playtest tools, only on admin runs. */
 function adminAction(r: Run, op: AdminOp, key?: CardKey, target?: number) {
