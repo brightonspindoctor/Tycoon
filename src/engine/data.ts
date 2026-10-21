@@ -318,7 +318,7 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   patentHolder: { role: 'engine', name: 'The Patent Holder', hold: 12, weak: 'Legal', cycle: ['Cease and Desist', 'New Patent Claim', 'Royalty'], portrait: 'patentHolder' },
   saboteur: { role: 'engine', name: 'The Saboteur', hold: 10, weak: 'Dirty', cycle: ['Wreck', 'Lit Fuse', 'Infiltrate'], movesFirst: 'Infiltrate', whenBeaten: 'Starts a fire', portrait: 'saboteur' },
   commission: { role: 'engine', name: 'The Railroad Commission', hold: 8, weak: 'Dirty', cycle: ['Proration', 'Inspection', 'Leaky Tanks'], portrait: 'commission' },
-  proxyFight: { role: 'boss', name: 'The Proxy Fight', hold: 26, weak: 'Legal', resist: 'Dirty', cycle: ['Hostile Bid', 'Proxy Meeting', 'The Vote'], movesFirst: 'Canvass', portrait: 'proxyFight' },
+  proxyFight: { role: 'boss', name: 'The Proxy Fight', hold: 46, weak: 'Legal', resist: 'Dirty', cycle: ['Hostile Bid', 'Proxy Meeting', 'The Vote'], movesFirst: 'Canvass', portrait: 'proxyFight' },
   // stage 3
   spill: { role: 'engine', name: 'The Spill', hold: 22, weak: 'Bury', cycle: ['Slick', 'Shut Down', 'Clean-up Bill'], buyout: 'Pay for the clean-up', portrait: 'spill' },
   climateScience: { role: 'engine', name: 'Climate Science', hold: 24, weak: 'Bury', resist: 'Dirty', cycle: ['Measure', 'Publish', 'Peer Review'], round3: 'Consensus', portrait: 'climateScience' },

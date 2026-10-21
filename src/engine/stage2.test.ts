@@ -472,7 +472,7 @@ describe('fire in stage 2 comes from Bad Blood', () => {
   })
   it('every stage 2 enemy has 2 more Hold than before', () => {
     expect([THREATS.muckraker.hold, THREATS.combine.hold, THREATS.clawback.hold, THREATS.patentHolder.hold, THREATS.saboteur.hold, THREATS.commission.hold, THREATS.proxyFight.hold])
-      .toEqual([11, 11, 10, 12, 10, 8, 26])
+      .toEqual([11, 11, 10, 12, 10, 8, 46])
   })
   it('R&D Sprint counts every Well and Field', () => {
     let r = inStage2(['rdSprint'])

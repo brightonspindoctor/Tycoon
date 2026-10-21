@@ -45,7 +45,7 @@ describe('admin −20 Hold', () => {
     r = act(r, { type: 'admin', op: 'hold20', target: t.id })
     expect(r.threats[0].hold).toBe(t.hold - 20)
     expect(r.ap).toBe(ap)
-    r = act(r, { type: 'admin', op: 'hold20', target: t.id })
+    for (let i = 0; i < 5 && r.phase === 'turn'; i++) r = act(r, { type: 'admin', op: 'hold20', target: t.id })
     expect(r.phase).toBe('stageComplete')
   })
 })
