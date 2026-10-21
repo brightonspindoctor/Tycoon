@@ -158,7 +158,6 @@ function secondUpgrade(base: CardDef, up: CardDef): CardDef {
   }
   if (typeof base.ap === 'number' && typeof up.ap === 'number' && up.ap < base.ap) {
     d.ap = Math.max(0, up.ap - (base.ap - up.ap))
-    if (d.ap === 0 && !/Costs no AP/.test(text)) text = `${text} Costs no AP.`
   }
   return { ...d, text: text.replace(/Pay \$0\. /, '') }
 }
@@ -711,15 +710,6 @@ export function infiltrateTarget(r: Run): number {
   })
   return best
 }
-/** Where a Rotary Rig goes: your best Well that isn't already a Field. */
-export function rigTarget(r: Run): number {
-  let best = -1
-  r.plots.forEach((w, i) => {
-    const b = best >= 0 ? r.plots[best]! : null
-    if (w && !w.field && (!b || w.output > b.output || (w.output === b.output && w.reserve > b.reserve))) best = i
-  })
-  return best
-}
 
 function checkBankrupt(r: Run): boolean {
   if (r.phase === 'lost') return true // ousted or ruined already
@@ -830,7 +820,6 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (d.gold && r.gold < d.gold) return { ok: false, why: 'Not enough gold' }
   if (isProspect(c.key) && (d.plots ?? 0) > 0 && r.plots.length >= CONFIG.maxPlots && freePlot(r) < 0) return { ok: false, why: 'No land left to claim' }
   if (isProspect(c.key) && !d.plots && !canBuild(r)) return { ok: false, why: 'No empty plot' }
-  if (c.key === 'rotaryRig' && rigTarget(r) < 0) return { ok: false, why: 'No Well to convert' }
   if (c.key === 'rdSprint' && !sprintWells(r)) return { ok: false, why: 'No Wells' }
   if (d.scrap === 'one' && !handTargetsFor(r, c).length) return { ok: false, why: 'Nothing to destroy' }
   if (d.scrap === 'junk' && !r.hand.some(x => x.id !== c.id && CARDS[x.key].junk)) return { ok: false, why: 'No junk in hand' }
@@ -933,7 +922,6 @@ function play(r: Run, cardId: number, target?: number) {
         say(r, add ? `Claimed ${add} plot${add > 1 ? 's' : ''}.` : `No new land. ${wells} Well card${wells > 1 ? 's' : ''} drawn.`)
         break
       }
-      case 'rotaryRig': { const i = rigTarget(r); if (i >= 0) { r.plots[i]!.field = true; say(r, `Rotary Rig: Well No. ${i + 1} is now a Field.`) } break }
       case 'rdSprint': {
         const made = sprintWells(r) * d.power
         const got = Math.min(made, r.storage - r.oil)

@@ -160,13 +160,6 @@ describe('stage 2 economy', () => {
     expect(skimRate(r)).toBe(CONFIG.skimRate2[1])
   })
 
-  it('a Rotary Rig (no longer sold) still turns a Well into a Field', () => {
-    let r = inStage2(['rotaryRig'])
-    r.plots = [{ output: 1, reserve: 2 }, { output: 2, reserve: 1 }]
-    r = act(r, { type: 'play', cardId: inHand(r, 'rotaryRig').id })
-    expect(r.plots[1]!.field).toBe(true)
-    expect(r.plots[0]!.field).toBeFalsy()
-  })
 })
 
 describe('Board Exposure', () => {

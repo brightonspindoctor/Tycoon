@@ -368,14 +368,14 @@ button.m-threat { cursor: pointer; }
 .m-detail__why { font-family: var(--font-figures); font-size: 11px; }
 .m-detail .cl-btn { flex: none; }
 .m-detail__hint { flex: none; color: var(--accent); }
-.m-hand { display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px 4px; scroll-padding-inline: 12px; scroll-snap-type: x proximity; scrollbar-width: none; min-height: 168px; align-items: flex-end; }
+.m-hand { display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px 4px; scroll-padding-inline: 12px; scroll-snap-type: x proximity; scrollbar-width: none; min-height: 176px; align-items: flex-end; }
 .m-hand::-webkit-scrollbar { display: none; }
 .m-hand__empty { align-self: center; margin: 0 auto; }
 .m-hand .hand__slot { flex: none; scroll-snap-align: start; animation-name: deal-up; }
-.m-hand .card { width: 112px; height: 156px; padding: 7px; gap: 4px; }
+.m-hand .card { width: 112px; height: 164px; padding: 7px; gap: 3px; overflow: hidden; }
 .m-hand .card .cl-card__cost { width: 22px; height: 22px; font-size: 13px; }
 .m-hand .card .cl-card__name { font-size: 13px; line-height: 15px; }
-.m-hand .card .cl-card__art { flex: 1; height: auto; }
+.m-hand .card .cl-card__art { flex: 1; height: auto; min-height: 24px; }
 .m-hand .card .cl-card__effect { flex: none; overflow: visible; }
 .m-hand .card .cl-card__art img { width: auto; height: auto; max-width: 44px; max-height: 100%; aspect-ratio: 1; }
 .m-hand .card .cl-card__era { display: none; }

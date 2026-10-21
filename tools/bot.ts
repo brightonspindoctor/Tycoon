@@ -144,7 +144,7 @@ export function botTurn(r: Run): Run {
     const petty = find('pettyCash')
     const stop = find('shoreUp') ?? find('securityDetail')
     const draw = find('telegraphLine') ?? find('tickerTape') ?? (r.capital > 8 ? find('efficiencyExpert') : undefined)
-    const rig = find('rotaryRig') ?? find('derrick')
+    const rig = find('derrick')
     const skimOK = botStyle.skim === 'greedy' ? r.exposure <= 5 && r.capital > skimRate(r) + 6 : botStyle.skim === 'normal' ? r.exposure <= 3 && r.capital > skimRate(r) + 12 : false
     const expense = skimOK ? find('expenseAccount') : undefined
     const sprint = find('rdSprint')
@@ -189,7 +189,7 @@ export function botRun(r: Run, stopAt = 3): Run {
     else if (r.phase === 'turn') r = botTurn(r)
     else if (r.phase === 'incorporate') r = botIncorporate(r)
     else if (r.phase === 'roundWon') {
-      if (r.spoils) r = act(r, { type: isAttack(r.spoils) || r.spoils === 'expenseAccount' || r.spoils === 'prospect' || r.spoils === 'rotaryRig' || r.spoils === 'thinkTank' ? 'takeSpoils' : 'sellSpoils' })
+      if (r.spoils) r = act(r, { type: isAttack(r.spoils) || r.spoils === 'expenseAccount' || r.spoils === 'prospect' || r.spoils === 'thinkTank' ? 'takeSpoils' : 'sellSpoils' })
       r = act(r, { type: 'continue' })
     }
     else if (r.phase === 'stageComplete' && r.stage < stopAt) r = act(r, { type: 'continue' })

@@ -27,7 +27,7 @@ export function CardView({ card, apCost, playable = true, why, selected, onClick
   const builds = stage >= 2 && (card.key === 'well' || card.key === 'wildcat')
   // there's no board in stage 3: cards from the 1900s stop mentioning it
   const plain = (t: string) => (stage >= 3 ? t.replace(/ ?[+−]\d Board Exposure\./g, '').replace(/ The board never sees it\./, '') : t)
-  const text = plain(units(builds ? (stage >= 3 ? `Build a Rig: ${CONFIG.rigOutput} oil a turn, never runs dry.` : 'Build a Well: 1 oil a turn, never runs dry.') : d.text, stage))
+  const text = plain(units(builds ? (stage >= 3 ? `Build a Rig: ${CONFIG.rigOutput} oil a turn, never dry.` : 'Build a Well: 1 oil a turn, never dry.') : d.text, stage))
   const base = CARDS[card.key].uses
   // a long text steps its font down until it fits the card's fixed text box
   const effect = useRef<HTMLDivElement>(null)
@@ -35,10 +35,12 @@ export function CardView({ card, apCost, playable = true, why, selected, onClick
     const el = effect.current
     if (!el) return
     el.style.fontSize = ''; el.style.lineHeight = ''
-    if (el.closest('.m-hand')) return // the mobile hand lets its art shrink instead
+    // the mobile hand keeps a minimum of art and lets the text step down until the card holds it all
+    const box = el.closest('.m-hand') ? el.closest('.card') as HTMLElement | null : null
+    const over = () => (box ? box.scrollHeight > box.clientHeight + 1 : el.scrollHeight > el.clientHeight + 1)
     let size = parseFloat(getComputedStyle(el).fontSize)
-    const floor = small ? 8 : 10.5
-    while (el.scrollHeight > el.clientHeight + 1 && size > floor) {
+    const floor = small ? 8 : box ? 9 : 10.5
+    while (over() && size > floor) {
       size -= 0.5
       el.style.fontSize = `${size}px`; el.style.lineHeight = `${Math.round(size * 1.28)}px`
     }
