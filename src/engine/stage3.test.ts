@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { act, cardDef, goMultinational, handSize, intentText, newRun, price, production, type Run } from './engine'
 import { CONFIG } from './config'
-import { CARDS, THREATS, type CardKey, type ThreatKind } from './data'
+import { CARDS, type CardKey, type ThreatKind } from './data'
 
 /** A run that has just won the proxy fight, with some old stock in the deck. */
 function afterProxyFight(seed = 3): Run {
@@ -216,12 +216,12 @@ describe('Buy Out, Advertorial, the Oil Shock and Cover', () => {
     expect(after.threats[0].hold).toBe(20 - 20) // 28 on a 20-Hold enemy: beaten
   })
 
-  it("Buy Out can't touch Climate Science, the Bribery Scandal or the summit", () => {
-    for (const k of ['climateScience', 'briberyScandal', 'geneva'] as ThreatKind[]) {
-      expect(THREATS[k].immune).toBe('Buy Out')
-      const r = inStage3(['buyOut'], k)
-      expect(act(r, { type: 'play', cardId: inHand(r, 'buyOut').id, target: 900 }).threats[0].hold).toBe(20)
-    }
+  it('Buy Out is Legal damage: full on the summit, double on the Bribery Scandal, half on the Spill', () => {
+    expect(CARDS.buyOut.family).toBe('Legal')
+    const hold = (k: ThreatKind) => { const r = inStage3(['buyOut'], k); r.threats[0].hold = 40; return act(r, { type: 'play', cardId: inHand(r, 'buyOut').id, target: 900 }).threats[0].hold }
+    expect(hold('geneva')).toBe(40 - 14)
+    expect(hold('briberyScandal')).toBe(40 - 28)
+    expect(hold('spill')).toBe(40 - 7)
   })
 
   it('Cover blocks Heat from enemies, and every enemy move also takes Capital', () => {

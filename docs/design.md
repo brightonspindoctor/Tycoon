@@ -178,7 +178,7 @@ Winning the Proxy Fight pays 3 gold, then a page-turn to 1970 stamped MULTINATIO
 - **Residue** at the end of stage 3: 70+ leaves **On File** (The Truth starts 1 step further on in stage 4); 30 or less leaves **Clean Image** (your first greenwash card each round costs 1 less). Neither does anything yet.
 
 ### Damage kinds
-Legal, Dirty, **Bury** (hiding evidence), **Lobby** (Washington; Lobby cards also cool Heat) and **Buy Out** (paid in Capital). Enemies are weak to, resist or are immune to them.
+Four damage types: Legal, Dirty, **Bury** (hiding evidence) and **Lobby** (Washington; Lobby cards also cool Heat). Buy Out is a Legal card paid for in Capital. Enemies are weak to, resist or are immune to them.
 
 ### Stage 3 cards (Trading Floor pool)
 | Card | Cost | Effect | Upgraded |
@@ -196,7 +196,7 @@ Legal, Dirty, **Bury** (hiding evidence), **Lobby** (Washington; Lobby cards als
 | Fund a Think Tank | 1 AP, $5M | −10 Heat | $3M, −14 Heat |
 | Bribe an Official | 1 AP, $3M | Dirty, remove 8 Hold. A Bribery Scandal on the board gains 3 Hold | 11 |
 | Retain Counsel | 1 AP, $2M | Legal, remove 7 Hold | 10 |
-| **Buy Out** | 1 AP, $8M | Buy Out, remove 14 Hold | 18 (++: 22) |
+| **Buy Out** | 1 AP, $8M | Legal, remove 14 Hold | 18 (++: 22) |
 | **Advertorial** | 1 AP, $4M | +6 Cover (blocks enemy Heat too) | +9 (++: +12) |
 | **Oil Shock** | 0 AP, one use | Your next oil sale this turn pays double. Sold once a run ($15M) | — |
 Every bribe (Bribe the Sheriff, Bribe, Bribe an Official) feeds a Bribery Scandal. Junk: Dead Weight, Dry Lease, Draft Declaration (the summit's: must play, 1 AP, does nothing).
@@ -208,12 +208,12 @@ Every bribe (Bribe the Sheriff, Bribe, Bribe an Official) feeds a Bribery Scanda
 **Every stage 3 enemy move also takes Capital** ($1–3M, the last column), on top of what the move does. Cover blocks it.
 | Enemy | Role | Hold | Weak | Resists | Immune | Cycle | Per move |
 |---|---|---|---|---|---|---|---|
-| Rival Companies | Cash | 30 | Buy Out | Dirty | — | Price War (oil −$1M) → Undercut (−$4M) → Poach Contracts (−$6M). Beaten: prices recover | $3M |
+| Rival Companies | Cash | 30 | Legal | Dirty | — | Price War (oil −$1M) → Undercut (−$4M) → Poach Contracts (−$6M). Beaten: prices recover | $3M |
 | Diversified Assets | Cash | 27 | Legal | — | — | Running Costs (−$4M) → Bad Quarter (−$4M) → Write-down (−$8M) | $3M |
-| The Bribery Scandal | Cash | 28 | Legal | Lobby | Buy Out | Leak (−1 gold) → Hearing (−$5M) → Exposé (−$8M) (+ Indictment: −2 gold in R3). Grows 3 Hold for every bribe you pay | $2M |
-| The Spill | Engine | 29 | Buy Out | Legal | — | Slick (lose 2 stored oil) → Shut Down (a Rig pumps nothing next turn) → Clean-up Bill (−$5M) | $2M |
-| Climate Science | Engine | 31 | Bury | Dirty | Buy Out | Measure (+5 Heat) → Publish (+8 Heat) → Peer Review (regains 3 Hold) (+ Consensus: +10 Heat in R3) | $1M |
-| **The Geneva Climate Summit** (boss, 1979) | Boss | 47 | — | Dirty | Buy Out | Expert Testimony (+8 Heat, +4 each cycle) → Draft Declaration (must-play junk in your next hand) → Resolution (−$6M, +$2M each cycle). Moves first: Opening Session (+6 Heat) | $3M |
+| The Bribery Scandal | Cash | 28 | Legal | Lobby | — | Leak (−1 gold) → Hearing (−$5M) → Exposé (−$8M) (+ Indictment: −2 gold in R3). Grows 3 Hold for every bribe you pay | $2M |
+| The Spill | Engine | 29 | Bury | Legal | — | Slick (lose 2 stored oil) → Shut Down (a Rig pumps nothing next turn) → Clean-up Bill (−$5M) | $2M |
+| Climate Science | Engine | 31 | Bury | Dirty | — | Measure (+5 Heat) → Publish (+8 Heat) → Peer Review (regains 3 Hold) (+ Consensus: +10 Heat in R3) | $1M |
+| **The Geneva Climate Summit** (boss, 1979) | Boss | 47 | — | Dirty | — | Expert Testimony (+8 Heat, +4 each cycle) → Draft Declaration (must-play junk in your next hand) → Resolution (−$6M, +$2M each cycle). Moves first: Opening Session (+6 Heat) | $3M |
 
 ## Endings
 - Bankrupt (Capital 0) · Ousted (Exposure 8, stage 2) · Ruined (gold below 0, stage 2 on) · Broken up (Heat 100, stage 3) · Out of time · later: Stranded (stage 4).

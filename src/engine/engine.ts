@@ -311,7 +311,7 @@ export function damageFor(family: Family, power: number, kind: ThreatKind): numb
 }
 /** Hold an attack would actually remove from this enemy now, after its Cover. */
 export const damageOn = (t: Threat, family: Family, power: number) => Math.max(0, damageFor(family, power, t.kind) - (t.cover ?? 0))
-export const ATTACK_FAMILIES: Family[] = ['Legal', 'Dirty', 'Bury', 'Lobby', 'Buy Out']
+export const ATTACK_FAMILIES: Family[] = ['Legal', 'Dirty', 'Bury', 'Lobby']
 export const isAttack = (key: CardKey) => ATTACK_FAMILIES.includes(CARDS[key].family) && CARDS[key].power > 0
 
 export const fires = (n: number) => `${n} fire${n === 1 ? '' : 's'}`

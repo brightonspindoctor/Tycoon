@@ -1,7 +1,7 @@
 // Card, enemy, item and modifier definitions for Oil, stages 1 to 3.
 import { CONFIG } from './config'
 
-export type Family = 'Legal' | 'Dirty' | 'Bury' | 'Lobby' | 'Buy Out' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Fortune' | 'Board' | 'Scrap' | 'Junk'
+export type Family = 'Legal' | 'Dirty' | 'Bury' | 'Lobby' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Fortune' | 'Board' | 'Scrap' | 'Junk'
 export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'shovels' | 'coins' | 'telegraph' | 'dynamite' | 'gear' | 'timber' | 'hose' | 'envelope' | 'graft'
   | 'wages' | 'sheriff' | 'will' | 'shares' | 'cashbox' | 'redtape' | 'iou' | 'phone' | 'infiltrate'
   // stage 2 (Art Deco)
@@ -185,7 +185,7 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $2. Remove 7 Hold.', flavour: 'Billed in six-minute units.' },
   advertorial: { name: 'Advertorial', era: 3, ap: 1, cost: 4, uses: null, family: 'Defence', power: 0, cover: 6, icon: 'advertorial', price: 15, rarity: 'Common',
     text: 'Pay $4. +6 Cover this turn. Cover blocks Heat from enemies too.', flavour: 'Paid opinion, opposite the editorial page.' },
-  buyOut: { name: 'Buy Out', era: 3, ap: 1, cost: 8, uses: null, family: 'Buy Out', power: 14, icon: 'buyOut', price: 20, rarity: 'Uncommon',
+  buyOut: { name: 'Buy Out', era: 3, ap: 1, cost: 8, uses: null, family: 'Legal', power: 14, icon: 'buyOut', price: 20, rarity: 'Uncommon',
     text: 'Pay $8. Remove 14 Hold.', flavour: 'Everyone has a number.' },
   oilShock: { name: 'Oil Shock', era: 3, ap: 0, cost: 0, uses: 1, family: 'Tempo', power: 0, doubleSale: true, icon: 'oilShock', price: 15, rarity: 'Rare',
     text: "Your next oil sale this turn pays double. Then it's gone. One per run.", flavour: 'October 1973. Thank you, gentlemen.' },
@@ -335,12 +335,12 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   commission: { role: 'engine', name: 'The Railroad Commission', hold: 8, weak: 'Dirty', cycle: ['Proration', 'Inspection', 'Leaky Tanks'], portrait: 'commission' },
   proxyFight: { role: 'boss', name: 'The Proxy Fight', hold: 46, weak: 'Legal', resist: 'Dirty', cycle: ['Hostile Bid', 'Proxy Meeting', 'The Vote'], movesFirst: 'Canvass', portrait: 'proxyFight' },
   // stage 3
-  spill: { role: 'engine', name: 'The Spill', hold: 29, weak: 'Buy Out', resist: 'Legal', chip: 2, cycle: ['Slick', 'Shut Down', 'Clean-up Bill'], portrait: 'spill' },
-  climateScience: { role: 'engine', name: 'Climate Science', hold: 31, weak: 'Bury', resist: 'Dirty', immune: 'Buy Out', chip: 1, cycle: ['Measure', 'Publish', 'Peer Review'], round3: 'Consensus', portrait: 'climateScience' },
-  rivals: { role: 'cash', name: 'Rival Companies', hold: 30, weak: 'Buy Out', resist: 'Dirty', chip: 3, cycle: ['Price War', 'Undercut', 'Poach Contracts'], whenBeaten: 'Prices recover', portrait: 'rivals' },
+  spill: { role: 'engine', name: 'The Spill', hold: 29, weak: 'Bury', resist: 'Legal', chip: 2, cycle: ['Slick', 'Shut Down', 'Clean-up Bill'], portrait: 'spill' },
+  climateScience: { role: 'engine', name: 'Climate Science', hold: 31, weak: 'Bury', resist: 'Dirty', chip: 1, cycle: ['Measure', 'Publish', 'Peer Review'], round3: 'Consensus', portrait: 'climateScience' },
+  rivals: { role: 'cash', name: 'Rival Companies', hold: 30, weak: 'Legal', resist: 'Dirty', chip: 3, cycle: ['Price War', 'Undercut', 'Poach Contracts'], whenBeaten: 'Prices recover', portrait: 'rivals' },
   diversified: { role: 'cash', name: 'Diversified Assets', hold: 27, weak: 'Legal', chip: 3, cycle: ['Running Costs', 'Bad Quarter', 'Write-down'], portrait: 'diversified' },
-  briberyScandal: { role: 'cash', name: 'The Bribery Scandal', hold: 28, weak: 'Legal', resist: 'Lobby', immune: 'Buy Out', chip: 2, cycle: ['Leak', 'Hearing', 'Exposé'], round3: 'Indictment', portrait: 'briberyScandal' },
-  geneva: { role: 'boss', name: 'The Geneva Climate Summit', hold: 47, resist: 'Dirty', immune: 'Buy Out', chip: 3, cycle: ['Expert Testimony', 'Draft Declaration', 'Resolution'], movesFirst: 'Opening Session', portrait: 'geneva' },
+  briberyScandal: { role: 'cash', name: 'The Bribery Scandal', hold: 28, weak: 'Legal', resist: 'Lobby', chip: 2, cycle: ['Leak', 'Hearing', 'Exposé'], round3: 'Indictment', portrait: 'briberyScandal' },
+  geneva: { role: 'boss', name: 'The Geneva Climate Summit', hold: 47, resist: 'Dirty', chip: 3, cycle: ['Expert Testimony', 'Draft Declaration', 'Resolution'], movesFirst: 'Opening Session', portrait: 'geneva' },
 }
 
 // Round 1 takes your cash, round 2 breaks your engine, round 3 sends one of each.
