@@ -17,6 +17,8 @@ export function botIncorporate(r: Run): Run {
     const c = r.deck.find(x => x.key === k && canUpgrade(x))
     if (c && r.capital > r.upgradeCost + 16) r = act(r, { type: 'upgradeCard', cardId: c.id })
   }
+  // pick the new cards: a Derrick and the attack card first
+  for (const k of ['derrick', 'patentThicket', 'payDividend', 'tickerTape'] as CardKey[]) if ((r.picked ?? []).length < CONFIG.incorporatePicks && r.offer?.includes(k)) r = act(r, { type: 'pickCard', key: k })
   return act(r, { type: 'leaveShop' })
 }
 
@@ -108,7 +110,7 @@ export function botRun(r: Run, stopAt = 2): Run {
     else if (r.phase === 'turn') r = botTurn(r)
     else if (r.phase === 'incorporate') r = botIncorporate(r)
     else if (r.phase === 'roundWon') {
-      if (r.spoils) r = act(r, { type: isAttack(r.spoils) || r.spoils === 'prospect' || r.spoils === 'rotaryRig' ? 'takeSpoils' : 'sellSpoils' })
+      if (r.spoils) r = act(r, { type: isAttack(r.spoils) || r.spoils === 'expenseAccount' || r.spoils === 'prospect' || r.spoils === 'rotaryRig' ? 'takeSpoils' : 'sellSpoils' })
       r = act(r, { type: 'continue' })
     }
     else if (r.phase === 'stageComplete' && r.stage < stopAt) r = act(r, { type: 'continue' })

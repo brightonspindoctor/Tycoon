@@ -22,7 +22,7 @@ function play(seed: number, o: AdminStart) {
       r = botTurn(r)
       if (r.phase !== 'turn') fights.push({ round: cur.round, enemies: cur.enemies, won: r.phase === 'roundWon' || r.phase === 'stageComplete', turns: turn, capDelta: r.capital - cur.cap })
     } else if (r.phase === 'shop') { shopCap[r.round] = r.capital; r = botShop(r) }
-    else if (r.phase === 'roundWon') r = act(act(r, { type: r.spoils && ['patentThicket', 'espionage', 'poachEngineer', 'securityDetail'].includes(r.spoils) ? 'takeSpoils' : 'sellSpoils' }), { type: 'continue' })
+    else if (r.phase === 'roundWon') r = act(act(r, { type: r.spoils && ['patentThicket', 'espionage', 'poachEngineer', 'securityDetail', 'expenseAccount'].includes(r.spoils) ? 'takeSpoils' : 'sellSpoils' }), { type: 'continue' })
     else break
   }
   return { r, fights, shopCap }

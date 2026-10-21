@@ -31,6 +31,8 @@ export function adminStart(seed: number, o: AdminStart): Run {
     r.admin = true
     if (o.deck === 'strong') { STRONG_2.forEach(k => add(k)); const l = r.deck.find(c => c.key === 'lawyerUp'); if (l) l.up = true }
     r.exposure = Math.max(0, Math.min(7, o.exposure))
+    // jumping past incorporation: skip the pick and hand over the old stage 2 kit
+    if (o.start !== 'incorporate') { r.offer = undefined; r.picked = undefined; (['derrick', 'payDividend', 'expenseAccount'] as CardKey[]).forEach(k => add(k)) }
   }
   r.capital = o.capital
   r.gold = o.gold

@@ -189,6 +189,8 @@ export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBr
 // stage 2 sells only stage 2 cards: better than stage 1's, and dearer
 export const SHOP_POOL_2: CardKey[] = ['telegraphLine', 'tickerTape', 'nightShift', 'efficiencyExpert', 'streamline', 'shredFiles', 'scrapParts', 'cleanHouse',
   'patentThicket', 'espionage', 'poachEngineer', 'rdSprint', 'payDividend', 'personalLawyer', 'securityDetail', 'insurance', 'expenseAccount']
+/** Stage 2 incorporation: pick incorporatePicks of these; the rest go on sale at the first Exchange visit. */
+export const INCORPORATE_OFFER_2: CardKey[] = ['derrick', 'payDividend', 'patentThicket', 'tickerTape']
 export const shopPool = (stage: number): CardKey[] => (stage >= 2 ? SHOP_POOL_2 : SHOP_POOL)
 /** The land card each stage's shop always stocks: a Prospect in stage 1, a Steel Derrick (a Well) from stage 2. */
 export const PROSPECT_FOR: Record<number, CardKey> = { 1: 'prospect', 2: 'derrick' }
