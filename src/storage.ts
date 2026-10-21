@@ -8,6 +8,7 @@ export interface RunRecord {
   gold: number | null // only recorded for a finished game
   completed: boolean
   stageGold: number
+  tactic?: string // the badge a won game earned
 }
 
 const KEY = 'tycoon.runs.v1'

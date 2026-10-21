@@ -92,7 +92,7 @@ export function History({ onBack }: { onBack: () => void }) {
               <tr key={r.id}>
                 <td>{runs.length - i}</td><td>{new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td><td>{r.industry}</td>
                 <td><span className="mini-bar">{Array.from({ length: 16 }, (_, k) => <i key={k} className={k + 1 < r.rounds || (k + 1 === r.rounds && !ended(r)) ? 'd' : k + 1 === r.rounds ? 'x' : ''} />)}</span> {r.completed ? 'Complete' : `Stage ${Math.ceil(r.rounds / 4)} · Round ${((r.rounds - 1) % 4) + 1}`}</td>
-                <td className={r.outcome === 'Quit' ? 'res-note' : ended(r) ? 'cl-minus' : ''}>{r.outcome}</td>
+                <td className={r.outcome === 'Quit' ? 'res-note' : ended(r) ? 'cl-minus' : ''}>{r.outcome}{r.tactic && <span className="history__badge">{r.tactic}</span>}</td>
                 <td className="num">{r.gold !== null ? `${r.gold} gold` : <span className="res-note">— ({r.stageGold} gold)</span>}</td>
               </tr>
             ))}</tbody>

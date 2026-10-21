@@ -6,6 +6,7 @@ import { ERA_THEME, money, units, year } from '../engine/format'
 import { CONFIG } from '../engine/config'
 import { play } from '../sound'
 import { iconUrl } from './icons'
+import { TACTICS, tacticFor } from '../engine/tactics'
 
 function Progress({ reached, dead }: { reached: number; dead: boolean }) {
   return (
@@ -84,6 +85,7 @@ export function StageComplete({ run, onMenu, onHistory, onContinue }: { run: Run
     : st === 2 ? { title: 'The proxy fight is won', sub: 'The board is yours again, for now. A war is coming, and after it, the oil shocks.' }
     : { title: 'The Geneva Climate Summit is over', sub: 'The declaration calls for further research. Your delegates helped write it.' }
   const wells = run.plots.filter(Boolean).length
+  const tactic = last ? tacticFor(run.tally, run.deck.length, run.stats.oilSold) : null
   return (
     <div className="screen end" data-theme={ERA_THEME[st] ?? 'victorian'}>
       <header className="end__head">
@@ -114,6 +116,16 @@ export function StageComplete({ run, onMenu, onHistory, onContinue }: { run: Run
               )}
             </div>
           </section>
+          {tactic && (
+            <section className="badge" role="status" aria-label="Your tactic">
+              <img src={iconUrl(TACTICS[tactic].icon)} alt="" />
+              <div>
+                <span className="cl-label">How you won</span>
+                <b className="cl-display">{TACTICS[tactic].name}</b>
+                <span>{TACTICS[tactic].text}</span>
+              </div>
+            </section>
+          )}
           <div className="end__progress"><div className="end__progress-head"><span className="cl-label">How far you got</span><span className="cl-num">Round {st * 4} of 16</span></div><Progress reached={st * 4} dead={false} /></div>
           <div className="end__tiles">
             <div className="tile"><span className="cl-label">Capital</span><b className="cl-num">{money(run.capital, st)}</b><span className="res-note">{last ? 'left in the company' : `carried into stage ${st + 1}${st === 1 && run.bonus === 'trustFund' ? '. The Trust Fund ends here: Bank Debt starts in stage 2.' : ''}`}</span></div>

@@ -17,6 +17,7 @@ import { InstallPrompt } from './ui/InstallPrompt'
 import { ShopScreen } from './ui/ShopScreen'
 import { RoundSummary } from './ui/RoundSummary'
 import { CrashOut, StageComplete } from './ui/EndScreens'
+import { TACTICS, tacticFor } from './engine/tactics'
 import { IncorporateScreen } from './ui/Incorporate'
 import { MultinationalScreen } from './ui/Multinational'
 import { EraTransition } from './ui/EraTransition'
@@ -129,6 +130,7 @@ export default function App() {
       saveRun({
         id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run),
         outcome: run.phase === 'stageComplete' ? `Stage ${run.stage} complete` : LOST[run.loss?.reason ?? 'bankrupt'], gold: null, completed: false, stageGold: run.gold,
+        tactic: run.phase === 'stageComplete' ? (t => t ? TACTICS[t].name : undefined)(tacticFor(run.tally, run.deck.length, run.stats.oilSold)) : undefined,
       })
       setBailout(trustFundOffered(CONFIG.trustFundStreak))
     }

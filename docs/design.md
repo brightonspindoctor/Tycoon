@@ -229,3 +229,18 @@ Rolodex ($20M: +1 hand size, up to 7, buy more than one), Paper Shredder ($18M: 
 `npm run fuzz` plays thousands of random runs through all three stages (a third of them start in stage 3) checking the rules never reach an impossible state.
 **Admin mode** (playtesting): turn it on in Settings (or open the game with `?admin=1`; `?admin=0` turns it off). The title screen then shows **Admin · jump in**: pick stage 1, 2 or 3, where to start (incorporation or going multinational, round 1–3 or the boss), Wells/Fields/Rigs, Capital, gold, Board Exposure or Heat, the bonus and a starter or strong deck. During an admin run, Settings has tools: +10 Capital, +1 gold, Exposure ±1, Heat ±10, +1 AP, win the round, and add any card. Admin runs are never recorded in history and don't touch the Trust Fund streak.
 Preview pages for design checks: `?preview=incorporate`, `?preview=complete2`, `?preview=crash2`, `?preview=multinational`, `?preview=complete3`, `?preview=crash3`, and any of shop, bossshop, summary, round3, boss with `&stage=2` or `&stage=3`.
+
+## Hidden tactics
+
+Never shown during play. The run keeps a quiet tally (damage by card family, moves blocked, Cover used, cards destroyed, Heat cooled, rounds won quickly). When the whole game is won, the results page awards one badge: the tactic furthest past its bar (bars in `CONFIG.tactics`), or none if nothing stands out. The badge is also kept in the run history.
+
+| Badge | Earned by |
+|---|---|
+| Lean Operation | Destroying cards and finishing with a small deck (14 or fewer) |
+| Fortress | Blocking moves and soaking damage and Heat with Cover |
+| Oil Baron | Barrels sold across the run |
+| Spin Doctor | Heat taken off by your own cards |
+| Lawyered Up | Legal cards doing most of the damage |
+| Blitz | Winning rounds in 2 turns or fewer |
+
+Bars were set so roughly 6 in 10 winning bot runs earn a badge, spread fairly evenly across the six. Later: shop and spoils offers will lean towards the tactics a deck is already using.

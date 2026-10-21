@@ -124,4 +124,11 @@ export const CONFIG = {
   turnLimit: 25,
   claimJumperFires: 1, // fires the Claim Jumper starts as he's beaten
   oilCarriesOver: true,
+  // hidden tactics: the bar each one has to clear to earn its badge at the end of a won game
+  tactics: {
+    quickTurns: 2, // a round won in this many turns or fewer counts towards Blitz
+    leanDeckMax: 14, // Lean Operation: the deck you finish with is this size or smaller
+    blockWorth: 6, // Fortress: each blocked move counts as this much Cover used
+    bar: { leanOperation: 8, fortress: 32, oilBaron: 130, spinDoctor: 44, lawyeredUp: 0.5, blitz: 0.3 },
+  },
 } as const

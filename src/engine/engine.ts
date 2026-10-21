@@ -6,6 +6,7 @@ import {
   BOONS, REWARDS, BRIBES, INCORPORATE_OFFER_3, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
 } from './data'
 import { next, pick, shuffle } from './rng'
+import { newTally, type Tally } from './tactics'
 
 export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean; free?: boolean; up?: boolean; up2?: boolean; faded?: boolean } // free: costs no AP · up: upgraded · up2: upgraded twice (stage 3) · faded: unused
 export interface Well { output: number; reserve: number; unstable?: boolean; field?: boolean; lasting?: boolean; rig?: boolean } // a Field (an old Well), a stage 2 Well (lasting) and a stage 3 Rig never run dry
@@ -64,6 +65,7 @@ export interface Run {
   shop: ShopOffer
   ledger: LedgerLine[]
   events: string[]
+  tally?: Tally // hidden: how the run was played, for the tactic badge at the end
   stats: { oilSold: number; earned: number; spent: number; wellsBuilt: number; wellsBurnt: number; wellsStolen: number; wellsLost: number; wellsDry: number; skims: number }
   loss?: { reason: LossReason; by: string[] }
   roundStart: Snapshot
@@ -221,6 +223,9 @@ export const fieldCount = (r: Run) => r.plots.filter(w => w?.field).length
 /** What R&D Sprint counts: every Well and Field in stage 2 (Fields only, in theory, before). */
 const sprintWells = (r: Run) => (r.stage >= 2 ? wellCount(r) : fieldCount(r))
 
+/** The hidden tally, made on first use (runs saved before it existed have none). */
+function tally(r: Run): Tally { return (r.tally ??= newTally()) }
+
 function money(r: Run, label: string, amount: number) {
   if (amount === 0) return
   r.capital += amount
@@ -257,6 +262,7 @@ function heat(r: Run, n: number, why: string, who?: number, quiet = false) {
   const won = r.phase === 'roundWon' || r.phase === 'stageComplete' // a win at the buzzer still counts
   r.heat = Math.max(0, Math.min(won ? CONFIG.heatMax - 1 : CONFIG.heatMax, r.heat + n))
   if (r.heat === before) return
+  if (r.heat < before) tally(r).cooled += before - r.heat
   if (!quiet) {
     const msg = `${why}: Heat ${n > 0 ? '+' : '−'}${Math.abs(r.heat - before)} (${r.heat}/${CONFIG.heatMax}).`
     say(r, msg)
@@ -274,7 +280,7 @@ export const handSize = (r: Run) => Math.min(CONFIG.handMax, CONFIG.handSize + r
 /** Heat from an enemy (stage 3): Cover blocks it first, like cash. */
 function enemyHeat(r: Run, n: number, why: string, who?: number) {
   const blocked = Math.min(n, r.cover)
-  if (blocked) { r.cover -= blocked; say(r, `Cover blocked ${blocked} Heat.`) }
+  if (blocked) { r.cover -= blocked; tally(r).absorbed += blocked; say(r, `Cover blocked ${blocked} Heat.`) }
   heat(r, n - blocked, why, who)
 }
 /** The cards the shop and the spoils draw from: the Oil Shock only until you've had one. */
@@ -318,7 +324,7 @@ function startFire(r: Run, count: number) {
 /** Destroys a card in your hand for good (a temporary card just goes). */
 function destroyInHand(r: Run, c: Card) {
   r.hand = r.hand.filter(x => x.id !== c.id)
-  if (!c.temp) removeFromDeck(r, c)
+  if (!c.temp) { removeFromDeck(r, c); tally(r).destroyed++ }
 }
 function removeFromDeck(r: Run, c: Card) {
   r.deck = r.deck.filter(x => x.id !== c.id)
@@ -360,6 +366,7 @@ export function newRun(seed: number, bonus: BonusKey): Run {
     short: 0, freight: 0, pending: { ap: 0, audit: false, refuse: false, margin: 0, cease: 0, prorate: false }, current: { audit: false, refuse: false, prorate: false },
     items: [], destroyCost: CONFIG.destroyCost, prospectPrice: CONFIG.prospectPrice,
     shop: { cards: [], item: null, loanTaken: false, prospectSold: false, bucketSold: false, boon: null, dividendPaid: false }, ledger: [], events: [],
+    tally: newTally(),
     stats: { oilSold: 0, earned: 0, spent: 0, wellsBuilt: 0, wellsBurnt: 0, wellsStolen: 0, wellsLost: 0, wellsDry: 0, skims: 0 },
     roundStart: { capital: CONFIG.startCapital, gold: 0, wells: 0, oil: 0, deck: 0, exposure: 0 },
     boon: null, reward: null, tempStorage: 0, spoils: null, report: [], reportSeq: 0,
@@ -501,7 +508,7 @@ function shopAction(r: Run, a: Action) {
     case 'destroyCard': {
       const c = r.deck.find(x => x.id === a.cardId)
       if (!c || !pay(r, r.destroyCost, `Destroy ${CARDS[c.key].name}`)) return
-      removeFromDeck(r, c); r.destroyCost += r.stage >= 3 ? CONFIG.cost3Step : 1
+      removeFromDeck(r, c); tally(r).destroyed++; r.destroyCost += r.stage >= 3 ? CONFIG.cost3Step : 1
       return
     }
     case 'reroll':
@@ -747,6 +754,8 @@ function endRound(r: Run) {
       else if (r.capital < r.roundStart.capital) expose(r, 1, 'A bad quarter')
       if (isLost(r)) return
     }
+    tally(r).rounds++
+    if (r.turn <= CONFIG.tactics.quickTurns) tally(r).quick++
     r.phase = r.round >= 4 ? 'stageComplete' : 'roundWon'
     if (r.phase === 'stageComplete') grantReward(r)
     // a card to take, or turn down for cash. After stage 2's first fight, it's the Expense Account: skimming from now on
@@ -778,8 +787,9 @@ function grantReward(r: Run) {
 }
 
 /** Damage to an enemy. Cards marked badBlood put a Bad Blood card in your discard pile. */
-function hit(r: Run, t: Threat, dmg: number, badBlood = false, ignoreCover = false) {
+function hit(r: Run, t: Threat, dmg: number, badBlood = false, ignoreCover = false, family?: string) {
   if (t.cover && !ignoreCover) { const blocked = Math.min(t.cover, dmg); t.cover -= blocked; dmg -= blocked; if (blocked) say(r, `${THREATS[t.kind].name}'s Cover blocked ${blocked}.`) }
+  if (family) { const d = tally(r).damage; d[family] = (d[family] ?? 0) + Math.max(0, Math.min(dmg, t.hold)) }
   t.hold -= dmg
   if (badBlood && r.stage < 3) { addJunk(r, 'badBlood', 'discard'); say(r, 'Bad Blood added to your discard pile.') }
   if (t.hold <= 0) threatBeaten(r, t)
@@ -857,12 +867,12 @@ function play(r: Run, cardId: number, target?: number) {
     if (d.gold) r.gold -= d.gold
     if (d.chance !== undefined) {
       // a gamble: it either lands cleanly or backfires with Bad Blood
-      if (next(r) < d.chance) { say(r, `${d.name} taken: ${THREATS[t.kind].name} −${dmg} Hold.`); hit(r, t, dmg) }
+      if (next(r) < d.chance) { say(r, `${d.name} taken: ${THREATS[t.kind].name} −${dmg} Hold.`); hit(r, t, dmg, false, false, d.family) }
       else if (r.stage < 3) { addJunk(r, 'badBlood', 'discard'); say(r, `${THREATS[t.kind].name} refused the bribe. Bad Blood added to your discard pile.`) }
       else say(r, `${THREATS[t.kind].name} refused the bribe.`)
     } else {
       say(r, `${d.name}: ${THREATS[t.kind].name} −${dmg} Hold.`)
-      hit(r, t, dmg, !!d.badBlood)
+      hit(r, t, dmg, !!d.badBlood, false, d.family)
     }
     if (r.phase === 'turn' && d.draw) drawCards(r, d.draw)
     if (d.exposure) expose(r, d.exposure, d.name)
@@ -872,6 +882,7 @@ function play(r: Run, cardId: number, target?: number) {
     const t = options.find(x => x.id === target) ?? options[0]
     spendCard(r, c)
     t.stopped = true
+    tally(r).blocks++
     if (d.cover) r.cover += d.cover
     say(r, `${d.name}: ${THREATS[t.kind].name}'s ${intent(r, t)} is stopped this turn.`)
   } else if (d.scrap) {
@@ -1300,6 +1311,7 @@ function endTurn(r: Run) {
   const blocked = Math.min(dmg, r.cover)
   const taken = dmg - blocked
   r.cover -= blocked // Cover is used up as it blocks
+  tally(r).absorbed += blocked
   if (taken) money(r, 'Fines and losses', -taken)
   if (blocked) say(r, `Cover blocked $${blocked}.`)
   if (dmg) beat(r, 'money', 'Fines and losses', blocked ? (taken ? `−$${taken}. Cover blocked $${blocked}.` : `Cover blocked all $${dmg}.`) : `−$${taken}.`)
