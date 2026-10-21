@@ -103,7 +103,7 @@ Beating the Baron pays **3 gold** (every boss does). Then the company incorporat
 - **Fire only burns oil** and stops the pumps; it never destroys a Well or Field. With no oil left, one fire dies down each turn.
 - The shop is **The Exchange**. It always offers a **Silo** ($5: +2 oil storage, once a visit, 2 in the whole stage), **Duplicate a card** (a second copy, upgrade and all, for the card's shop price; once a visit), and sells **only stage 2 cards**, stronger and dearer than stage 1's ($4–8). Its staples: a **Steel Derrick** (a Well) one per visit from $6, rising $2 each time. It sells no fire card: you put fires out with the water cards you brought from stage 1.
 - Exchange extras: **Upgrade a card**, and **Pay dividends** ($4: Exposure −2, once per visit). No Cheap Loan.
-- Items (stage 2 only; the stage 1 items stay in stage 1): Refinery ($10: oil +$1), Offshore Account ($5: enemies take 1 less gold), Pumping Station ($12: +1 AP a turn), Press Office ($9: Exposure −1 as each round begins), Filling Stations ($8: +$1 a turn), Auditing Firm ($6: unused Cover carries over).
+- Items (stage 2 only; the stage 1 items stay in stage 1): Offshore Account ($5: enemies take 1 less gold), Pumping Station ($12: +1 AP a turn), Press Office ($9: Exposure −1 as each round begins), Filling Stations ($8: +$1 a turn), Auditing Firm ($6: unused Cover carries over).
 
 ### Board Exposure (0 to 8)
 - **Rises:** +1 per Expense Account or Petty Cash skim, Shred the Files and Industrial Espionage, +1 when a round ends with less Capital than it started (a bad quarter), and from enemies.
@@ -202,7 +202,7 @@ Legal, Dirty, **Bury** (hiding evidence), **Lobby** (Washington; Lobby cards als
 Every bribe (Bribe the Sheriff, Bribe, Bribe an Official) feeds a Bribery Scandal. Junk: Dead Weight, Dry Lease, Draft Declaration (the summit's: must play, 1 AP, does nothing).
 
 ### Stage 3 items
-Rolodex ($20M: +1 hand size, up to 7, buy more than one), Paper Shredder ($18M: once a round, destroy a card in hand for free), Supertanker ($20M: +4 storage, up to 12), **Think Tank** ($15M: +3 Cover every turn).
+**Refinery** ($22M: oil sells +$1M; moved here from stage 2), Rolodex ($20M: +1 hand size, up to 7, buy more than one), Paper Shredder ($18M: once a round, destroy a card in hand for free), Supertanker ($20M: +4 storage, up to 12), **Think Tank** ($15M: +3 Cover every turn).
 
 ### Stage 3 enemies
 **Every stage 3 enemy move also takes Capital** ($1–3M, the last column), on top of what the move does. Cover blocks it.

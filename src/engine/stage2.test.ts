@@ -448,8 +448,9 @@ describe('the Exchange, tidied', () => {
     r = act(r, { type: 'duplicateCard', cardId: lawyer.id })
     expect(r.deck.filter(c => c.key === 'payDividend')).toHaveLength(2)
   })
-  it('sells only stage 2 items, and the Refinery costs 10K', () => {
-    expect(ITEMS.refinery.price).toBe(10)
+  it('sells only stage 2 items; the Refinery has moved to stage 3 at $22M', () => {
+    expect(ITEMS.refinery.stages).toEqual([3])
+    expect(ITEMS.refinery.price).toBe(22)
     for (const k of ['storageTank', 'silo', 'steamPump', 'accountant'] as const) expect(ITEMS[k].stages).toEqual([1])
     for (let seed = 1; seed < 30; seed++) {
       let r = inStage2(['lawyerUp'], 'muckraker', seed)

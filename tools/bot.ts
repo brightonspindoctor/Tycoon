@@ -49,7 +49,7 @@ function botShop3(r: Run): Run {
     const i = r.shop.cards.indexOf(k)
     if (i >= 0 && r.capital > (CARDS[k].price ?? 0) + (n ? 40 : 10)) { r = act(r, { type: 'buyCard', slot: i }); break }
   }
-  if (r.shop.item && ['supertanker', 'thinkTankItem', 'paperShredder', 'rolodex'].includes(r.shop.item) && r.capital > 35) r = act(r, { type: 'buyItem' })
+  if (r.shop.item && ['supertanker', 'refinery', 'thinkTankItem', 'paperShredder', 'rolodex'].includes(r.shop.item) && r.capital > 35) r = act(r, { type: 'buyItem' })
   const up = UPGRADE_3.map(k => r.deck.find(x => x.key === k && canUpgrade(x, r.stage))).find(Boolean)
   if (up && r.capital > r.upgradeCost + 18) r = act(r, { type: 'upgradeCard', cardId: up.id })
   return act(r, { type: 'leaveShop' })
@@ -75,7 +75,7 @@ export function botShop(r: Run): Run {
     const k = r.shop.cards[i]
     if (k && want.includes(k) && r.capital > (CARDS[k].price ?? 0) + 7) { r = act(r, { type: 'buyCard', slot: i }); break }
   }
-  if ((r.shop.item === 'storageTank' || r.shop.item === 'refinery' || r.shop.item === 'offshore') && r.capital > 14) r = act(r, { type: 'buyItem' })
+  if ((r.shop.item === 'storageTank' || r.shop.item === 'offshore') && r.capital > 14) r = act(r, { type: 'buyItem' })
   if (stage2) {
     const up = UPGRADE_ORDER.map(k => r.deck.find(x => x.key === k && canUpgrade(x))).find(Boolean)
     if (up && r.capital > r.upgradeCost + 14) r = act(r, { type: 'upgradeCard', cardId: up.id })
