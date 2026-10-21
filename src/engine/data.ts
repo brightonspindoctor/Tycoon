@@ -9,7 +9,7 @@ export type Icon = 'derrick' | 'plot' | 'barrels' | 'fire' | 'bucket' | 'cudgels
   // stage 3 (1970s): icons still to be drawn fall back to these names, so keep them listed
   | 'embargoRumours' | 'queuesAtPump' | 'telex' | 'memo' | 'restructure' | 'personalGuarantee' | 'dipTrust' | 'buryEvidence' | 'lobbyCongress'
   | 'thinkTank' | 'bribeOfficial' | 'retainCounsel' | 'deadWeight' | 'dryLease' | 'draftDeclaration' | 'rolodex' | 'paperShredder' | 'supertanker' | 'rig'
-  | 'advertorial' | 'buyOut' | 'oilShock'
+  | 'advertorial' | 'buyOut' | 'oilShock' | 'cleanImage' | 'onFile'
 
 export type CardKey =
   | 'prospect' | 'well' | 'wildcat' | 'hiredHand' | 'lawyerUp' | 'shoreUp' | 'bucket' | 'fireBrigade'
@@ -380,8 +380,8 @@ export const ITEMS: Record<ItemKey, { name: string; text: string; price: number;
   paperShredder: { name: 'Paper Shredder', text: 'Once a round, destroy a card in your hand for free', price: 18, icon: 'paperShredder', stages: [3] },
   supertanker: { name: 'Supertanker', text: `+${CONFIG.supertanker} oil storage (up to ${CONFIG.maxStorage})`, price: 20, repeatable: true, icon: 'supertanker', stages: [3] },
   thinkTankItem: { name: 'Think Tank', text: `+${CONFIG.thinkTankCover} Cover every turn`, price: 15, icon: 'thinkTank', stages: [3] },
-  furtherResearch: { name: 'Clean Image', text: 'Stage 4: your first greenwash card each round costs 1 less', price: 0, icon: 'pressOffice', never: true },
-  regulators: { name: 'On File', text: 'Stage 4: The Truth starts 1 step further on', price: 0, icon: 'redtape', never: true, negative: true },
+  furtherResearch: { name: 'Clean Image', text: 'Stage 4: your first greenwash card each round costs 1 less', price: 0, icon: 'cleanImage', never: true },
+  regulators: { name: 'On File', text: 'Stage 4: The Truth starts 1 step further on', price: 0, icon: 'onFile', never: true, negative: true },
 }
 
 // Before the boss: one small, single-use item, bought with gold. Beat the boss: a
