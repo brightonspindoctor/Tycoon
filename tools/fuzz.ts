@@ -30,7 +30,6 @@ function randomAction(r: Run): Action {
     return rand() < 0.25 ? { type: 'leaveShop' } : pick(opts)
   }
   const opts: Action[] = [{ type: 'endTurn' }, { type: 'sellOil' }, { type: 'firebreak' }, { type: 'sellWell', plot: Math.floor(rand() * 6) - 1 }]
-  for (const t of r.threats) opts.push({ type: 'buyOut', target: t.id })
   if (r.hand.length) opts.push({ type: 'shred', cardId: pick(r.hand).id })
   for (const c of r.hand) {
     const ts = r.threats.map(t => t.id)
@@ -84,6 +83,9 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.heat >= CONFIG.heatMax && r.phase !== 'lost') return 'Heat at the top but not broken up'
   if (r.loss?.reason === 'brokenUp' && r.heat < CONFIG.heatMax) return 'broken up below the top'
   if (r.stage === 3 && r.fire) return 'a fire in stage 3'
+  if (r.stage === 3 && r.phase === 'turn' && r.debt) return 'Bank Debt in stage 3'
+  if (r.deck.some(c => c.up2 && !c.up)) return 'a second upgrade without a first'
+  if (r.deck.filter(c => c.key === 'oilShock').length > 1) return 'two Oil Shocks'
   if (r.stage === 3 && r.deck.some(c => c.key === 'badBlood')) return 'Bad Blood in stage 3'
   if (r.stage === 3 && r.plots.some(w => w && !w.rig)) return 'a stage 3 plot that is not a Rig'
   if (r.stage === 3 && r.storage - r.tempStorage > CONFIG.maxStorage) return `storage ${r.storage}`

@@ -70,25 +70,30 @@ export const CONFIG = {
   prorationCap: 2, // production cap under the Railroad Commission's Proration
 
   // stage 3 · 1970s · Heat
-  oilPrice3: 6, // the oil shocks
+  oilPrice3: 5, // the oil shocks
   heatMax: 100, // Heat at this: the company is broken up
   heatPerAP: 2, // every AP you spend adds this much Heat
-  oilShockCash: 15, // offered as stage 3 begins: this much Capital...
-  oilShockHeat: 15, // ...for starting the stage at this much Heat
-  rigPrice: 12, // an Offshore Rig, built straight from the shop; rises by rigStep each time
-  rigStep: 4,
-  rigOutput: 1, // every Rig pumps this and never runs dry
+  sellAP3: 2, // stage 3: selling oil takes 2 AP
+  earthDayHeat: 8, // the Earth Day modifier
+  heatPerSkims: 5, // stage 3 starts with this much Heat for every heatSkimsEvery gold skimmed in stage 2...
+  heatSkimsEvery: 3,
+  heatStartCap: 15, // ...up to this
+  thinkTankCover: 3, // the Think Tank item: Cover at the start of every turn
+  destroyCost3: 10, // stage 3: destroying and upgrading start at least here, and rise by cost3Step
+  upgradeCost3: 10,
+  cost3Step: 5,
+  rigPrice: 30, // an Offshore Rig, built straight from the shop; rises by rigStep each time
+  rigStep: 10,
+  rigOutput: 2, // every Rig pumps this and never runs dry
   rigValue: 10, // selling a Rig
   maxStorage: 12, // Supertankers stop here
   supertanker: 4, // storage a Supertanker adds
   handMax: 7, // Rolodexes stop here
-  buyoutPerHold: 2, // buying out an enemy: $ for every point of Hold it has left
-  buyoutAP: 1,
   bribeFeedsScandal: 3, // every bribe you pay: a Bribery Scandal on the board gains this much Hold
-  lobbyFirmCost: 15, // the Trading Floor's Lobbying Firm: $ for −lobbyFirmDrop Heat, once per visit
-  lobbyFirmDrop: 8,
-  heatLow: 40, // stage 3 ends at or below this: Further Research Needed
-  heatHigh: 75, // at or above this: the Regulators are watching
+  lobbyFirmCost: 25, // the Trading Floor's Lobbying Firm: $ for −lobbyFirmDrop Heat, once per visit
+  lobbyFirmDrop: 10,
+  heatLow: 30, // stage 3 ends at or below this: Clean Image
+  heatHigh: 70, // at or above this: On File
   skimRate3: { 0: 20, 1: 20, 2: 24, 3: 28, 4: 32 } as Record<number, number>, // stage 3: the Expense Account, from $20 a gold
   // stage 3 enemies
   slickOil: 2, // the Spill's Slick: stored oil lost

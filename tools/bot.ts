@@ -1,5 +1,5 @@
 // A simple rule-following player, used by the tests and the balance simulator.
-import { act, buyoutPrice, canBuild, canBuyOut, canPlay, canUpgrade, cardDef, damageOn, handTargetsFor, intent, isAttack, liveThreats, netPrice, rigCount, skimRate, type Card, type Run } from '../src/engine/engine'
+import { act, canBuild, canPlay, canUpgrade, cardDef, damageOn, handTargetsFor, intent, isAttack, liveThreats, netPrice, rigCount, sellAP, skimRate, type Card, type Run } from '../src/engine/engine'
 import { CARDS, PROSPECT_FOR, type CardKey } from '../src/engine/data'
 import { CONFIG } from '../src/engine/config'
 
@@ -9,16 +9,16 @@ export const botStyle = { skim: 'normal' as 'none' | 'normal' | 'greedy' }
 
 const UPGRADE_ORDER: CardKey[] = ['lawyerUp', 'payWages', 'hiredHand', 'patentThicket', 'espionage', 'dynamite', 'payDividend', 'expenseAccount', 'improveGear', 'shoreUp', 'insurance']
 
-const UPGRADE_3: CardKey[] = ['buryEvidence', 'retainCounsel', 'lobbyCongress', 'bribeOfficial', 'restructure', 'telex', 'thinkTank']
+const UPGRADE_3: CardKey[] = ['buyOut', 'buryEvidence', 'lobbyCongress', 'retainCounsel', 'bribeOfficial', 'advertorial', 'restructure', 'telex', 'thinkTank']
 /** A card that's dead weight in stage 3: junk, or a faded old card. */
 const stale = (c: Card) => !!c.faded || (CARDS[c.key].junk && !CARDS[c.key].forced)
 
-/** Stage 2 → 3: drop the dead stock, cash the Oil Shock if short, upgrade the new cards. */
+/** Stage 2 → 3: pick the new cards, drop the dead stock, upgrade. */
 function botMultinational(r: Run): Run {
-  if (r.capital < 25) r = act(r, { type: 'takeLoan' })
+  for (const k of ['buyOut', 'lobbyCongress', 'buryEvidence', 'advertorial'] as CardKey[]) if ((r.picked ?? []).length < CONFIG.incorporatePicks && r.offer?.includes(k)) r = act(r, { type: 'pickCard', key: k })
   for (const c of r.deck.filter(x => CARDS[x.key].junk)) if (r.capital > r.destroyCost + 12) r = act(r, { type: 'destroyCard', cardId: c.id })
   for (const k of UPGRADE_3) {
-    const c = r.deck.find(x => x.key === k && canUpgrade(x))
+    const c = r.deck.find(x => x.key === k && canUpgrade(x, r.stage))
     if (c && r.capital > r.upgradeCost + 20) r = act(r, { type: 'upgradeCard', cardId: c.id })
   }
   return act(r, { type: 'leaveShop' })
@@ -44,13 +44,13 @@ function botShop3(r: Run): Run {
   if (rigCount(r) < 5 && canBuild(r) && r.capital > r.prospectPrice + 10) r = act(r, { type: 'buyProspect' })
   const junk = r.deck.find(stale)
   if (junk && r.capital > r.destroyCost + 10) r = act(r, { type: 'destroyCard', cardId: junk.id })
-  const want: CardKey[] = r.heat >= 40 ? ['thinkTank', 'lobbyCongress', 'buryEvidence', 'retainCounsel', 'restructure'] : ['buryEvidence', 'thinkTank', 'retainCounsel', 'lobbyCongress', 'restructure', 'telex', 'queuesAtPump']
+  const want: CardKey[] = r.heat >= 40 ? ['thinkTank', 'lobbyCongress', 'advertorial', 'buyOut', 'buryEvidence', 'retainCounsel', 'restructure'] : ['buyOut', 'buryEvidence', 'lobbyCongress', 'thinkTank', 'retainCounsel', 'oilShock', 'advertorial', 'restructure', 'telex', 'queuesAtPump']
   for (let n = 0; n < 2; n++) for (const k of want) { // a rich company buys twice
     const i = r.shop.cards.indexOf(k)
     if (i >= 0 && r.capital > (CARDS[k].price ?? 0) + (n ? 40 : 10)) { r = act(r, { type: 'buyCard', slot: i }); break }
   }
-  if (r.shop.item && ['supertanker', 'paperShredder', 'rolodex'].includes(r.shop.item) && r.capital > 20) r = act(r, { type: 'buyItem' })
-  const up = UPGRADE_3.map(k => r.deck.find(x => x.key === k && canUpgrade(x))).find(Boolean)
+  if (r.shop.item && ['supertanker', 'thinkTankItem', 'paperShredder', 'rolodex'].includes(r.shop.item) && r.capital > 35) r = act(r, { type: 'buyItem' })
+  const up = UPGRADE_3.map(k => r.deck.find(x => x.key === k && canUpgrade(x, r.stage))).find(Boolean)
   if (up && r.capital > r.upgradeCost + 18) r = act(r, { type: 'upgradeCard', cardId: up.id })
   return act(r, { type: 'leaveShop' })
 }
@@ -98,26 +98,30 @@ function botTurn3(r: Run): Run {
     const attacks = playable.filter(c => isAttack(c.key) && bestHit(c) > 1).sort((a, b) => bestHit(b) - bestHit(a))
     const scrapper = playable.find(c => cardDef(c).scrap === 'one' && handTargetsFor(r, c).some(stale))
     const cool = r.heat >= 35 && r.capital > 15 ? (find('thinkTank') ?? (r.heat >= 55 ? find('lobbyCongress') : undefined)) : undefined
-    const buy = live.find(t => canBuyOut(r, t) && r.capital - buyoutPrice(t) > 15)
     const cash = r.capital < 12 ? (find('personalGuarantee') ?? (r.capital < 6 ? find('dipTrust') : undefined)) : undefined
     const boost = r.oil >= 3 ? (find('queuesAtPump') ?? find('embargoRumours')) : undefined
     let choice: Run | null = null
-    const full = r.oil > 0 && !r.current.refuse && r.oil + rigCount(r) > r.storage // selling now beats losing oil to a full tank
+    const canSell = r.oil > 0 && !r.current.refuse && r.ap >= sellAP(r)
+    const full = canSell && r.oil + rigCount(r) * CONFIG.rigOutput > r.storage && (r.capital < 25 || !playable.some(c => isAttack(c.key) && bestHit(c) > 1)) // selling is a whole turn: fight first unless cash is short
+    const shock = canSell && r.oil >= 8 && !r.doubleSale ? find('oilShock') : undefined
+    const heatComing = live.some(t => ['Measure', 'Publish', 'Consensus', 'Expert Testimony'].includes(intent(r, t)))
+    const spin = heatComing && r.cover < 4 && r.ap >= 1 && r.capital > 15 ? find('advertorial') : undefined
     if (forced) choice = act(r, { type: 'play', cardId: forced.id })
-    else if (full && boost && r.ap >= 2) choice = act(r, { type: 'play', cardId: boost.id })
+    else if (shock) choice = act(r, { type: 'play', cardId: shock.id })
+    else if (full && boost && r.ap >= 1 + sellAP(r)) choice = act(r, { type: 'play', cardId: boost.id })
     else if (full) choice = act(r, { type: 'sellOil' })
     else if (r.items.includes('paperShredder') && !r.shredded && r.hand.some(stale)) choice = act(r, { type: 'shred', cardId: r.hand.find(stale)!.id })
     else if (cash) choice = act(r, { type: 'play', cardId: cash.id })
     else if (cool) choice = act(r, { type: 'play', cardId: cool.id })
     else if (scrapper) choice = act(r, { type: 'play', cardId: scrapper.id, target: handTargetsFor(r, scrapper).find(stale)!.id })
-    else if (buy) choice = act(r, { type: 'buyOut', target: buy.id })
     else if (attacks.length) {
       const c = attacks[0]
       const t = live.reduce((a, b) => (damageOn(b, cardDef(c).family, cardDef(c).power) > damageOn(a, cardDef(c).family, cardDef(c).power) ? b : a))
       choice = act(r, { type: 'play', cardId: c.id, target: t.id })
     }
-    else if (boost) choice = act(r, { type: 'play', cardId: boost.id })
-    else if (r.oil > 0 && !r.current.refuse && (r.oil >= Math.min(r.storage - 1, 3) || r.capital <= 10)) choice = act(r, { type: 'sellOil' })
+    else if (spin) choice = act(r, { type: 'play', cardId: spin.id })
+    else if (boost && r.ap >= 1 + sellAP(r)) choice = act(r, { type: 'play', cardId: boost.id })
+    else if (canSell && (r.oil >= Math.min(r.storage - 1, 6) || r.capital <= 10)) choice = act(r, { type: 'sellOil' })
     else if (find('telex') && r.ap >= 2) choice = act(r, { type: 'play', cardId: find('telex')!.id })
     else if (find('hardGraft')) choice = act(r, { type: 'play', cardId: find('hardGraft')!.id })
     if (!choice || JSON.stringify(choice) === JSON.stringify(r)) break

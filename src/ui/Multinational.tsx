@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { CARDS } from '../engine/data'
-import { canUpgrade, debtPerTurn, rigCount, type Action, type Run } from '../engine/engine'
+import { canUpgrade, rigCount, type Action, type Run } from '../engine/engine'
 import { money, units, year } from '../engine/format'
 import { play } from '../sound'
 import { CardView } from './CardView'
@@ -18,6 +18,9 @@ export function MultinationalScreen({ run, dispatch }: { run: Run; dispatch: (a:
   const m = (n: number, sign = false) => money(n, st, sign)
   const can = (cost: number) => run.capital - cost >= 1
   const rigs = rigCount(run)
+  const offer = run.offer ?? []
+  const picked = run.picked ?? []
+  const ready = !offer.length || picked.length >= Math.min(CONFIG.incorporatePicks, offer.length)
   const dead = run.deck.filter(c => CARDS[c.key].junk && !CARDS[c.key].forced).length
 
   return (
@@ -40,21 +43,27 @@ export function MultinationalScreen({ run, dispatch }: { run: Run; dispatch: (a:
 
           <section className="incorporate__board">
             <HeatMeter run={run} />
-            <p className="res-note">No fires, no board. Every AP you spend adds {CONFIG.heatPerAP} Heat; Climate Science and the summit add more. Lobbying takes it down. Some enemies can be bought out with Capital instead of fought.</p>
+            <p className="res-note">No fires, no board, no Bank Debt. Every AP you spend adds {CONFIG.heatPerAP} Heat, and selling oil takes {CONFIG.sellAP3} AP. Climate Science and the summit add more Heat; Cover blocks it, and Lobbying takes it down.</p>
+          </section>
+
+          <section className="incorporate__pick" aria-label="New cards">
+            <span className="cl-label">Pick {CONFIG.incorporatePicks} new cards · {picked.length} of {CONFIG.incorporatePicks}</span>
+            <p className="res-note">The others go on sale at the first Trading Floor visit.</p>
+            <div className="deck__list">
+              {offer.map((k, i) => {
+                const on = picked.includes(k)
+                const full = !on && picked.length >= CONFIG.incorporatePicks
+                return <CardView key={k} card={{ id: -1 - i, key: k, uses: CARDS[k].uses }} stage={st} selected={on} playable={!full} onClick={() => { if (full) return; dispatch({ type: 'pickCard', key: k }); play('click') }} />
+              })}
+            </div>
           </section>
 
           <section className="shop__deals">
-            <div className="cl-slot slot incorporate__loan">
-              <span className="cl-tag">{m(CONFIG.oilShockCash, true)}</span>
-              <div className="cl-slot__name">The Oil Shock</div>
-              <div className="cl-slot__desc"><span className="cl-plus">{m(CONFIG.oilShockCash, true)} Capital now.</span> <span className="cl-minus">Start the stage at {CONFIG.oilShockHeat} Heat.</span></div>
-              <button type="button" className="cl-btn" disabled={run.shop.loanTaken} onClick={() => { dispatch({ type: 'takeLoan' }); play('coin') }}>{run.shop.loanTaken ? 'Cashed in' : 'Cash in'}</button>
-            </div>
             <div className="cl-slot slot">
               <span className="cl-tag">{m(run.upgradeCost)}</span>
               <div className="cl-slot__name">Upgrade a card</div>
-              <div className="cl-slot__desc">Once per card. The price rises each time.</div>
-              <button type="button" className="cl-btn" disabled={!can(run.upgradeCost) || !run.deck.some(canUpgrade)} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
+              <div className="cl-slot__desc">Twice per card in this stage. The price rises each time.</div>
+              <button type="button" className="cl-btn" disabled={!can(run.upgradeCost) || !run.deck.some(c => canUpgrade(c, st))} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
             </div>
             <div className="cl-slot slot">
               <span className="cl-tag">{m(run.destroyCost)}</span>
@@ -68,7 +77,7 @@ export function MultinationalScreen({ run, dispatch }: { run: Run; dispatch: (a:
             <span className="cl-label">Your deck · {run.deck.length} cards{mode ? ` · choose a card to ${mode}` : ''}</span>
             <div className="deck__list">
               {run.deck.map(c => {
-                const ok = mode === 'destroy' || (mode === 'upgrade' && canUpgrade(c))
+                const ok = mode === 'destroy' || (mode === 'upgrade' && canUpgrade(c, st))
                 return <CardView key={c.id} card={c} small stage={st} playable={!mode || ok} marked={ok && mode ? mode : undefined} onClick={() => {
                   if (!ok || !mode) return
                   dispatch({ type: mode === 'destroy' ? 'destroyCard' : 'upgradeCard', cardId: c.id })
@@ -85,12 +94,11 @@ export function MultinationalScreen({ run, dispatch }: { run: Run; dispatch: (a:
             <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className="cl-ledger__total">{m(run.capital)}</span></div>
             <ul className="cl-ledger__rows">
               {run.ledger.slice(-6).map((l, i) => <li key={i} className="ink-in"><span>{units(l.label, st)}</span><span className={l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{m(l.amount, true)}</span></li>)}
-              <li className="next-debt"><span>Bank Debt per turn</span><span className="cl-minus">{debtPerTurn(run) ? `(${m(-debtPerTurn(run))})` : 'None'}</span></li>
             </ul>
           </section>
           <section className="fortune"><div><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b></div><span className="res-note">The Bribery Scandal takes gold. Personal Guarantee and Dip into the Trust turn it back into Capital.</span></section>
           <div className="events">{run.events.slice(0, 2).map((e, i) => <p key={i}>{units(e, st)}</p>)}</div>
-          <button type="button" className="cl-btn cl-btn--primary leave" onClick={() => { dispatch({ type: 'leaveShop' }); play('click') }}>Begin round 1</button>
+          <button type="button" className="cl-btn cl-btn--primary leave" disabled={!ready} onClick={() => { dispatch({ type: 'leaveShop' }); play('click') }}>{ready ? 'Begin round 1' : `Pick ${CONFIG.incorporatePicks - picked.length} more`}</button>
         </aside>
       </div>
     </div>

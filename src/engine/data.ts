@@ -1,7 +1,7 @@
 // Card, enemy, item and modifier definitions for Oil, stages 1 to 3.
 import { CONFIG } from './config'
 
-export type Family = 'Legal' | 'Dirty' | 'Bury' | 'Lobby' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Fortune' | 'Board' | 'Scrap' | 'Junk'
+export type Family = 'Legal' | 'Dirty' | 'Bury' | 'Lobby' | 'Buy Out' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Fortune' | 'Board' | 'Scrap' | 'Junk'
 export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'shovels' | 'coins' | 'telegraph' | 'dynamite' | 'gear' | 'timber' | 'hose' | 'envelope' | 'graft'
   | 'wages' | 'sheriff' | 'will' | 'shares' | 'cashbox' | 'redtape' | 'iou' | 'phone'
   // stage 2 (Art Deco)
@@ -9,6 +9,7 @@ export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket'
   // stage 3 (1970s): icons still to be drawn fall back to these names, so keep them listed
   | 'embargoRumours' | 'queuesAtPump' | 'telex' | 'memo' | 'restructure' | 'personalGuarantee' | 'dipTrust' | 'buryEvidence' | 'lobbyCongress'
   | 'thinkTank' | 'bribeOfficial' | 'retainCounsel' | 'deadWeight' | 'dryLease' | 'draftDeclaration' | 'rolodex' | 'paperShredder' | 'supertanker' | 'rig'
+  | 'advertorial' | 'buyOut' | 'oilShock'
 
 export type CardKey =
   | 'prospect' | 'well' | 'wildcat' | 'hiredHand' | 'lawyerUp' | 'shoreUp' | 'bucket' | 'fireBrigade'
@@ -22,6 +23,7 @@ export type CardKey =
   // stage 3
   | 'embargoRumours' | 'queuesAtPump' | 'telex' | 'memo' | 'restructure' | 'personalGuarantee' | 'dipTrust'
   | 'buryEvidence' | 'lobbyCongress' | 'thinkTank' | 'bribeOfficial' | 'retainCounsel' | 'deadWeight' | 'dryLease' | 'draftDeclaration'
+  | 'advertorial' | 'buyOut' | 'oilShock'
 
 export interface CardDef {
   name: string
@@ -54,6 +56,7 @@ export interface CardDef {
   heat?: number // change to Heat when played (stage 3)
   roundBoost?: number // oil sells this much more for the rest of the round (Queues at the Pump)
   memo?: boolean // discard the rest of your hand, draw that many +1
+  doubleSale?: boolean // your next oil sale this turn pays double (the Oil Shock)
 }
 
 export const CARDS: Record<CardKey, CardDef> = {
@@ -153,30 +156,36 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Skim: pay the rate, get 1 gold. +1 Board Exposure.', flavour: 'Entertaining clients. Some of them real.' },
 
   // ---------------------------------------------------------------- stage 3 (1970s)
-  embargoRumours: { name: 'Embargo Rumours', era: 3, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 1, icon: 'embargoRumours', price: 6, rarity: 'Common',
+  embargoRumours: { name: 'Embargo Rumours', era: 3, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 1, icon: 'embargoRumours', price: 15, rarity: 'Common',
     text: 'Oil sells +$1 this turn.', flavour: 'A source close to the ministry.' },
-  queuesAtPump: { name: 'Queues at the Pump', era: 3, ap: 2, cost: 0, uses: null, family: 'Tempo', power: 0, roundBoost: 2, icon: 'queuesAtPump', price: 8, rarity: 'Uncommon',
+  queuesAtPump: { name: 'Queues at the Pump', era: 3, ap: 2, cost: 0, uses: null, family: 'Tempo', power: 0, roundBoost: 2, icon: 'queuesAtPump', price: 22, rarity: 'Uncommon',
     text: 'Oil sells +$2 for the rest of the round.', flavour: 'Odd plates on Mondays.' },
-  telex: { name: 'Telex', era: 3, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 0, draw: 3, icon: 'telex', price: 6, rarity: 'Common',
+  telex: { name: 'Telex', era: 3, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 0, draw: 3, icon: 'telex', price: 18, rarity: 'Common',
     text: 'Draw 3 cards.', flavour: 'URGENT URGENT URGENT.' },
-  memo: { name: 'Memo', era: 3, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 0, memo: true, icon: 'memo', price: 5, rarity: 'Common',
+  memo: { name: 'Memo', era: 3, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 0, memo: true, icon: 'memo', price: 15, rarity: 'Common',
     text: 'Discard the rest of your hand. Draw that many cards, plus 1.', flavour: 'Per my last memo.' },
-  restructure: { name: 'Restructure', era: 3, ap: 1, cost: 0, uses: null, family: 'Scrap', power: 0, scrap: 'one', draw: 1, icon: 'restructure', price: 5, rarity: 'Common',
+  restructure: { name: 'Restructure', era: 3, ap: 1, cost: 0, uses: null, family: 'Scrap', power: 0, scrap: 'one', draw: 1, icon: 'restructure', price: 15, rarity: 'Common',
     text: 'Destroy a card in your hand. Draw 1 card.', flavour: 'Synergies have been identified.' },
-  personalGuarantee: { name: 'Personal Guarantee', era: 3, ap: 1, cost: 0, gold: 1, uses: null, family: 'Fortune', power: CONFIG.personalGuaranteeCash, icon: 'personalGuarantee', price: 4, rarity: 'Common',
+  personalGuarantee: { name: 'Personal Guarantee', era: 3, ap: 1, cost: 0, gold: 1, uses: null, family: 'Fortune', power: CONFIG.personalGuaranteeCash, icon: 'personalGuarantee', price: 12, rarity: 'Common',
     text: `Pay 1 gold from your fortune. +$${CONFIG.personalGuaranteeCash}.`, flavour: 'Your word. Your house.' },
-  dipTrust: { name: 'Dip into the Trust', era: 3, ap: 0, cost: 0, gold: CONFIG.dipTrustGold, uses: 1, family: 'Fortune', power: CONFIG.dipTrustCash, icon: 'dipTrust', price: 5, rarity: 'Uncommon',
+  dipTrust: { name: 'Dip into the Trust', era: 3, ap: 0, cost: 0, gold: CONFIG.dipTrustGold, uses: 1, family: 'Fortune', power: CONFIG.dipTrustCash, icon: 'dipTrust', price: 15, rarity: 'Uncommon',
     text: `Pay ${CONFIG.dipTrustGold} gold from your fortune. +$${CONFIG.dipTrustCash}. Then it's gone.`, flavour: 'The children will understand.' },
-  buryEvidence: { name: 'Bury Evidence', era: 3, ap: 1, cost: 0, uses: null, family: 'Bury', power: 6, icon: 'buryEvidence', price: 6, rarity: 'Common',
+  buryEvidence: { name: 'Bury Evidence', era: 3, ap: 1, cost: 0, uses: null, family: 'Bury', power: 6, icon: 'buryEvidence', price: 18, rarity: 'Common',
     text: 'Remove 6 Hold.', flavour: 'Filed under Miscellaneous.' },
-  lobbyCongress: { name: 'Lobby Congress', era: 3, ap: 1, cost: 3, uses: null, family: 'Lobby', power: 3, heat: -5, icon: 'lobbyCongress', price: 6, rarity: 'Common',
-    text: 'Pay $3. Remove 3 Hold. −5 Heat.', flavour: 'Dinner, then a quiet word.' },
-  thinkTank: { name: 'Fund a Think Tank', era: 3, ap: 1, cost: 5, uses: null, family: 'Lobby', power: 0, heat: -10, icon: 'thinkTank', price: 8, rarity: 'Uncommon',
+  lobbyCongress: { name: 'Lobby Congress', era: 3, ap: 1, cost: 6, uses: null, family: 'Lobby', power: 9, heat: -6, icon: 'lobbyCongress', price: 20, rarity: 'Common',
+    text: 'Pay $6. Remove 9 Hold. −6 Heat.', flavour: 'Dinner, then a quiet word.' },
+  thinkTank: { name: 'Fund a Think Tank', era: 3, ap: 1, cost: 5, uses: null, family: 'Lobby', power: 0, heat: -10, icon: 'thinkTank', price: 22, rarity: 'Uncommon',
     text: 'Pay $5. −10 Heat.', flavour: 'Independent research, independently funded by us.' },
-  bribeOfficial: { name: 'Bribe an Official', era: 3, ap: 1, cost: 3, uses: null, family: 'Dirty', power: 8, icon: 'bribeOfficial', price: 7, rarity: 'Common',
+  bribeOfficial: { name: 'Bribe an Official', era: 3, ap: 1, cost: 3, uses: null, family: 'Dirty', power: 8, icon: 'bribeOfficial', price: 18, rarity: 'Common',
     text: `Pay $3. Remove 8 Hold. A Bribery Scandal gains ${CONFIG.bribeFeedsScandal} Hold.`, flavour: 'A consultancy fee.' },
-  retainCounsel: { name: 'Retain Counsel', era: 3, ap: 1, cost: 2, uses: null, family: 'Legal', power: 7, icon: 'retainCounsel', price: 6, rarity: 'Common',
+  retainCounsel: { name: 'Retain Counsel', era: 3, ap: 1, cost: 2, uses: null, family: 'Legal', power: 7, icon: 'retainCounsel', price: 18, rarity: 'Common',
     text: 'Pay $2. Remove 7 Hold.', flavour: 'Billed in six-minute units.' },
+  advertorial: { name: 'Advertorial', era: 3, ap: 1, cost: 4, uses: null, family: 'Defence', power: 0, cover: 6, icon: 'advertorial', price: 15, rarity: 'Common',
+    text: 'Pay $4. +6 Cover this turn. Cover blocks Heat from enemies too.', flavour: 'Paid opinion, opposite the editorial page.' },
+  buyOut: { name: 'Buy Out', era: 3, ap: 1, cost: 8, uses: null, family: 'Buy Out', power: 14, icon: 'buyOut', price: 20, rarity: 'Uncommon',
+    text: 'Pay $8. Remove 14 Hold.', flavour: 'Everyone has a number.' },
+  oilShock: { name: 'Oil Shock', era: 3, ap: 0, cost: 0, uses: 1, family: 'Tempo', power: 0, doubleSale: true, icon: 'oilShock', price: 15, rarity: 'Rare',
+    text: "Your next oil sale this turn pays double. Then it's gone. One per run.", flavour: 'October 1973. Thank you, gentlemen.' },
   deadWeight: { name: 'Dead Weight', era: 3, ap: null, cost: 0, uses: null, family: 'Junk', power: 0, junk: true, icon: 'deadWeight',
     text: "Can't be played. Does nothing.", flavour: 'It worked in its day.' },
   dryLease: { name: 'Dry Lease', era: 3, ap: 1, cost: 0, uses: 1, family: 'Junk', power: 0, junk: true, icon: 'dryLease',
@@ -241,7 +250,9 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   restructure: { name: 'Write It Off', goldBack: 2, text: 'Destroy a card in your hand. Draw 1 card. +$2.' },
   personalGuarantee: { power: 8, text: 'Pay 1 gold from your fortune. +$8.' },
   buryEvidence: { power: 9, text: 'Remove 9 Hold.' },
-  lobbyCongress: { heat: -8, text: 'Pay $3. Remove 3 Hold. −8 Heat.' },
+  lobbyCongress: { heat: -9, text: 'Pay $6. Remove 9 Hold. −9 Heat.' },
+  advertorial: { cover: 9, text: 'Pay $4. +9 Cover this turn. Cover blocks Heat from enemies too.' },
+  buyOut: { power: 18, text: 'Pay $8. Remove 18 Hold.' },
   thinkTank: { cost: 3, heat: -14, text: 'Pay $3. −14 Heat.' },
   bribeOfficial: { power: 11, text: `Pay $3. Remove 11 Hold. A Bribery Scandal gains ${CONFIG.bribeFeedsScandal} Hold.` },
   retainCounsel: { power: 10, text: 'Pay $2. Remove 10 Hold.' },
@@ -254,12 +265,12 @@ export const SHOP_POOL_2: CardKey[] = ['telegraphLine', 'tickerTape', 'nightShif
   'patentThicket', 'espionage', 'poachEngineer', 'rdSprint', 'payDividend', 'personalLawyer', 'securityDetail', 'insurance', 'expenseAccount']
 // stage 3: oil price boosts, faster cycling, destroying cards, gold into Capital, and the new defences
 export const SHOP_POOL_3: CardKey[] = ['embargoRumours', 'queuesAtPump', 'telex', 'memo', 'tickerTape', 'restructure', 'personalGuarantee', 'dipTrust',
-  'buryEvidence', 'lobbyCongress', 'thinkTank', 'bribeOfficial', 'retainCounsel']
+  'buryEvidence', 'lobbyCongress', 'thinkTank', 'bribeOfficial', 'retainCounsel', 'advertorial', 'buyOut', 'oilShock']
 /** Stage 2 incorporation: pick incorporatePicks of these; the rest go on sale at the first Exchange visit. */
 export const INCORPORATE_OFFER_2: CardKey[] = ['derrick', 'payDividend', 'patentThicket', 'tickerTape']
 export const shopPool = (stage: number): CardKey[] => (stage >= 3 ? SHOP_POOL_3 : stage >= 2 ? SHOP_POOL_2 : SHOP_POOL)
-/** The new cards in your deck as stage 3 begins. */
-export const STAGE3_CARDS: CardKey[] = ['buryEvidence', 'lobbyCongress', 'bribeOfficial']
+/** Going multinational: pick incorporatePicks of these; the rest go on sale at the first Trading Floor visit. */
+export const INCORPORATE_OFFER_3: CardKey[] = ['buryEvidence', 'lobbyCongress', 'buyOut', 'advertorial']
 /** Old cards that are useless in stage 3: land cards become Dry Leases; fire and board cards, Dead Weight. */
 export const TO_DRY_LEASE: CardKey[] = ['prospect', 'survey', 'oldProspect', 'derrick', 'well', 'wildcat', 'rotaryRig']
 export const TO_DEAD_WEIGHT: CardKey[] = ['bucket', 'fireBrigade', 'shoreUp', 'payDividend']
@@ -299,7 +310,7 @@ export interface ThreatDef {
   movesFirst?: string
   cover?: number // Cover it gets each turn: blocks that much of your damage (doesn't stack)
   whenBeaten?: string
-  buyout?: string // stage 3: you can pay this enemy off with Capital (the button's label)
+  chip?: number // stage 3: $ every move also takes, on top of what the move does (Cover blocks it)
   portrait: string
 }
 
@@ -320,12 +331,12 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   commission: { role: 'engine', name: 'The Railroad Commission', hold: 8, weak: 'Dirty', cycle: ['Proration', 'Inspection', 'Leaky Tanks'], portrait: 'commission' },
   proxyFight: { role: 'boss', name: 'The Proxy Fight', hold: 46, weak: 'Legal', resist: 'Dirty', cycle: ['Hostile Bid', 'Proxy Meeting', 'The Vote'], movesFirst: 'Canvass', portrait: 'proxyFight' },
   // stage 3
-  spill: { role: 'engine', name: 'The Spill', hold: 22, weak: 'Bury', cycle: ['Slick', 'Shut Down', 'Clean-up Bill'], buyout: 'Pay for the clean-up', portrait: 'spill' },
-  climateScience: { role: 'engine', name: 'Climate Science', hold: 24, weak: 'Bury', resist: 'Dirty', cycle: ['Measure', 'Publish', 'Peer Review'], round3: 'Consensus', portrait: 'climateScience' },
-  rivals: { role: 'cash', name: 'Rival Companies', hold: 22, weak: 'Legal', resist: 'Dirty', cycle: ['Price War', 'Undercut', 'Poach Contracts'], whenBeaten: 'Prices recover', buyout: 'Buy them out', portrait: 'rivals' },
-  diversified: { role: 'cash', name: 'Diversified Assets', hold: 18, resist: 'Legal', cycle: ['Running Costs', 'Bad Quarter', 'Write-down'], buyout: 'Sell it off at a loss', portrait: 'diversified' },
-  briberyScandal: { role: 'cash', name: 'The Bribery Scandal', hold: 18, weak: 'Legal', resist: 'Lobby', cycle: ['Leak', 'Hearing', 'Exposé'], round3: 'Indictment', portrait: 'briberyScandal' },
-  geneva: { role: 'boss', name: 'The Geneva Climate Summit', hold: 50, weak: 'Lobby', resist: 'Dirty', cycle: ['Expert Testimony', 'Draft Declaration', 'Resolution'], movesFirst: 'Opening Session', portrait: 'geneva' },
+  spill: { role: 'engine', name: 'The Spill', hold: 29, weak: 'Buy Out', resist: 'Legal', chip: 2, cycle: ['Slick', 'Shut Down', 'Clean-up Bill'], portrait: 'spill' },
+  climateScience: { role: 'engine', name: 'Climate Science', hold: 31, weak: 'Bury', resist: 'Dirty', immune: 'Buy Out', chip: 1, cycle: ['Measure', 'Publish', 'Peer Review'], round3: 'Consensus', portrait: 'climateScience' },
+  rivals: { role: 'cash', name: 'Rival Companies', hold: 30, weak: 'Buy Out', resist: 'Dirty', chip: 3, cycle: ['Price War', 'Undercut', 'Poach Contracts'], whenBeaten: 'Prices recover', portrait: 'rivals' },
+  diversified: { role: 'cash', name: 'Diversified Assets', hold: 27, weak: 'Legal', chip: 3, cycle: ['Running Costs', 'Bad Quarter', 'Write-down'], portrait: 'diversified' },
+  briberyScandal: { role: 'cash', name: 'The Bribery Scandal', hold: 28, weak: 'Legal', resist: 'Lobby', immune: 'Buy Out', chip: 2, cycle: ['Leak', 'Hearing', 'Exposé'], round3: 'Indictment', portrait: 'briberyScandal' },
+  geneva: { role: 'boss', name: 'The Geneva Climate Summit', hold: 47, resist: 'Dirty', immune: 'Buy Out', chip: 3, cycle: ['Expert Testimony', 'Draft Declaration', 'Resolution'], movesFirst: 'Opening Session', portrait: 'geneva' },
 }
 
 // Round 1 takes your cash, round 2 breaks your engine, round 3 sends one of each.
@@ -336,20 +347,22 @@ export const ENGINE_POOLS: Record<number, ThreatKind[]> = { 1: ENGINE_POOL, 2: [
 export const BOSS: Record<number, ThreatKind> = { 1: 'baron', 2: 'proxyFight', 3: 'geneva' }
 export const ROLE_LABEL: Record<ThreatRole, string> = { cash: 'Takes your cash', engine: 'Breaks your engine', boss: 'Boss' }
 
-export type ModKey = 'drySeason' | 'glut' | 'hardRock' | 'bankSqueeze' | 'badWeather' | 'boomtown' | 'scandal'
+export type ModKey = 'drySeason' | 'glut' | 'hardRock' | 'bankSqueeze' | 'badWeather' | 'boomtown' | 'scandal' | 'embargo' | 'earthDay'
 export const MODS: Record<ModKey, { name: string; text: string; stages?: number[] }> = {
   drySeason: { name: 'Dry Season', text: 'Every outbreak starts 1 extra fire', stages: [1] },
   scandal: { name: 'Scandal', text: '+1 Board Exposure as the round begins', stages: [2] },
   glut: { name: 'Glut', text: 'Oil sells −$1' },
   hardRock: { name: 'Hard Rock', text: 'Prospect costs +1 AP', stages: [1, 2] },
-  bankSqueeze: { name: 'Bank Squeeze', text: 'Debt +$1 a turn' },
+  bankSqueeze: { name: 'Bank Squeeze', text: 'Debt +$1 a turn', stages: [1, 2] },
   badWeather: { name: 'Bad Weather', text: 'Draw 1 fewer card' },
-  boomtown: { name: 'Boomtown', text: 'Oil +$1, debt +$1' },
+  boomtown: { name: 'Boomtown', text: 'Oil +$1, debt +$1', stages: [1, 2] },
+  embargo: { name: 'OPEC Embargo', text: 'Oil sells +$2', stages: [3] },
+  earthDay: { name: 'Earth Day', text: `+${CONFIG.earthDayHeat} Heat as the round begins`, stages: [3] },
 }
 
 export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'accountant' | 'refinery' | 'offshore' | 'boardGrudge' | 'loyalDirectors'
   | 'pumpingStation' | 'pressOffice' | 'fillingStations' | 'auditingFirm'
-  | 'rolodex' | 'paperShredder' | 'supertanker' | 'furtherResearch' | 'regulators'
+  | 'rolodex' | 'paperShredder' | 'supertanker' | 'thinkTankItem' | 'furtherResearch' | 'regulators'
 // stages: which stages' shops sell it (all if unset); never: a residue item, only ever given
 export const ITEMS: Record<ItemKey, { name: string; text: string; price: number; repeatable?: boolean; icon: Icon; stages?: number[]; never?: boolean; negative?: boolean }> = {
   storageTank: { name: 'Storage Tank', text: '+2 oil storage', price: 4, repeatable: true, icon: 'barrels', stages: [1] },
@@ -365,11 +378,12 @@ export const ITEMS: Record<ItemKey, { name: string; text: string; price: number;
   boardGrudge: { name: 'Board Grudge', text: 'The board takes $1 every shop visit', price: 0, icon: 'redtape', never: true, negative: true },
   loyalDirectors: { name: 'Loyal Directors', text: '+1 AP in boss fights', price: 0, icon: 'shares', never: true },
   // stage 3
-  rolodex: { name: 'Rolodex', text: `+1 hand size (up to ${CONFIG.handMax})`, price: 7, repeatable: true, icon: 'rolodex', stages: [3] },
-  paperShredder: { name: 'Paper Shredder', text: 'Once a round, destroy a card in your hand for free', price: 6, icon: 'paperShredder', stages: [3] },
-  supertanker: { name: 'Supertanker', text: `+${CONFIG.supertanker} oil storage (up to ${CONFIG.maxStorage})`, price: 7, repeatable: true, icon: 'supertanker', stages: [3] },
-  furtherResearch: { name: 'Further Research Needed', text: 'Stage 4: The Truth starts slower', price: 0, icon: 'pressOffice', never: true },
-  regulators: { name: 'The Regulators', text: 'Stage 4: they are watching you', price: 0, icon: 'redtape', never: true, negative: true },
+  rolodex: { name: 'Rolodex', text: `+1 hand size (up to ${CONFIG.handMax})`, price: 20, repeatable: true, icon: 'rolodex', stages: [3] },
+  paperShredder: { name: 'Paper Shredder', text: 'Once a round, destroy a card in your hand for free', price: 18, icon: 'paperShredder', stages: [3] },
+  supertanker: { name: 'Supertanker', text: `+${CONFIG.supertanker} oil storage (up to ${CONFIG.maxStorage})`, price: 20, repeatable: true, icon: 'supertanker', stages: [3] },
+  thinkTankItem: { name: 'Think Tank', text: `+${CONFIG.thinkTankCover} Cover every turn`, price: 15, icon: 'thinkTank', stages: [3] },
+  furtherResearch: { name: 'Clean Image', text: 'Stage 4: your first greenwash card each round costs 1 less', price: 0, icon: 'pressOffice', never: true },
+  regulators: { name: 'On File', text: 'Stage 4: The Truth starts 1 step further on', price: 0, icon: 'redtape', never: true, negative: true },
 }
 
 // Before the boss: one small, single-use item, bought with gold. Beat the boss: a

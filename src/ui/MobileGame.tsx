@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, MODS, ROLE_LABEL, THREATS } from '../engine/data'
 import {
-  apCost, buyoutPrice, canBuyOut, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run, type Threat,
 } from '../engine/engine'
 import { FIELD_PLACE, money, units, year } from '../engine/format'
@@ -72,7 +72,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
           <span className="m-hud__cap">
             <span className="cl-label">Capital</span>
             <b className={`cl-num ${run.capital <= debtPerTurn(run) * 2 ? 'cl-minus' : ''}`}>{money(run.capital, st)}</b>
-            <span className="m-hud__debt cl-num">{nextDebt ? `${money(-nextDebt, st)} next turn` : 'No debt'}</span>
+            <span className="m-hud__debt cl-num">{nextDebt ? `${money(-nextDebt, st)} next turn` : st >= 3 ? `Heat ${run.heat}` : 'No debt'}</span>
           </span>
           <span className={`m-hud__gold ${acting?.kind === 'gold' ? 'is-acting' : ''}`}>
             <span className="cl-label">Fortune</span>
@@ -114,7 +114,6 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                     {[d.weak && `Weak: ${d.weak}`, d.resist && `Resists: ${d.resist}`, d.immune && `Immune: ${d.immune}`].filter(Boolean).join(' · ')}
                   </div>
                 </div>
-                {d.buyout && run.phase === 'turn' && !t.beaten && !needsTarget && <button type="button" className="cl-btn cl-btn--small buyout" disabled={!canBuyOut(run, t)} onClick={e => { e.stopPropagation(); setSelected(null); dispatch({ type: 'buyOut', target: t.id }) }}>{d.buyout} · 1 AP · {money(buyoutPrice(t), st)}</button>}
                 {run.admin && run.phase === 'turn' && !t.beaten && !needsTarget && <button type="button" className="cl-btn cl-btn--small admin-hit" onClick={e => { e.stopPropagation(); dispatch({ type: 'admin', op: 'hold20', target: t.id }) }}>−20</button>}
                 {needsTarget && !t.beaten && <span className={`m-threat__dmg ${can ? '' : 'is-none'}`}>{stopping ? (can ? 'Stop' : 'Stopped') : can ? `−${dmgOn(t)} Hold` : 'No effect'}</span>}
               </Tag>
@@ -225,8 +224,8 @@ export function MobileGame({ run, dispatch, acting }: Props) {
             <span className="cl-label">AP</span>
             {Array.from({ length: Math.max(run.ap, CONFIG.baseAP) }, (_, i) => <span key={i} className={`ap-coin ${i < run.ap ? 'is-on' : ''}`} />)}
           </div>
-          <button type="button" className="cl-btn cl-btn--small m-sell" disabled={run.ap < 1 || run.oil < 1 || run.current.refuse} onClick={() => dispatch({ type: 'sellOil' })}>
-            {run.current.refuse ? 'Refused' : <>Sell {run.oil} oil<b className="cl-num"> {money(run.oil * netPrice(run), st, true)}</b></>}
+          <button type="button" className="cl-btn cl-btn--small m-sell" disabled={run.ap < sellAP(run) || run.oil < 1 || run.current.refuse} onClick={() => dispatch({ type: 'sellOil' })}>
+            {run.current.refuse ? 'Refused' : <>Sell {run.oil} oil<b className="cl-num"> {money(run.oil * netPrice(run) * (run.doubleSale ? 2 : 1), st, true)}</b>{st >= 3 && ` · ${sellAP(run)} AP`}</>}
           </button>
           <button type="button" className={`cl-btn end-turn ${run.ap === 0 ? 'cl-btn--primary' : ''}`} onClick={() => { setSelected(null); setPlotMenu(null); dispatch({ type: 'endTurn' }) }}>End turn</button>
         </div>
@@ -241,7 +240,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
               <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className="cl-ledger__total">{money(run.capital, st)}</span></div>
               <ul className="cl-ledger__rows">
                 {run.ledger.map((l, i) => <li key={i}><span>{units(l.label, st)}</span><span className={l.label === 'Brought forward' ? '' : l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{l.label === 'Brought forward' ? money(l.amount, st) : money(l.amount, st, true)}</span></li>)}
-                <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">{nextDebt ? `(${money(-nextDebt, st)})` : 'None'}</span></li>
+                {st < 3 && <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">{nextDebt ? `(${money(-nextDebt, st)})` : 'None'}</span></li>}
               </ul>
             </section>
             <ExposureMeter run={run} />

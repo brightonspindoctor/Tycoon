@@ -3,11 +3,11 @@
 import { CONFIG } from './config'
 import {
   ATTACK_CARDS, BOSS, CARDS, INCORPORATE_OFFER_2, CASH_POOLS, ENGINE_POOLS, ITEMS, MODS, PROSPECTS, PROSPECT_FOR, WATER_FOR, STARTER, THREATS, UPGRADES, shopPool,
-  BOONS, REWARDS, BRIBES, STAGE3_CARDS, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
+  BOONS, REWARDS, BRIBES, INCORPORATE_OFFER_3, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
 } from './data'
 import { next, pick, shuffle } from './rng'
 
-export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean; free?: boolean; up?: boolean; faded?: boolean } // free: costs no AP · up: upgraded · faded: an old card in stage 3
+export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean; free?: boolean; up?: boolean; up2?: boolean; faded?: boolean } // free: costs no AP · up: upgraded · up2: upgraded twice (stage 3) · faded: unused
 export interface Well { output: number; reserve: number; unstable?: boolean; field?: boolean; lasting?: boolean; rig?: boolean } // a Field (an old Well), a stage 2 Well (lasting) and a stage 3 Rig never run dry
 export const neverDry = (w: Well) => !!(w.field || w.lasting || w.rig)
 export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string; stopped?: boolean; cover?: number }
@@ -85,6 +85,9 @@ export interface Run {
   heat: number // stage 3: 0 to heatMax; every AP spent adds to it, and at the top you're broken up
   roundBoost: number // oil sells this much more for the rest of the round (Queues at the Pump)
   shredded: boolean // the Paper Shredder has been used this round
+  doubleSale?: boolean // the Oil Shock: the next sale this turn pays double
+  oilShockBought?: boolean // the Oil Shock is sold once a run
+  skimBase?: number // gold skimmed before this stage began (for stage 3's starting Heat)
   offer?: CardKey[] // incorporation: the new cards on offer
   picked?: CardKey[] // incorporation: the ones chosen so far
   leftover?: CardKey[] // offered at incorporation, not picked: on sale at the first shop visit
@@ -117,7 +120,6 @@ export type Action =
   | { type: 'buySilo' }
   | { type: 'duplicateCard'; cardId: number }
   | { type: 'admin'; op: AdminOp; card?: CardKey; target?: number }
-  | { type: 'buyOut'; target: number } // stage 3: pay an enemy off with Capital
   | { type: 'shred'; cardId: number } // stage 3: the Paper Shredder, once a round
   | { type: 'pickCard'; key: CardKey }
   | { type: 'leaveShop' }
@@ -127,13 +129,43 @@ export type Action =
 const clone = <T,>(x: T): T => structuredClone(x)
 const card = (r: Run, key: CardKey, temp = false): Card => ({ id: r.nextId++, key, uses: CARDS[key].uses, temp })
 
-/** What a card does, upgrade included. */
-export function cardDef(c: { key: CardKey; up?: boolean; faded?: boolean }): CardDef {
+/** What a card does, upgrades included. */
+export function cardDef(c: { key: CardKey; up?: boolean; up2?: boolean; faded?: boolean }): CardDef {
   let d = CARDS[c.key]
   if (c.up) d = { ...d, ...UPGRADES[c.key], name: UPGRADES[c.key]?.name ?? `${d.name}+` }
+  if (c.up && c.up2) d = secondUpgrade(CARDS[c.key], d)
   return c.faded ? fadedDef(d) : d
 }
-export const canUpgrade = (c: Card) => !c.up && !c.temp && !c.faded && !!UPGRADES[c.key]
+// where each number sits in a card's text, so a second upgrade can rewrite it
+const NUMBER_IN_TEXT: Partial<Record<keyof CardDef, RegExp>> = {
+  power: /(Remove |\+\$|\+)(\d+)( Hold| AP| oil|\.)/, heat: /(−)(\d+)( Heat)/, draw: /(Draw )(\d+)()/, cover: /(\+)(\d+)( Cover)/,
+  cost: /(Pay \$)(\d+)()/, goldBack: /(\+\$)(\d+)(\.\s*$)/, roundBoost: /(\+\$)(\d+)()/,
+}
+/** Stage 3 lets a card be upgraded twice: the second upgrade repeats the first one's gain. */
+function secondUpgrade(base: CardDef, up: CardDef): CardDef {
+  const d: CardDef = { ...up, name: `${up.name}+` }
+  let text = up.text
+  for (const k of Object.keys(NUMBER_IN_TEXT) as (keyof CardDef)[]) {
+    const a = base[k], b = up[k]
+    if (typeof a !== 'number' || typeof b !== 'number' || a === b) continue
+    const v = Math.max(k === 'heat' ? -99 : 0, b + (b - a))
+    ;(d as unknown as Record<string, number>)[k] = v
+    text = text.replace(NUMBER_IN_TEXT[k]!, (_m, pre: string, _n: string, post: string) => `${pre}${Math.abs(v)}${post}`)
+  }
+  if (typeof base.ap === 'number' && typeof up.ap === 'number' && up.ap < base.ap) {
+    d.ap = Math.max(0, up.ap - (base.ap - up.ap))
+    if (d.ap === 0 && !/Costs no AP/.test(text)) text = `${text} Costs no AP.`
+  }
+  return { ...d, text: text.replace(/Pay \$0\. /, '') }
+}
+/** Can this card take an upgrade? Once in stage 2; in stage 3, twice if the second one adds anything. */
+export function canUpgrade(c: Card, stage = 2): boolean {
+  if (c.temp || c.faded || !UPGRADES[c.key]) return false
+  if (!c.up) return true
+  if (stage < 3 || c.up2) return false
+  const same = (d: CardDef) => JSON.stringify({ ...d, name: '', text: '' })
+  return same(cardDef({ ...c, up2: true })) !== same(cardDef(c))
+}
 /** The Exchange can copy any card with a shop price (not junk), upgrade and all, for that price. */
 export const canDuplicate = (c: Card) => !c.temp && !c.faded && !CARDS[c.key].junk && !!CARDS[c.key].price
 export const isProspect = (k: CardKey) => PROSPECTS.includes(k)
@@ -154,6 +186,7 @@ export function price(r: Run): number {
   let p = (r.stage >= 3 ? CONFIG.oilPrice3 : r.stage >= 2 ? CONFIG.oilPrice2 : CONFIG.oilPrice) - r.short + r.boost + (r.roundBoost ?? 0) + (r.items.includes('refinery') ? 1 : 0)
   if (r.modifier === 'glut') p -= 1
   if (r.modifier === 'boomtown') p += 1
+  if (r.modifier === 'embargo') p += 2
   return Math.max(CONFIG.oilFloor, p)
 }
 /** What you get per barrel after freight; never below the floor. */
@@ -161,6 +194,7 @@ export const netPrice = (r: Run) => Math.max(CONFIG.oilFloor, price(r) - freight
 export const freight = (r: Run) => r.freight
 
 export function debtPerTurn(r: Run): number {
+  if (r.stage >= 3) return 0 // no Bank Debt in stage 3: Heat is the clock
   let d = r.debt
   if (r.bonus === 'trustFund' && r.stage > 1) d += CONFIG.startDebt // Father's money only covers stage 1
   if (r.modifier === 'bankSqueeze' || r.modifier === 'boomtown') d += 1
@@ -238,9 +272,15 @@ function heat(r: Run, n: number, why: string, who?: number, quiet = false) {
 const apHeat = (r: Run, ap: number) => heat(r, ap * CONFIG.heatPerAP, 'Effort', undefined, true)
 /** Hand size: 5, plus a Rolodex each, up to handMax. */
 export const handSize = (r: Run) => Math.min(CONFIG.handMax, CONFIG.handSize + r.items.filter(i => i === 'rolodex').length)
-/** What buying an enemy out costs: $ for every point of Hold it has left. */
-export const buyoutPrice = (t: Threat) => Math.max(1, t.hold) * CONFIG.buyoutPerHold
-export const canBuyOut = (r: Run, t: Threat) => r.phase === 'turn' && !t.beaten && !!THREATS[t.kind].buyout && r.ap >= CONFIG.buyoutAP && r.capital - buyoutPrice(t) >= 1
+/** Heat from an enemy (stage 3): Cover blocks it first, like cash. */
+function enemyHeat(r: Run, n: number, why: string, who?: number) {
+  const blocked = Math.min(n, r.cover)
+  if (blocked) { r.cover -= blocked; say(r, `Cover blocked ${blocked} Heat.`) }
+  heat(r, n - blocked, why, who)
+}
+/** The cards the shop and the spoils draw from: the Oil Shock only until you've had one. */
+const poolFor = (r: Run): CardKey[] => shopPool(r.stage).filter(k => k !== 'oilShock' || !(r.oilShockBought || r.deck.some(c => c.key === 'oilShock')))
+const gotCard = (r: Run, key: CardKey) => { if (key === 'oilShock') r.oilShockBought = true }
 
 /** An enemy takes gold from your own fortune. Below 0 gold, you're ruined. */
 function takeGold(r: Run, n: number, who: string) {
@@ -264,7 +304,7 @@ export function damageFor(family: Family, power: number, kind: ThreatKind): numb
 }
 /** Hold an attack would actually remove from this enemy now, after its Cover. */
 export const damageOn = (t: Threat, family: Family, power: number) => Math.max(0, damageFor(family, power, t.kind) - (t.cover ?? 0))
-export const ATTACK_FAMILIES: Family[] = ['Legal', 'Dirty', 'Bury', 'Lobby']
+export const ATTACK_FAMILIES: Family[] = ['Legal', 'Dirty', 'Bury', 'Lobby', 'Buy Out']
 export const isAttack = (key: CardKey) => ATTACK_FAMILIES.includes(CARDS[key].family) && CARDS[key].power > 0
 
 export const fires = (n: number) => `${n} fire${n === 1 ? '' : 's'}`
@@ -344,7 +384,7 @@ function weightedCard(r: Run, pool: CardKey[]): CardKey {
 }
 
 function stockShop(r: Run) {
-  const pool = [...shopPool(r.stage)]
+  const pool = [...poolFor(r)]
   const picks: CardKey[] = []
   while (picks.length < 3 && pool.length) {
     const k = weightedCard(r, pool)
@@ -376,7 +416,7 @@ function shopAction(r: Run, a: Action) {
     case 'buyCard': {
       const key = r.shop.cards[a.slot]
       if (!key || !pay(r, CARDS[key].price!, CARDS[key].name)) return
-      r.deck.push(card(r, key)); r.shop.cards[a.slot] = null
+      r.deck.push(card(r, key)); r.shop.cards[a.slot] = null; gotCard(r, key)
       return
     }
     case 'buyBucket': {
@@ -422,11 +462,7 @@ function shopAction(r: Run, a: Action) {
     }
     case 'takeLoan':
       if (r.shop.loanTaken || (r.phase === 'shop' && r.stage >= 2)) return // no Cheap Loan at the Exchange
-      if (r.phase === 'incorporate' && r.stage >= 3) { // the Oil Shock: cash now, Heat from the start
-        money(r, 'The Oil Shock', CONFIG.oilShockCash); heat(r, CONFIG.oilShockHeat, 'The Oil Shock')
-        r.shop.loanTaken = true
-        return
-      }
+      if (r.stage >= 3) return // no loans in stage 3
       if (r.phase === 'incorporate') { money(r, 'Incorporation loan', CONFIG.stage2Loan); r.debt += CONFIG.stage2LoanDebt }
       else { money(r, 'Cheap Loan', 8); r.debt += 1 }
       r.shop.loanTaken = true
@@ -434,8 +470,9 @@ function shopAction(r: Run, a: Action) {
       return
     case 'upgradeCard': {
       const c = r.deck.find(x => x.id === a.cardId)
-      if (!c || !canUpgrade(c) || r.stage < 2 || !pay(r, r.upgradeCost, `Upgrade ${CARDS[c.key].name}`)) return
-      c.up = true; r.upgradeCost += 1
+      if (!c || !canUpgrade(c, r.stage) || r.stage < 2 || !pay(r, r.upgradeCost, `Upgrade ${cardDef(c).name}`)) return
+      if (c.up) c.up2 = true; else c.up = true
+      r.upgradeCost += r.stage >= 3 ? CONFIG.cost3Step : 1
       say(r, `${cardDef(c).name}: upgraded.`)
       return
     }
@@ -447,7 +484,7 @@ function shopAction(r: Run, a: Action) {
     case 'duplicateCard': {
       const c = r.deck.find(x => x.id === a.cardId)
       if (!c || r.stage < 2 || r.phase !== 'shop' || r.shop.duplicated || !canDuplicate(c) || !pay(r, CARDS[c.key].price!, `Duplicate ${CARDS[c.key].name}`)) return
-      r.deck.push({ ...card(r, c.key), up: c.up, uses: CARDS[c.key].uses }); r.shop.duplicated = true
+      r.deck.push({ ...card(r, c.key), up: c.up, up2: c.up2, uses: CARDS[c.key].uses }); r.shop.duplicated = true
       say(r, `${cardDef(c).name}: a second copy is in your deck.`)
       return
     }
@@ -465,7 +502,7 @@ function shopAction(r: Run, a: Action) {
     case 'destroyCard': {
       const c = r.deck.find(x => x.id === a.cardId)
       if (!c || !pay(r, r.destroyCost, `Destroy ${CARDS[c.key].name}`)) return
-      removeFromDeck(r, c); r.destroyCost += 1
+      removeFromDeck(r, c); r.destroyCost += r.stage >= 3 ? CONFIG.cost3Step : 1
       return
     }
     case 'reroll':
@@ -492,8 +529,8 @@ function shopAction(r: Run, a: Action) {
     case 'leaveShop':
       if (r.phase === 'incorporate') {
         if (r.offer && (r.picked ?? []).length < Math.min(CONFIG.incorporatePicks, r.offer.length)) { say(r, `Pick ${CONFIG.incorporatePicks} new cards first.`); return }
-        for (const k of r.picked ?? []) r.deck.push(card(r, k))
-        r.leftover = (r.offer ?? []).filter(k => !(r.picked ?? []).includes(k) && k !== PROSPECT_FOR[2]) // the Derrick is always on sale anyway
+        for (const k of r.picked ?? []) { r.deck.push(card(r, k)); gotCard(r, k) }
+        r.leftover = (r.offer ?? []).filter(k => !(r.picked ?? []).includes(k) && k !== PROSPECT_FOR[r.stage]) // the Derrick is always on sale anyway
         r.offer = undefined; r.picked = undefined
         r.phase = 'shop'; startRound(r, 1); return
       }
@@ -542,6 +579,7 @@ function startRound(r: Run, round: number) {
   for (const t of r.threats) { say(r, `${THREATS[t.kind].name} arrives.`); beat(r, 'enemy', `Round ${round}`, `${THREATS[t.kind].name} arrives.`, t.id) }
   if (r.modifier) { say(r, `${MODS[r.modifier].name}: ${MODS[r.modifier].text}.`); beat(r, 'info', MODS[r.modifier].name, `${MODS[r.modifier].text}.`) }
   if (r.modifier === 'scandal') expose(r, 1, 'Scandal')
+  if (r.modifier === 'earthDay') heat(r, CONFIG.earthDayHeat, 'Earth Day')
   if (r.items.includes('pressOffice')) expose(r, -1, 'Press Office')
   // opening moves
   for (const t of r.threats) {
@@ -561,7 +599,7 @@ function startRound(r: Run, round: number) {
     }
     if (op === 'Opening Session') {
       beat(r, 'enemy', `${THREATS[t.kind].name} · ${op}`, `+${CONFIG.genevaOpening} Heat.`, t.id)
-      captured = []; heat(r, CONFIG.genevaOpening, op); captured = null
+      captured = []; enemyHeat(r, CONFIG.genevaOpening, op); captured = null
       t.opened = `${op}: +${CONFIG.genevaOpening} Heat.`
     }
     if (op === 'Infiltrate') {
@@ -585,6 +623,8 @@ function beginTurn(r: Run) {
   r.turn += 1
   r.ledger = [{ label: 'Brought forward', amount: r.capital }]
   if (!r.items.includes('accountant') && !r.items.includes('auditingFirm')) r.cover = 0
+  if (r.items.includes('thinkTankItem')) r.cover += CONFIG.thinkTankCover
+  r.doubleSale = false
   r.current = { audit: r.pending.audit, refuse: r.pending.refuse, prorate: r.pending.prorate, shutdown: r.pending.shutdown ?? 0 }
   const declarations = r.pending.declarations ?? 0
   const apPenalty = r.pending.ap
@@ -712,7 +752,7 @@ function endRound(r: Run) {
     r.phase = r.round >= 4 ? 'stageComplete' : 'roundWon'
     if (r.phase === 'stageComplete') grantReward(r)
     // a card to take, or turn down for cash. After stage 2's first fight, it's the Expense Account: skimming from now on
-    else r.spoils = r.stage === 2 && r.round === 1 && !r.deck.some(c => c.key === 'expenseAccount') ? 'expenseAccount' : weightedCard(r, [...shopPool(r.stage)])
+    else r.spoils = r.stage === 2 && r.round === 1 && !r.deck.some(c => c.key === 'expenseAccount') ? 'expenseAccount' : weightedCard(r, [...poolFor(r)])
     r.plots.forEach(w => w && (w.unstable = false))
   }
 }
@@ -885,7 +925,8 @@ function play(r: Run, cardId: number, target?: number) {
       }
       case 'tickerTape': case 'embargoRumours': r.boost += d.power; break
       case 'personalGuarantee': case 'dipTrust': r.gold -= d.gold ?? 0; money(r, d.name, d.power); say(r, `${d.name}: ${d.gold} gold into the company.`); break
-      case 'thinkTank': case 'telex': case 'memo': case 'queuesAtPump': case 'deadWeight': case 'dryLease': case 'draftDeclaration': break
+      case 'thinkTank': case 'telex': case 'memo': case 'queuesAtPump': case 'deadWeight': case 'dryLease': case 'draftDeclaration': case 'advertorial': break
+      case 'oilShock': r.doubleSale = true; say(r, 'Oil Shock: your next sale this turn pays double.'); break
       case 'nightShift': r.ap += d.power; break
       case 'payDividend': break
       case 'personalLawyer': r.goldShield = true; say(r, 'Your Personal Lawyer is on retainer this turn.'); break
@@ -933,19 +974,6 @@ function feedScandal(r: Run) {
   }
 }
 
-/** Stage 3: pay an enemy off. Costs 1 AP (and its Heat) and $ for every point of Hold it has left. */
-function buyOut(r: Run, target: number) {
-  const t = liveThreats(r).find(x => x.id === target)
-  if (!t || !canBuyOut(r, t)) return
-  const cost = buyoutPrice(t)
-  r.ap -= CONFIG.buyoutAP
-  money(r, `${THREATS[t.kind].buyout}`, -cost)
-  say(r, `${THREATS[t.kind].buyout}: ${THREATS[t.kind].name} is gone.`)
-  apHeat(r, CONFIG.buyoutAP)
-  if (isLost(r)) return
-  hit(r, t, t.hold, false, true)
-}
-
 /** The Paper Shredder: once a round, destroy a card in your hand for free. */
 function shred(r: Run, cardId: number) {
   const c = r.hand.find(x => x.id === cardId)
@@ -955,15 +983,20 @@ function shred(r: Run, cardId: number) {
   say(r, `Paper Shredder: ${cardDef(c).name} destroyed.`)
 }
 
+/** AP to sell your oil: 1, or 2 in stage 3. */
+export const sellAP = (r: Run) => (r.stage >= 3 ? CONFIG.sellAP3 : 1)
 function sellOil(r: Run) {
-  if (r.ap < 1 || r.oil < 1 || r.current.refuse) return
-  r.ap -= 1
+  const ap = sellAP(r)
+  if (r.ap < ap || r.oil < 1 || r.current.refuse) return
+  r.ap -= ap
   const n = r.oil
   const each = netPrice(r)
   r.oil = 0
   r.stats.oilSold += n
-  money(r, `Sold ${n} oil @ $${each}`, n * each)
-  apHeat(r, 1)
+  const doubled = !!r.doubleSale
+  r.doubleSale = false
+  money(r, `Sold ${n} oil @ $${each}${doubled ? ' (Oil Shock: doubled)' : ''}`, n * each * (doubled ? 2 : 1))
+  apHeat(r, ap)
 }
 
 /** What a Well sells for: $1 for every barrel still in it; a Field or a stage 2 Well (never dry) has a set price. */
@@ -1246,9 +1279,9 @@ function endTurn(r: Run) {
       case 'Slick': { const lost = Math.min(r.oil, CONFIG.slickOil); r.oil -= lost; if (lost) say(r, `The slick took ${lost} oil.`); break }
       case 'Shut Down': if (wellCount(r)) r.pending.shutdown = (r.pending.shutdown ?? 0) + 1; break
       case 'Clean-up Bill': dmg += CONFIG.cleanupBill; break
-      case 'Measure': heat(r, CONFIG.measureHeat, a, t.id); break
-      case 'Publish': heat(r, CONFIG.publishHeat, a, t.id); break
-      case 'Consensus': heat(r, CONFIG.consensusHeat, a, t.id); break
+      case 'Measure': enemyHeat(r, CONFIG.measureHeat, a, t.id); break
+      case 'Publish': enemyHeat(r, CONFIG.publishHeat, a, t.id); break
+      case 'Consensus': enemyHeat(r, CONFIG.consensusHeat, a, t.id); break
       case 'Peer Review': { const before = t.hold; t.hold = Math.min(t.maxHold, t.hold + CONFIG.peerReview); if (t.hold > before) say(r, `Peer review: +${t.hold - before} Hold.`); break }
       case 'Undercut': dmg += CONFIG.undercut; break
       case 'Poach Contracts': dmg += CONFIG.poachContracts; break
@@ -1258,10 +1291,11 @@ function endTurn(r: Run) {
       case 'Hearing': dmg += CONFIG.hearing; break
       case 'Exposé': dmg += CONFIG.exposeCash; break
       case 'Indictment': takeGold(r, CONFIG.indictGold, name); break
-      case 'Expert Testimony': heat(r, testimony(c), a, t.id); break
+      case 'Expert Testimony': enemyHeat(r, testimony(c), a, t.id); break
       case 'Draft Declaration': r.pending.declarations = (r.pending.declarations ?? 0) + 1; break
       case 'Resolution': dmg += resolution(c); break
     }
+    if (r.stage >= 3 && THREATS[t.kind].chip) dmg += THREATS[t.kind].chip! // every stage 3 move also costs you
     if (isLost(r)) { if (captured.length) line.text = captured.join(' '); captured = null; return }
     // report what actually happened, if the move said so; otherwise what it promised
     if (captured.length) line.text = captured.join(' ')
@@ -1297,6 +1331,7 @@ export function incorporate(r: Run) {
   r.plots = r.plots.map(w => (w ? { output: CONFIG.stage2Output, reserve: w.reserve, field: true } : null))
   for (const c of r.deck) if (c.key === 'prospect') { c.key = 'oldProspect'; c.uses = CARDS.oldProspect.uses; c.up = false }
   r.offer = [...INCORPORATE_OFFER_2]; r.picked = []
+  r.skimBase = r.stats.skims
   r.prospectPrice = CONFIG.derrickPrice
   r.exposure = Math.min(CONFIG.exposureStartCap, Math.floor(r.stats.skims / CONFIG.exposureStartPer))
   r.shop = { cards: [], item: null, loanTaken: false, prospectSold: true, bucketSold: true, boon: null, dividendPaid: true }
@@ -1324,9 +1359,15 @@ export function goMultinational(r: Run) {
     else if (TO_DEAD_WEIGHT.includes(c.key)) { c.key = 'deadWeight'; c.uses = null; c.up = false }
     // every other old card keeps working exactly as before
   }
-  for (const k of STAGE3_CARDS) r.deck.push(card(r, k))
+  r.offer = [...INCORPORATE_OFFER_3]; r.picked = []
   r.prospectPrice = CONFIG.rigPrice
-  r.heat = 0
+  r.debt = 0 // no Bank Debt in stage 3
+  r.destroyCost = Math.max(r.destroyCost, CONFIG.destroyCost3)
+  r.upgradeCost = Math.max(r.upgradeCost, CONFIG.upgradeCost3)
+  // the press read the expense accounts: Heat for what you skimmed in stage 2
+  const skimmed = r.stats.skims - (r.skimBase ?? 0)
+  r.heat = Math.min(CONFIG.heatStartCap, Math.floor(skimmed / CONFIG.heatSkimsEvery) * CONFIG.heatPerSkims)
+  r.skimBase = r.stats.skims
   r.shop = { cards: [], item: null, loanTaken: false, prospectSold: true, bucketSold: true, boon: null, dividendPaid: true }
   r.threats = []
   r.modifier = null
@@ -1365,7 +1406,7 @@ export function act(prev: Run, a: Action): Run {
   if (r.phase === 'stageComplete' && a.type === 'continue' && r.stage === 1) { incorporate(r); return r }
   if (r.phase === 'stageComplete' && a.type === 'continue' && r.stage === 2) { goMultinational(r); return r }
   if (r.phase === 'roundWon' && r.spoils && (a.type === 'takeSpoils' || a.type === 'sellSpoils')) {
-    if (a.type === 'takeSpoils') { r.deck.push(card(r, r.spoils)); say(r, `${CARDS[r.spoils].name} added to your deck.`) }
+    if (a.type === 'takeSpoils') { r.deck.push(card(r, r.spoils)); gotCard(r, r.spoils); say(r, `${CARDS[r.spoils].name} added to your deck.`) }
     else money(r, `Turned down ${CARDS[r.spoils].name}`, CONFIG.spoilsCash)
     r.spoils = null
     return r
@@ -1381,7 +1422,6 @@ export function act(prev: Run, a: Action): Run {
     case 'sellOil': sellOil(r); break
     case 'sellWell': sellWell(r, a.plot); break
     case 'firebreak': firebreak(r); break
-    case 'buyOut': buyOut(r, a.target); break
     case 'shred': shred(r, a.cardId); break
     case 'endTurn': endTurn(r); break
   }

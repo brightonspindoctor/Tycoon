@@ -1,6 +1,6 @@
 import { ROLE_LABEL, THREATS } from '../engine/data'
-import { buyoutPrice, canBuyOut, intent, intentText, type Run, type Threat } from '../engine/engine'
-import { money, units } from '../engine/format'
+import { intent, intentText, type Run, type Threat } from '../engine/engine'
+import { units } from '../engine/format'
 import { Portrait } from './Portrait'
 
 interface Props {
@@ -11,10 +11,9 @@ interface Props {
   preview?: string
   onTarget?: () => void
   onAdminHit?: () => void // admin runs: −20 Hold, 0 AP
-  onBuyOut?: () => void // stage 3: pay this enemy off
 }
 
-export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget, onAdminHit, onBuyOut }: Props) {
+export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget, onAdminHit }: Props) {
   const d = THREATS[threat.kind]
   const pct = Math.max(0, (threat.hold / threat.maxHold) * 100)
   const Tag = targeting ? 'button' : 'section'
@@ -46,7 +45,6 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget,
           <span>{units(intentText(run, threat), run.stage)}</span>
         </div>
       )}
-      {d.buyout && !threat.beaten && onBuyOut && !targeting && <button type="button" className="cl-btn cl-btn--small buyout" disabled={!canBuyOut(run, threat)} onClick={e => { e.stopPropagation(); onBuyOut() }}>{d.buyout} · 1 AP · {money(buyoutPrice(threat), run.stage)}</button>}
       {onAdminHit && !threat.beaten && <button type="button" className="cl-btn cl-btn--small admin-hit" onClick={e => { e.stopPropagation(); onAdminHit() }}>Admin · −20 Hold</button>}
       <dl className="threat__traits">
         {d.weak && <div><dt>Weak to:</dt><dd>{d.weak}</dd></div>}

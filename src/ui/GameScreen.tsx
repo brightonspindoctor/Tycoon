@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, MODS, THREATS } from '../engine/data'
 import {
-  apCost, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run,
 } from '../engine/engine'
 import { ERA_THEME, FIELD_PLACE, STAGE_TITLE, money, units, year } from '../engine/format'
@@ -71,8 +71,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
               targeting={targeting && targets.some(x => x.id === t.id)}
               preview={!sel ? undefined : stopping ? (t.stopped ? 'Already stopped' : 'Stop this move') : (n => (n > 0 ? `−${n} Hold` : 'No effect'))(damageOn(t, cardDef(sel).family, cardDef(sel).power))}
               onTarget={() => { dispatch({ type: 'play', cardId: sel!.id, target: t.id }); setSelected(null) }}
-              onAdminHit={run.admin && run.phase === 'turn' ? () => dispatch({ type: 'admin', op: 'hold20', target: t.id }) : undefined}
-              onBuyOut={run.phase === 'turn' ? () => { setSelected(null); dispatch({ type: 'buyOut', target: t.id }) } : undefined} />
+              onAdminHit={run.admin && run.phase === 'turn' ? () => dispatch({ type: 'admin', op: 'hold20', target: t.id }) : undefined} />
           ))}
           {run.fire > 0 && (
             <section className={`hazard ${lit('fire')}`} aria-label={`${fires(run.fire)} burning`}>
@@ -132,7 +131,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
             <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className={`cl-ledger__total ${run.capital <= debtPerTurn(run) * 2 ? 'cl-minus' : ''}`}>{money(run.capital, st)}</span></div>
             <ul className="cl-ledger__rows">
               {run.ledger.slice(-6).map((l, i) => <li key={`${run.turn}-${i}`} className="ink-in"><span>{units(l.label, st)}</span><span className={l.label === 'Brought forward' ? '' : l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{l.label === 'Brought forward' ? money(l.amount, st) : money(l.amount, st, true)}</span></li>)}
-              <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">{debtPerTurn(run) ? `(${money(-debtPerTurn(run) * (run.pending.audit ? 2 : 1), st)})` : 'None'}</span></li>
+              {st < 3 && <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">{debtPerTurn(run) ? `(${money(-debtPerTurn(run) * (run.pending.audit ? 2 : 1), st)})` : 'None'}</span></li>}
             </ul>
           </section>
           <ExposureMeter run={run} lit={acting?.kind === 'board'} />
@@ -158,9 +157,9 @@ export function GameScreen({ run, dispatch, acting }: Props) {
             {Array.from({ length: Math.max(run.ap, CONFIG.baseAP) }, (_, i) => <span key={i} className={`ap-coin ${i < run.ap ? 'is-on' : ''}`} />)}
             <span className="cl-num">{run.ap}</span>
           </div>
-          <button type="button" className="cl-btn sell-btn" disabled={run.ap < 1 || run.oil < 1 || run.current.refuse}
+          <button type="button" className="cl-btn sell-btn" disabled={run.ap < sellAP(run) || run.oil < 1 || run.current.refuse}
             onClick={() => dispatch({ type: 'sellOil' })}>
-            {run.current.refuse ? 'Shipment refused' : `Sell ${run.oil} oil · 1 AP · ${money(run.oil * netPrice(run), st, true)}`}
+            {run.current.refuse ? 'Shipment refused' : `Sell ${run.oil} oil · ${sellAP(run)} AP · ${money(run.oil * netPrice(run) * (run.doubleSale ? 2 : 1), st, true)}`}
             {run.fire > 0 && run.oil > 0 && st < 2 && <em> · fire hits Wells next</em>}
           </button>
           {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}

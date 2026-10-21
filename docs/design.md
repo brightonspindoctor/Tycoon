@@ -156,59 +156,63 @@ Money is in millions ($M). Rounds are 1970, 1973, 1976 and 1979. The shop is **t
 
 ### Going multinational (between stages)
 Winning the Proxy Fight pays 3 gold, then a page-turn to 1970 stamped MULTINATIONAL, then the Multinational screen:
-- Every Field and Well becomes an **offshore Rig**: 1 oil a turn, never runs dry, sells for $10. Empty plots go. At most 5 Rigs.
+- Every Field and Well becomes an **offshore Rig**: 2 oil a turn, never runs dry, sells for $10M. Empty plots go. At most 5 Rigs.
 - **Some old cards turn to junk.** Land cards (Prospects, Surveys, Steel Derricks, Well cards, Rotary Rig) become **Dry Leases** (1 AP, do nothing, destroyed once played). Fire and board cards (Bucket, Fire Brigade, Shore Up, Pay a Dividend) become **Dead Weight** (unplayable). Every other old card works exactly as before, upgrades included; stage 3 enemies are simply far tougher. Bad Blood is gone (no fires in stage 3).
-- **Bury Evidence**, **Lobby Congress** and **Bribe an Official** join your deck.
-- **The Oil Shock**: +$15M now, but start the stage at 15 Heat. Take it or leave it.
-- Upgrade and destroy cards, as at incorporation. Stage 2's residue applies (Board Grudge takes $1M every shop visit, never your last; Loyal Directors gives +1 AP against the summit).
+- **Pick 2 new cards** from 4: Bury Evidence, Lobby Congress, Buy Out and Advertorial. The 2 you leave are on sale at the first Trading Floor visit.
+- **No Bank Debt** in stage 3, and no loans. Heat is the only clock.
+- Heat starts at 0, +5 for every 3 gold skimmed in stage 2 (15 at most).
+- Upgrade and destroy cards (from $10M each, rising $5M each time). In stage 3 a card can be **upgraded twice** (++): the second upgrade repeats the first one's gain, if it has a number to grow. Stage 2's residue applies (Board Grudge takes $1M every shop visit, never your last; Loyal Directors gives +1 AP against the summit).
 
 ### Economy
-- Oil sells at **$6M**. Storage carries over; Supertankers raise it to 12 at most.
-- The Trading Floor always offers an **Offshore Rig**, built at once (from $12M, rising $4M each time, one per visit, 5 at most), and a **lobbying firm** ($15M: Heat −8, once per visit). No Silo, no dividends. Upgrade, duplicate and destroy as in stage 2.
-- Skimming is still the Expense Account: $20M a gold, rising $20M, $20M, $24M, $28M, $32M by round. It no longer raises anything but your fortune.
-- No fires, no Board Exposure. Round 2 modifiers: Glut, Bank Squeeze, Bad Weather, Boomtown.
+- Oil sells at **$5M**. **Selling oil takes 2 AP.** Storage carries over; Supertankers raise it to 12 at most, so a sale pays about $60M at most before boosts.
+- The Trading Floor always offers an **Offshore Rig**, built at once (from $30M, rising $10M each time, one per visit, 5 at most), and a **lobbying firm** ($25M: Heat −10, once per visit). No Silo, no dividends. Upgrade, duplicate and destroy as above. Cards cost $12–22M, items $15–20M.
+- Skimming is still the Expense Account: $20M a gold, rising $20M, $20M, $24M, $28M, $32M by round.
+- No fires, no Board Exposure. Round 2 modifiers: Glut (oil −$1M), Bad Weather, **OPEC Embargo** (oil +$2M), **Earth Day** (+8 Heat as the round begins).
 
 ### Heat (0 to 100)
-- **Every AP you spend adds 2 Heat**: cards, selling oil, selling a Rig, buying an enemy out. 0 AP cards add none. Roughly 50 AP for the whole stage.
-- **Only Climate Science and the Geneva Climate Summit add Heat** besides that.
-- **Lobbying takes it down**: Lobby Congress (−5), Fund a Think Tank (−10), the Trading Floor's lobbying firm (−8). A card's own Heat and its AP Heat land together.
+- **Every AP you spend adds 2 Heat**: cards, selling oil (2 AP, so 4 Heat), selling a Rig. 0 AP cards add none.
+- Climate Science and the Geneva Climate Summit add Heat besides that, and Earth Day. **Cover blocks Heat from enemies**, like cash (not the Heat from your own AP).
+- **Lobbying takes it down**: Lobby Congress (−6), Fund a Think Tank (−10), the Trading Floor's lobbying firm (−10). A card's own Heat and its AP Heat land together.
 - **At 100: broken up.** A blow that wins the round or the stage still counts if it tips Heat over (Heat holds at 99).
-- **Residue** at the end of stage 3: 75+ leaves **The Regulators** (negative, for stage 4); 40 or less leaves **Further Research Needed** (The Truth starts slower in stage 4). Neither does anything yet.
+- **Residue** at the end of stage 3: 70+ leaves **On File** (The Truth starts 1 step further on in stage 4); 30 or less leaves **Clean Image** (your first greenwash card each round costs 1 less). Neither does anything yet.
 
-### Buying enemies out
-Some stage 3 enemies can be paid off: 1 AP and $2M for every point of Hold left. The Spill (pay for the clean-up), Rival Companies (buy them out) and Diversified Assets (sell it off at a loss). Climate Science, the Bribery Scandal and the summit can't be bought.
+### Damage kinds
+Legal, Dirty, **Bury** (hiding evidence), **Lobby** (Washington; Lobby cards also cool Heat) and **Buy Out** (paid in Capital). Enemies are weak to, resist or are immune to them.
 
 ### Stage 3 cards (Trading Floor pool)
-New families: **Bury** (hiding evidence) and **Lobby** (Washington). Enemies are weak to or resist them like Legal and Dirty.
 | Card | Cost | Effect | Upgraded |
 |---|---|---|---|
 | Embargo Rumours | 1 AP | Oil +$1M this turn | 0 AP |
-| Queues at the Pump | 2 AP | Oil +$2M for the rest of the round | 1 AP |
-| Telex | 1 AP | Draw 3 | Draw 4 |
+| Queues at the Pump | 2 AP | Oil +$2M for the rest of the round | 1 AP (++: 0 AP) |
+| Telex | 1 AP | Draw 3 | Draw 4 (++: 5) |
 | Memo | 1 AP | Discard the rest of your hand, draw that many +1 | 0 AP |
 | Ticker Tape | 1 AP | (from stage 2) Draw 2, oil +$1M this turn | Draw 3 |
 | Restructure | 1 AP | Destroy a card in hand, draw 1 | **Write It Off**: also +$2M |
 | Personal Guarantee | 1 AP | Pay 1 gold: +$6M | +$8M |
 | Dip into the Trust | 0 AP, one use | Pay 3 gold: +$20M | — |
-| Bury Evidence | 1 AP | Bury, remove 6 Hold | 9 |
-| Lobby Congress | 1 AP, $3M | Lobby, remove 3 Hold, −5 Heat | −8 Heat |
+| Bury Evidence | 1 AP | Bury, remove 6 Hold | 9 (++: 12) |
+| Lobby Congress | 1 AP, $6M | Lobby, remove 9 Hold, −6 Heat | −9 Heat (++: −12) |
 | Fund a Think Tank | 1 AP, $5M | −10 Heat | $3M, −14 Heat |
 | Bribe an Official | 1 AP, $3M | Dirty, remove 8 Hold. A Bribery Scandal on the board gains 3 Hold | 11 |
 | Retain Counsel | 1 AP, $2M | Legal, remove 7 Hold | 10 |
+| **Buy Out** | 1 AP, $8M | Buy Out, remove 14 Hold | 18 (++: 22) |
+| **Advertorial** | 1 AP, $4M | +6 Cover (blocks enemy Heat too) | +9 (++: +12) |
+| **Oil Shock** | 0 AP, one use | Your next oil sale this turn pays double. Sold once a run ($15M) | — |
 Every bribe (Bribe the Sheriff, Bribe, Bribe an Official) feeds a Bribery Scandal. Junk: Dead Weight, Dry Lease, Draft Declaration (the summit's: must play, 1 AP, does nothing).
 
 ### Stage 3 items
-Rolodex ($7M: +1 hand size, up to 7, buy more than one), Paper Shredder ($6M: once a round, destroy a card in hand for free), Supertanker ($7M: +4 storage, up to 12).
+Rolodex ($20M: +1 hand size, up to 7, buy more than one), Paper Shredder ($18M: once a round, destroy a card in hand for free), Supertanker ($20M: +4 storage, up to 12), **Think Tank** ($15M: +3 Cover every turn).
 
 ### Stage 3 enemies
-| Enemy | Role | Hold | Weak | Resists | Cycle | Buy out | Notes |
+**Every stage 3 enemy move also takes Capital** ($1–3M, the last column), on top of what the move does. Cover blocks it.
+| Enemy | Role | Hold | Weak | Resists | Immune | Cycle | Per move |
 |---|---|---|---|---|---|---|---|
-| Rival Companies | Cash | 22 | Legal | Dirty | Price War (oil −$1M) → Undercut (−$4M) → Poach Contracts (−$6M) | Yes | Beaten: prices recover |
-| Diversified Assets | Cash | 18 | — | Legal | Running Costs (−$4M) → Bad Quarter (−$4M) → Write-down (−$8M) | Yes | The Montgomery Ward problem |
-| The Bribery Scandal | Cash | 18 | Legal | Lobby | Leak (−1 gold) → Hearing (−$5M) → Exposé (−$8M) (+ Indictment: −2 gold in R3) | No | Grows 3 Hold for every bribe you pay |
-| The Spill | Engine | 22 | Bury | — | Slick (lose 2 stored oil) → Shut Down (a Rig pumps nothing next turn) → Clean-up Bill (−$5M) | Yes | |
-| Climate Science | Engine | 24 | Bury | Dirty | Measure (+5 Heat) → Publish (+8 Heat) → Peer Review (regains 3 Hold) (+ Consensus: +10 Heat in R3) | No | |
-| **The Geneva Climate Summit** (boss, 1979) | Boss | 50 | Lobby | Dirty | Expert Testimony (+8 Heat, +4 each cycle) → Draft Declaration (must-play junk in your next hand) → Resolution (−$6M, +$2M each cycle) | No | Moves first: Opening Session (+6 Heat) |
+| Rival Companies | Cash | 30 | Buy Out | Dirty | — | Price War (oil −$1M) → Undercut (−$4M) → Poach Contracts (−$6M). Beaten: prices recover | $3M |
+| Diversified Assets | Cash | 27 | Legal | — | — | Running Costs (−$4M) → Bad Quarter (−$4M) → Write-down (−$8M) | $3M |
+| The Bribery Scandal | Cash | 28 | Legal | Lobby | Buy Out | Leak (−1 gold) → Hearing (−$5M) → Exposé (−$8M) (+ Indictment: −2 gold in R3). Grows 3 Hold for every bribe you pay | $2M |
+| The Spill | Engine | 29 | Buy Out | Legal | — | Slick (lose 2 stored oil) → Shut Down (a Rig pumps nothing next turn) → Clean-up Bill (−$5M) | $2M |
+| Climate Science | Engine | 31 | Bury | Dirty | Buy Out | Measure (+5 Heat) → Publish (+8 Heat) → Peer Review (regains 3 Hold) (+ Consensus: +10 Heat in R3) | $1M |
+| **The Geneva Climate Summit** (boss, 1979) | Boss | 47 | — | Dirty | Buy Out | Expert Testimony (+8 Heat, +4 each cycle) → Draft Declaration (must-play junk in your next hand) → Resolution (−$6M, +$2M each cycle). Moves first: Opening Session (+6 Heat) | $3M |
 
 ## Endings
 - Bankrupt (Capital 0) · Ousted (Exposure 8, stage 2) · Ruined (gold below 0, stage 2 on) · Broken up (Heat 100, stage 3) · Out of time · later: Stranded (stage 4).

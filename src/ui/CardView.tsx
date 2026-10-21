@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef } from 'react'
+import { CONFIG } from '../engine/config'
 import { CARDS } from '../engine/data'
 import { cardDef, type Card } from '../engine/engine'
 import { ERA_LABEL, ERA_THEME, units } from '../engine/format'
@@ -26,7 +27,7 @@ export function CardView({ card, apCost, playable = true, why, selected, onClick
   const builds = stage >= 2 && (card.key === 'well' || card.key === 'wildcat')
   // there's no board in stage 3: cards from the 1900s stop mentioning it
   const plain = (t: string) => (stage >= 3 ? t.replace(/ ?[+−]\d Board Exposure\./g, '').replace(/ The board never sees it\./, '') : t)
-  const text = plain(units(builds ? (stage >= 3 ? 'Build a Rig: 1 oil a turn, never runs dry.' : 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty.') : d.text, stage))
+  const text = plain(units(builds ? (stage >= 3 ? `Build a Rig: ${CONFIG.rigOutput} oil a turn, never runs dry.` : 'Build a Well: 1 oil a turn, never runs dry. Claims a plot if none is empty.') : d.text, stage))
   const base = CARDS[card.key].uses
   // a long text steps its font down until it fits the card's fixed text box
   const effect = useRef<HTMLDivElement>(null)

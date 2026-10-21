@@ -38,8 +38,10 @@ export function adminStart(seed: number, o: AdminStart): Run {
   }
   if (o.stage === 3) {
     r.phase = 'stageComplete'; r.round = 4
-    r = act(r, { type: 'continue' }) // multinational: Fields become Rigs, old cards fade
+    r = act(r, { type: 'continue' }) // multinational: Fields become Rigs, old land and fire cards turn to junk
     r.admin = true
+    // jumping past the Multinational screen: skip the pick and take Bury Evidence and Lobby Congress
+    if (o.start !== 'incorporate') { r.offer = undefined; r.picked = undefined; (['buryEvidence', 'lobbyCongress'] as CardKey[]).forEach(k => add(k)) }
     if (o.deck === 'strong') STRONG_3.forEach(k => add(k))
     r.heat = Math.max(0, Math.min(90, o.heat ?? 0))
   }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, buyoutPrice, cardDef, goMultinational, handSize, intentText, newRun, price, production, type Run } from './engine'
+import { act, cardDef, goMultinational, handSize, intentText, newRun, price, production, type Run } from './engine'
 import { CONFIG } from './config'
 import { CARDS, THREATS, type CardKey, type ThreatKind } from './data'
 
@@ -20,6 +20,7 @@ function afterProxyFight(seed = 3): Run {
 /** Straight into stage 3, round 1, against one enemy, with a hand you choose. */
 function inStage3(hand: CardKey[] = [], threat: ThreatKind = 'rivals', seed = 3): Run {
   let r = act(afterProxyFight(seed), { type: 'continue' })
+  r = act(act(r, { type: 'pickCard', key: 'buryEvidence' }), { type: 'pickCard', key: 'lobbyCongress' })
   r = act(r, { type: 'leaveShop' })
   r.threats = [{ id: 900, kind: threat, hold: 20, maxHold: 20, step: 0, cycle: 0, round3: false, beaten: false }]
   r.hand = hand.map((k, i) => ({ id: 5000 + i, key: k, uses: CARDS[k].uses }))
@@ -66,17 +67,25 @@ describe('going multinational (stage 2 → 3)', () => {
     expect(after.ap).toBe(r.ap - 1)
   })
 
-  it('adds Bury Evidence, Lobby Congress and Bribe an Official, and starts Heat at 0', () => {
-    const r = act(afterProxyFight(), { type: 'continue' })
-    for (const k of ['buryEvidence', 'lobbyCongress', 'bribeOfficial'] as CardKey[]) expect(r.deck.some(c => c.key === k)).toBe(true)
+  it('has you pick 2 of 4 new cards, starts Heat from stage 2 skimming, and drops Bank Debt', () => {
+    let r = act(afterProxyFight(), { type: 'continue' })
+    expect(r.offer).toEqual(['buryEvidence', 'lobbyCongress', 'buyOut', 'advertorial'])
     expect(r.heat).toBe(0)
+    expect(r.debt).toBe(0)
+    expect(act(r, { type: 'leaveShop' }).phase).toBe('incorporate') // pick first
+    r = act(act(r, { type: 'pickCard', key: 'buyOut' }), { type: 'pickCard', key: 'advertorial' })
+    r = act(r, { type: 'leaveShop' })
+    expect(r.deck.some(c => c.key === 'buyOut') && r.deck.some(c => c.key === 'advertorial')).toBe(true)
+    expect(r.leftover).toEqual(['buryEvidence', 'lobbyCongress'])
+    expect(r.ledger.some(l => /Bank debt/.test(l.label))).toBe(false)
+    // skimmed 6 gold in stage 2: +10 Heat to start
+    const skimmer = afterProxyFight(); skimmer.stats.skims = 6
+    expect(act(skimmer, { type: 'continue' }).heat).toBe(2 * CONFIG.heatPerSkims)
   })
 
-  it('offers the Oil Shock: Capital now, Heat from the start', () => {
-    const r = act(act(afterProxyFight(), { type: 'continue' }), { type: 'takeLoan' })
-    expect(r.capital).toBe(30 + CONFIG.oilShockCash)
-    expect(r.heat).toBe(CONFIG.oilShockHeat)
-    expect(r.debt).toBe(CONFIG.startDebt) // not a loan: no extra Bank Debt
+  it('no longer offers a loan or an Oil Shock cash-in', () => {
+    const r = act(afterProxyFight(), { type: 'continue' })
+    expect(act(r, { type: 'takeLoan' }).capital).toBe(r.capital)
   })
 
   it('money is shown in millions from here', () => {
@@ -90,8 +99,9 @@ describe('Heat', () => {
     const r = inStage3(['telex'])
     const after = act(r, { type: 'play', cardId: inHand(r, 'telex').id })
     expect(after.heat).toBe(r.heat + CONFIG.heatPerAP)
-    const sold = act({ ...r, oil: 2 }, { type: 'sellOil' })
-    expect(sold.heat).toBe(r.heat + CONFIG.heatPerAP)
+    const sold = act({ ...r, oil: 2 }, { type: 'sellOil' }) // selling takes 2 AP in stage 3
+    expect(sold.ap).toBe(r.ap - CONFIG.sellAP3)
+    expect(sold.heat).toBe(r.heat + CONFIG.sellAP3 * CONFIG.heatPerAP)
   })
 
   it('0 AP cards add no Heat', () => {
@@ -105,8 +115,8 @@ describe('Heat', () => {
     const a = act(r, { type: 'play', cardId: inHand(r, 'thinkTank').id })
     expect(a.heat).toBe(r.heat + CONFIG.heatPerAP - 10)
     const b = act(a, { type: 'play', cardId: inHand(a, 'lobbyCongress').id, target: 900 })
-    expect(b.heat).toBe(a.heat + CONFIG.heatPerAP - 5)
-    expect(b.threats[0].hold).toBe(20 - 3)
+    expect(b.heat).toBe(a.heat + CONFIG.heatPerAP - 6)
+    expect(b.threats[0].hold).toBe(20 - 9)
   })
 
   it('at 100 the company is broken up', () => {
@@ -198,22 +208,55 @@ describe('stage 3 cards', () => {
   })
 })
 
-describe('buying enemies out', () => {
-  it('pays $2 per Hold left, costs 1 AP, and beats the enemy', () => {
-    const r = inStage3([], 'rivals')
-    r.threats[0].hold = 10
-    const after = act(r, { type: 'buyOut', target: 900 })
-    expect(after.capital).toBe(r.capital - buyoutPrice(r.threats[0]))
-    expect(after.heat).toBe(r.heat + CONFIG.heatPerAP)
-    expect(after.phase).toBe('roundWon')
+describe('Buy Out, Advertorial, the Oil Shock and Cover', () => {
+  it('Buy Out costs $8 and removes 14 Hold, double against Rival Companies', () => {
+    const r = inStage3(['buyOut'], 'rivals')
+    const after = act(r, { type: 'play', cardId: inHand(r, 'buyOut').id, target: 900 })
+    expect(after.capital).toBe(r.capital - 8)
+    expect(after.threats[0].hold).toBe(20 - 20) // 28 on a 20-Hold enemy: beaten
   })
 
-  it("can't buy out Climate Science, the Bribery Scandal or the summit", () => {
+  it("Buy Out can't touch Climate Science, the Bribery Scandal or the summit", () => {
     for (const k of ['climateScience', 'briberyScandal', 'geneva'] as ThreatKind[]) {
-      expect(THREATS[k].buyout).toBeUndefined()
-      const r = inStage3([], k)
-      expect(act(r, { type: 'buyOut', target: 900 }).capital).toBe(r.capital)
+      expect(THREATS[k].immune).toBe('Buy Out')
+      const r = inStage3(['buyOut'], k)
+      expect(act(r, { type: 'play', cardId: inHand(r, 'buyOut').id, target: 900 }).threats[0].hold).toBe(20)
     }
+  })
+
+  it('Cover blocks Heat from enemies, and every enemy move also takes Capital', () => {
+    const r = inStage3(['advertorial'], 'climateScience')
+    const a = act(r, { type: 'play', cardId: inHand(r, 'advertorial').id })
+    expect(a.cover).toBe(6)
+    const b = act(a, { type: 'endTurn' }) // Measure: +5 Heat, blocked; then $1 chip, blocked by what's left
+    expect(b.heat).toBe(a.heat)
+    expect(b.capital).toBe(a.capital)
+    const c = act(inStage3([], 'climateScience'), { type: 'endTurn' })
+    expect(c.heat).toBe(10 + CONFIG.measureHeat)
+  })
+
+  it('the Oil Shock doubles your next sale this turn, and is sold once a run', () => {
+    const r = inStage3(['oilShock'])
+    r.oil = 4
+    const a = act(r, { type: 'play', cardId: inHand(r, 'oilShock').id })
+    const sold = act(a, { type: 'sellOil' })
+    expect(sold.capital).toBe(a.capital + 4 * CONFIG.oilPrice3 * 2)
+    expect(sold.deck.some(c => c.key === 'oilShock')).toBe(false)
+    const shop = { ...sold, oilShockBought: true }
+    for (let i = 0; i < 30; i++) { shop.phase = 'shop'; const x = act(shop, { type: 'reroll' }); expect(x.shop.cards).not.toContain('oilShock') }
+  })
+
+  it('a card can be upgraded twice in stage 3', () => {
+    const r = inStage3(['buryEvidence'])
+    r.phase = 'shop'; r.capital = 200
+    const c = r.hand[0]
+    const once = act(r, { type: 'upgradeCard', cardId: c.id })
+    const twice = act(once, { type: 'upgradeCard', cardId: c.id })
+    const card = twice.deck.find(x => x.id === c.id)!
+    expect(card.up && card.up2).toBe(true)
+    expect(cardDef(card).power).toBe(12)
+    expect(cardDef(card).text).toBe('Remove 12 Hold.')
+    expect(act(twice, { type: 'upgradeCard', cardId: c.id }).capital).toBe(twice.capital) // not a third time
   })
 })
 
@@ -224,7 +267,7 @@ describe('stage 3 items and the shop', () => {
     const after = act(r, { type: 'buyProspect' })
     expect(after.plots.filter(w => w?.rig)).toHaveLength(3)
     expect(after.prospectPrice).toBe(r.prospectPrice + CONFIG.rigStep)
-    expect(production(after)).toBe(3)
+    expect(production(after)).toBe(3 * CONFIG.rigOutput)
   })
 
   it('Rolodex: +1 hand size, up to 7; Supertanker: +4 storage, up to 12', () => {

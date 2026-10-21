@@ -55,7 +55,7 @@ export function ShopScreen({ run, dispatch }: Props) {
                     <div className="cl-card__top"><div className="cl-card__cost">–</div><div className="cl-card__name">Offshore Rig</div></div>
                     <div className="cl-card__art"><img src={iconUrl('rig')} alt="" /></div>
                     <div className="cl-card__band">Production</div>
-                    <div className="cl-card__effect">Built at once: 1 oil a turn, never runs dry.</div>
+                    <div className="cl-card__effect">Built at once: {CONFIG.rigOutput} oil a turn, never runs dry.</div>
                   </button>
                 )}
                 <span className="res-note">One per visit. {rigCount(run)} of {CONFIG.maxPlots} Rigs. The price climbs {money(CONFIG.rigStep, st)} each time.</span>
@@ -107,8 +107,8 @@ export function ShopScreen({ run, dispatch }: Props) {
               <div className="cl-slot slot">
                 <span className="cl-tag">{money(run.upgradeCost, st)}</span>
                 <div className="cl-slot__name">Upgrade a card</div>
-                <div className="cl-slot__desc">Once per card. The price rises each time.</div>
-                <button type="button" className="cl-btn" disabled={!can(run.upgradeCost) || !run.deck.some(canUpgrade)} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
+                <div className="cl-slot__desc">{stage3 ? 'Twice per card in this stage.' : 'Once per card.'} The price rises each time.</div>
+                <button type="button" className="cl-btn" disabled={!can(run.upgradeCost) || !run.deck.some(c => canUpgrade(c, st))} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
               </div>
             )}
             {only2 && (
@@ -149,7 +149,7 @@ export function ShopScreen({ run, dispatch }: Props) {
             <span className="cl-label">Your deck · {run.deck.length} cards{mode ? ` · choose a card to ${mode}` : ''}</span>
             <div className="deck__list">
               {run.deck.map(c => {
-                const ok = mode === 'destroy' || (mode === 'upgrade' && canUpgrade(c)) || (mode === 'duplicate' && canDuplicate(c) && can(CARDS[c.key].price!))
+                const ok = mode === 'destroy' || (mode === 'upgrade' && canUpgrade(c, st)) || (mode === 'duplicate' && canDuplicate(c) && can(CARDS[c.key].price!))
                 return <CardView key={c.id} card={c} small stage={st} playable={!mode || ok} marked={ok && mode ? (mode === 'duplicate' ? 'upgrade' : mode) : undefined}
                   price={mode === 'duplicate' && canDuplicate(c) ? money(CARDS[c.key].price!, st) : undefined} onClick={() => {
                   if (mode === 'destroy') dispatch({ type: 'destroyCard', cardId: c.id })
@@ -167,7 +167,7 @@ export function ShopScreen({ run, dispatch }: Props) {
             <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className="cl-ledger__total">{money(run.capital, st)}</span></div>
             <ul className="cl-ledger__rows">
               {run.ledger.slice(-5).map((l, i) => <li key={i} className="ink-in"><span>{units(l.label, st)}</span><span className={l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{money(l.amount, st, true)}</span></li>)}
-              <li className="next-debt"><span>Debt in round {run.round + 1}, per turn</span><span className="cl-minus">{run.debt ? `(${money(-run.debt, st)})` : 'None'}</span></li>
+              {!stage3 && <li className="next-debt"><span>Debt in round {run.round + 1}, per turn</span><span className="cl-minus">{run.debt ? `(${money(-run.debt, st)})` : 'None'}</span></li>}
             </ul>
           </section>
           <ExposureMeter run={run} />
