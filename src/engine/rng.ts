@@ -20,6 +20,3 @@ export function shuffle<T>(state: { rng: number }, items: T[]): T[] {
   return items
 }
 
-export function sample<T>(state: { rng: number }, items: readonly T[], n: number): T[] {
-  return shuffle(state, [...items]).slice(0, n)
-}

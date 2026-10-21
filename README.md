@@ -36,7 +36,7 @@ Design previews: add `?preview=summary`, `?preview=shop`, `?preview=crash`, `?pr
 | `src/sound.ts` | Placeholder sounds, synthesised in the browser until real recordings are added, with one master volume. |
 | `src/install.ts`, `public/sw.js`, `public/manifest.webmanifest` | Installing to the home screen and playing offline. |
 | `src/storage.ts` | Run history, best scores and unlocks, saved in the browser. |
-| `public/art/` | Icons, enemy portraits, card frames and title art. |
+| `public/art/` | Card and item icons, and enemy portraits. |
 | `tools/` | The bot player and balance simulator (`sim.ts`), plus the original Python simulator. |
 | `docs/design.md` | The game design: rules, enemies, shop and the plan for stages 2–4. |
 

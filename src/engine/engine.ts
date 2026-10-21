@@ -443,7 +443,7 @@ function shopAction(r: Run, a: Action) {
         say(r, `Rig No. ${i + 1} is pumping.`)
         return
       }
-      const k = PROSPECT_FOR[r.stage] ?? 'survey'
+      const k = PROSPECT_FOR[r.stage] ?? 'derrick'
       if (r.shop.prospectSold || !pay(r, r.prospectPrice, CARDS[k].name)) return
       r.deck.push(card(r, k)); r.prospectPrice += r.stage >= 2 ? CONFIG.derrickStep : 1; r.shop.prospectSold = true
       return
@@ -914,7 +914,7 @@ function play(r: Run, cardId: number, target?: number) {
       say(r, `${d.name}: ${rest.length} discarded, ${got} drawn.`)
     }
     switch (c.key) {
-      case 'prospect': case 'survey': case 'oldProspect': {
+      case 'prospect': case 'oldProspect': {
         const add = Math.min(d.plots ?? 0, CONFIG.maxPlots - r.plots.length)
         for (let i = 0; i < add; i++) r.plots.push(null)
         const wells = d.wells ?? 1

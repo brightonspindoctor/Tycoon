@@ -12,8 +12,6 @@ export const CONFIG = {
   oilFloor: 1, // the price never drops below this, freight included
   startStorage: 3,
   maxPlots: 5,
-  plotsPerProspect: 2,
-  wellCardsPerProspect: 2,
   wellReserve: 6, // barrels a Well pumps before it runs dry
   wildcatReserve: 8,
   sellPerBarrel: 1, // selling a Well pays this for each barrel still in it
@@ -38,7 +36,6 @@ export const CONFIG = {
   incorporatePicks: 2, // new cards you pick at incorporation, from the offer
   stage2Loan: 10, // offered at incorporation
   stage2LoanDebt: 1, // Bank Debt it adds per turn
-  surveyPrice: 5, // (unused since stage 2 sells Wells instead)
   derrickPrice: 6, // the Steel Derrick, a stage 2 Well the Exchange always stocks; rises by derrickStep each time
   derrickStep: 2,
   silo2Price: 5, // the Exchange's Silo: +silo2Storage oil storage, offered every visit
@@ -46,7 +43,6 @@ export const CONFIG = {
   silo2Max: 2, // at most this many Exchange Silos in stage 2
   stage2Output: 1, // every Well and Field pumps this in stage 2, and none runs dry
   fieldValue: 8, // selling a Field
-  wreckReserve: 3, // a wrecked Field becomes a Well with this many barrels
   exposureMax: 8, // Board Exposure at this: ousted
   exposureHigh: 5, // 5 or more counts as high
   exposureLow: 2, // 2 or less at the end of stage 2: Loyal Directors

@@ -139,7 +139,7 @@ export function botTurn(r: Run): Run {
     const water = find('fireBrigade') ?? find('bucket')
     const attack = playable.find(c => isAttack(c.key))
     const building = playable.find(c => c.key === 'well' || c.key === 'wildcat')
-    const prospect = playable.find(c => ['prospect', 'survey', 'oldProspect'].includes(c.key))
+    const prospect = playable.find(c => ['prospect', 'oldProspect'].includes(c.key))
     const graft = find('hardGraft')
     const petty = find('pettyCash')
     const stop = find('shoreUp') ?? find('securityDetail')

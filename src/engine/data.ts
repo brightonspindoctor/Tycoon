@@ -2,10 +2,10 @@
 import { CONFIG } from './config'
 
 export type Family = 'Legal' | 'Dirty' | 'Bury' | 'Lobby' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Fortune' | 'Board' | 'Scrap' | 'Junk'
-export type Icon = 'derrick' | 'plot' | 'barrel' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'shovels' | 'coins' | 'telegraph' | 'dynamite' | 'gear' | 'timber' | 'hose' | 'envelope' | 'graft'
+export type Icon = 'derrick' | 'plot' | 'barrels' | 'fire' | 'bucket' | 'cudgels' | 'deed' | 'telegraph' | 'dynamite' | 'gear' | 'timber' | 'hose' | 'envelope' | 'graft'
   | 'wages' | 'sheriff' | 'will' | 'shares' | 'cashbox' | 'redtape' | 'iou' | 'phone' | 'infiltrate'
   // stage 2 (Art Deco)
-  | 'telegraphLine' | 'tickerTape' | 'nightShift' | 'efficiencyExpert' | 'streamline' | 'shredFiles' | 'scrapParts' | 'cleanHouse' | 'patentThicket' | 'espionage' | 'poachEngineer' | 'rdSprint' | 'payDividend' | 'personalLawyer' | 'securityDetail' | 'insurance' | 'expenseAccount' | 'refinery' | 'pipeline' | 'offshore' | 'pumpingStation' | 'pressOffice' | 'fillingStations' | 'auditingFirm'
+  | 'telegraphLine' | 'tickerTape' | 'nightShift' | 'efficiencyExpert' | 'streamline' | 'shredFiles' | 'scrapParts' | 'cleanHouse' | 'patentThicket' | 'espionage' | 'poachEngineer' | 'rdSprint' | 'payDividend' | 'personalLawyer' | 'securityDetail' | 'insurance' | 'expenseAccount' | 'refinery' | 'offshore' | 'pumpingStation' | 'pressOffice' | 'fillingStations' | 'auditingFirm'
   // stage 3 (1970s): icons still to be drawn fall back to these names, so keep them listed
   | 'embargoRumours' | 'queuesAtPump' | 'telex' | 'memo' | 'restructure' | 'personalGuarantee' | 'dipTrust' | 'buryEvidence' | 'lobbyCongress'
   | 'thinkTank' | 'bribeOfficial' | 'retainCounsel' | 'deadWeight' | 'dryLease' | 'draftDeclaration' | 'rolodex' | 'paperShredder' | 'supertanker' | 'rig'
@@ -16,7 +16,7 @@ export type CardKey =
   | 'improveGear' | 'hardGraft' | 'pettyCash' | 'payWages' | 'dynamite' | 'bribe' | 'telegram'
   | 'looseThread' | 'badBlood' | 'marginCall' | 'iou' | 'payOff' | 'infiltrate' | 'inheritance' | 'dividends'
   // stage 2
-  | 'survey' | 'oldProspect' | 'telegraphLine' | 'tickerTape' | 'nightShift' | 'efficiencyExpert'
+  | 'oldProspect' | 'telegraphLine' | 'tickerTape' | 'nightShift' | 'efficiencyExpert'
   | 'streamline' | 'shredFiles' | 'scrapParts' | 'cleanHouse' | 'patentThicket' | 'espionage' | 'poachEngineer'
   | 'rdSprint' | 'payDividend' | 'personalLawyer' | 'ceaseDesist' | 'proxyBallot'
   | 'derrick' | 'securityDetail' | 'insurance' | 'expenseAccount' | 'patentClaim'
@@ -109,8 +109,6 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: '−$1 a turn while held. Pay $1 to clear it.', flavour: 'Signed in haste.' },
 
   // ---------------------------------------------------------------- stage 2 (Art Deco)
-  survey: { name: 'Survey', era: 2, ap: 2, cost: 0, uses: 1, family: 'Production', power: 0, plots: 1, wells: 1, icon: 'plot', price: CONFIG.surveyPrice,
-    text: 'Claim 1 plot. 1 Well card to your hand.', flavour: 'The easy oil is gone.' },
   oldProspect: { name: 'Worn Prospect', ap: 2, cost: 0, uses: 1, family: 'Production', power: 0, plots: 0, wells: 1, icon: 'plot',
     text: '1 Well card to your hand. No new land.', flavour: 'Every inch of it already drilled.' },
   telegraphLine: { name: 'Telegraph Line', era: 2, ap: 0, cost: 0, uses: null, family: 'Tempo', power: 0, draw: 1, icon: 'telegraphLine', price: 5, rarity: 'Common',
@@ -209,7 +207,6 @@ export function fadedDef(d: CardDef): CardDef {
 export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   prospect: { ap: 1, text: 'Claim 2 plots. 2 Well cards to your hand.' },
   oldProspect: { plots: 1, text: 'Claim 1 plot. 1 Well card to your hand.' },
-  survey: { ap: 1, text: 'Claim 1 plot. 1 Well card to your hand.' },
   hiredHand: { power: 3, text: 'Remove 3 Hold.' },
   infiltrate: { power: 4, poison: [3, 2], text: 'Remove 4 Hold. 3 more next turn, then 2.' },
   lawyerUp: { power: 5, text: 'Pay $2. Remove 5 Hold.' },
@@ -273,7 +270,7 @@ export const shopPool = (stage: number): CardKey[] => (stage >= 3 ? SHOP_POOL_3 
 /** Going multinational: pick incorporatePicks of these; the rest go on sale at the first Trading Floor visit. */
 export const INCORPORATE_OFFER_3: CardKey[] = ['buryEvidence', 'lobbyCongress', 'buyOut', 'advertorial']
 /** Old cards that are useless in stage 3: land cards become Dry Leases; fire and board cards, Dead Weight. */
-export const TO_DRY_LEASE: CardKey[] = ['prospect', 'survey', 'oldProspect', 'derrick', 'well', 'wildcat']
+export const TO_DRY_LEASE: CardKey[] = ['prospect', 'oldProspect', 'derrick', 'well', 'wildcat']
 export const TO_DEAD_WEIGHT: CardKey[] = ['bucket', 'fireBrigade', 'shoreUp', 'payDividend']
 /** Bribes: each one played feeds a Bribery Scandal. */
 export const BRIBES: CardKey[] = ['bribe', 'payOff', 'bribeOfficial']
@@ -281,7 +278,7 @@ export const BRIBES: CardKey[] = ['bribe', 'payOff', 'bribeOfficial']
 export const PROSPECT_FOR: Record<number, CardKey> = { 1: 'prospect', 2: 'derrick' }
 /** The fire card each stage's shop always stocks. */
 export const WATER_FOR: Record<number, CardKey> = { 1: 'bucket' }
-export const PROSPECTS: CardKey[] = ['prospect', 'survey', 'oldProspect']
+export const PROSPECTS: CardKey[] = ['prospect', 'oldProspect']
 export const ATTACK_CARDS: CardKey[] = ['hiredHand', 'lawyerUp', 'dynamite']
 
 export type BonusKey = 'extraProspect' | 'threeOil' | 'pettyCash' | 'gearGraft' | 'trustFund'

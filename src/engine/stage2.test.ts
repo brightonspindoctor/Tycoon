@@ -44,7 +44,6 @@ describe('incorporation (stage 1 → 2)', () => {
     let r = act(before, { type: 'continue' })
     expect(r.deck.filter(c => c.key === 'prospect')).toHaveLength(0)
     expect(r.deck.filter(c => c.key === 'oldProspect')).toHaveLength(prospects)
-    expect(r.deck.some(c => c.key === 'survey')).toBe(false)
     expect(r.offer).toEqual(['derrick', 'payDividend', 'patentThicket', 'tickerTape'])
     for (const k of ['derrick', 'payDividend', 'expenseAccount'] as const) expect(r.deck.some(c => c.key === k)).toBe(false)
     // can't leave without picking 2, and can't pick a 3rd
