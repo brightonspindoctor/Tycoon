@@ -11,6 +11,7 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 - Rounds get harder: round 1 one threat (weaker pool); round 2 one threat and a modifier; round 3 two threats; round 4 the boss.
 - Stages are eras, and the whole look changes: Victorian (1860s–90s), Art Deco (1900s–30s), 1970s flower power (1970–79), corporate greenwash (1980s–now). Cards keep the look of the era they came from.
 - Money gets a unit per stage but keeps its value: $15 → $15K → $15M → $15B.
+- Front page: three industry tiles (Oil, then two sealed), and Run history, Settings, About and a locked **?** button. The **?** becomes the Scoreboard (finished games on this device, best gold first) the first time you win the game. About credits Jonny Sadler and links to buymeacoffee.com/jonnysadler.
 - Each stage adds one meter that lasts only for that stage, and leaves a residue item behind:
   - Stage 1: none. Capital only.
   - Stage 2: Board Exposure, 0 to 8 (5+ is high; 8 = ousted).

@@ -10,6 +10,8 @@ export type Icon = 'derrick' | 'plot' | 'barrels' | 'fire' | 'bucket' | 'cudgels
   | 'embargoRumours' | 'queuesAtPump' | 'telex' | 'memo' | 'restructure' | 'personalGuarantee' | 'dipTrust' | 'buryEvidence' | 'lobbyCongress'
   | 'thinkTank' | 'bribeOfficial' | 'retainCounsel' | 'deadWeight' | 'dryLease' | 'draftDeclaration' | 'rolodex' | 'paperShredder' | 'supertanker' | 'rig'
   | 'advertorial' | 'buyOut' | 'oilShock' | 'cleanImage' | 'onFile'
+  // era-correct art for older stock: stage 1 items, stage 2 junk and the Steel Derrick, stage 3 boons
+  | 'steamPump' | 'storageTank' | 'steelDerrick' | 'ceaseDesist' | 'patentClaim' | 'proxyBallot' | 'spareHand3' | 'inheritance3' | 'tempSilo3'
 
 export type CardKey =
   | 'prospect' | 'well' | 'wildcat' | 'hiredHand' | 'lawyerUp' | 'shoreUp' | 'bucket' | 'fireBrigade'
@@ -139,13 +141,13 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $3. −1 Board Exposure.', flavour: 'Gentlemen, a token of our esteem.' },
   personalLawyer: { name: 'Personal Lawyer', era: 2, ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, icon: 'personalLawyer', price: 5, rarity: 'Common',
     text: 'Blocks the next gold an enemy takes this turn.', flavour: 'Retained for the family.' },
-  ceaseDesist: { name: 'Cease and Desist', era: 2, ap: 1, cost: 0, uses: 1, family: 'Junk', power: 0, icon: 'redtape', forced: true, junk: true,
+  ceaseDesist: { name: 'Cease and Desist', era: 2, ap: 1, cost: 0, uses: 1, family: 'Junk', power: 0, icon: 'ceaseDesist', forced: true, junk: true,
     text: 'Must play. Does nothing.', flavour: 'Pursuant to patent No. 1,042,117.' },
-  proxyBallot: { name: 'Proxy Ballot', era: 2, ap: 0, cost: 0, uses: 1, family: 'Junk', power: 0, exposure: 1, icon: 'envelope', forced: true, junk: true,
+  proxyBallot: { name: 'Proxy Ballot', era: 2, ap: 0, cost: 0, uses: 1, family: 'Junk', power: 0, exposure: 1, icon: 'proxyBallot', forced: true, junk: true,
     text: 'Must play. +1 Board Exposure. Then it\'s gone.', flavour: 'Signed on behalf of a widow in Ohio.' },
-  patentClaim: { name: 'New Patent Claim', era: 2, ap: null, cost: 0, uses: 1, family: 'Junk', power: 0, icon: 'redtape', junk: true,
+  patentClaim: { name: 'New Patent Claim', era: 2, ap: null, cost: 0, uses: 1, family: 'Junk', power: 0, icon: 'patentClaim', junk: true,
     text: "Can't be played. Gone at the end of the turn.", flavour: 'Patent pending. Everything pending.' },
-  derrick: { name: 'Steel Derrick', era: 2, ap: 1, cost: 0, uses: 1, family: 'Production', power: 1, icon: 'derrick', price: CONFIG.derrickPrice,
+  derrick: { name: 'Steel Derrick', era: 2, ap: 1, cost: 0, uses: 1, family: 'Production', power: 1, icon: 'steelDerrick', price: CONFIG.derrickPrice,
     text: 'Build a Well: 1 oil a turn, never dry.', flavour: 'Riveted, not nailed.' },
   securityDetail: { name: 'Security Detail', era: 2, ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, stop: true, oncePerRound: true, cover: 2, icon: 'securityDetail', price: 6, rarity: 'Common',
     text: 'Block one enemy move. +2 Cover.', flavour: 'Men in good suits, standing very still.' },
@@ -365,9 +367,9 @@ export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'accountant' | 'ref
   | 'rolodex' | 'paperShredder' | 'supertanker' | 'thinkTankItem' | 'furtherResearch' | 'regulators'
 // stages: which stages' shops sell it (all if unset); never: a residue item, only ever given
 export const ITEMS: Record<ItemKey, { name: string; text: string; price: number; repeatable?: boolean; icon: Icon; stages?: number[]; never?: boolean; negative?: boolean }> = {
-  storageTank: { name: 'Storage Tank', text: '+2 oil storage', price: 4, repeatable: true, icon: 'barrels', stages: [1] },
+  storageTank: { name: 'Storage Tank', text: '+2 oil storage', price: 4, repeatable: true, icon: 'storageTank', stages: [1] },
   silo: { name: 'Silo', text: '+4 oil storage', price: 7, icon: 'barrels', stages: [1] },
-  steamPump: { name: 'Steam Pump', text: '+1 AP every turn', price: 10, icon: 'derrick', stages: [1] },
+  steamPump: { name: 'Steam Pump', text: '+1 AP every turn', price: 10, icon: 'steamPump', stages: [1] },
   accountant: { name: 'Accountant', text: 'Cover you don\'t use carries over to the next turn', price: 4, icon: 'deed', stages: [1] },
   refinery: { name: 'Refinery', text: 'Oil sells +$1', price: 22, icon: 'refinery', stages: [3] },
   offshore: { name: 'Offshore Account', text: 'Enemies take 1 less gold from your fortune', price: 5, icon: 'offshore', stages: [2] },
@@ -399,7 +401,7 @@ export const BOONS: Record<BoonKey, { name: string; text: string; type: BoonType
 }
 export type RewardKey = 'steamPump' | 'dividends' | 'silo' | 'drillingRights'
 export const REWARDS: Record<RewardKey, { name: string; text: string; type: BoonType; icon: Icon }> = {
-  steamPump: { name: 'Steam Pump', text: '+1 AP every turn.', type: 'ap', icon: 'derrick' },
+  steamPump: { name: 'Steam Pump', text: '+1 AP every turn.', type: 'ap', icon: 'steamPump' },
   dividends: { name: 'Dividends', text: `A card that gives $${CONFIG.dividends} every time you play it.`, type: 'cash', icon: 'shares' },
   silo: { name: 'Silo', text: '+4 oil storage, for good.', type: 'storage', icon: 'barrels' },
   drillingRights: { name: 'Drilling Rights', text: '2 Well cards for your deck.', type: 'wells', icon: 'derrick' },
@@ -407,7 +409,8 @@ export const REWARDS: Record<RewardKey, { name: string; text: string; type: Boon
 /** From stage 3 the land cards are Rigs: the same boon and reward, renamed. Rewards are given at the end of a stage, so from stage 2 they're Rigs for the stage ahead. */
 const RIG_BOON = { name: 'Spare Rigs', text: '2 Rig cards in your first hand against the boss.', icon: 'rig' as Icon }
 const RIG_REWARD = { text: '2 Rig cards for your deck.', icon: 'rig' as Icon }
-export const boonInfo = (k: BoonKey, stage: number) => (k === 'spareRigs' && stage >= 3 ? { ...BOONS[k], ...RIG_BOON } : BOONS[k])
+const BOON_ICON_3: Partial<Record<BoonKey, Icon>> = { spareHand: 'spareHand3', inheritance: 'inheritance3', tempSilo: 'tempSilo3' }
+export const boonInfo = (k: BoonKey, stage: number) => (stage < 3 ? BOONS[k] : k === 'spareRigs' ? { ...BOONS[k], ...RIG_BOON } : { ...BOONS[k], icon: BOON_ICON_3[k] ?? BOONS[k].icon })
 export const rewardInfo = (k: RewardKey, stage: number) => (k === 'drillingRights' && stage >= 2 ? { ...REWARDS[k], ...RIG_REWARD } : REWARDS[k])
 /** The card a boon or reward hands out: Rigs once stage 3 is (or is next) the stage. */
 export const landCardFor = (stage: number): CardKey => (stage >= 3 ? 'rig' : 'well')

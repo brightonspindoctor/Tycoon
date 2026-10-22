@@ -11,11 +11,13 @@ const INDUSTRIES = ['Oil', 'Fishing', 'Pharma', 'Tech']
 // a run that died, rather than one that finished a stage or the game
 const ended = (r: RunRecord) => ['Bankrupt', 'Out of time', 'Quit', 'Ousted', 'Ruined'].includes(r.outcome)
 
-export function Intro({ onBegin, onHistory, admin, onAdminStart }: { onBegin: () => void; onHistory: () => void; admin?: boolean; onAdminStart?: (o: AdminStart) => void }) {
+export function Intro({ onBegin, onHistory, onAbout, onScoreboard, admin, onAdminStart }: { onBegin: () => void; onHistory: () => void; onAbout: () => void; onScoreboard: () => void; admin?: boolean; onAdminStart?: (o: AdminStart) => void }) {
   const done = completedIndustries()
   const best = bestScore('Oil')
-  // each industry is revealed when the one before it is finished
-  const open = INDUSTRIES.filter((_, i) => i === 0 || done.includes(INDUSTRIES[i - 1]))
+  const won = done.length > 0 // the scoreboard unlocks the first time you win the game
+  // each industry is revealed when the one before it is finished; three tiles on the page
+  const shown = INDUSTRIES.slice(0, 3)
+  const open = shown.filter((_, i) => i === 0 || done.includes(shown[i - 1]))
   return (
     <div className="screen intro" data-theme="victorian">
       <img className="intro__art" src={`${import.meta.env.BASE_URL}art/title.jpg`} alt="Tycoon: a share certificate with the industries arranged around a globe" />
@@ -23,23 +25,64 @@ export function Intro({ onBegin, onHistory, admin, onAdminStart }: { onBegin: ()
         <span className="cl-label">Industry. Influence. Plausible deniability.</span>
         <h1 className="cl-display intro__title">Choose your industry</h1>
         <div className="industries">
-          {INDUSTRIES.map(name => open.includes(name) ? (
+          {shown.map(name => open.includes(name) ? (
             <button key={name} type="button" className="industry" disabled={name !== 'Oil'} onClick={() => { play('click'); onBegin() }}>
               <span className="cl-display industry__name">{name}</span>
-              <span className="res-note">{name === 'Oil' ? (best !== null ? `Best: ${best} gold` : 'Stages 1 and 2 playable') : 'Coming soon'}</span>
+              {name === 'Oil' ? best !== null && <span className="res-note">Best: {best} gold</span> : <span className="res-note">Coming soon</span>}
               <span className="cl-btn cl-btn--primary">Begin</span>
             </button>
           ) : (
             <div key={name} className="industry industry--sealed"><span className="cl-display industry__name">? ? ?</span><span className="cl-label">Sealed</span></div>
           ))}
-          <div className="industry industry--sealed industry--hidden"><span className="cl-display industry__name">? ? ?</span><span className="cl-label">Sealed</span></div>
-          <span className="res-note">Finish an industry as Chairman to unseal the next.</span>
         </div>
         {admin && onAdminStart && <AdminStartPanel onStart={onAdminStart} />}
         <div className="intro__menu">
           <button type="button" className="cl-btn" onClick={onHistory}>Run history</button>
           <button type="button" className="cl-btn" onClick={() => { play('click'); openSettings() }}>Settings</button>
+          <button type="button" className="cl-btn" onClick={() => { play('click'); onAbout() }}>About</button>
+          {won
+            ? <button type="button" className="cl-btn" onClick={() => { play('click'); onScoreboard() }}>Scoreboard</button>
+            : <button type="button" className="cl-btn intro__locked" disabled aria-label="Locked" title="Locked">?</button>}
         </div>
+      </div>
+    </div>
+  )
+}
+
+export function About({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="screen about" data-theme="victorian">
+      <header className="game__head">
+        <div><span className="cl-label">Tycoon</span><h1 className="cl-display game__title">About</h1></div>
+        <button type="button" className="cl-btn" onClick={onBack}>Back</button>
+      </header>
+      <div className="about__body">
+        <p>This game was made by Jonny Sadler as a passion project.</p>
+        <p>If you enjoyed it please consider buying him a coffee.</p>
+        <a className="cl-btn cl-btn--primary" href="https://buymeacoffee.com/jonnysadler" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
+      </div>
+    </div>
+  )
+}
+
+/** The scoreboard: every finished game on this device, best first. Unlocked by winning once. */
+export function Scoreboard({ onBack }: { onBack: () => void }) {
+  const board = loadRuns().filter(r => r.completed && r.gold !== null).sort((a, b) => (b.gold as number) - (a.gold as number))
+  return (
+    <div className="screen history scoreboard" data-theme="victorian">
+      <header className="game__head">
+        <div><span className="cl-label">Tycoon · Big Oil beats the Truth</span><h1 className="cl-display game__title">Scoreboard</h1></div>
+        <button type="button" className="cl-btn" onClick={onBack}>Back</button>
+      </header>
+      <div className="history__table">
+        <table className="cl-table">
+          <thead><tr><th>#</th><th>Date</th><th>Industry</th><th>Badge</th><th className="num">Gold</th></tr></thead>
+          <tbody>
+            {board.map((r, i) => (
+              <tr key={r.id}><td>{i + 1}</td><td>{new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td><td>{r.industry}</td><td>{r.tactic ?? '—'}</td><td className="num">{r.gold}</td></tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )

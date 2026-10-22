@@ -22,9 +22,9 @@ import { IncorporateScreen } from './ui/Incorporate'
 import { MultinationalScreen } from './ui/Multinational'
 import { EraTransition } from './ui/EraTransition'
 import { units } from './engine/format'
-import { BonusPick, History, Intro } from './ui/MenuScreens'
+import { About, BonusPick, History, Intro, Scoreboard } from './ui/MenuScreens'
 
-type Screen = 'intro' | 'bonus' | 'welcome' | 'run' | 'history'
+type Screen = 'intro' | 'bonus' | 'welcome' | 'run' | 'history' | 'about' | 'scoreboard'
 
 // Phones held upright get their own layout; anything wider gets the 1440×900 board scaled to fit.
 const MOBILE_MAX = 760
@@ -158,7 +158,9 @@ export default function App() {
   let body: JSX.Element
   if (previewPage === 'cards') body = <CardGallery />
   else if (previewPage === 'sounds') body = <SoundBoard />
-  else if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} admin={admin} onAdminStart={startAdmin} />
+  else if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} onAbout={() => setScreen('about')} onScoreboard={() => setScreen('scoreboard')} admin={admin} onAdminStart={startAdmin} />
+  else if (screen === 'about') body = <About onBack={() => setScreen('intro')} />
+  else if (screen === 'scoreboard') body = <Scoreboard onBack={() => setScreen('intro')} />
   else if (screen === 'bonus') body = <BonusPick onPick={start} onBack={() => setScreen('intro')} />
   else if (screen === 'welcome') body = <Welcome onBegin={() => { markWelcomed(); start(pendingBonus ?? 'threeOil') }} />
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />
