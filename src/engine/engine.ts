@@ -185,8 +185,11 @@ export function skimRate(r: Run): number {
   return table[r.round] ?? table[4]
 }
 
+/** What an item costs in the shop: Board Grudge marks every item up. */
+export const itemPrice = (r: Run, it: ItemKey) => ITEMS[it].price + (r.items.includes('boardGrudge') ? CONFIG.grudgeMarkup : 0)
 export function price(r: Run): number {
   let p = (r.stage >= 3 ? CONFIG.oilPrice3 : r.stage >= 2 ? CONFIG.oilPrice2 : CONFIG.oilPrice) - r.short + r.boost + (r.roundBoost ?? 0) + (r.items.includes('refinery') ? 1 : 0)
+    - r.items.filter(i => i === 'supertanker').length * CONFIG.supertankerCut
   if (r.modifier === 'glut') p -= 1
   if (r.modifier === 'boomtown') p += 1
   if (r.modifier === 'embargo') p += 2
@@ -408,7 +411,6 @@ function stockShop(r: Run) {
 function openShop(r: Run) {
   r.shop = { cards: [], item: null, loanTaken: false, prospectSold: false, bucketSold: false, boon: null, dividendPaid: false }
   stockShop(r)
-  if (r.items.includes('boardGrudge') && r.stage >= 3 && r.capital > 1) money(r, 'Board Grudge', -1) // never your last dollar
   if (r.round === 3) r.shop.boon = pick(r, (Object.keys(BOONS) as BoonKey[]).filter(b => r.stage < 3 || BOONS[b].type !== 'fire'))
 }
 
@@ -459,10 +461,10 @@ function shopAction(r: Run, a: Action) {
     }
     case 'buyItem': {
       const it = r.shop.item
-      if (!it || !pay(r, ITEMS[it].price, ITEMS[it].name)) return
+      if (!it || !pay(r, itemPrice(r, it), ITEMS[it].name)) return
       r.items.push(it)
       if (it === 'storageTank') r.storage += 2
-      if (it === 'silo') r.storage += 4
+      if (it === 'silo') r.storage += CONFIG.siloStorage
       if (it === 'supertanker') r.storage = Math.min(CONFIG.maxStorage, r.storage + CONFIG.supertanker)
       r.shop.item = null
       return
@@ -633,11 +635,14 @@ function startRound(r: Run, round: number) {
   }
 }
 
+/** Cover your items give at the start of every turn. Clean Image is a free Think Tank, and stacks with a bought one. */
+export const itemCover = (r: Run) => (r.items.includes('auditingFirm') ? CONFIG.auditingFirmCover : 0)
+  + (r.items.includes('thinkTankItem') ? CONFIG.thinkTankCover : 0) + (r.items.includes('furtherResearch') ? CONFIG.thinkTankCover : 0)
 function beginTurn(r: Run) {
   r.turn += 1
   r.ledger = [{ label: 'Brought forward', amount: r.capital }]
-  if (!r.items.includes('accountant') && !r.items.includes('auditingFirm')) r.cover = 0
-  if (r.items.includes('thinkTankItem')) r.cover += CONFIG.thinkTankCover
+  if (!r.items.includes('accountant')) r.cover = 0
+  r.cover += itemCover(r)
   r.doubleSale = false
   r.current = { audit: r.pending.audit, refuse: r.pending.refuse, prorate: r.pending.prorate, shutdown: r.pending.shutdown ?? 0 }
   const declarations = r.pending.declarations ?? 0
@@ -683,7 +688,7 @@ function beginTurn(r: Run) {
   const n = handSize(r) - (r.modifier === 'badWeather' ? 1 : 0)
   drawUpTo(r, n)
   const loyal = r.round === 4 && r.items.includes('loyalDirectors') ? 1 : 0
-  r.ap = Math.max(0, CONFIG.baseAP + (r.items.includes('steamPump') ? 1 : 0) + (r.items.includes('pumpingStation') ? 1 : 0) + loyal - apPenalty)
+  r.ap = Math.max(0, CONFIG.baseAP + (r.items.includes('steamPump') ? 1 : 0) + loyal - apPenalty)
 }
 
 function drawOne(r: Run): boolean {

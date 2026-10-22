@@ -363,28 +363,27 @@ export const MODS: Record<ModKey, { name: string; text: string; stages?: number[
 }
 
 export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'accountant' | 'refinery' | 'offshore' | 'boardGrudge' | 'loyalDirectors'
-  | 'pumpingStation' | 'pressOffice' | 'fillingStations' | 'auditingFirm'
+  | 'pressOffice' | 'fillingStations' | 'auditingFirm'
   | 'rolodex' | 'paperShredder' | 'supertanker' | 'thinkTankItem' | 'furtherResearch' | 'regulators'
 // stages: which stages' shops sell it (all if unset); never: a residue item, only ever given
 export const ITEMS: Record<ItemKey, { name: string; text: string; price: number; repeatable?: boolean; icon: Icon; stages?: number[]; never?: boolean; negative?: boolean }> = {
   storageTank: { name: 'Storage Tank', text: '+2 oil storage', price: 4, repeatable: true, icon: 'storageTank', stages: [1] },
-  silo: { name: 'Silo', text: '+4 oil storage', price: 7, icon: 'barrels', stages: [1] },
+  silo: { name: 'Silo', text: `+${CONFIG.siloStorage} oil storage`, price: 7, icon: 'barrels', stages: [1] },
   steamPump: { name: 'Steam Pump', text: '+1 AP every turn', price: 10, icon: 'steamPump', stages: [1] },
   accountant: { name: 'Accountant', text: 'Cover you don\'t use carries over to the next turn', price: 4, icon: 'deed', stages: [1] },
   refinery: { name: 'Refinery', text: 'Oil sells +$1', price: 22, icon: 'refinery', stages: [3] },
   offshore: { name: 'Offshore Account', text: 'Enemies take 1 less gold from your fortune', price: 5, icon: 'offshore', stages: [2] },
-  pumpingStation: { name: 'Pumping Station', text: '+1 AP every turn', price: 12, icon: 'pumpingStation', stages: [2] },
   pressOffice: { name: 'Press Office', text: 'Board Exposure −1 as each round begins', price: 9, icon: 'pressOffice', stages: [2] },
   fillingStations: { name: 'Filling Stations', text: '+$1 every turn', price: 8, icon: 'fillingStations', stages: [2] },
-  auditingFirm: { name: 'Auditing Firm', text: "Cover you don't use carries over to the next turn", price: 6, icon: 'auditingFirm', stages: [2] },
-  boardGrudge: { name: 'Board Grudge', text: 'The board takes $1 every shop visit', price: 0, icon: 'redtape', never: true, negative: true },
+  auditingFirm: { name: 'Auditing Firm', text: `+${CONFIG.auditingFirmCover} Cover every turn`, price: 6, icon: 'auditingFirm', stages: [2] },
+  boardGrudge: { name: 'Board Grudge', text: `Every shop item costs $${CONFIG.grudgeMarkup} more`, price: 0, icon: 'redtape', never: true, negative: true },
   loyalDirectors: { name: 'Loyal Directors', text: '+1 AP in boss fights', price: 0, icon: 'shares', never: true },
   // stage 3
   rolodex: { name: 'Rolodex', text: `+1 hand size (up to ${CONFIG.handMax})`, price: 20, repeatable: true, icon: 'rolodex', stages: [3] },
-  paperShredder: { name: 'Paper Shredder', text: 'Once a round, destroy a card in your hand for free', price: 18, icon: 'paperShredder', stages: [3] },
-  supertanker: { name: 'Supertanker', text: `+${CONFIG.supertanker} oil storage (up to ${CONFIG.maxStorage})`, price: 20, repeatable: true, icon: 'supertanker', stages: [3] },
+  paperShredder: { name: 'Paper Shredder', text: 'Once a round, destroy a card in your hand for free', price: CONFIG.paperShredderPrice, icon: 'paperShredder', stages: [3] },
+  supertanker: { name: 'Supertanker', text: `+${CONFIG.supertanker} oil storage (up to ${CONFIG.maxStorage}). Oil sells $${CONFIG.supertankerCut} less`, price: CONFIG.supertankerPrice, repeatable: true, icon: 'supertanker', stages: [3] },
   thinkTankItem: { name: 'Think Tank', text: `+${CONFIG.thinkTankCover} Cover every turn`, price: 15, icon: 'thinkTank', stages: [3] },
-  furtherResearch: { name: 'Clean Image', text: 'Stage 4: your first greenwash card each round costs 1 less', price: 0, icon: 'cleanImage', never: true },
+  furtherResearch: { name: 'Clean Image', text: `A free Think Tank: +${CONFIG.thinkTankCover} Cover every turn`, price: 0, icon: 'cleanImage', never: true },
   regulators: { name: 'On File', text: 'Stage 4: The Truth starts 1 step further on', price: 0, icon: 'onFile', never: true, negative: true },
 }
 

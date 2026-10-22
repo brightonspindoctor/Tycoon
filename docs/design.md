@@ -82,7 +82,7 @@ Only a few enemies resist a kind of card (the Railroad Agent and the Baron); the
 Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown.
 
 ### Shop
-3 cards, one Prospect and one Bucket of Water ($2) per visit (they then sell out; Prospect's price rises quietly), Destroy a card from $2 (rises quietly by $1 each time), no hint of the next enemy, 1 item, the Cheap Loan, Destroy a card, Reroll, and Skim. Items: Storage Tank, Silo, Steam Pump, Accountant ($4: Cover you don't use carries over to the next turn within a round; Cover is used up as it blocks, and resets every round).
+3 cards, one Prospect and one Bucket of Water ($2) per visit (they then sell out; Prospect's price rises quietly), Destroy a card from $2 (rises quietly by $1 each time), no hint of the next enemy, 1 item, the Cheap Loan, Destroy a card, Reroll, and Skim. Items: Storage Tank, Silo (+2 storage), Steam Pump, Accountant ($4: Cover you don't use carries over to the next turn within a round; Cover is used up as it blocks, and resets every round).
 
 ## Stage 2 rules (as built) · 1901–1930 · Technical race · Art Deco
 ### Incorporation (between stages)
@@ -102,16 +102,16 @@ Beating the Baron pays **3 gold** (every boss does). Then the company incorporat
 - **Every Well pumps 1 oil and never runs dry** in stage 2, old Well and Wildcat cards included. A Well card claims a new plot if none is empty (5 plots at most).
 - **Skimming is a card**: the Expense Account (0 AP, pay the rate for 1 gold, +1 Exposure; $5 in the shop). The rate starts at $10 a gold and rises each round: $10, $10, $12, $14, $16. The Exchange has no skim buttons.
 - **Fire only burns oil** and stops the pumps; it never destroys a Well or Field. With no oil left, one fire dies down each turn.
-- The shop is **The Exchange**. It always offers a **Silo** ($5: +2 oil storage, once a visit, 2 in the whole stage), **Duplicate a card** (a second copy, upgrade and all, for the card's shop price; once a visit), and sells **only stage 2 cards**, stronger and dearer than stage 1's ($4–8). Its staples: a **Steel Derrick** (a Well) one per visit from $6, rising $2 each time. It sells no fire card: you put fires out with the water cards you brought from stage 1.
+- The shop is **The Exchange**. It always offers a **Silo** ($12: +3 oil storage, once a visit, 2 in the whole stage), **Duplicate a card** (a second copy, upgrade and all, for the card's shop price; once a visit), and sells **only stage 2 cards**, stronger and dearer than stage 1's ($4–8). Its staples: a **Steel Derrick** (a Well) one per visit from $6, rising $2 each time. It sells no fire card: you put fires out with the water cards you brought from stage 1.
 - Exchange extras: **Upgrade a card**, and **Pay dividends** ($4: Exposure −2, once per visit). No Cheap Loan.
-- Items (stage 2 only; the stage 1 items stay in stage 1): Offshore Account ($5: enemies take 1 less gold), Pumping Station ($12: +1 AP a turn), Press Office ($9: Exposure −1 as each round begins), Filling Stations ($8: +$1 a turn), Auditing Firm ($6: unused Cover carries over).
+- Items (stage 2 only; the stage 1 items stay in stage 1): Offshore Account ($5: enemies take 1 less gold), Press Office ($9: Exposure −1 as each round begins), Filling Stations ($8: +$1 a turn), Auditing Firm ($6: +2 Cover every turn).
 
 ### Board Exposure (0 to 8)
 - **Rises:** +1 per Expense Account or Petty Cash skim, Shred the Files and Industrial Espionage, +1 when a round ends with less Capital than it started (a bad quarter), and from enemies.
 - **Falls:** winning a fight within 3 turns (−2, the boss included), Pay a Dividend card (−1; upgraded −2), the Exchange's dividends (−2), +Capital over a round (a good quarter, −1), beating the Muckraker or the Clawback Committee (−1). The quarter check doesn't apply after the boss.
 - **High at 5+:** the Clawback Committee takes gold instead of cash.
 - **At 8: ousted.**
-- **Residue** at the end of stage 2: 5+ leaves **Board Grudge** (the board takes $1 every shop visit); 2 or less leaves **Loyal Directors** (+1 AP in boss fights). Both apply from stage 3.
+- **Residue** at the end of stage 2: 5+ leaves **Board Grudge** (every shop item costs $2 more); 2 or less leaves **Loyal Directors** (+1 AP in boss fights). Both apply from stage 3.
 
 ### Your fortune
 From stage 2 some enemies take gold. **Below 0 gold you're ruined** (run over). Personal Lawyer blocks the next gold taken that turn; Offshore Account takes 1 off each theft.
@@ -163,7 +163,7 @@ Winning the Proxy Fight pays 3 gold, then a page-turn to 1970 stamped MULTINATIO
 - **Pick 2 new cards** from 4: Bury Evidence, Lobby Congress, Buy Out and Advertorial. The 2 you leave are on sale at the first Trading Floor visit.
 - **No Bank Debt** in stage 3, and no loans. Heat is the only clock.
 - Heat starts at 0, +5 for every 3 gold skimmed in stage 2 (15 at most).
-- Upgrade and destroy cards (from $10M each, rising $5M each time). In stage 3 a card can be **upgraded twice** (++): the second upgrade repeats the first one's gain, if it has a number to grow. Stage 2's residue applies (Board Grudge takes $1M every shop visit, never your last; Loyal Directors gives +1 AP against the summit).
+- Upgrade and destroy cards (from $10M each, rising $5M each time). In stage 3 a card can be **upgraded twice** (++): the second upgrade repeats the first one's gain, if it has a number to grow. Stage 2's residue applies (Board Grudge: every item costs $2M more; Loyal Directors gives +1 AP against the summit).
 
 ### Economy
 - Oil sells at **$5M**. **Selling oil takes 2 AP.** Storage carries over; Supertankers raise it to 12 at most, so a sale pays about $60M at most before boosts.
@@ -176,7 +176,7 @@ Winning the Proxy Fight pays 3 gold, then a page-turn to 1970 stamped MULTINATIO
 - Climate Science and the Geneva Climate Summit add Heat besides that, and Earth Day. **Cover blocks Heat from enemies**, like cash (not the Heat from your own AP).
 - **Lobbying takes it down**: Lobby Congress (−6), Fund a Think Tank (−10), the Trading Floor's lobbying firm (−10). A card's own Heat and its AP Heat land together.
 - **At 100: broken up.** A blow that wins the round or the stage still counts if it tips Heat over (Heat holds at 99).
-- **Residue** at the end of stage 3: 70+ leaves **On File** (The Truth starts 1 step further on in stage 4); 30 or less leaves **Clean Image** (your first greenwash card each round costs 1 less). Neither does anything yet.
+- **Residue** at the end of stage 3: 70+ leaves **On File** (The Truth starts 1 step further on in stage 4); 30 or less leaves **Clean Image** (a free Think Tank: +3 Cover every turn, stacking with a bought one). Neither does anything until stage 4 is built.
 
 ### Damage kinds
 Four damage types: Legal, Dirty, **Bury** (hiding evidence) and **Lobby** (Washington; Lobby cards also cool Heat). Buy Out is a Legal card paid for in Capital. Enemies are weak to, resist or are immune to them.
@@ -203,7 +203,7 @@ Four damage types: Legal, Dirty, **Bury** (hiding evidence) and **Lobby** (Washi
 Every bribe (Bribe the Sheriff, Bribe, Bribe an Official) feeds a Bribery Scandal. Junk: Dead Weight, Dry Lease, Draft Declaration (the summit's: must play, 1 AP, does nothing).
 
 ### Stage 3 items
-**Refinery** ($22M: oil sells +$1M; moved here from stage 2), Rolodex ($20M: +1 hand size, up to 7, buy more than one), Paper Shredder ($18M: once a round, destroy a card in hand for free), Supertanker ($20M: +4 storage, up to 12), **Think Tank** ($15M: +3 Cover every turn).
+**Refinery** ($22M: oil sells +$1M; moved here from stage 2), Rolodex ($20M: +1 hand size, up to 7, buy more than one), Paper Shredder ($35M: once a round, destroy a card in hand for free), Supertanker ($30M: +4 storage, up to 12; each one makes oil sell $1M less), **Think Tank** ($15M: +3 Cover every turn).
 
 ### Stage 3 enemies
 **Every stage 3 enemy move also takes Capital** ($1–3M, the last column), on top of what the move does. Cover blocks it.

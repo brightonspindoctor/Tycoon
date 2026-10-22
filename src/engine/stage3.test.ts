@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, cardDef, goMultinational, handSize, intentText, newRun, price, production, type Run } from './engine'
+import { act, cardDef, goMultinational, handSize, intentText, itemCover, itemPrice, newRun, price, production, type Run } from './engine'
 import { CONFIG } from './config'
 import { CARDS, boonInfo, landCardFor, rewardInfo, type CardKey, type ThreatKind } from './data'
 
@@ -341,5 +341,32 @@ describe('land cards for the stage ahead', () => {
     expect(boonInfo('spareRigs', 1).name).toBe('Spare Wells')
     expect(boonInfo('spareRigs', 2).name).toBe('Spare Wells')
     expect(boonInfo('spareRigs', 3).name).toBe('Spare Rigs')
+  })
+})
+
+describe('reworked items', () => {
+  it('each Supertanker makes oil sell for less', () => {
+    const r = inStage3()
+    const base = price(r)
+    r.items.push('supertanker')
+    expect(price(r)).toBe(base - CONFIG.supertankerCut)
+  })
+
+  it('Board Grudge marks up every shop item', () => {
+    const r = inStage3()
+    expect(itemPrice(r, 'paperShredder')).toBe(CONFIG.paperShredderPrice)
+    r.items.push('boardGrudge')
+    expect(itemPrice(r, 'paperShredder')).toBe(CONFIG.paperShredderPrice + CONFIG.grudgeMarkup)
+  })
+
+  it('Clean Image works as a free Think Tank, and stacks with a bought one; the Auditing Firm gives 2', () => {
+    const r = inStage3()
+    expect(itemCover(r)).toBe(0)
+    r.items.push('furtherResearch')
+    expect(itemCover(r)).toBe(CONFIG.thinkTankCover)
+    r.items.push('thinkTankItem')
+    expect(itemCover(r)).toBe(2 * CONFIG.thinkTankCover)
+    r.items.push('auditingFirm')
+    expect(itemCover(r)).toBe(2 * CONFIG.thinkTankCover + CONFIG.auditingFirmCover)
   })
 })

@@ -358,15 +358,15 @@ describe('fire in stage 2', () => {
 })
 
 describe('the Exchange Silo', () => {
-  it('adds 2 storage, once a visit, 2 at most', () => {
+  it('adds 3 storage, once a visit, 2 at most', () => {
     let r = inStage2([])
     r.phase = 'shop'; r.shop.siloSold = false; r.capital = 60
     const st = r.storage
     r = act(r, { type: 'buySilo' })
     r = act(r, { type: 'buySilo' })
-    expect(r.storage).toBe(st + 2)
+    expect(r.storage).toBe(st + CONFIG.silo2Storage)
     for (let i = 0; i < 3; i++) { r.shop.siloSold = false; r = act(r, { type: 'buySilo' }) }
-    expect(r.storage).toBe(st + 4)
+    expect(r.storage).toBe(st + 2 * CONFIG.silo2Storage)
   })
 })
 

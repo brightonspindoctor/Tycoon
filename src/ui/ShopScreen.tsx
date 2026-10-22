@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { boonInfo, CARDS, ITEMS, PROSPECT_FOR, WATER_FOR } from '../engine/data'
-import { canBuild, canDuplicate, canUpgrade, rigCount, skimRate, waterPrice, type Action, type Run } from '../engine/engine'
+import { canBuild, canDuplicate, canUpgrade, itemPrice, rigCount, skimRate, waterPrice, type Action, type Run } from '../engine/engine'
 import { ERA_THEME, SHOP_NAME, money, units } from '../engine/format'
 import { ExposureMeter } from './Exposure'
 import { HeatMeter } from './Heat'
@@ -85,10 +85,10 @@ export function ShopScreen({ run, dispatch }: Props) {
           <section className="shop__deals">
             {run.shop.item ? (
               <div className="cl-slot slot">
-                <span className="cl-tag">{money(ITEMS[run.shop.item].price, st)}</span>
+                <span className="cl-tag">{money(itemPrice(run, run.shop.item), st)}</span>
                 <div className="cl-slot__name">{ITEMS[run.shop.item].name}</div>
                 <div className="cl-slot__desc">{units(ITEMS[run.shop.item].text, st)}</div>
-                <button type="button" className="cl-btn" disabled={!can(ITEMS[run.shop.item].price)} onClick={() => dispatch({ type: 'buyItem' })}>Buy</button>
+                <button type="button" className="cl-btn" disabled={!can(itemPrice(run, run.shop.item))} onClick={() => dispatch({ type: 'buyItem' })}>Buy</button>
               </div>
             ) : <div className="cl-slot slot sold">Item sold</div>}
             {!stage2 && <div className="cl-slot slot">

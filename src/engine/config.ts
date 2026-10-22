@@ -11,6 +11,7 @@ export const CONFIG = {
   oilPrice2: 4, // stage 2: the motor car arrives
   oilFloor: 1, // the price never drops below this, freight included
   startStorage: 3,
+  siloStorage: 2, // the Land Office's Silo item (the boss reward Silo is separate)
   maxPlots: 5,
   wellReserve: 6, // barrels a Well pumps before it runs dry
   wildcatReserve: 8,
@@ -38,8 +39,8 @@ export const CONFIG = {
   stage2LoanDebt: 1, // Bank Debt it adds per turn
   derrickPrice: 6, // the Steel Derrick, a stage 2 Well the Exchange always stocks; rises by derrickStep each time
   derrickStep: 2,
-  silo2Price: 5, // the Exchange's Silo: +silo2Storage oil storage, offered every visit
-  silo2Storage: 2,
+  silo2Price: 12, // the Exchange's Silo: +silo2Storage oil storage, offered every visit
+  silo2Storage: 3,
   silo2Max: 2, // at most this many Exchange Silos in stage 2
   stage2Output: 1, // every Well and Field pumps this in stage 2, and none runs dry
   fieldValue: 8, // selling a Field
@@ -75,7 +76,12 @@ export const CONFIG = {
   heatPerSkims: 5, // stage 3 starts with this much Heat for every heatSkimsEvery gold skimmed in stage 2...
   heatSkimsEvery: 3,
   heatStartCap: 15, // ...up to this
-  thinkTankCover: 3, // the Think Tank item: Cover at the start of every turn
+  thinkTankCover: 3, // the Think Tank item (and Clean Image, a free one): Cover at the start of every turn
+  auditingFirmCover: 2, // the Auditing Firm: Cover at the start of every turn
+  supertankerPrice: 30,
+  supertankerCut: 1, // each Supertanker: oil sells this much less
+  paperShredderPrice: 35,
+  grudgeMarkup: 2, // Board Grudge: every shop item costs this much more
   destroyCost3: 10, // stage 3: destroying and upgrading start at least here, and rise by cost3Step
   upgradeCost3: 10,
   cost3Step: 5,
