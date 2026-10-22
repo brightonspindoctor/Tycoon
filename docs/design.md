@@ -303,7 +303,7 @@ Bars were set so roughly 6 in 10 winning bot runs earn a badge, spread fairly ev
 | Deepwater Disaster | 40 | Bury · Lobby | 4 Cover every turn | Blowout (−$8B) → ⏰ Live Footage → Containment Fails (8 Cover this turn) → Clean-up Bill (−$8B) → ⏰ Inquiry |
 | Spilled Tanker | 35 | Bury · Dirty | Junk in your hand | Oiled Seabirds (a Compensation Claim in your hand) → ⏰ Beach Closures → Claims Pile Up (2 Compensation Claims) → Lost Cargo (lose your stored oil) → ⏰ Documentary |
 | Green Politicians | 36 | Dirty · Lobby | Personal attacks and limits | Windfall Tax (−2 gold) → ⏰ Hearings → Subpoena (play at most 3 cards next turn) → Asset Freeze (−3 gold) → ⏰ Climate Bill |
-| War | 34 | Legal · Bury | While it lasts, every Rig pumps 1 in total… only 1 barrel a turn, but oil sells for $10B | Requisition (lose 2 oil) → ⏰ Refugee Crisis → Pipeline Strike (−$8B) → Profiteering Probe (−$6B) → ⏰ Ceasefire Talks |
+| War | 34 | Legal · Bury | While it lasts you produce only 1 barrel a turn, but oil sells for $10B | Requisition (lose 2 oil) → ⏰ Refugee Crisis → Pipeline Strike (−$8B) → Profiteering Probe (−$6B) → ⏰ Ceasefire Talks |
 
 Compensation Claim (junk): must play, pay $3B. Every enemy move also takes $2–3B (Cover blocks it), as in stage 3.
 
