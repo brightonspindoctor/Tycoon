@@ -4,7 +4,7 @@
 A solo roguelike deckbuilder in the style of Slay the Spire. You are the head of a harmful industry, from the 1860s to today. The message: corruption wins for big tycoons, and it is very hard for anyone to stop them. The tension in every turn is how much money to take for yourself and how much to leave in the company.
 
 ## Industries
-Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidden fifth path, the **eco-warrior**, who plays against the tycoons. Only Oil exists so far.
+Unlocked one after another: **Oil → Big Pharma → Fishing → Tech** (Big Pharma is shown as Coming soon from the start), then a hidden fifth path, the **eco-warrior**, who plays against the tycoons. Only Oil exists so far.
 
 ## Structure
 - 4 stages × 4 rounds. Round 4 of each stage is a boss. A shop follows every round (there is none before round 1: picking a starting bonus goes straight into the first fight); the shop after a boss has a new card pool.
@@ -12,7 +12,7 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 - Stages are eras, and the whole look changes: Victorian (1860s–90s), Art Deco (1900s–30s), 1970s flower power (1970–79), 2010s flat-design greenwash (2010–19). Cards keep the look of the era they came from.
 - Money gets a unit per stage but keeps its value: $15 → $15K → $15M → $15B.
 - Unlocks for every later run on the device (never from admin playtests): beat the Rival Baron once and runs start with 4 storage instead of 3 (silently); beat the Proxy Fight once and **Old Faithful** joins the starting bonuses: a Well that pumps 1, never runs dry, and nothing can target (fires, enemies, Firebreak, selling). It stops pumping in a fire, and becomes a Field and a Rig with the rest.
-- Front page: three industry tiles (Oil, then two sealed), and Run history, Settings, About and a locked **?** button. The **?** becomes the Scoreboard (finished games on this device, best gold first) the first time you win the game. About credits Jonny Sadler and links to buymeacoffee.com/jonnysadler.
+- Front page: three industry tiles (Oil, Big Pharma as Coming soon, then one sealed), and Run history, Settings, About and a locked **?** button. The **?** becomes the Scoreboard (finished games on this device, best gold first) the first time you win the game. About credits Jonny Sadler and links to buymeacoffee.com/jonnysadler.
 - Each stage adds one meter that lasts only for that stage, and leaves a residue item behind:
   - Stage 1: none. Capital only.
   - Stage 2: Board Exposure, 0 to 8 (5+ is high; 8 = ousted).
@@ -247,6 +247,80 @@ Never shown during play. The run keeps a quiet tally (damage by card family, mov
 | Blitz | Winning rounds in 2 turns or fewer |
 
 Bars were set so roughly 6 in 10 winning bot runs earn a badge, spread fairly evenly across the six. Later: shop and spoils offers will lean towards the tactics a deck is already using.
+
+## Stage 4 rules (spec, not built) · 2010–2019 · Battling the Truth
+
+### Shape
+- **Five fights:** four single enemies (rounds 1–4, never two at once), then **The Truth** (round 5). A full run is now 17 rounds.
+- The four enemies are drawn from the six below, getting tougher by round (+4 Hold per round after the first). **No enemy is met twice in a run.**
+- A shop (the Investor Portal) follows every fight.
+
+### The Truth clock (replaces Heat)
+- Starts at **1 o'clock** (2 with On File). **Midnight loses the run**, at any point, boss fight included.
+- **Every enemy's 2nd and 5th move moves it forward 1 hour.** Nothing else ticks it on its own.
+- **Winding it back:** Carbon Footprint (−1 hour), Net Zero by 2050 (−2 hours, once a run).
+- Heat is worth nothing in stage 4: old cards keep only their other effects (Lobby Congress still removes Hold; Advertorial still gives Cover; Fund a Think Tank does nothing). The Think Tank item still gives Cover.
+
+### Transition (multinational → Big Oil)
+- Any loan from earlier is **paid off**. The **World Bank** offers **$30B** of "development finance": $2B a turn in debt, and a **Green Project** card in your deck.
+- **Clear-out:** destroy up to 3 cards for free.
+- Pick 2 of 4 stage 4 cards offered; the other two go on sale at the first visit.
+- Rigs carry over (2 oil a turn). Money is in $B.
+
+### Economy
+- Oil sells at **$6B**; selling takes 2 AP; storage up to 16. Skimming from $40B a gold. Upgrades and destroys from $15B, rising $5B.
+
+### Cards (era 4)
+| Card | AP · cost | Effect | Upgraded | Price |
+|---|---|---|---|---|
+| Recycling | 1 | Shuffle your discard pile into your draw pile. Draw 2. | 0 AP | $25B |
+| Propaganda | 1 | Lobby: remove 10 Hold. Draw 1. | 13 Hold | $28B |
+| On the Payroll | 1 · $4B | Legal: remove 10 Hold. +1 AP. | 13 Hold | $30B |
+| Climate Breakdown | 1 | Dirty: remove 12 Hold. Oil sells +$2B this round. | 15 Hold | $30B |
+| Astroturfing | 1 | Dirty: remove 7 Hold. +4 Cover. | 9 Hold, +6 Cover | $25B |
+| Sustainability Report | 1 | Bury: remove 9 Hold. Draw 1. | 12 Hold | $25B |
+| Eco-Friendly Rebrand | 1 · $3B | +8 Cover. Draw 1. | +11 Cover | $22B |
+| Bridge Fuel | 0 | +2 AP. Once a round. | +3 AP | $30B |
+| Carbon Footprint | 1 | The clock goes back 1 hour. Draw 1. | 0 AP | $35B (Uncommon) |
+| Net Zero by 2050 | 1 | The clock goes back 2 hours. Once a run. | — | $40B (Rare) |
+| Influencers | 0 · $3B | The next card's Hold damage or Cover is doubled. Only one in the game; can't be duplicated or destroyed by the clear-out. | — | $35B (Rare) |
+| Green Project (junk) | 1 | Does nothing. Not forced: it sits in your hand until you pay to play it. | — | — |
+
+### Items
+| Item | Effect | Price |
+|---|---|---|
+| Lobbyist on Retainer | +1 AP every turn | $40B |
+| Strategic Reserve | +4 oil storage (up to 16) | $30B |
+| PR Agency | +4 Cover every turn | $30B |
+| Fossil Fuel Subsidy | +$3B every turn | $30B |
+| Offshore Trust | Enemies take 1 less gold from your fortune | $25B |
+
+### Enemies (each cycles five moves; ⏰ = the clock moves forward 1 hour)
+| Enemy | Hold | Weak · Resists | Its thing | Moves |
+|---|---|---|---|---|
+| Fracking | 36 | Legal · Dirty | Cuts you to 1 AP | Cheap Gas (oil −$2B this round) → ⏰ Earthquake Swarm → Tremors (next turn you have 1 AP) → Moratorium (−$6B) → ⏰ Flaming Taps |
+| Green Alternatives | 38 | Lobby · Legal | Heals itself | Subsidies (+6 Hold) → ⏰ Price Parity → Undercut (−$6B) → Grid Deal (+6 Hold) → ⏰ Cheaper Every Year |
+| Deepwater Disaster | 40 | Bury · Lobby | 4 Cover every turn | Blowout (−$8B) → ⏰ Live Footage → Containment Fails (8 Cover this turn) → Clean-up Bill (−$8B) → ⏰ Inquiry |
+| Spilled Tanker | 35 | Bury · Dirty | Junk in your hand | Oiled Seabirds (a Compensation Claim in your hand) → ⏰ Beach Closures → Claims Pile Up (2 Compensation Claims) → Lost Cargo (lose your stored oil) → ⏰ Documentary |
+| Green Politicians | 36 | Dirty · Lobby | Personal attacks and limits | Windfall Tax (−2 gold) → ⏰ Hearings → Subpoena (play at most 3 cards next turn) → Asset Freeze (−3 gold) → ⏰ Climate Bill |
+| War | 34 | Legal · Bury | While it lasts, every Rig pumps 1 in total… only 1 barrel a turn, but oil sells for $10B | Requisition (lose 2 oil) → ⏰ Refugee Crisis → Pipeline Strike (−$8B) → Profiteering Probe (−$6B) → ⏰ Ceasefire Talks |
+
+Compensation Claim (junk): must play, pay $3B. Every enemy move also takes $2–3B (Cover blocks it), as in stage 3.
+
+### The Truth (boss)
+- **Four phases of 25 Hold, one after another.** Each phase is hurt only by one damage type; other attacks do nothing:
+  1. **Consensus Report** · Dirty
+  2. **Lawsuits** · Legal
+  3. **Whistleblower** · Bury
+  4. **Breakthrough** · Lobby
+- **Its attacks are the consequences:** Sea Level Rise (−$8B), Childhood Asthma (−2 gold), Water Pollution (a Compensation Claim in your hand), Suppressed Development (−1 AP next turn), Wildfire Season (lose your stored oil), Crop Failure (−$6B). Every third move moves the clock forward 1 hour.
+- **The later the hour you arrive, the harder it is:** every attack does +$1B (or +1 gold for personal attacks every 4 hours) for each hour past 1, and it starts with Cover equal to the hour.
+- No modifiers in stage 4.
+
+### Completion
+- Beat the Truth: the well-done screen (victory banner): **"Big Oil beats the Truth. Good for you and your gold."**
+- **Score = the gold in your Personal Account only.** The run is recorded as completed, with any badge earned.
+- First win: the **?** becomes the Scoreboard (world-on-fire banner); Oil counts as finished.
 
 ## Stage 4 look (planned, not built) · 2010–2019 · Battling the Truth · 2010s flat design
 The company is now **Big Oil**, and money is in billions ($B). Rounds are 2010, 2013, 2016 and 2019 (Deepwater Horizon, the fracking boom, Paris 2015, the school strikes). The shop is **the Investor Portal**, and the header tagline reads "Powering a better tomorrow™".

@@ -7,7 +7,8 @@ import { openSettings } from './settingsBus'
 import { AdminStartPanel } from './AdminPanel'
 import type { AdminStart } from '../engine/admin'
 
-const INDUSTRIES = ['Oil', 'Fishing', 'Pharma', 'Tech']
+const INDUSTRIES = ['Oil', 'Big Pharma', 'Fishing', 'Tech']
+const ANNOUNCED = ['Big Pharma'] // shown as Coming soon before Oil is finished
 // a run that died, rather than one that finished a stage or the game
 const ended = (r: RunRecord) => ['Bankrupt', 'Out of time', 'Quit', 'Ousted', 'Ruined'].includes(r.outcome)
 
@@ -17,7 +18,7 @@ export function Intro({ onBegin, onHistory, onAbout, onScoreboard, admin, onAdmi
   const won = done.length > 0 // the scoreboard unlocks the first time you win the game
   // each industry is revealed when the one before it is finished; three tiles on the page
   const shown = INDUSTRIES.slice(0, 3)
-  const open = shown.filter((_, i) => i === 0 || done.includes(shown[i - 1]))
+  const open = shown.filter((name, i) => i === 0 || ANNOUNCED.includes(name) || done.includes(shown[i - 1]))
   return (
     <div className="screen intro" data-theme="victorian">
       <img className="intro__art" src={`${import.meta.env.BASE_URL}art/title.jpg`} alt="Tycoon: a share certificate with the industries arranged around a globe" />
