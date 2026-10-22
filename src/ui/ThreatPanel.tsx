@@ -1,5 +1,6 @@
 import { ROLE_LABEL, THREATS } from '../engine/data'
-import { infiltrated, intent, intentText, type Run, type Threat } from '../engine/engine'
+import { infiltrated, intent, intentText, phaseName, weakOf, type Run, type Threat } from '../engine/engine'
+import { TRUTH_PHASES } from '../engine/data'
 import { units } from '../engine/format'
 import { Portrait } from './Portrait'
 
@@ -25,6 +26,9 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget,
         <div className="threat__title">
           <span className="cl-label">{ROLE_LABEL[d.role]}{d.movesFirst ? ' · Moves first' : ''}</span>
           <h2 className="threat__name">{d.name}</h2>
+          {threat.kind === 'truth' && <span className="truth-phase cl-label" aria-label={`Phase ${(threat.phase ?? 0) + 1} of 4: ${phaseName(threat)}`}>
+            {TRUTH_PHASES.map((_, i) => <i key={i} className={i < (threat.phase ?? 0) ? 'is-done' : i === (threat.phase ?? 0) ? 'is-now' : ''} />)} {phaseName(threat)}
+          </span>}
           <div className="threat__hold">
             <span className="hold-bar"><span style={{ width: `${pct}%` }} /></span>
             <span className="cl-num">{Math.max(0, threat.hold)} / {threat.maxHold}</span>
@@ -48,7 +52,7 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget,
       )}
       {onAdminHit && !threat.beaten && <button type="button" className="cl-btn cl-btn--small admin-hit" onClick={e => { e.stopPropagation(); onAdminHit() }}>Admin · −20 Hold</button>}
       <dl className="threat__traits">
-        {d.weak && <div><dt>Weak to:</dt><dd>{d.weak}</dd></div>}
+        {weakOf(threat.kind, threat.phase) && <div><dt>Weak to:</dt><dd>{weakOf(threat.kind, threat.phase)}</dd></div>}
         {d.resist && <div><dt>Resists:</dt><dd>{d.resist}</dd></div>}
         {d.immune && <div><dt>Immune to:</dt><dd>{d.immune}</dd></div>}
       </dl>

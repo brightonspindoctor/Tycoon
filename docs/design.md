@@ -248,11 +248,11 @@ Never shown during play. The run keeps a quiet tally (damage by card family, mov
 
 Bars were set so roughly 6 in 10 winning bot runs earn a badge, spread fairly evenly across the six. Later: shop and spoils offers will lean towards the tactics a deck is already using.
 
-## Stage 4 rules (spec, not built) · 2010–2019 · Battling the Truth
+## Stage 4 rules (as built) · 2010–2019 · Battling the Truth
 
 ### Shape
 - **Five fights:** four single enemies (rounds 1–4, never two at once), then **The Truth** (round 5). A full run is now 17 rounds, but progress still reads out of 16: the Truth arrives as a surprise round 17.
-- The four enemies are drawn from the six below, getting tougher by round (+4 Hold per round after the first). **No enemy is met twice in a run.**
+- The four enemies are drawn from the six below, getting tougher by round (+6 Hold per round after the first). **No enemy is met twice in a run.** Rounds are 2010, 2012, 2014, 2016, then 2019 for the Truth.
 - A shop (the Investor Portal) follows every fight.
 
 ### The Truth clock (replaces Heat)
@@ -268,7 +268,7 @@ Bars were set so roughly 6 in 10 winning bot runs earn a badge, spread fairly ev
 - Rigs carry over (2 oil a turn). Money is in $B.
 
 ### Economy
-- Oil sells at **$6B**; selling takes 2 AP; storage up to 16. Skimming from $40B a gold. Upgrades and destroys from $15B, rising $5B.
+- Oil sells at **$4B** (balance-tested down from $6B: the Rigs made stage 4 too easy); selling takes 2 AP; storage up to 16. Skimming from $40B a gold. Upgrades and destroys from $15B, rising $5B. New Rigs from $40B.
 
 ### Cards (era 4)
 | Card | AP · cost | Effect | Upgraded | Price |
@@ -298,14 +298,14 @@ Bars were set so roughly 6 in 10 winning bot runs earn a badge, spread fairly ev
 ### Enemies (each cycles five moves; ⏰ = the clock moves forward 1 hour)
 | Enemy | Hold | Weak · Resists | Its thing | Moves |
 |---|---|---|---|---|
-| Fracking | 36 | Legal · Dirty | Cuts you to 1 AP | Cheap Gas (oil −$2B this round) → ⏰ Earthquake Swarm → Tremors (next turn you have 1 AP) → Moratorium (−$6B) → ⏰ Flaming Taps |
-| Green Alternatives | 38 | Lobby · Legal | Heals itself | Subsidies (+6 Hold) → ⏰ Price Parity → Undercut (−$6B) → Grid Deal (+6 Hold) → ⏰ Cheaper Every Year |
-| Deepwater Disaster | 40 | Bury · Lobby | 4 Cover every turn | Blowout (−$8B) → ⏰ Live Footage → Containment Fails (8 Cover this turn) → Clean-up Bill (−$8B) → ⏰ Inquiry |
-| Spilled Tanker | 35 | Bury · Dirty | Junk in your hand | Oiled Seabirds (a Compensation Claim in your hand) → ⏰ Beach Closures → Claims Pile Up (2 Compensation Claims) → Lost Cargo (lose your stored oil) → ⏰ Documentary |
-| Green Politicians | 36 | Dirty · Lobby | Personal attacks and limits | Windfall Tax (−2 gold) → ⏰ Hearings → Subpoena (play at most 3 cards next turn) → Asset Freeze (−3 gold) → ⏰ Climate Bill |
-| War | 34 | Legal · Bury | While it lasts you produce only 1 barrel a turn, but oil sells for $10B | Requisition (lose 2 oil) → ⏰ Refugee Crisis → Pipeline Strike (−$8B) → Profiteering Probe (−$6B) → ⏰ Ceasefire Talks |
+| Fracking | 58 | Legal · Dirty | Cuts you to 1 AP | Cheap Gas (oil −$2B this round) → ⏰ Earthquake Swarm → Tremors (next turn you have 1 AP) → Moratorium (−$6B) → ⏰ Flaming Taps |
+| Green Alternatives | 60 | Lobby · Legal | Heals itself | Subsidies (+6 Hold) → ⏰ Price Parity → Undercut (−$6B) → Grid Deal (+6 Hold) → ⏰ Cheaper Every Year |
+| Deepwater Disaster | 62 | Bury · Lobby | 4 Cover every turn | Blowout (−$8B) → ⏰ Live Footage → Containment Fails (8 Cover this turn) → Clean-up Bill (−$8B) → ⏰ Inquiry |
+| Spilled Tanker | 56 | Bury · Dirty | Junk in your hand | Oiled Seabirds (a Compensation Claim in your hand) → ⏰ Beach Closures → Claims Pile Up (2 Compensation Claims) → Lost Cargo (lose your stored oil) → ⏰ Documentary |
+| Green Politicians | 56 | Dirty · Lobby | Personal attacks and limits | Windfall Tax (−2 gold) → ⏰ Hearings → Subpoena (play at most 3 cards next turn) → Asset Freeze (−3 gold) → ⏰ Climate Bill |
+| War | 54 | Legal · Bury | While it lasts you produce only 1 barrel a turn, but oil sells for $10B | Requisition (lose 2 oil) → ⏰ Refugee Crisis → Pipeline Strike (−$8B) → Profiteering Probe (−$6B) → ⏰ Ceasefire Talks |
 
-Compensation Claim (junk): must play, pay $3B. Every enemy move also takes $2–3B (Cover blocks it), as in stage 3.
+Money moves as built: Moratorium and Undercut −$10B, Blowout, Clean-up Bill and Pipeline Strike −$12B, Profiteering Probe −$10B. Compensation Claim (junk): must play, pay $5B. Every enemy move also takes $4B ($5B for Green Alternatives, Deepwater Disaster and War; Cover blocks it).
 
 ### The Truth (boss)
 - **Four phases of 25 Hold, one after another.** Each phase is weak to one damage type; every other type still does normal damage (no resistances, no immunities):
@@ -313,9 +313,12 @@ Compensation Claim (junk): must play, pay $3B. Every enemy move also takes $2–
   2. **Lawsuits** · Legal
   3. **Whistleblower** · Bury
   4. **Breakthrough** · Lobby
-- **Its attacks are the consequences:** Sea Level Rise (−$8B), Childhood Asthma (−2 gold), Water Pollution (a Compensation Claim in your hand), Suppressed Development (−1 AP next turn), Wildfire Season (lose your stored oil), Crop Failure (−$6B). Every 5th move moves the clock forward 1 hour.
-- **The later the hour you arrive, the harder it is:** every attack does +$1B (or +1 gold for personal attacks every 4 hours) for each hour past 1, and it starts with Cover equal to the hour.
+- **Its attacks are the consequences:** Sea Level Rise (−$14B), Childhood Asthma (−2 gold), Water Pollution (a Compensation Claim in your hand), Suppressed Development (−1 AP next turn), Wildfire Season (lose your stored oil), Crop Failure (−$12B). Every 5th move moves the clock forward 1 hour.
+- **The later the hour you arrive, the harder it is:** every cash attack does +$2B for each hour past 1, Childhood Asthma takes 1 more gold for every 4 hours past 1, and it has Cover equal to the hour every turn.
 - No modifiers in stage 4.
+
+### Balance (bot, 600 runs per bonus)
+Stage 4 is won by about 2 in 3 bots that reach it, close to stage 3. Bots meet the Truth at about 5 o'clock; most losses are to the Truth itself (ruined or bankrupt), a few at midnight.
 
 ### Completion
 - Beat the Truth: the well-done screen (victory banner): **"Big Oil beats the Truth. Good for you and your gold."**

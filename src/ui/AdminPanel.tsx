@@ -26,22 +26,25 @@ function Stepper({ label, value, min, max, step = 1, onChange }: { label: string
 export function AdminStartPanel({ onStart }: { onStart: (o: AdminStart) => void }) {
   const [o, setO] = useState<AdminStart>(ADMIN_DEFAULTS)
   const set = (p: Partial<AdminStart>) => setO({ ...o, ...p })
-  const starts = (o.stage === 1 ? STARTS.filter(s => s.v !== 'incorporate') : STARTS).map(s => (s.v === 'incorporate' && o.stage === 3 ? { ...s, label: 'Multinational' } : s))
+  // stage 4 has four rounds before its boss, the Truth, in round 5
+  const stageStarts = o.stage === 4 ? [...STARTS.slice(0, 4), { v: 4 as const, label: 'Round 4' }, { v: 5 as const, label: 'The Truth' }] : STARTS
+  const starts = (o.stage === 1 ? stageStarts.filter(s => s.v !== 'incorporate') : stageStarts).map(s => (s.v === 'incorporate' && o.stage >= 3 ? { ...s, label: o.stage === 4 ? 'Big Oil' : 'Multinational' } : s))
   return (
     <section className="admin" aria-label="Admin: jump in">
       <div className="admin__head"><span className="cl-label">Admin · jump in</span><span className="res-note">Not recorded in history.</span></div>
       <div className="segmented" role="radiogroup" aria-label="Stage">
-        {([1, 2, 3] as const).map(s => <button key={s} type="button" role="radio" aria-checked={o.stage === s} className={o.stage === s ? 'is-on' : ''} onClick={() => set({ stage: s, start: s === 1 && o.start === 'incorporate' ? 1 : o.start })}>Stage {s}</button>)}
+        {([1, 2, 3, 4] as const).map(s => <button key={s} type="button" role="radio" aria-checked={o.stage === s} className={o.stage === s ? 'is-on' : ''} onClick={() => set({ stage: s, start: s === 1 && o.start === 'incorporate' ? 1 : s < 4 && o.start === 5 ? 4 : o.start })}>Stage {s}</button>)}
       </div>
       <div className="segmented admin__starts" role="radiogroup" aria-label="Start at">
         {starts.map(s => <button key={String(s.v)} type="button" role="radio" aria-checked={o.start === s.v} className={o.start === s.v ? 'is-on' : ''} onClick={() => set({ start: s.v })}>{s.label}</button>)}
       </div>
       <div className="admin__grid">
-        <Stepper label={o.stage === 3 ? 'Rigs' : o.stage === 2 ? 'Fields' : 'Wells'} value={o.wells} min={0} max={5} onChange={n => set({ wells: n })} />
-        <Stepper label={o.stage === 3 ? 'Capital ($M)' : o.stage === 2 ? 'Capital ($K)' : 'Capital ($)'} value={o.capital} min={5} max={100} step={5} onChange={n => set({ capital: n })} />
+        <Stepper label={o.stage >= 3 ? 'Rigs' : o.stage === 2 ? 'Fields' : 'Wells'} value={o.wells} min={0} max={5} onChange={n => set({ wells: n })} />
+        <Stepper label={o.stage === 4 ? 'Capital ($B)' : o.stage === 3 ? 'Capital ($M)' : o.stage === 2 ? 'Capital ($K)' : 'Capital ($)'} value={o.capital} min={5} max={200} step={5} onChange={n => set({ capital: n })} />
         <Stepper label="Gold" value={o.gold} min={0} max={20} onChange={n => set({ gold: n })} />
         {o.stage === 2 && <Stepper label="Exposure" value={o.exposure} min={0} max={7} onChange={n => set({ exposure: n })} />}
         {o.stage === 3 && <Stepper label="Heat" value={o.heat ?? 0} min={0} max={90} step={10} onChange={n => set({ heat: n })} />}
+        {o.stage === 4 && <Stepper label="Clock (hour)" value={o.clock ?? 1} min={1} max={11} onChange={n => set({ clock: n })} />}
       </div>
       <div className="admin__row">
         <label className="cl-label" htmlFor="admin-bonus">Bonus</label>
@@ -72,12 +75,14 @@ export function AdminTools({ onAdmin, inTurn, stage }: { onAdmin: (op: AdminOp, 
         {stage === 2 && <button type="button" className="cl-btn cl-btn--small" onClick={() => go('exposureUp')}>Exposure +1</button>}
         {stage === 3 && <button type="button" className="cl-btn cl-btn--small" onClick={() => go('heatDown')}>Heat −10</button>}
         {stage === 3 && <button type="button" className="cl-btn cl-btn--small" onClick={() => go('heatUp')}>Heat +10</button>}
+        {stage === 4 && <button type="button" className="cl-btn cl-btn--small" onClick={() => go('clockDown')}>Clock −1 hour</button>}
+        {stage === 4 && <button type="button" className="cl-btn cl-btn--small" onClick={() => go('clockUp')}>Clock +1 hour</button>}
         {inTurn && <button type="button" className="cl-btn cl-btn--small" onClick={() => go('ap')}>+1 AP</button>}
         {inTurn && <button type="button" className="cl-btn cl-btn--small" onClick={() => go('winRound')}>Win the round</button>}
       </div>
       <div className="admin__row">
         <select className="admin__select" value={key} onChange={e => setKey(e.target.value as CardKey)} aria-label="Card to add">
-          {keys.map(k => <option key={k} value={k}>{CARDS[k].name}{CARDS[k].era === 2 ? ' (1900s)' : CARDS[k].era === 3 ? ' (1970s)' : ''}</option>)}
+          {keys.map(k => <option key={k} value={k}>{CARDS[k].name}{CARDS[k].era === 2 ? ' (1900s)' : CARDS[k].era === 3 ? ' (1970s)' : CARDS[k].era === 4 ? ' (2010s)' : ''}</option>)}
         </select>
         <button type="button" className="cl-btn cl-btn--small" onClick={() => go('addCard', key)}>Add to {inTurn ? 'hand' : 'deck'}</button>
       </div>

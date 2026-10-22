@@ -782,3 +782,59 @@ button.m-threat { cursor: pointer; }
 .history__badge { display: block; font-size: 12px; color: var(--personal); }
 .infiltrated { border-left-color: var(--ink-muted); }
 .infiltrated b { color: var(--ink); }
+
+/* ---------- Stage 4: the 2010s ----------
+   Flat colour, white cards, pill buttons, soft shadows, lots of white space. No ruled paper:
+   the first era where the ledger is hidden. Oil black only for the clock and for losses. */
+.screen[data-theme="greenwash"], .m[data-theme="greenwash"] .screen { background-image: none; }
+[data-theme="greenwash"] .game__head { border-bottom: 0; position: relative; padding-bottom: 18px; }
+[data-theme="greenwash"] .game__head::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; border-radius: 999px;
+  background: linear-gradient(to right, var(--accent) 0 70%, var(--sky) 70% 92%, var(--pink) 92% 100%); }
+[data-theme="greenwash"] .game__title { color: var(--accent); letter-spacing: -.02em; }
+[data-theme="greenwash"] .cl-btn { border-radius: 999px; border-width: 1.5px; font-family: var(--font-body); letter-spacing: .02em; }
+[data-theme="greenwash"] .cl-btn--primary { box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent); }
+[data-theme="greenwash"] .cl-card { border: 0; box-shadow: 0 6px 18px rgba(23, 51, 43, .12), 0 1px 3px rgba(23, 51, 43, .08); }
+[data-theme="greenwash"] .cl-card::after { border: 0; }
+[data-theme="greenwash"] .cl-card__cost { background: var(--accent); color: var(--on-accent); border-radius: 999px; border: 0; }
+[data-theme="greenwash"] .cl-ledger, [data-theme="greenwash"] .fortune, [data-theme="greenwash"] .threat, [data-theme="greenwash"] .tile,
+[data-theme="greenwash"] .cl-slot, [data-theme="greenwash"] .resources > div, [data-theme="greenwash"] .plot { border-color: transparent; box-shadow: 0 4px 14px rgba(23, 51, 43, .09); background: var(--paper-raised); }
+[data-theme="greenwash"] .cl-label { letter-spacing: .08em; font-weight: 800; }
+[data-theme="greenwash"] .cl-num { font-variant-numeric: tabular-nums; font-weight: 800; }
+[data-theme="greenwash"] .hold-bar { border-radius: 999px; }
+[data-theme="greenwash"] .round-pip { border-radius: 999px; }
+.round-pip.is-truth { background: var(--oil); border-color: var(--oil); }
+
+/* the Truth clock: a clean, minimal face; the only black on the page */
+.truth-clock { display: flex; gap: 14px; align-items: center; background: var(--paper-raised); border-radius: var(--cl-radius); padding: 10px 14px; box-shadow: 0 4px 14px rgba(23, 51, 43, .09); }
+.truth-clock svg { flex: none; }
+.truth-clock__face { fill: #ffffff; stroke: var(--oil); stroke-width: 3; }
+.truth-clock__tick { stroke: var(--ink-muted); stroke-width: 2; stroke-linecap: round; }
+.truth-clock__tick--midnight { stroke: var(--loss); stroke-width: 4; }
+.truth-clock__spent { fill: color-mix(in srgb, var(--oil) 14%, transparent); }
+.truth-clock__hand { stroke: var(--oil); stroke-width: 4; stroke-linecap: round; transition: transform .6s cubic-bezier(.3, 1.4, .5, 1); transform-origin: 50px 50px; }
+.truth-clock__minute { stroke: var(--oil); stroke-width: 2.5; stroke-linecap: round; }
+.truth-clock__pin { fill: var(--oil); }
+.truth-clock__text { display: flex; flex-direction: column; gap: 2px; }
+.truth-clock__text b { font-size: 24px; line-height: 28px; color: var(--oil); }
+.truth-clock.is-late .truth-clock__text b, .truth-clock.is-late .cl-label { color: var(--loss); }
+.truth-clock.is-late .truth-clock__face { stroke: var(--loss); }
+.truth-clock .res-note { font-size: 12px; line-height: 16px; }
+.truth-clock--compact { padding: 8px 12px; margin: 0 0 10px; }
+.truth-clock--compact .truth-clock__text b { font-size: 20px; line-height: 24px; }
+.truth-clock.is-acting { box-shadow: 0 0 0 3px var(--oil); }
+@media (prefers-reduced-motion: reduce) { .truth-clock__hand { transition: none; } }
+
+.truth-phase { display: inline-flex; gap: 6px; align-items: center; margin-top: 2px; }
+.truth-phase i { width: 18px; height: 6px; border-radius: 999px; background: var(--rule); }
+.truth-phase i.is-done { background: var(--oil); }
+.truth-phase i.is-now { background: var(--accent); }
+.amplify-badge { border-radius: 999px; background: var(--pink); color: var(--ink); padding: 4px 12px; font-weight: 800; font-size: 13px; }
+.cap-badge { border-radius: 999px; background: var(--paper-raised); border: 1.5px solid var(--loss); color: var(--loss); padding: 4px 12px; font-weight: 800; font-size: 13px; }
+
+/* the final screen and the scoreboard */
+.victory__banner { width: 100%; height: 300px; object-fit: cover; border-radius: var(--cl-radius); display: block; }
+.scoreboard__banner { width: 100%; height: 220px; object-fit: cover; border-radius: var(--cl-radius); display: block; flex: none; }
+.victory__score b { font-size: 64px; line-height: 66px; color: var(--personal); }
+.m .victory__banner { height: 180px; }
+.m .scoreboard__banner { height: 140px; }
+.bigoil__loan .cl-slot__desc .cl-minus { display: block; }

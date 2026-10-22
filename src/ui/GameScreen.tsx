@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { CONFIG } from '../engine/config'
-import { ITEMS, MODS, THREATS } from '../engine/data'
+import { ITEMS, MODS, THREATS, bossRound } from '../engine/data'
 import {
-  apCost, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, atWar, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run,
 } from '../engine/engine'
 import { ERA_THEME, FIELD_PLACE, STAGE_TITLE, money, units, year } from '../engine/format'
 import { ExposureMeter } from './Exposure'
 import { HeatMeter } from './Heat'
+import { TruthClock } from './TruthClock'
 import { CardView } from './CardView'
 import { iconUrl } from './icons'
 import { ThreatPanel } from './ThreatPanel'
@@ -54,10 +55,17 @@ export function GameScreen({ run, dispatch, acting }: Props) {
           <h1 className="cl-display game__title">{STAGE_TITLE[st] ?? STAGE_TITLE[1]}</h1>
         </div>
         <div className="game__meta">
-          <div className="round-track" aria-label={`Round ${run.round} of 4`}>
-            <span className="cl-label">Round {run.round} of 4 · Turn {run.turn}{st === 2 && run.turn <= CONFIG.quickWinTurns ? ` · Win by turn ${CONFIG.quickWinTurns}: Exposure −${CONFIG.quickWinDrop}` : ''}</span>
-            <div>{[1, 2, 3, 4].map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 ? 'is-boss' : ''}`} />)}</div>
-          </div>
+          {(() => {
+            // stage 4 still counts to 4: the Truth arrives as a surprise fifth round
+            const truth = st >= 4 && run.round >= bossRound(4)
+            const pips = truth ? [1, 2, 3, 4, 5] : [1, 2, 3, 4]
+            return (
+              <div className="round-track" aria-label={truth ? 'The final round' : `Round ${run.round} of 4`}>
+                <span className="cl-label">{truth ? 'Round 5 · The Truth' : `Round ${run.round} of 4`} · Turn {run.turn}{st === 2 && run.turn <= CONFIG.quickWinTurns ? ` · Win by turn ${CONFIG.quickWinTurns}: Exposure −${CONFIG.quickWinDrop}` : ''}</span>
+                <div>{pips.map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 && st < 4 ? 'is-boss' : ''} ${i === 5 ? 'is-truth' : ''}`} />)}</div>
+              </div>
+            )
+          })()}
           <SettingsButton />
           {run.modifier && <div className="modifier"><span className="cl-label">Modifier</span><b>{MODS[run.modifier].name}</b> · {units(MODS[run.modifier].text, st)}</div>}
         </div>
@@ -85,7 +93,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
         <section className="col-field" aria-label="Your field">
           <div className="field__label"><span className="cl-label">Your {st >= 3 ? 'rigs' : st >= 2 ? 'fields' : 'field'} · {FIELD_PLACE[st] ?? FIELD_PLACE[1]}</span>{run.current.prorate && <span className="cl-label cl-minus">Prorated: {CONFIG.prorationCap} oil a turn at most</span>}{run.fire > 0 && <span className="cl-label field__fireway">Fire burns ←</span>}</div>
           <div className="field">
-            {run.plots.length === 0 && <div className="plot plot--empty-field">{st >= 3 ? 'No Rigs. Build one at the Trading Floor.' : st >= 2 ? 'No Wells. Play a Steel Derrick to build one.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
+            {run.plots.length === 0 && <div className="plot plot--empty-field">{st >= 3 ? `No Rigs. Build one at ${st >= 4 ? 'the Investor Portal' : 'the Trading Floor'}.` : st >= 2 ? 'No Wells. Play a Steel Derrick to build one.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
             {run.plots.map((w, i) => {
               const marked = run.marked === i && !!w
               const burning = burnsWell && i === run.plots.reduce((m, p, k) => (p ? k : m), -1)
@@ -94,7 +102,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
                 <div key={i} className={`plot ${!w ? 'plot--empty' : ''} ${w?.field || w?.rig ? 'plot--field' : ''} ${w?.rig ? 'plot--rig' : ''} ${w?.unstable ? 'plot--unstable' : ''} ${marked ? 'plot--marked' : ''} ${burning ? 'plot--burning' : ''} ${run.fire && w ? 'plot--stopped' : ''}`}>
                   <span className="cl-label">Plot {i + 1}</span>
                   {w ? <button type="button" className="plot__well" onClick={() => setPlotMenu(plotMenu === i ? null : i)} aria-label={`${plotName(run, i)}, ${state}`}>
-                    <img src={iconUrl(w.rig ? 'rig' : 'derrick')} alt="" />
+                    <img src={iconUrl(w.rig ? (st >= 4 ? 'rig4' : 'rig') : 'derrick')} alt="" />
                   </button> : <div className="plot__hole" />}
                   <span className="plot__name">{w ? plotName(run, i) : '—'}</span>
                   <span className="plot__state">{state}</span>
@@ -118,9 +126,9 @@ export function GameScreen({ run, dispatch, acting }: Props) {
           </div>
 
           <div className="resources">
-            <div><span className="cl-label">Oil price</span><b className="cl-num">{money(netPrice(run), st)}</b><span className="res-note">{freight(run) ? `${money(price(run), st)} − freight ${money(freight(run), st)}` : run.boost || run.roundBoost ? [run.boost && `+${money(run.boost, st)} this turn`, run.roundBoost && `+${money(run.roundBoost, st)} this round`].filter(Boolean).join(' · ') : 'per barrel'}</span></div>
+            <div><span className="cl-label">Oil price</span><b className="cl-num">{money(netPrice(run), st)}</b><span className="res-note">{atWar(run) ? `War: ${CONFIG.warOutput} barrel a turn` : freight(run) ? `${money(price(run), st)} − freight ${money(freight(run), st)}` : run.boost || run.roundBoost ? [run.boost && `+${money(run.boost, st)} this turn`, run.roundBoost && `+${money(run.roundBoost, st)} this round`].filter(Boolean).join(' · ') : 'per barrel'}</span></div>
             <div><span className="cl-label">Production</span><b className={`cl-num ${production(run) === 0 && run.plots.some(Boolean) ? 'cl-minus' : ''}`}>{production(run)}</b><span className="res-note">{run.fire ? 'pumps stopped' : st >= 3 ? `${run.plots.filter(Boolean).length} of ${CONFIG.maxPlots} Rigs${run.current.shutdown ? ` · ${run.current.shutdown} shut down` : ''}` : st >= 2 ? `${run.plots.filter(w => w?.field).length} Fields · ${run.plots.filter(w => w && !w.field).length} Wells` : `${run.plots.filter(Boolean).length} Wells`}</span></div>
-            <div><span className="cl-label">Storage</span><b className="cl-num">{run.storage}</b><span className="res-note">{st >= 3 ? `barrels · up to ${CONFIG.maxStorage}` : 'barrels'}</span></div>
+            <div><span className="cl-label">Storage</span><b className="cl-num">{run.storage}</b><span className="res-note">{st >= 3 ? `barrels · up to ${st >= 4 ? CONFIG.maxStorage4 : CONFIG.maxStorage}` : 'barrels'}</span></div>
           </div>
 
           <div className="events" aria-live="polite">{run.events.slice(0, 3).map((e, i) => <p key={`${run.turn}-${i}-${e}`} className={i === 0 ? 'is-new' : ''}>{units(e, st)}</p>)}</div>
@@ -131,14 +139,15 @@ export function GameScreen({ run, dispatch, acting }: Props) {
             <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className={`cl-ledger__total ${run.capital <= debtPerTurn(run) * 2 ? 'cl-minus' : ''}`}>{money(run.capital, st)}</span></div>
             <ul className="cl-ledger__rows">
               {run.ledger.slice(-6).map((l, i) => <li key={`${run.turn}-${i}`} className="ink-in"><span>{units(l.label, st)}</span><span className={l.label === 'Brought forward' ? '' : l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{l.label === 'Brought forward' ? money(l.amount, st) : money(l.amount, st, true)}</span></li>)}
-              {st < 3 && <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">{debtPerTurn(run) ? `(${money(-debtPerTurn(run) * (run.pending.audit ? 2 : 1), st)})` : 'None'}</span></li>}
+              {st !== 3 && <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">{debtPerTurn(run) ? `(${money(-debtPerTurn(run) * (run.pending.audit ? 2 : 1), st)})` : 'None'}</span></li>}
             </ul>
           </section>
           <ExposureMeter run={run} lit={acting?.kind === 'board'} />
           <HeatMeter run={run} compact lit={acting?.kind === 'board'} />
+          <TruthClock run={run} compact lit={acting?.kind === 'board'} />
           <section className={`fortune ${lit('gold')}`}>
             <div><span className="cl-label">Your fortune</span><b className={`cl-num ${st >= 2 && run.gold === 0 ? 'cl-minus' : ''}`}>{run.gold} gold</b></div>
-            <span className="res-note">{run.goldShield ? 'Personal Lawyer on retainer this turn.' : st >= 3 ? 'The Bribery Scandal takes gold. Below 0, you are ruined.' : st >= 2 ? 'Enemies can take gold now. Below 0, you are ruined.' : `Skim rate: ${money(skimRate(run), st)} → 1 gold`}</span>
+            <span className="res-note">{run.goldShield ? 'Personal Lawyer on retainer this turn.' : st >= 4 ? 'Green Politicians and the Truth take gold. Below 0, you are ruined.' : st >= 3 ? 'The Bribery Scandal takes gold. Below 0, you are ruined.' : st >= 2 ? 'Enemies can take gold now. Below 0, you are ruined.' : `Skim rate: ${money(skimRate(run), st)} → 1 gold`}</span>
           </section>
           <section className="items">
             <span className="cl-label">Items</span>
@@ -163,6 +172,8 @@ export function GameScreen({ run, dispatch, acting }: Props) {
             {run.fire > 0 && run.oil > 0 && st < 2 && <em> · fire hits Wells next</em>}
           </button>
           {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
+          {run.amplify && <span className="amplify-badge">Influencers: next card doubled</span>}
+          {!!run.current.cardCap && <span className="cap-badge">Subpoena: {run.played ?? 0} of {run.current.cardCap} cards</span>}
           <div className="action-strip__actions">
             {run.items.includes('paperShredder') && <button type="button" className="cl-btn" disabled={run.shredded || !run.hand.length} onClick={() => { setSelected(null); setShredding(!shredding) }}>{run.shredded ? 'Shredder used this round' : shredding ? 'Cancel' : 'Paper Shredder · free · once a round'}</button>}
             {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose Well No. {weakestWell(run) + 1}, put out every fire</button>}

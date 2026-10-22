@@ -77,23 +77,28 @@
   --influence: var(--accent);
 }
 [data-theme="greenwash"] {
-  --paper: #f2f9f4;
+  /* 2010s flat design: a sustainability report made by a start-up. Oil black only for the clock and losses. */
+  --paper: #eef5f0;
   --paper-raised: #ffffff;
-  --ink: #10302a;
-  --ink-muted: #456459;
-  --rule: #c3dfcf;
-  --accent: #1b7a50;
+  --ink: #17332b;
+  --ink-muted: #5c7a6f;
+  --rule: #d3e6db;
+  --accent: #2e9e4f;
   --on-accent: #ffffff;
-  --loss: #a8231b;
-  --gain: #1b6e47;
-  --personal: #6e5200;
-  --cover: #22648a;
-  --oil: #10302a;
-  --heat: #b0450f;
+  --loss: #c9302c;
+  --gain: #1f8a45;
+  --personal: #b35c7a;
+  --cover: #2f8fd8;
+  --oil: #141414;
+  --heat: #2e9e4f;
   --board: #55408a;
-  --truth: #111111;
+  --sky: #4aa8e8;
+  --pink: #f4a6b8;
+  --truth: #141414;
   --on-truth: #ffffff;
   --influence: var(--accent);
+  --font-body: Nunito, "Trebuchet MS", system-ui, sans-serif;
+  --font-figures: Nunito, "Trebuchet MS", system-ui, sans-serif;
 }
 :root {
   --space-1: 4px;
@@ -114,7 +119,7 @@
   --font-display-1950: "Alfa Slab One", Rockwell, Georgia, serif;
   --font-display-1970: Fraunces, "Cooper Black", Georgia, serif;
   --radius-1970: 14px;
-  --font-display-1990: Quicksand, "Trebuchet MS", system-ui, sans-serif;
+  --font-display-1990: Nunito, Quicksand, "Trebuchet MS", system-ui, sans-serif;
   --font-truth: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 .era-1860 { font-family: var(--font-display-1860); font-size: 34px; line-height: 38px; font-weight: 400; }

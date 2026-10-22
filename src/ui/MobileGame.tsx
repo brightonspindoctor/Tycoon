@@ -4,14 +4,15 @@
 // played by accident on a small screen.
 import { useState } from 'react'
 import { CONFIG } from '../engine/config'
-import { ITEMS, MODS, ROLE_LABEL, THREATS } from '../engine/data'
+import { ITEMS, MODS, ROLE_LABEL, THREATS, bossRound } from '../engine/data'
 import {
-  apCost, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, infiltrated, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, phaseName, weakOf, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, infiltrated, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run, type Threat,
 } from '../engine/engine'
 import { FIELD_PLACE, money, units, year } from '../engine/format'
 import { ExposureMeter } from './Exposure'
 import { HeatMeter } from './Heat'
+import { TruthClock } from './TruthClock'
 import { Portrait } from './Portrait'
 import { CardView } from './CardView'
 import { iconUrl } from './icons'
@@ -64,15 +65,15 @@ export function MobileGame({ run, dispatch, acting }: Props) {
     <div className="m-game">
       <header className="m-hud">
         <div className="m-hud__when">
-          <span className="cl-label">Round {run.round}/4 · Turn {run.turn}{st === 2 && run.turn <= CONFIG.quickWinTurns ? ` · −${CONFIG.quickWinDrop} if won by ${CONFIG.quickWinTurns}` : ''}</span>
+          <span className="cl-label">{st >= 4 && run.round >= bossRound(4) ? 'The Truth' : `Round ${run.round}/4`} · Turn {run.turn}{st === 2 && run.turn <= CONFIG.quickWinTurns ? ` · −${CONFIG.quickWinDrop} if won by ${CONFIG.quickWinTurns}` : ''}</span>
           <div className="m-hud__year"><b className="cl-display">{year(st, run.round)}</b><SettingsButton /></div>
-          <div className="m-pips">{[1, 2, 3, 4].map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 ? 'is-boss' : ''}`} />)}</div>
+          <div className="m-pips">{(st >= 4 && run.round >= bossRound(4) ? [1, 2, 3, 4, 5] : [1, 2, 3, 4]).map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 && st < 4 ? 'is-boss' : ''} ${i === 5 ? 'is-truth' : ''}`} />)}</div>
         </div>
         <button type="button" className={`m-hud__money ${lit('money')}`} onClick={() => setSheet(true)} aria-label="Open the ledger">
           <span className="m-hud__cap">
             <span className="cl-label">Capital</span>
             <b className={`cl-num ${run.capital <= debtPerTurn(run) * 2 ? 'cl-minus' : ''}`}>{money(run.capital, st)}</b>
-            <span className="m-hud__debt cl-num">{nextDebt ? `${money(-nextDebt, st)} next turn` : st >= 3 ? `Heat ${run.heat}` : 'No debt'}</span>
+            <span className="m-hud__debt cl-num">{nextDebt ? `${money(-nextDebt, st)} next turn` : st === 3 ? `Heat ${run.heat}` : st >= 4 ? `${run.clock} o'clock` : 'No debt'}</span>
           </span>
           <span className={`m-hud__gold ${acting?.kind === 'gold' ? 'is-acting' : ''}`}>
             <span className="cl-label">Fortune</span>
@@ -100,7 +101,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                 <div className="m-threat__body">
                   <span className="cl-label m-threat__role">{ROLE_LABEL[d.role]}{d.movesFirst ? ' · Moves first' : ''}</span>
                   <div className="m-threat__top">
-                    <h2 className="m-threat__name">{d.name}</h2>
+                    <h2 className="m-threat__name">{d.name}{t.kind === 'truth' ? ` · ${phaseName(t)}` : ''}</h2>
                     <span className="cl-num m-threat__hold">{t.cover && !t.beaten ? <span className="enemy-cover">Cover {t.cover} · </span> : null}{Math.max(0, t.hold)}/{t.maxHold}</span>
                   </div>
                   <span className="hold-bar"><span style={{ width: `${Math.max(0, (t.hold / t.maxHold) * 100)}%` }} /></span>
@@ -112,7 +113,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                     <div className="m-intent"><b>Next · {intent(run, t)}</b> {units(intentText(run, t), st)}</div>
                   )}
                   <div className="m-traits">
-                    {[d.weak && `Weak: ${d.weak}`, d.resist && `Resists: ${d.resist}`, d.immune && `Immune: ${d.immune}`].filter(Boolean).join(' · ')}
+                    {[weakOf(t.kind, t.phase) && `Weak: ${weakOf(t.kind, t.phase)}`, d.resist && `Resists: ${d.resist}`, d.immune && `Immune: ${d.immune}`].filter(Boolean).join(' · ')}
                   </div>
                 </div>
                 {run.admin && run.phase === 'turn' && !t.beaten && !needsTarget && <button type="button" className="cl-btn cl-btn--small admin-hit" onClick={e => { e.stopPropagation(); dispatch({ type: 'admin', op: 'hold20', target: t.id }) }}>−20</button>}
@@ -131,11 +132,12 @@ export function MobileGame({ run, dispatch, acting }: Props) {
 
         <ExposureMeter run={run} compact lit={acting?.kind === 'board'} />
         <HeatMeter run={run} compact lit={acting?.kind === 'board'} />
+        <TruthClock run={run} compact lit={acting?.kind === 'board'} />
 
         <section aria-label="Your field">
           <div className="m-label"><span className="cl-label">Your {st >= 3 ? 'rigs' : st >= 2 ? 'fields' : 'field'} · {FIELD_PLACE[st] ?? FIELD_PLACE[1]}</span>{run.current.prorate && <span className="cl-label cl-minus">Prorated</span>}{run.fire > 0 && <span className="cl-label field__fireway">Fire burns ←</span>}</div>
           <div className="m-field">
-            {run.plots.length === 0 && <div className="m-plot m-plot--none">{st >= 3 ? 'No Rigs. Build one at the Trading Floor.' : st >= 2 ? 'No Wells. Play a Steel Derrick to build one.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
+            {run.plots.length === 0 && <div className="m-plot m-plot--none">{st >= 3 ? `No Rigs. Build one at ${st >= 4 ? 'the Investor Portal' : 'the Trading Floor'}.` : st >= 2 ? 'No Wells. Play a Steel Derrick to build one.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
             {run.plots.map((w, i) => {
               const marked = run.marked === i && !!w
               const burning = burnsWell && i === lastWell
@@ -145,7 +147,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                   <span className="m-plot__no cl-num">{i + 1}</span>
                   {w ? (
                     <button type="button" className="plot__well" onClick={() => { setSelected(null); setPlotMenu(plotMenu === i ? null : i) }} aria-label={`${plotName(run, i)}, ${state}. Tap to sell`}>
-                      <img src={iconUrl(w.rig ? 'rig' : 'derrick')} alt="" />
+                      <img src={iconUrl(w.rig ? (st >= 4 ? 'rig4' : 'rig') : 'derrick')} alt="" />
                     </button>
                   ) : <div className="m-plot__hole" />}
                   <span className="m-plot__state">{state}</span>
@@ -241,11 +243,12 @@ export function MobileGame({ run, dispatch, acting }: Props) {
               <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className="cl-ledger__total">{money(run.capital, st)}</span></div>
               <ul className="cl-ledger__rows">
                 {run.ledger.map((l, i) => <li key={i}><span>{units(l.label, st)}</span><span className={l.label === 'Brought forward' ? '' : l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{l.label === 'Brought forward' ? money(l.amount, st) : money(l.amount, st, true)}</span></li>)}
-                {st < 3 && <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">{nextDebt ? `(${money(-nextDebt, st)})` : 'None'}</span></li>}
+                {st !== 3 && <li className="next-debt"><span>Debt next turn</span><span className="cl-minus">{nextDebt ? `(${money(-nextDebt, st)})` : 'None'}</span></li>}
               </ul>
             </section>
             <ExposureMeter run={run} />
             <HeatMeter run={run} />
+            <TruthClock run={run} />
             <section className="fortune">
               <div><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b></div>
               <span className="res-note">{run.goldShield ? 'Personal Lawyer on retainer this turn.' : st >= 2 ? 'Enemies can take gold now. Below 0, you are ruined.' : `Skim rate: ${money(skimRate(run), st)} → 1 gold`}</span>

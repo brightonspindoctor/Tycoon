@@ -75,6 +75,7 @@ export function Scoreboard({ onBack }: { onBack: () => void }) {
         <div><span className="cl-label">Tycoon · Big Oil beats the Truth</span><h1 className="cl-display game__title">Scoreboard</h1></div>
         <button type="button" className="cl-btn" onClick={onBack}>Back</button>
       </header>
+      <img className="scoreboard__banner" src={`${import.meta.env.BASE_URL}art/screens/scoreboard.jpg`} alt="The Earth from orbit, every continent on fire" />
       <div className="history__table">
         <table className="cl-table">
           <thead><tr><th>#</th><th>Date</th><th>Industry</th><th>Badge</th><th className="num">Gold</th></tr></thead>

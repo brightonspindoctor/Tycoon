@@ -7,8 +7,9 @@ import { play } from '../sound'
 const LINES: Record<number, string[]> = {
   2: ['The Baron is finished.', 'His fields are yours.', 'Now you answer to a board.'],
   3: ['The board is yours.', 'The oil is offshore.', 'The whole world is watching.'],
+  4: ['The summit is over.', 'The oil is everywhere.', 'Now it has to look green.'],
 }
-const STAMP: Record<number, string> = { 2: 'INCORPORATED', 3: 'MULTINATIONAL' }
+const STAMP: Record<number, string> = { 2: 'INCORPORATED', 3: 'MULTINATIONAL', 4: 'BIG OIL' }
 
 export function EraTransition({ to, onDone }: { to: number; onDone: () => void }) {
   const from = to - 1

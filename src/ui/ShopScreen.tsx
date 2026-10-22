@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { boonInfo, CARDS, ITEMS, PROSPECT_FOR, WATER_FOR } from '../engine/data'
+import { boonInfo, bossRound, CARDS, ITEMS, PROSPECT_FOR, WATER_FOR } from '../engine/data'
 import { canBuild, canDuplicate, canUpgrade, itemPrice, rigCount, skimRate, waterPrice, type Action, type Run } from '../engine/engine'
 import { ERA_THEME, SHOP_NAME, money, units } from '../engine/format'
 import { ExposureMeter } from './Exposure'
 import { HeatMeter } from './Heat'
+import { TruthClock } from './TruthClock'
 import { CONFIG } from '../engine/config'
 import { CardView } from './CardView'
 import { iconUrl } from './icons'
@@ -16,12 +17,15 @@ export function ShopScreen({ run, dispatch }: Props) {
   const [mode, setMode] = useState<Mode>(null)
   const st = run.stage
   const rate = skimRate(run)
-  const nextRate = (st >= 3 ? CONFIG.skimRate3 : st >= 2 ? CONFIG.skimRate2 : CONFIG.skimRate)[run.round + 1] ?? rate
+  const nextRate = (st >= 4 ? CONFIG.skimRate4 : st >= 3 ? CONFIG.skimRate3 : st >= 2 ? CONFIG.skimRate2 : CONFIG.skimRate)[run.round + 1] ?? rate
   const plotsLeft = CONFIG.maxPlots - run.plots.length
   const can = (cost: number) => run.capital - cost >= 1
   const stage2 = st >= 2
   const only2 = st === 2 // the Silo and dividends belong to the board years
   const stage3 = st >= 3
+  const beforeBoss = run.round === bossRound(st) - 1
+  // stage 4 never says how many rounds are left: the Truth is a surprise
+  const nextLabel = st >= 4 && beforeBoss ? 'Next: the final round' : `Next: Round ${run.round + 1}`
   const prospectKey = PROSPECT_FOR[st] ?? 'derrick'
   const waterKey = WATER_FOR[st] // stage 2 sells no fire card
 
@@ -32,7 +36,7 @@ export function ShopScreen({ run, dispatch }: Props) {
           <span className="cl-label">Stage {st} · {run.round === 0 ? 'Before you start' : `After round ${run.round}`}</span>
           <h1 className="cl-display game__title">{SHOP_NAME[st] ?? SHOP_NAME[2]}</h1>
         </div>
-        <div className="shop__head-right"><SettingsButton /><div className="shop__next"><span className="cl-label">Next: Round {run.round + 1}</span></div></div>
+        <div className="shop__head-right"><SettingsButton /><div className="shop__next"><span className="cl-label">{nextLabel}</span></div></div>
       </header>
 
       <div className="shop__grid">
@@ -53,7 +57,7 @@ export function ShopScreen({ run, dispatch }: Props) {
                   <button type="button" className={`cl-card card rig-slot ${canBuild(run) && can(run.prospectPrice) ? 'card--playable' : 'card--dim'}`} disabled={!canBuild(run) || !can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })}>
                     <span className="cl-tag card-price">{money(run.prospectPrice, st)}</span>
                     <div className="cl-card__top"><div className="cl-card__cost">–</div><div className="cl-card__name">Offshore Rig</div></div>
-                    <div className="cl-card__art"><img src={iconUrl('rig')} alt="" /></div>
+                    <div className="cl-card__art"><img src={iconUrl(st >= 4 ? 'rig4' : 'rig')} alt="" /></div>
                     <div className="cl-card__band">Production</div>
                     <div className="cl-card__effect">Built at once: {CONFIG.rigOutput} oil a turn, never runs dry.</div>
                   </button>
@@ -72,7 +76,7 @@ export function ShopScreen({ run, dispatch }: Props) {
             <section className="boon" aria-label="Before the Baron">
               <img src={iconUrl(boonInfo(run.shop.boon, st).icon)} alt="" />
               <div className="boon__text">
-                <span className="cl-label">Before the boss · one offer</span>
+                <span className="cl-label">{st >= 4 ? 'Something is coming · one offer' : 'Before the boss · one offer'}</span>
                 <b className="cl-display">{boonInfo(run.shop.boon, st).name}</b>
                 <span>{units(boonInfo(run.shop.boon, st).text, st)}</span>
               </div>
@@ -81,7 +85,7 @@ export function ShopScreen({ run, dispatch }: Props) {
               </button>
             </section>
           )}
-          {run.boon && run.round === 3 && !run.shop.boon && <div className="boon boon--bought"><span className="cl-label">Bought for the boss</span><b className="cl-display">{boonInfo(run.boon, st).name}</b></div>}
+          {run.boon && beforeBoss && !run.shop.boon && <div className="boon boon--bought"><span className="cl-label">Bought for the boss</span><b className="cl-display">{boonInfo(run.boon, st).name}</b></div>}
           <section className="shop__deals">
             {run.shop.item ? (
               <div className="cl-slot slot">
@@ -127,7 +131,7 @@ export function ShopScreen({ run, dispatch }: Props) {
                 <button type="button" className="cl-btn" disabled={!!run.shop.duplicated || !run.deck.some(c => canDuplicate(c) && can(CARDS[c.key].price!))} onClick={() => setMode(mode === 'duplicate' ? null : 'duplicate')}>{run.shop.duplicated ? 'Done' : mode === 'duplicate' ? 'Cancel' : 'Choose'}</button>
               </div>
             )}
-            {stage3 && (
+            {st === 3 && (
               <div className="cl-slot slot">
                 <span className="cl-tag">{money(CONFIG.lobbyFirmCost, st)}</span>
                 <div className="cl-slot__name">Hire a lobbying firm</div>
@@ -167,11 +171,12 @@ export function ShopScreen({ run, dispatch }: Props) {
             <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className="cl-ledger__total">{money(run.capital, st)}</span></div>
             <ul className="cl-ledger__rows">
               {run.ledger.slice(-5).map((l, i) => <li key={i} className="ink-in"><span>{units(l.label, st)}</span><span className={l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{money(l.amount, st, true)}</span></li>)}
-              {!stage3 && <li className="next-debt"><span>Debt in round {run.round + 1}, per turn</span><span className="cl-minus">{run.debt ? `(${money(-run.debt, st)})` : 'None'}</span></li>}
+              {st !== 3 && <li className="next-debt"><span>Debt in round {run.round + 1}, per turn</span><span className="cl-minus">{run.debt ? `(${money(-run.debt, st)})` : 'None'}</span></li>}
             </ul>
           </section>
           <ExposureMeter run={run} />
           <HeatMeter run={run} />
+          <TruthClock run={run} />
           <section className="fortune fortune--skim">
             <div><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b></div>
             <p>{stage3 ? 'Skim with an Expense Account card during a round. Personal Guarantee and Dip into the Trust turn gold back into Capital.' : stage2 ? 'Skimming is done with an Expense Account card during a round: one gold at a time, +1 Board Exposure each.' : "Gold can't buy anything here. Every dollar you skim comes off the company's health."}</p>

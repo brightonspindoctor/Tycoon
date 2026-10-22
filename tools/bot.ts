@@ -180,7 +180,7 @@ function botTurn3(r: Run): Run {
 
 /** The moves that move the Truth clock on: worth stopping. */
 const ticking = (r: Run) => liveThreats(r).filter(t => !t.stopped && intentTicks(r, t))
-const intentTicks = (r: Run, t: Run['threats'][number]) => t.kind === 'truth' ? (t.step + 1) % CONFIG.truthTickEvery === 0 : !!THREATS[t.kind].ticks?.includes(t.step % THREATS[t.kind].cycle.length)
+const intentTicks = (_r: Run, t: Run['threats'][number]) => t.kind === 'truth' ? (t.step + 1) % CONFIG.truthTickEvery === 0 : !!THREATS[t.kind].ticks?.includes(t.step % THREATS[t.kind].cycle.length)
 
 /** Stage 4: beat each enemy fast, stop the moves that move the clock, and keep the clock back. */
 function botTurn4(r: Run): Run {

@@ -6,12 +6,12 @@
 [data-theme="deco"]             { --cl-display: var(--font-display-1900); --cl-radius: var(--radius-1900); --cl-display-weight: 400; }
 [data-theme="midcentury"]       { --cl-display: var(--font-display-1950); --cl-radius: var(--radius-1950); --cl-display-weight: 400; }
 [data-theme="seventies"]        { --cl-display: var(--font-display-1970); --cl-radius: var(--radius-1970); --cl-display-weight: 900; }
-[data-theme="greenwash"]        { --cl-display: var(--font-display-1990); --cl-radius: var(--radius-1990); --cl-display-weight: 600; }
+[data-theme="greenwash"]        { --cl-display: var(--font-display-1990); --cl-radius: var(--radius-1990); --cl-display-weight: 800; }
 [data-era="1860"] { --cl-display: var(--font-display-1860); --cl-radius: var(--radius-1860); --cl-display-weight: 400; }
 [data-era="1900"] { --cl-display: var(--font-display-1900); --cl-radius: var(--radius-1900); --cl-display-weight: 400; }
 [data-era="1950"] { --cl-display: var(--font-display-1950); --cl-radius: var(--radius-1950); --cl-display-weight: 400; }
 [data-era="1970"] { --cl-display: var(--font-display-1970); --cl-radius: var(--radius-1970); --cl-display-weight: 900; }
-[data-era="1990"] { --cl-display: var(--font-display-1990); --cl-radius: var(--radius-1990); --cl-display-weight: 600; }
+[data-era="1990"] { --cl-display: var(--font-display-1990); --cl-radius: var(--radius-1990); --cl-display-weight: 800; }
 
 body { background: var(--paper); color: var(--ink); font-family: var(--font-body); margin: 0; }
 .cl-row { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-start; padding: var(--space-4); }

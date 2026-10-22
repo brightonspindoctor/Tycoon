@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { act, newRun, roundsReached, type Action, type AdminOp, type Beat, type Run } from './engine/engine'
-import type { BonusKey, CardKey } from './engine/data'
+import { bossRound, type BonusKey, type CardKey } from './engine/data'
 import { loadAdmin, loadReplay, loadUnlocks, markWelcomed, saveAdmin, saveRun, saveUnlock, trustFundOffered, welcomeSeen } from './storage'
 import { adminStart, type AdminStart } from './engine/admin'
 import { Welcome } from './ui/Welcome'
@@ -20,6 +20,7 @@ import { CrashOut, StageComplete } from './ui/EndScreens'
 import { TACTICS, tacticFor } from './engine/tactics'
 import { IncorporateScreen } from './ui/Incorporate'
 import { MultinationalScreen } from './ui/Multinational'
+import { BigOilScreen } from './ui/BigOil'
 import { EraTransition } from './ui/EraTransition'
 import { units } from './engine/format'
 import { About, BonusPick, History, Intro, Scoreboard } from './ui/MenuScreens'
@@ -90,10 +91,11 @@ export default function App() {
     let wantStage = Number(params.get('stage') ?? 1)
     if (want === 'incorporate' || want === 'complete2' || want === 'crash2') { wantStage = 2; if (want !== 'incorporate') want = want.slice(0, -1) }
     if (want === 'multinational' || want === 'complete3' || want === 'crash3') { wantStage = 3; want = want === 'multinational' ? 'incorporate' : want.slice(0, -1) }
+    if (want === 'bigoil' || want === 'complete4' || want === 'crash4') { wantStage = 4; want = want === 'bigoil' ? 'incorporate' : want.slice(0, -1) }
     void import('../tools/bot').then(({ botIncorporate, botShop, botTurn }) => {
       for (let seed = 1; seed < 600; seed++) {
-        let r = newRun(seed, 'threeOil')
-        for (let i = 0; i < 1600; i++) {
+        let r = newRun(seed, wantStage >= 4 ? 'oldFaithful' : 'threeOil')
+        for (let i = 0; i < 2400; i++) {
           if (want === 'incorporate' && r.phase === 'incorporate' && r.stage === wantStage) break
           if (r.stage < wantStage) {
             if (r.phase === 'stageComplete') { r = act(r, { type: 'continue' }); continue }
@@ -104,7 +106,7 @@ export default function App() {
             if (want === 'bossshop' && r.phase === 'shop' && r.round === 3) break
             if (want === 'summary' && r.phase === 'roundWon' && r.round >= 2) break
             if (want === 'round3' && r.phase === 'turn' && r.round === 3 && r.turn >= 2) break
-            if (want === 'boss' && r.phase === 'turn' && r.round === 4 && r.turn >= 2) break
+            if (want === 'boss' && r.phase === 'turn' && r.round === bossRound(r.stage) && r.turn >= 2) break
           }
           if (r.phase === 'shop') r = botShop(r)
           else if (r.phase === 'turn') r = botTurn(r)
@@ -114,7 +116,7 @@ export default function App() {
         if (r.stage !== wantStage) continue
         const hit = (want === 'incorporate' && r.phase === 'incorporate') || (want === 'crash' && r.phase === 'lost') || (want === 'complete' && r.phase === 'stageComplete') ||
           (want === 'summary' && r.phase === 'roundWon') || (want === 'shop' && r.phase === 'shop') || (want === 'bossshop' && r.phase === 'shop' && r.round === 3) ||
-          (want === 'round3' && r.phase === 'turn' && r.round === 3) || (want === 'boss' && r.phase === 'turn' && r.round === 4)
+          (want === 'round3' && r.phase === 'turn' && r.round === 3) || (want === 'boss' && r.phase === 'turn' && r.round === bossRound(r.stage))
         if (hit) { saved.current = r.seed; setRun(r); setScreen('run'); return }
       }
     })
@@ -130,14 +132,15 @@ export default function App() {
   // record finished runs once
   useEffect(() => {
     if (!run || saved.current === run.seed || run.admin) return // admin playtests are never recorded
-    // a finished stage carries on into the next, so a run is recorded when it ends or when stage 3 (the last one built) is done
-    if (run.phase === 'lost' || (run.phase === 'stageComplete' && run.stage >= 3)) {
+    // a finished stage carries on into the next, so a run is recorded when it ends, or when the Truth is beaten: the game is won
+    if (run.phase === 'lost' || (run.phase === 'stageComplete' && run.stage >= 4)) {
       saved.current = run.seed
-      const LOST = { bankrupt: 'Bankrupt', stalemate: 'Out of time', ousted: 'Ousted', ruined: 'Ruined', brokenUp: 'Broken up' }
+      const LOST = { bankrupt: 'Bankrupt', stalemate: 'Out of time', ousted: 'Ousted', ruined: 'Ruined', brokenUp: 'Broken up', midnight: 'Midnight' }
+      const won = run.phase === 'stageComplete'
       saveRun({
         id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run),
-        outcome: run.phase === 'stageComplete' ? `Stage ${run.stage} complete` : LOST[run.loss?.reason ?? 'bankrupt'], gold: null, completed: false, stageGold: run.gold,
-        tactic: run.phase === 'stageComplete' ? (t => t ? TACTICS[t].name : undefined)(tacticFor(run.tally, run.deck.length, run.stats.oilSold)) : undefined,
+        outcome: won ? 'Chairman' : LOST[run.loss?.reason ?? 'bankrupt'], gold: won ? run.gold : null, completed: won, stageGold: run.gold, // your gold is the score
+        tactic: won ? (t => t ? TACTICS[t].name : undefined)(tacticFor(run.tally, run.deck.length, run.stats.oilSold)) : undefined,
       })
       setBailout(trustFundOffered(CONFIG.trustFundStreak))
     }
@@ -173,8 +176,8 @@ export default function App() {
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />
   else if (run.phase === 'shop' && !tape) body = <ShopScreen run={run} dispatch={dispatch} />
   else if (run.phase === 'lost' && !tape) body = <CrashOut run={run} bailout={bailout} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
-  else if (run.phase === 'stageComplete' && !tape) body = <StageComplete run={run} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} onContinue={() => dispatch({ type: 'continue' })} />
-  else if (run.phase === 'incorporate') body = <>{run.stage >= 3 ? <MultinationalScreen run={run} dispatch={dispatch} /> : <IncorporateScreen run={run} dispatch={dispatch} />}{eraTo && <EraTransition to={eraTo} onDone={() => setEraTo(null)} />}</>
+  else if (run.phase === 'stageComplete' && !tape) body = <StageComplete run={run} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} onScoreboard={() => setScreen('scoreboard')} onContinue={() => dispatch({ type: 'continue' })} />
+  else if (run.phase === 'incorporate') body = <>{run.stage >= 4 ? <BigOilScreen run={run} dispatch={dispatch} /> : run.stage >= 3 ? <MultinationalScreen run={run} dispatch={dispatch} /> : <IncorporateScreen run={run} dispatch={dispatch} />}{eraTo && <EraTransition to={eraTo} onDone={() => setEraTo(null)} />}</>
   else if (tape) body = (
     <>
       {mobile ? <MobileGame run={tape.frozen} dispatch={() => {}} acting={acting} /> : <GameScreen run={tape.frozen} dispatch={() => {}} acting={acting} />}
@@ -189,7 +192,7 @@ export default function App() {
   )
 
   const fade = <div key={`${screen}-${run?.phase}-${run?.round}`} className="screen-fade">{body}</div>
-  const inRun = screen === 'run' && !!run && (run.phase === 'turn' || run.phase === 'shop' || run.phase === 'roundWon' || run.phase === 'incorporate' || (run.phase === 'stageComplete' && run.stage < 3))
+  const inRun = screen === 'run' && !!run && (run.phase === 'turn' || run.phase === 'shop' || run.phase === 'roundWon' || run.phase === 'incorporate' || (run.phase === 'stageComplete' && run.stage < 4))
   function quitRun() {
     if (!run) return
     saved.current = run.seed
