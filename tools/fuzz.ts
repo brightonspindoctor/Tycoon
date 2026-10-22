@@ -106,7 +106,7 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.phase === 'incorporate' && (r.stage < 2 || r.round !== 0)) return 'incorporating mid-stage'
   if (r.phase === 'incorporate' && r.stage === 2 && prev.phase === 'stageComplete' && r.plots.some(w => w && !w.field)) return 'a Well that did not become a Field'
   if (r.phase === 'incorporate' && r.stage === 3 && prev.phase === 'stageComplete' && r.plots.length !== prev.plots.filter(Boolean).length) return 'a Field that did not become a Rig'
-  if (r.phase === 'incorporate' && r.stage === 3 && r.deck.some(c => ['prospect', 'oldProspect', 'derrick', 'well', 'bucket', 'shoreUp'].includes(c.key))) return 'an old land or fire card survived going multinational'
+  if (r.phase === 'incorporate' && r.stage === 3 && r.deck.some(c => ['prospect', 'oldProspect', 'derrick', 'well', 'bucket'].includes(c.key))) return 'an old land or fire card survived going multinational'
   if (r.phase === 'stageComplete' && r.round !== 4) return 'stage complete before round 4'
   if (r.phase === 'roundWon' && r.round >= 4) return 'roundWon in round 4'
   if ((r.phase === 'roundWon' || r.phase === 'stageComplete') && r.threats.some(t => !t.beaten)) return 'round won with an enemy standing'

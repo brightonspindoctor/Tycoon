@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { act, cardDef, goMultinational, handSize, intentText, newRun, price, production, type Run } from './engine'
 import { CONFIG } from './config'
-import { CARDS, type CardKey, type ThreatKind } from './data'
+import { CARDS, boonInfo, landCardFor, rewardInfo, type CardKey, type ThreatKind } from './data'
 
 /** A run that has just won the proxy fight, with some old stock in the deck. */
 function afterProxyFight(seed = 3): Run {
@@ -45,7 +45,8 @@ describe('going multinational (stage 2 → 3)', () => {
     const r = act(afterProxyFight(), { type: 'continue' })
     const keys = r.deck.map(c => c.key)
     expect(keys.filter(k => k === 'dryLease')).toHaveLength(2) // Worn Prospect, Steel Derrick
-    expect(keys.filter(k => k === 'deadWeight')).toHaveLength(3) // Bucket, Shore Up, Pay a Dividend
+    expect(keys.filter(k => k === 'deadWeight')).toHaveLength(2) // Bucket, Pay a Dividend
+    expect(keys).toContain('shoreUp') // blocks still work in stage 3, like Security Detail
     expect(keys).not.toContain('badBlood') // no fires in stage 3
   })
 
@@ -313,5 +314,32 @@ describe('the Geneva Climate Summit', () => {
     const hot = inStage3(['buryEvidence'], 'geneva')
     hot.round = 4; hot.threats[0].hold = 1; hot.heat = 90
     expect(act(hot, { type: 'play', cardId: inHand(hot, 'buryEvidence').id, target: 900 }).residue).toBe('regulators')
+  })
+})
+
+describe('land cards for the stage ahead', () => {
+  it('Drilling Rights after the stage 2 boss gives Rigs, which survive going multinational', () => {
+    expect(landCardFor(2 + 1)).toBe('rig') // grantReward hands out the land card for the stage ahead
+    expect(landCardFor(1 + 1)).toBe('well')
+    expect(rewardInfo('drillingRights', 2).text).toContain('Rig')
+    expect(rewardInfo('drillingRights', 1).text).toContain('Well')
+    const r = afterProxyFight()
+    r.deck.push({ id: 7000, key: 'rig', uses: 1 }, { id: 7001, key: 'rig', uses: 1 })
+    const after = act(r, { type: 'continue' })
+    expect(after.deck.filter(c => c.key === 'rig')).toHaveLength(2) // not turned into Dry Leases
+  })
+
+  it('a Rig card builds a Rig', () => {
+    const r = inStage3(['rig'])
+    const before = r.plots.filter(Boolean).length
+    const s = act(r, { type: 'play', cardId: inHand(r, 'rig').id })
+    expect(s.plots.filter(Boolean).length).toBe(before + 1)
+    expect(s.plots.filter(w => w?.rig)).toHaveLength(before + 1)
+  })
+
+  it('the spare-land boon is Spare Wells until stage 3', () => {
+    expect(boonInfo('spareRigs', 1).name).toBe('Spare Wells')
+    expect(boonInfo('spareRigs', 2).name).toBe('Spare Wells')
+    expect(boonInfo('spareRigs', 3).name).toBe('Spare Rigs')
   })
 })

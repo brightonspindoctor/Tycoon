@@ -23,7 +23,7 @@ export type CardKey =
   // stage 3
   | 'embargoRumours' | 'queuesAtPump' | 'telex' | 'memo' | 'restructure' | 'personalGuarantee' | 'dipTrust'
   | 'buryEvidence' | 'lobbyCongress' | 'thinkTank' | 'bribeOfficial' | 'retainCounsel' | 'deadWeight' | 'dryLease' | 'draftDeclaration'
-  | 'advertorial' | 'buyOut' | 'oilShock'
+  | 'advertorial' | 'buyOut' | 'oilShock' | 'rig'
 
 export interface CardDef {
   name: string
@@ -185,6 +185,8 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $8. Remove 14 Hold.', flavour: 'Everyone has a number.' },
   oilShock: { name: 'Oil Shock', era: 3, ap: 0, cost: 0, uses: 1, family: 'Tempo', power: 0, doubleSale: true, icon: 'oilShock', price: 15, rarity: 'Rare',
     text: "Your next sale this turn pays double. Once a run.", flavour: 'October 1973. Thank you, gentlemen.' },
+  rig: { name: 'Offshore Rig', era: 3, ap: 1, cost: 0, uses: 1, family: 'Production', power: CONFIG.rigOutput, icon: 'rig',
+    text: `Build a Rig: ${CONFIG.rigOutput} oil a turn, never dry.`, flavour: 'Out where nobody can see.' },
   deadWeight: { name: 'Dead Weight', era: 3, ap: null, cost: 0, uses: null, family: 'Junk', power: 0, junk: true, icon: 'deadWeight',
     text: "Can't be played. Does nothing.", flavour: 'It worked in its day.' },
   dryLease: { name: 'Dry Lease', era: 3, ap: 1, cost: 0, uses: 1, family: 'Junk', power: 0, junk: true, icon: 'dryLease',
@@ -269,9 +271,9 @@ export const INCORPORATE_OFFER_2: CardKey[] = ['derrick', 'payDividend', 'patent
 export const shopPool = (stage: number): CardKey[] => (stage >= 3 ? SHOP_POOL_3 : stage >= 2 ? SHOP_POOL_2 : SHOP_POOL)
 /** Going multinational: pick incorporatePicks of these; the rest go on sale at the first Trading Floor visit. */
 export const INCORPORATE_OFFER_3: CardKey[] = ['buryEvidence', 'lobbyCongress', 'buyOut', 'advertorial']
-/** Old cards that are useless in stage 3: land cards become Dry Leases; fire and board cards, Dead Weight. */
+/** Old cards that are useless in stage 3: land cards become Dry Leases; fire and board cards, Dead Weight. Shore Up carries over, like Security Detail. */
 export const TO_DRY_LEASE: CardKey[] = ['prospect', 'oldProspect', 'derrick', 'well', 'wildcat']
-export const TO_DEAD_WEIGHT: CardKey[] = ['bucket', 'fireBrigade', 'shoreUp', 'payDividend']
+export const TO_DEAD_WEIGHT: CardKey[] = ['bucket', 'fireBrigade', 'payDividend']
 /** Bribes: each one played feeds a Bribery Scandal. */
 export const BRIBES: CardKey[] = ['bribe', 'payOff', 'bribeOfficial']
 /** The land card each stage's shop always stocks: a Prospect in stage 1, a Steel Derrick (a Well) in stage 2. Stage 3 builds a Rig outright. */
@@ -390,7 +392,7 @@ export type BoonType = 'ap' | 'wells' | 'fire' | 'cash' | 'storage' // a 'fire' 
 export type BoonKey = 'spareHand' | 'spareRigs' | 'fireBrigade' | 'inheritance' | 'tempSilo'
 export const BOONS: Record<BoonKey, { name: string; text: string; type: BoonType; icon: Icon }> = {
   spareHand: { name: 'A Spare Hand', text: '+1 AP on your first turn against the boss.', type: 'ap', icon: 'cudgels' },
-  spareRigs: { name: 'Spare Rigs', text: '2 Well cards in your first hand against the boss.', type: 'wells', icon: 'derrick' },
+  spareRigs: { name: 'Spare Wells', text: '2 Well cards in your first hand against the boss.', type: 'wells', icon: 'derrick' },
   fireBrigade: { name: 'Fire Brigade', text: 'A Fire Brigade card for your deck.', type: 'fire', icon: 'hose' },
   inheritance: { name: 'Inheritance', text: `A card that gives $${CONFIG.inheritance} once, then is gone.`, type: 'cash', icon: 'will' },
   tempSilo: { name: 'Temporary Silo', text: `+${CONFIG.tempSilo} oil storage for the boss fight.`, type: 'storage', icon: 'barrels' },
@@ -402,3 +404,10 @@ export const REWARDS: Record<RewardKey, { name: string; text: string; type: Boon
   silo: { name: 'Silo', text: '+4 oil storage, for good.', type: 'storage', icon: 'barrels' },
   drillingRights: { name: 'Drilling Rights', text: '2 Well cards for your deck.', type: 'wells', icon: 'derrick' },
 }
+/** From stage 3 the land cards are Rigs: the same boon and reward, renamed. Rewards are given at the end of a stage, so from stage 2 they're Rigs for the stage ahead. */
+const RIG_BOON = { name: 'Spare Rigs', text: '2 Rig cards in your first hand against the boss.', icon: 'rig' as Icon }
+const RIG_REWARD = { text: '2 Rig cards for your deck.', icon: 'rig' as Icon }
+export const boonInfo = (k: BoonKey, stage: number) => (k === 'spareRigs' && stage >= 3 ? { ...BOONS[k], ...RIG_BOON } : BOONS[k])
+export const rewardInfo = (k: RewardKey, stage: number) => (k === 'drillingRights' && stage >= 2 ? { ...REWARDS[k], ...RIG_REWARD } : REWARDS[k])
+/** The card a boon or reward hands out: Rigs once stage 3 is (or is next) the stage. */
+export const landCardFor = (stage: number): CardKey => (stage >= 3 ? 'rig' : 'well')

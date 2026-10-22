@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BOONS, CARDS, ITEMS, PROSPECT_FOR, WATER_FOR } from '../engine/data'
+import { boonInfo, CARDS, ITEMS, PROSPECT_FOR, WATER_FOR } from '../engine/data'
 import { canBuild, canDuplicate, canUpgrade, rigCount, skimRate, waterPrice, type Action, type Run } from '../engine/engine'
 import { ERA_THEME, SHOP_NAME, money, units } from '../engine/format'
 import { ExposureMeter } from './Exposure'
@@ -70,18 +70,18 @@ export function ShopScreen({ run, dispatch }: Props) {
 
           {run.shop.boon && (
             <section className="boon" aria-label="Before the Baron">
-              <img src={iconUrl(BOONS[run.shop.boon].icon)} alt="" />
+              <img src={iconUrl(boonInfo(run.shop.boon, st).icon)} alt="" />
               <div className="boon__text">
                 <span className="cl-label">Before the boss · one offer</span>
-                <b className="cl-display">{BOONS[run.shop.boon].name}</b>
-                <span>{units(BOONS[run.shop.boon].text, st)}</span>
+                <b className="cl-display">{boonInfo(run.shop.boon, st).name}</b>
+                <span>{units(boonInfo(run.shop.boon, st).text, st)}</span>
               </div>
               <button type="button" className="cl-btn cl-btn--skim" disabled={run.gold < CONFIG.boonGold} onClick={() => dispatch({ type: 'buyBoon' })}>
                 {run.gold < CONFIG.boonGold ? `Needs ${CONFIG.boonGold} gold` : `Buy · ${CONFIG.boonGold} gold`}
               </button>
             </section>
           )}
-          {run.boon && run.round === 3 && !run.shop.boon && <div className="boon boon--bought"><span className="cl-label">Bought for the boss</span><b className="cl-display">{BOONS[run.boon].name}</b></div>}
+          {run.boon && run.round === 3 && !run.shop.boon && <div className="boon boon--bought"><span className="cl-label">Bought for the boss</span><b className="cl-display">{boonInfo(run.boon, st).name}</b></div>}
           <section className="shop__deals">
             {run.shop.item ? (
               <div className="cl-slot slot">

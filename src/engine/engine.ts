@@ -3,7 +3,7 @@
 import { CONFIG } from './config'
 import {
   ATTACK_CARDS, BOSS, CARDS, INCORPORATE_OFFER_2, CASH_POOLS, ENGINE_POOLS, ITEMS, MODS, PROSPECTS, PROSPECT_FOR, WATER_FOR, STARTER, THREATS, UPGRADES, shopPool,
-  BOONS, REWARDS, BRIBES, INCORPORATE_OFFER_3, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
+  BOONS, REWARDS, BRIBES, INCORPORATE_OFFER_3, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, boonInfo, landCardFor, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
 } from './data'
 import { next, pick, shuffle } from './rng'
 import { newTally, type Tally } from './tactics'
@@ -178,7 +178,7 @@ export const waterPrice = () => CONFIG.bucketPrice
 /** Can a Well card be built? Stage 1 needs an empty plot; from stage 2 a Well claims a new plot if there's none. */
 export const canBuild = (r: Run) => freePlot(r) >= 0 || (r.stage >= 2 && r.plots.length < CONFIG.maxPlots)
 export const rigCount = (r: Run) => r.plots.filter(w => w?.rig).length
-const BUILDS: CardKey[] = ['well', 'wildcat', 'derrick']
+const BUILDS: CardKey[] = ['well', 'wildcat', 'derrick', 'rig']
 
 export function skimRate(r: Run): number {
   const table = r.stage >= 3 ? CONFIG.skimRate3 : r.stage >= 2 ? CONFIG.skimRate2 : CONFIG.skimRate
@@ -454,7 +454,7 @@ function shopAction(r: Run, a: Action) {
       r.gold -= CONFIG.boonGold; r.boon = b; r.shop.boon = null
       if (b === 'fireBrigade') r.deck.push(card(r, 'fireBrigade'))
       if (b === 'inheritance') r.deck.push(card(r, 'inheritance'))
-      say(r, `${BOONS[b].name}: yours for ${CONFIG.boonGold} gold.`)
+      say(r, `${boonInfo(b, r.stage).name}: yours for ${CONFIG.boonGold} gold.`)
       return
     }
     case 'buyItem': {
@@ -629,7 +629,7 @@ function startRound(r: Run, round: number) {
   if (isLost(r)) return
   beginTurn(r)
   if (round === 4 && r.boon === 'spareRigs' && r.turn === 1) {
-    for (let i = 0; i < 2; i++) { const w = card(r, 'well'); r.deck.push(w); r.hand.push(w) }
+    for (let i = 0; i < 2; i++) { const w = card(r, landCardFor(r.stage)); r.deck.push(w); r.hand.push(w) }
   }
 }
 
@@ -783,7 +783,7 @@ function grantReward(r: Run) {
   if (k === 'steamPump') r.items.push('steamPump')
   if (k === 'silo') { r.items.push('silo'); r.storage = r.stage >= 3 ? Math.min(CONFIG.maxStorage, r.storage + 4) : r.storage + 4 }
   if (k === 'dividends') r.deck.push(card(r, 'dividends'))
-  if (k === 'drillingRights') r.deck.push(card(r, 'well'), card(r, 'well'))
+  if (k === 'drillingRights') { const land = landCardFor(r.stage + 1); r.deck.push(card(r, land), card(r, land)) } // for the stage ahead: Rigs from stage 3
 }
 
 /** Damage to an enemy. Cards marked badBlood put a Bad Blood card in your discard pile. */
@@ -937,7 +937,7 @@ function play(r: Run, cardId: number, target?: number) {
       case 'payDividend': break
       case 'personalLawyer': r.goldShield = true; say(r, 'Your Personal Lawyer is on retainer this turn.'); break
       case 'ceaseDesist': case 'proxyBallot': break
-      case 'well': case 'wildcat': case 'derrick': {
+      case 'well': case 'wildcat': case 'derrick': case 'rig': {
         if (freePlot(r) < 0) r.plots.push(null) // stage 2: a Well claims its own plot
         const i = freePlot(r)
         r.plots[i] = r.stage >= 3 ? { output: CONFIG.rigOutput, reserve: 0, rig: true } // stage 3: a Rig

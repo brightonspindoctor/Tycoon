@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import type { Run } from '../engine/engine'
 import { roundsReached } from '../engine/engine'
-import { BONUSES, ITEMS, REWARDS } from '../engine/data'
+import { BONUSES, ITEMS, rewardInfo } from '../engine/data'
 import { ERA_THEME, money, units, year } from '../engine/format'
 import { CONFIG } from '../engine/config'
 import { play } from '../sound'
@@ -106,10 +106,10 @@ export function StageComplete({ run, onMenu, onHistory, onContinue }: { run: Run
               </div>
               {run.reward && (
                 <div className="winnings__prize">
-                  <img src={iconUrl(REWARDS[run.reward].icon)} alt="" />
+                  <img src={iconUrl(rewardInfo(run.reward, st).icon)} alt="" />
                   <div>
-                    <b className="cl-display">{REWARDS[run.reward].name}</b>
-                    <span>{units(REWARDS[run.reward].text, st)}</span>
+                    <b className="cl-display">{rewardInfo(run.reward, st).name}</b>
+                    <span>{units(rewardInfo(run.reward, st).text, st)}</span>
                     <span className="res-note">{`Yours for stage ${st + 1}.`}</span>
                   </div>
                 </div>
