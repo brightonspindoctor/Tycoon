@@ -2,7 +2,7 @@
 // after every single action, that the game never reaches an impossible state.
 // Run with: npm run fuzz
 import { act, canPlay, handSize, handTargetsFor, intent, intentText, newRun, targetsFor, wellValue, type Action, type Run } from '../src/engine/engine'
-import { BONUSES, BOONS, CARDS, ITEMS, REWARDS, type BonusKey } from '../src/engine/data'
+import { BONUSES, BOONS, CARDS, ITEMS, REWARDS, bossRound, type BonusKey } from '../src/engine/data'
 import { CONFIG } from '../src/engine/config'
 import { botIncorporate, botShop, botTurn } from './bot'
 import { adminStart, ADMIN_DEFAULTS } from '../src/engine/admin'
@@ -72,7 +72,7 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.plots.length > CONFIG.maxPlots) return `${r.plots.length} plots`
   for (const w of r.plots) if (w && wellValue(w) <= 0) return `a plot that sells for nothing: ${JSON.stringify(w)}`
   if (a.type === 'duplicateCard' && r.phase === 'shop' && r.shop.duplicated && !prev.shop.duplicated && r.deck.length !== prev.deck.length + 1) return 'duplicate did not add exactly one card'
-  for (const w of r.plots) if (w && ((!w.field && !w.lasting && !w.rig && w.reserve <= 0) || w.output <= 0)) return `well ${JSON.stringify(w)}`
+  for (const w of r.plots) if (w && ((!w.field && !w.lasting && !w.rig && !w.faithful && w.reserve <= 0) || w.output <= 0)) return `well ${JSON.stringify(w)}`
   if (r.gold < 0 && !(r.phase === 'lost' && r.loss?.reason === 'ruined')) return `gold ${r.gold}`
   if (r.gold < 0 && r.phase !== 'lost') return `gold ${r.gold} but still playing`
   if (r.exposure < 0 || r.exposure > CONFIG.exposureMax) return `exposure ${r.exposure}`
@@ -88,7 +88,7 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.deck.filter(c => c.key === 'oilShock').length > 1) return 'two Oil Shocks'
   if (r.stage === 3 && r.deck.some(c => c.key === 'badBlood')) return 'Bad Blood in stage 3'
   if (r.stage === 3 && r.plots.some(w => w && !w.rig)) return 'a stage 3 plot that is not a Rig'
-  if (r.stage === 3 && r.storage - r.tempStorage > CONFIG.maxStorage) return `storage ${r.storage}`
+  if (r.stage === 3 && r.storage - r.tempStorage > Math.max(CONFIG.maxStorage, prev.storage - prev.tempStorage)) return `storage ${r.storage}` // storage brought from stage 2 can sit above the Supertanker cap
   if (r.stage === 3 && r.phase === 'shop' && r.shop.cards.some(k => k && (CARDS[k].era ?? 1) < 3 && k !== 'tickerTape')) return 'an old card in the stage 3 shop'
   if (r.stage === 3 && r.phase === 'shop' && r.shop.item && !(ITEMS[r.shop.item].stages ?? []).includes(3)) return 'an old item in the stage 3 shop'
   if (r.deck.some(c => c.faded && c.up)) return 'a faded card that is upgraded'
@@ -98,17 +98,31 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.stage === 2 && r.phase === 'shop' && r.shop.cards.some(k => k && (CARDS[k].era ?? 1) < 2)) return 'a stage 1 card in the stage 2 shop'
   if (r.stage === 2 && r.phase === 'shop' && r.shop.item && !(ITEMS[r.shop.item].stages ?? []).includes(2)) return 'a stage 1 item in the stage 2 shop'
   if ((r.silos ?? 0) > CONFIG.silo2Max) return 'too many Silos'
+  // stage 4
+  if (r.stage === 4 && ((r.clock ?? 0) < 1 || (r.clock ?? 0) > CONFIG.clockMax)) return `clock ${r.clock}`
+  if (r.stage === 4 && (r.clock ?? 0) >= CONFIG.clockMax && r.phase !== 'lost') return 'midnight but still playing'
+  if (r.loss?.reason === 'midnight' && (r.clock ?? 0) < CONFIG.clockMax) return 'lost at midnight before midnight'
+  if (r.stage === 4 && r.plots.some(w => w && !w.rig)) return 'a stage 4 plot that is not a Rig'
+  if (r.stage === 4 && r.storage - r.tempStorage > Math.max(CONFIG.maxStorage4, prev.storage - prev.tempStorage)) return `storage ${r.storage}`
+  if (r.stage === 4 && r.phase === 'shop' && r.shop.cards.some(k => k && (CARDS[k].era ?? 1) < 4)) return 'an old card in the stage 4 shop'
+  if (r.stage === 4 && r.phase === 'shop' && r.shop.item && !(ITEMS[r.shop.item].stages ?? []).includes(4)) return 'an old item in the stage 4 shop'
+  if (r.stage === 4 && r.phase === 'turn' && r.round < bossRound(4) && r.threats.length !== 1) return 'two stage 4 enemies at once'
+  if ((r.met ?? []).length !== new Set(r.met ?? []).size) return 'a stage 4 enemy met twice'
+  if (r.deck.filter(c => c.key === 'influencers').length > 1 || r.deck.filter(c => c.key === 'netZero').length > 1) return 'two copies of a one-in-the-game card'
+  if (r.phase === 'shop' && r.shop.cards.some(k => k && CARDS[k].unique && (r.uniques ?? []).includes(k))) return 'a one-in-the-game card offered again'
+  for (const t of r.threats) if (t.kind === 'truth' && ((t.phase ?? 0) < 0 || (t.phase ?? 0) > 3 || t.maxHold !== CONFIG.truthPhaseHold)) return `Truth phase ${t.phase} hold ${t.maxHold}`
+  if (r.threats.some(t => t.kind === 'truth' && t.beaten) && r.threats.some(t => t.kind === 'truth' && (t.phase ?? 0) < 3)) return 'the Truth fell before its last phase'
   if (r.loss?.reason === 'ousted' && r.exposure < CONFIG.exposureMax) return 'ousted below the top'
   if (r.loss?.reason === 'ruined' && r.gold >= 0) return 'ruined with gold left'
   if (r.ap < 0) return `ap ${r.ap}`
   if (r.phase !== 'lost' && r.capital <= 0) return `capital ${r.capital} but phase ${r.phase}`
-  if ((r.round < 1 && r.phase !== 'incorporate') || r.round > 4) return `round ${r.round}`
+  if ((r.round < 1 && r.phase !== 'incorporate') || r.round > bossRound(r.stage)) return `round ${r.round}`
   if (r.phase === 'incorporate' && (r.stage < 2 || r.round !== 0)) return 'incorporating mid-stage'
   if (r.phase === 'incorporate' && r.stage === 2 && prev.phase === 'stageComplete' && r.plots.some(w => w && !w.field)) return 'a Well that did not become a Field'
   if (r.phase === 'incorporate' && r.stage === 3 && prev.phase === 'stageComplete' && r.plots.length !== prev.plots.filter(Boolean).length) return 'a Field that did not become a Rig'
   if (r.phase === 'incorporate' && r.stage === 3 && r.deck.some(c => ['prospect', 'oldProspect', 'derrick', 'well', 'bucket'].includes(c.key))) return 'an old land or fire card survived going multinational'
-  if (r.phase === 'stageComplete' && r.round !== 4) return 'stage complete before round 4'
-  if (r.phase === 'roundWon' && r.round >= 4) return 'roundWon in round 4'
+  if (r.phase === 'stageComplete' && r.round !== bossRound(r.stage)) return 'stage complete before the boss'
+  if (r.phase === 'roundWon' && r.round >= bossRound(r.stage)) return 'roundWon in the boss round'
   if ((r.phase === 'roundWon' || r.phase === 'stageComplete') && r.threats.some(t => !t.beaten)) return 'round won with an enemy standing'
   if (r.phase === 'turn' && !r.threats.some(t => !t.beaten) && !r.fire) return 'turn with no enemy standing and no fire'
   if ((r.phase === 'roundWon' || r.phase === 'stageComplete') && prev.phase === 'turn' && r.fire) return 'round ended with a fire burning'
@@ -119,7 +133,7 @@ function check(r: Run, prev: Run, a: Action): string | null {
   }
   if (r.marked !== null && (r.marked < 0 || r.marked >= r.plots.length)) return `marked plot ${r.marked}`
   if (a.type === 'endTurn' && r.phase === 'turn' && prev.phase === 'turn') {
-    const extra = r.round === 4 && r.turn === 1 && r.boon === 'spareRigs' ? 2 : 0
+    const extra = r.round === bossRound(r.stage) && r.turn === 1 && r.boon === 'spareRigs' ? 2 : 0
     if (r.hand.length > handSize(r) + extra) return `hand of ${r.hand.length} after drawing`
   }
   if (JSON.stringify(r).includes('null,"amount"') || /NaN|Infinity/.test(JSON.stringify({ c: r.capital, g: r.gold, o: r.oil, f: r.fire, ap: r.ap }))) return 'NaN somewhere'
@@ -131,8 +145,8 @@ function check(r: Run, prev: Run, a: Action): string | null {
   }
   if (r.phase === 'roundWon' && prev.phase === 'turn' && !r.spoils) return 'round won with no spoils offered'
   if (r.phase === 'stageComplete' && prev.phase === 'turn' && r.gold < prev.gold + CONFIG.bossGold - 3) return 'no gold for beating the boss'
-  if (r.phase === 'shop' && prev.phase === 'roundWon' && (r.shop.boon !== null) !== (r.round === 3)) return `pre-boss item offered after round ${r.round}`
-  if (r.phase === 'stageComplete' && prev.phase === 'turn') {
+  if (r.phase === 'shop' && prev.phase === 'roundWon' && (r.shop.boon !== null) !== (r.round === bossRound(r.stage) - 1)) return `pre-boss item offered after round ${r.round}`
+  if (r.phase === 'stageComplete' && prev.phase === 'turn' && r.stage < 4) {
     if (!r.reward) return 'stage complete with no reward'
     if (r.boon && REWARDS[r.reward].type === BOONS[r.boon].type) return 'reward is the same type as the pre-boss item'
     if (r.tempStorage) return 'temporary silo still counted after the stage'
@@ -151,17 +165,18 @@ const ends: Record<string, number> = {}
 const seen = new Map<string, string>()
 for (let i = 0; i < RUNS; i++) {
   // a third of the runs start straight in stage 3 (as admin mode does), so stage 3 gets real coverage
-  const s3 = i % 3 === 2
-  let r = s3 ? adminStart(1 + i * 7919, { ...ADMIN_DEFAULTS, stage: 3, start: i % 2 ? 'incorporate' : 1 + (i % 4) as 1 | 2 | 3 | 4, wells: i % 6, capital: 10 + (i % 5) * 10, gold: i % 7, deck: i % 2 ? 'strong' : 'starter' }) : newRun(1 + i * 7919, bonuses[i % bonuses.length])
-  if (s3) r.admin = false // checked like a normal run
+  const s3 = i % 4 === 2, s4 = i % 4 === 3
+  let r = s4 ? adminStart(1 + i * 7919, { ...ADMIN_DEFAULTS, stage: 4, start: i % 2 ? 'incorporate' : 1 + (i % 5) as 1 | 2 | 3 | 4 | 5, wells: i % 6, capital: 20 + (i % 5) * 20, gold: i % 9, deck: i % 2 ? 'strong' : 'starter', clock: 1 + (i % 10) })
+    : s3 ? adminStart(1 + i * 7919, { ...ADMIN_DEFAULTS, stage: 3, start: i % 2 ? 'incorporate' : 1 + (i % 4) as 1 | 2 | 3 | 4, wells: i % 6, capital: 10 + (i % 5) * 10, gold: i % 7, deck: i % 2 ? 'strong' : 'starter' }) : newRun(1 + i * 7919, bonuses[i % bonuses.length])
+  if (s3 || s4) r.admin = false // checked like a normal run
   if (!s3) r.gold = i % 3 // some runs have gold to spend on the Bribe and the pre-boss item
   const log: string[] = []
   // play sensibly with the bot up to a chosen round, then act at random from there
   const chaosFrom = 1 + (i % 4)
   // some runs play sensibly through stage 1 (and 2) first, so chaos also reaches stages 2 and 3
-  const chaosStage = s3 ? 3 : 1 + (i % 3)
+  const chaosStage = s4 ? 4 : s3 ? 3 : 1 + (i % 4)
   const before = (x: Run) => x.stage < chaosStage || (x.stage === chaosStage && x.round < chaosFrom)
-  for (let g = 0; g < 1400 && before(r) && r.phase !== 'lost' && !(r.phase === 'stageComplete' && r.stage === 3); g++) {
+  for (let g = 0; g < 1400 && before(r) && r.phase !== 'lost' && !(r.phase === 'stageComplete' && r.stage === 4); g++) {
     const prev = r
     if (r.phase === 'shop') r = botShop(r)
     else if (r.phase === 'turn') r = botTurn(r)
@@ -171,7 +186,7 @@ for (let i = 0; i < RUNS; i++) {
     const bad = check(r, prev, { type: 'continue' })
     if (bad) { if (!seen.has(bad)) seen.set(bad, `run ${i} (bot) round ${r.round} turn ${r.turn}`); problems++; break }
   }
-  for (let step = 0; step < 3000 && r.phase !== 'lost' && !(r.phase === 'stageComplete' && r.stage === 3); step++) {
+  for (let step = 0; step < 3000 && r.phase !== 'lost' && !(r.phase === 'stageComplete' && r.stage === 4); step++) {
     const a = rand() < 0.5 && r.phase === 'turn' ? botStep(r) : randomAction(r)
     let next: Run
     try { next = act(r, a) } catch (e) { const k = `crash: ${(e as Error).message}`; if (!seen.has(k)) seen.set(k, `${log.slice(-6).join(' > ')} > ${JSON.stringify(a)}`); problems++; break }

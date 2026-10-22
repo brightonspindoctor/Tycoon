@@ -3,14 +3,15 @@ import { act, newRun, type Card, type Run } from './engine'
 import { CARDS, type BonusKey, type CardKey } from './data'
 
 export interface AdminStart {
-  stage: 1 | 2 | 3
-  start: 1 | 2 | 3 | 4 | 'incorporate' // a round, or (stage 2) the incorporation screen
+  stage: 1 | 2 | 3 | 4
+  start: 1 | 2 | 3 | 4 | 5 | 'incorporate' // a round (5: the Truth, stage 4 only), or the screen between stages
   bonus: BonusKey
   wells: number // stage 1: Wells standing; stage 2: Fields
   capital: number
   gold: number
   exposure: number // stage 2
   heat?: number // stage 3
+  clock?: number // stage 4: the hour on the Truth clock
   deck: 'starter' | 'strong'
 }
 
@@ -20,6 +21,7 @@ export const ADMIN_DEFAULTS: AdminStart = { stage: 2, start: 1, bonus: 'threeOil
 const STRONG_1: CardKey[] = ['payWages', 'lawyerUp', 'fireBrigade', 'dynamite']
 const STRONG_2: CardKey[] = ['patentThicket', 'espionage', 'derrick', 'telegraphLine', 'personalLawyer']
 const STRONG_3: CardKey[] = ['retainCounsel', 'buryEvidence', 'telex', 'restructure', 'thinkTank']
+const STRONG_4: CardKey[] = ['climateBreakdown', 'sustainabilityReport', 'bridgeFuel', 'ecoRebrand', 'recycling']
 
 export function adminStart(seed: number, o: AdminStart): Run {
   let r = newRun(seed, o.bonus)
@@ -36,14 +38,23 @@ export function adminStart(seed: number, o: AdminStart): Run {
     // jumping past incorporation: skip the pick and hand over the old stage 2 kit
     if (o.start !== 'incorporate') { r.offer = undefined; r.picked = undefined; (['derrick', 'payDividend', 'expenseAccount'] as CardKey[]).forEach(k => add(k)) }
   }
-  if (o.stage === 3) {
+  if (o.stage >= 3) {
     r.phase = 'stageComplete'; r.round = 4
     r = act(r, { type: 'continue' }) // multinational: Fields become Rigs, old land and fire cards turn to junk
     r.admin = true
     // jumping past the Multinational screen: skip the pick and take Bury Evidence and Lobby Congress
-    if (o.start !== 'incorporate') { r.offer = undefined; r.picked = undefined; (['buryEvidence', 'lobbyCongress'] as CardKey[]).forEach(k => add(k)) }
+    if (o.start !== 'incorporate' || o.stage >= 4) { r.offer = undefined; r.picked = undefined; (['buryEvidence', 'lobbyCongress'] as CardKey[]).forEach(k => add(k)) }
     if (o.deck === 'strong') STRONG_3.forEach(k => add(k))
     r.heat = Math.max(0, Math.min(90, o.heat ?? 0))
+  }
+  if (o.stage === 4) {
+    r.phase = 'stageComplete'; r.round = 4
+    r = act(r, { type: 'continue' }) // Big Oil: the clock starts, the World Bank calls
+    r.admin = true
+    // jumping past the Big Oil screen: skip the pick and take Propaganda and On the Payroll
+    if (o.start !== 'incorporate') { r.offer = undefined; r.picked = undefined; (['propaganda', 'onThePayroll'] as CardKey[]).forEach(k => add(k)) }
+    if (o.deck === 'strong') STRONG_4.forEach(k => add(k))
+    r.clock = Math.max(1, Math.min(11, o.clock ?? 1))
   }
   r.capital = o.capital
   r.gold = o.gold

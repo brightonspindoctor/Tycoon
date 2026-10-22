@@ -123,6 +123,49 @@ export const CONFIG = {
   dipTrustCash: 20,
   dipTrustGold: 3,
 
+  // stage 4 · 2010s · Big Oil · the Truth clock
+  oilPrice4: 4,
+  maxStorage4: 16, // Strategic Reserves stop here
+  strategicReserve: 4, // storage a Strategic Reserve adds
+  stage4Fights: 5, // four enemies, then the Truth (round 5); progress still reads out of 16
+  stage4HoldStep: 6, // each stage 4 enemy after the first is this much tougher
+  worldBankLoan: 30, // offered as you become Big Oil
+  worldBankDebt: 2, // a turn
+  clearOut: 3, // free destroys as you become Big Oil
+  destroyCost4: 15, // stage 4: destroying and upgrading start at least here, and rise by cost3Step
+  upgradeCost4: 15,
+  rigPrice4: 40,
+  clockStart: 1, // the Truth clock: 1 o'clock
+  clockMax: 12, // midnight: the run is lost
+  skimRate4: { 0: 40, 1: 40, 2: 45, 3: 50, 4: 55, 5: 60 } as Record<number, number>,
+  chip4: 4, // every stage 4 enemy move also takes this (3 for the cash enemies)
+  warPrice: 10, // while War lasts: oil sells for this...
+  warOutput: 1, // ...but only this much is pumped a turn
+  cheapGas: 2, // Fracking: oil −$2 for the round
+  moratorium: 10,
+  subsidies: 6, // Green Alternatives: Hold it regains
+  undercut4: 10,
+  blowout4: 12, // Deepwater Disaster
+  containment: 8, // its Cover the turn after Containment Fails
+  cleanupBill4: 12,
+  claimCost: 5, // a Compensation Claim: must play, pay this
+  windfallGold: 2, // Green Politicians
+  freezeGold: 3,
+  subpoenaCards: 3, // most cards you can play the turn after a Subpoena
+  requisition: 2, // War: oil lost
+  pipelineStrike: 12,
+  profiteering: 10,
+  truthPhaseHold: 25, // each of the Truth's four phases
+  seaLevel: 14, // the Truth's attacks, plus truthPerHour for each hour past 1 on the clock as you arrive
+  cropFailure: 12,
+  asthmaGold: 2, // plus 1 for every truthGoldHours past 1
+  truthPerHour: 2,
+  truthGoldHours: 4,
+  truthTickEvery: 5, // the Truth moves the clock on with every 5th move it makes
+  lobbyistAP: 1,
+  prAgencyCover: 4,
+  subsidyCash: 3,
+
   destroyCost: 2, // rises by $1 each time (players find out)
   prospectPrice: 3,
   turnLimit: 25,

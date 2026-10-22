@@ -1,6 +1,6 @@
 // A simple rule-following player, used by the tests and the balance simulator.
 import { act, canBuild, canPlay, canUpgrade, cardDef, damageOn, handTargetsFor, intent, isAttack, liveThreats, netPrice, rigCount, sellAP, skimRate, type Card, type Run } from '../src/engine/engine'
-import { CARDS, PROSPECT_FOR, type CardKey } from '../src/engine/data'
+import { CARDS, PROSPECT_FOR, THREATS, type CardKey } from '../src/engine/data'
 import { CONFIG } from '../src/engine/config'
 
 // which cards are worth upgrading first
@@ -24,8 +24,55 @@ function botMultinational(r: Run): Run {
   return act(r, { type: 'leaveShop' })
 }
 
+const UPGRADE_4: CardKey[] = ['climateBreakdown', 'propaganda', 'onThePayroll', 'sustainabilityReport', 'astroturfing', 'buyOut', 'buryEvidence', 'lobbyCongress', 'retainCounsel', 'bridgeFuel', 'recycling', 'ecoRebrand']
+/** How useless a card is to Big Oil: junk first, then Heat-only and faded stock, then weak old attacks. */
+const dross = (c: Card) => (CARDS[c.key].junk ? 100 : c.key === 'thinkTank' ? 90 : ['improveGear', 'hiredHand', 'hardGraft', 'telegram', 'pettyCash'].includes(c.key) ? 50 : 0) - (CARDS[c.key].era ?? 1)
+/** The damage types a deck carries: the Truth wants all four. */
+const families = (r: Run) => new Set(r.deck.filter(c => isAttack(c.key)).map(c => CARDS[c.key].family))
+
+/** Stage 3 → 4: the World Bank if cash is short, the free clear-out, then pick the damage types the deck lacks. */
+function botBigOil(r: Run): Run {
+  if (r.capital < 60) r = act(r, { type: 'takeLoan' })
+  for (let i = 0; i < CONFIG.clearOut && (r.freeDestroys ?? 0) > 0; i++) {
+    const worst = [...r.deck].sort((a, b) => dross(b) - dross(a))[0]
+    if (!worst || dross(worst) <= 0) break
+    r = act(r, { type: 'destroyCard', cardId: worst.id })
+  }
+  const have = families(r)
+  const offer = [...(r.offer ?? [])].sort((a, b) => Number(have.has(CARDS[a].family)) - Number(have.has(CARDS[b].family)))
+  for (const k of offer) if ((r.picked ?? []).length < CONFIG.incorporatePicks) r = act(r, { type: 'pickCard', key: k })
+  for (const k of UPGRADE_4) {
+    const c = r.deck.find(x => x.key === k && canUpgrade(x, r.stage))
+    if (c && r.capital > r.upgradeCost + 25) r = act(r, { type: 'upgradeCard', cardId: c.id })
+  }
+  return act(r, { type: 'leaveShop' })
+}
+
+function botShop4(r: Run): Run {
+  if (rigCount(r) < 5 && canBuild(r) && r.capital > r.prospectPrice + 15) r = act(r, { type: 'buyProspect' })
+  const junk = [...r.deck].sort((a, b) => dross(b) - dross(a))[0]
+  if (junk && dross(junk) >= 50 && r.capital > r.destroyCost + 15) r = act(r, { type: 'destroyCard', cardId: junk.id })
+  const have = families(r)
+  const lateClock = (r.clock ?? 1) >= 5
+  const want: CardKey[] = [
+    ...(lateClock ? ['netZero', 'carbonFootprint'] as CardKey[] : []),
+    ...(['climateBreakdown', 'sustainabilityReport', 'propaganda', 'onThePayroll', 'astroturfing'] as CardKey[]).filter(k => !have.has(CARDS[k].family)),
+    'bridgeFuel', 'influencers', 'climateBreakdown', 'carbonFootprint', 'netZero', 'recycling', 'sustainabilityReport', 'propaganda', 'onThePayroll', 'astroturfing', 'ecoRebrand',
+  ]
+  for (let n = 0; n < 2; n++) for (const k of want) {
+    const i = r.shop.cards.indexOf(k)
+    if (i >= 0 && r.capital > (CARDS[k].price ?? 0) + (n ? 50 : 15)) { r = act(r, { type: 'buyCard', slot: i }); break }
+  }
+  if (r.shop.item && ['lobbyist', 'prAgency', 'fossilSubsidy', 'strategicReserve', 'offshoreTrust', 'rolodex'].includes(r.shop.item) && r.capital > 50) r = act(r, { type: 'buyItem' })
+  if (r.shop.boon && r.gold > 4) r = act(r, { type: 'buyBoon' })
+  const up = UPGRADE_4.map(k => r.deck.find(x => x.key === k && canUpgrade(x, r.stage))).find(Boolean)
+  if (up && r.capital > r.upgradeCost + 25) r = act(r, { type: 'upgradeCard', cardId: up.id })
+  return act(r, { type: 'leaveShop' })
+}
+
 /** Stage 1 → 2: take the loan when cash is short, upgrade the best cards, drop junk. */
 export function botIncorporate(r: Run): Run {
+  if (r.stage >= 4) return botBigOil(r)
   if (r.stage >= 3) return botMultinational(r)
   if (r.capital < 20) r = act(r, { type: 'takeLoan' })
   for (const c of r.deck.filter(x => CARDS[x.key].junk)) if (r.capital > r.destroyCost + 8) r = act(r, { type: 'destroyCard', cardId: c.id })
@@ -56,6 +103,7 @@ function botShop3(r: Run): Run {
 }
 
 export function botShop(r: Run): Run {
+  if (r.stage >= 4) return botShop4(r)
   if (r.stage >= 3) return botShop3(r)
   const stage2 = r.stage >= 2
   // the board first: keep Exposure well away from the top
@@ -130,7 +178,53 @@ function botTurn3(r: Run): Run {
   return r.phase === 'turn' ? act(r, { type: 'endTurn' }) : r
 }
 
+/** The moves that move the Truth clock on: worth stopping. */
+const ticking = (r: Run) => liveThreats(r).filter(t => !t.stopped && intentTicks(r, t))
+const intentTicks = (r: Run, t: Run['threats'][number]) => t.kind === 'truth' ? (t.step + 1) % CONFIG.truthTickEvery === 0 : !!THREATS[t.kind].ticks?.includes(t.step % THREATS[t.kind].cycle.length)
+
+/** Stage 4: beat each enemy fast, stop the moves that move the clock, and keep the clock back. */
+function botTurn4(r: Run): Run {
+  for (let guard = 0; guard < 40 && r.phase === 'turn'; guard++) {
+    const playable = r.hand.filter(c => canPlay(r, c).ok)
+    const find = (k: CardKey) => playable.find(c => c.key === k)
+    const forced = playable.find(c => CARDS[c.key].forced)
+    const live = liveThreats(r)
+    const bestHit = (c: Card) => Math.max(0, ...live.map(t => damageOn(t, cardDef(c).family, cardDef(c).power)))
+    const attacks = playable.filter(c => isAttack(c.key) && bestHit(c) > 1).sort((a, b) => bestHit(b) - bestHit(a))
+    const tick = ticking(r)[0]
+    const stop = tick ? (find('shoreUp') ?? find('securityDetail')) : undefined
+    const clockBack = (r.clock ?? 1) >= 7 ? (find('netZero') ?? find('carbonFootprint')) : (r.clock ?? 1) >= 4 ? find('carbonFootprint') : undefined
+    const apUp = find('bridgeFuel') ?? find('hardGraft')
+    const amp = attacks.length && bestHit(attacks[0]) >= 12 && r.capital > 20 && !r.amplify ? find('influencers') : undefined
+    const canSell = r.oil > 0 && !r.current.refuse && r.ap >= sellAP(r)
+    const full = canSell && r.oil + rigCount(r) * CONFIG.rigOutput > r.storage && (r.capital < 30 || !attacks.length)
+    const cash = r.capital < 15 ? (find('personalGuarantee') ?? (r.capital < 8 ? find('dipTrust') : undefined)) : undefined
+    let choice: Run | null = null
+    if (forced) choice = act(r, { type: 'play', cardId: forced.id })
+    else if (apUp) choice = act(r, { type: 'play', cardId: apUp.id })
+    else if (stop && tick) choice = act(r, { type: 'play', cardId: stop.id, target: tick.id })
+    else if (clockBack) choice = act(r, { type: 'play', cardId: clockBack.id })
+    else if (full) choice = act(r, { type: 'sellOil' })
+    else if (cash) choice = act(r, { type: 'play', cardId: cash.id })
+    else if (amp) choice = act(r, { type: 'play', cardId: amp.id })
+    else if (attacks.length) {
+      const c = attacks[0]
+      const t = live.reduce((a, b) => (damageOn(b, cardDef(c).family, cardDef(c).power) > damageOn(a, cardDef(c).family, cardDef(c).power) ? b : a))
+      choice = act(r, { type: 'play', cardId: c.id, target: t.id })
+    }
+    else if (find('recycling')) choice = act(r, { type: 'play', cardId: find('recycling')!.id })
+    else if (find('telex') && r.ap >= 2) choice = act(r, { type: 'play', cardId: find('telex')!.id })
+    else if (canSell && (r.oil >= Math.min(r.storage - 1, 6) || r.capital <= 15)) choice = act(r, { type: 'sellOil' })
+    else if (find('ecoRebrand') && r.capital > 20) choice = act(r, { type: 'play', cardId: find('ecoRebrand')!.id })
+    else if (find('greenProject')) choice = act(r, { type: 'play', cardId: find('greenProject')!.id })
+    if (!choice || JSON.stringify(choice) === JSON.stringify(r)) break
+    r = choice
+  }
+  return r.phase === 'turn' ? act(r, { type: 'endTurn' }) : r
+}
+
 export function botTurn(r: Run): Run {
+  if (r.stage >= 4) return botTurn4(r)
   if (r.stage >= 3) return botTurn3(r)
   for (let guard = 0; guard < 40 && r.phase === 'turn'; guard++) {
     const playable = r.hand.filter(c => canPlay(r, c).ok)
@@ -183,13 +277,13 @@ export function botTurn(r: Run): Run {
 }
 
 /** Plays a whole run: through stage 1, the incorporation, stage 2, going multinational and stage 3 (or stops at `stopAt`). */
-export function botRun(r: Run, stopAt = 3): Run {
+export function botRun(r: Run, stopAt = 4): Run {
   for (let guard = 0; guard < 900; guard++) {
     if (r.phase === 'shop') r = botShop(r)
     else if (r.phase === 'turn') r = botTurn(r)
     else if (r.phase === 'incorporate') r = botIncorporate(r)
     else if (r.phase === 'roundWon') {
-      if (r.spoils) r = act(r, { type: isAttack(r.spoils) || r.spoils === 'expenseAccount' || r.spoils === 'prospect' || r.spoils === 'thinkTank' ? 'takeSpoils' : 'sellSpoils' })
+      if (r.spoils) r = act(r, { type: isAttack(r.spoils) || ['expenseAccount', 'prospect', 'thinkTank', 'bridgeFuel', 'carbonFootprint', 'netZero', 'influencers', 'recycling'].includes(r.spoils) ? 'takeSpoils' : 'sellSpoils' })
       r = act(r, { type: 'continue' })
     }
     else if (r.phase === 'stageComplete' && r.stage < stopAt) r = act(r, { type: 'continue' })
