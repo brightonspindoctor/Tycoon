@@ -7,8 +7,8 @@ import { openSettings } from './settingsBus'
 import { AdminStartPanel } from './AdminPanel'
 import type { AdminStart } from '../engine/admin'
 
-const INDUSTRIES = ['Oil', 'Big Pharma', 'Fishing', 'Tech']
-const ANNOUNCED = ['Big Pharma'] // shown as Coming soon before Oil is finished
+const INDUSTRIES = ['Oil', 'Pharmaceutical', 'Fishing', 'Tech']
+const ANNOUNCED = ['Pharmaceutical'] // shown as Coming soon before Oil is finished
 // a run that died, rather than one that finished a stage or the game
 const ended = (r: RunRecord) => ['Bankrupt', 'Out of time', 'Quit', 'Ousted', 'Ruined'].includes(r.outcome)
 

@@ -4,7 +4,7 @@
 A solo roguelike deckbuilder in the style of Slay the Spire. You are the head of a harmful industry, from the 1860s to today. The message: corruption wins for big tycoons, and it is very hard for anyone to stop them. The tension in every turn is how much money to take for yourself and how much to leave in the company.
 
 ## Industries
-Unlocked one after another: **Oil → Big Pharma → Fishing → Tech** (Big Pharma is shown as Coming soon from the start), then a hidden fifth path, the **eco-warrior**, who plays against the tycoons. Only Oil exists so far.
+Unlocked one after another: **Oil → Pharmaceutical → Fishing → Tech** (Pharmaceutical is shown as Coming soon from the start), then a hidden fifth path, the **eco-warrior**, who plays against the tycoons. Only Oil exists so far.
 
 ## Structure
 - 4 stages × 4 rounds. Round 4 of each stage is a boss. A shop follows every round (there is none before round 1: picking a starting bonus goes straight into the first fight); the shop after a boss has a new card pool.
@@ -12,7 +12,7 @@ Unlocked one after another: **Oil → Big Pharma → Fishing → Tech** (Big Pha
 - Stages are eras, and the whole look changes: Victorian (1860s–90s), Art Deco (1900s–30s), 1970s flower power (1970–79), 2010s flat-design greenwash (2010–19). Cards keep the look of the era they came from.
 - Money gets a unit per stage but keeps its value: $15 → $15K → $15M → $15B.
 - Unlocks for every later run on the device (never from admin playtests): beat the Rival Baron once and runs start with 4 storage instead of 3 (silently); beat the Proxy Fight once and **Old Faithful** joins the starting bonuses: a Well that pumps 1, never runs dry, and nothing can target (fires, enemies, Firebreak, selling). It stops pumping in a fire, and becomes a Field and a Rig with the rest.
-- Front page: three industry tiles (Oil, Big Pharma as Coming soon, then one sealed), and Run history, Settings, About and a locked **?** button. The **?** becomes the Scoreboard (finished games on this device, best gold first) the first time you win the game. About credits Jonny Sadler and links to buymeacoffee.com/jonnysadler.
+- Front page: three industry tiles (Oil, Pharmaceutical as Coming soon, then one sealed), and Run history, Settings, About and a locked **?** button. The **?** becomes the Scoreboard (finished games on this device, best gold first) the first time you win the game. About credits Jonny Sadler and links to buymeacoffee.com/jonnysadler.
 - Each stage adds one meter that lasts only for that stage, and leaves a residue item behind:
   - Stage 1: none. Capital only.
   - Stage 2: Board Exposure, 0 to 8 (5+ is high; 8 = ousted).
