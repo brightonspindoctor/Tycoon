@@ -251,7 +251,7 @@ Bars were set so roughly 6 in 10 winning bot runs earn a badge, spread fairly ev
 ## Stage 4 rules (spec, not built) · 2010–2019 · Battling the Truth
 
 ### Shape
-- **Five fights:** four single enemies (rounds 1–4, never two at once), then **The Truth** (round 5). A full run is now 17 rounds.
+- **Five fights:** four single enemies (rounds 1–4, never two at once), then **The Truth** (round 5). A full run is now 17 rounds, but progress still reads out of 16: the Truth arrives as a surprise round 17.
 - The four enemies are drawn from the six below, getting tougher by round (+4 Hold per round after the first). **No enemy is met twice in a run.**
 - A shop (the Investor Portal) follows every fight.
 
@@ -308,12 +308,12 @@ Bars were set so roughly 6 in 10 winning bot runs earn a badge, spread fairly ev
 Compensation Claim (junk): must play, pay $3B. Every enemy move also takes $2–3B (Cover blocks it), as in stage 3.
 
 ### The Truth (boss)
-- **Four phases of 25 Hold, one after another.** Each phase is hurt only by one damage type; other attacks do nothing:
+- **Four phases of 25 Hold, one after another.** Each phase is weak to one damage type; every other type still does normal damage (no resistances, no immunities):
   1. **Consensus Report** · Dirty
   2. **Lawsuits** · Legal
   3. **Whistleblower** · Bury
   4. **Breakthrough** · Lobby
-- **Its attacks are the consequences:** Sea Level Rise (−$8B), Childhood Asthma (−2 gold), Water Pollution (a Compensation Claim in your hand), Suppressed Development (−1 AP next turn), Wildfire Season (lose your stored oil), Crop Failure (−$6B). Every third move moves the clock forward 1 hour.
+- **Its attacks are the consequences:** Sea Level Rise (−$8B), Childhood Asthma (−2 gold), Water Pollution (a Compensation Claim in your hand), Suppressed Development (−1 AP next turn), Wildfire Season (lose your stored oil), Crop Failure (−$6B). Every 5th move moves the clock forward 1 hour.
 - **The later the hour you arrive, the harder it is:** every attack does +$1B (or +1 gold for personal attacks every 4 hours) for each hour past 1, and it starts with Cover equal to the hour.
 - No modifiers in stage 4.
 
