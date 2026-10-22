@@ -40,7 +40,7 @@ Unlocked one after another: **Oil → Pharmaceutical → Fishing → Tech** (Pha
 
 ### Before and after the boss
 - After round 3 the Land Office offers one small, single-use item for **1 gold**: A Spare Hand (+1 AP on the first boss turn), Spare Wells (2 Well cards; called Spare Rigs and gives 2 Rig cards in stage 3), Fire Brigade (card), Inheritance (a card: +$5 once) or Temporary Silo (+4 storage for the boss round).
-- Beating the Baron gives a lasting item of a **different type** from the one bought (never the Steam Pump: no third AP from a boss): Dividends (a card: +$3 each play), Silo (+4 storage) or Drilling Rights (2 Well cards; from the stage 2 boss on, 2 Rig cards instead, so they survive going multinational).
+- Beating the Baron gives a lasting item of a **different type** from the one bought (never the Steam Pump: no third AP from a boss): Dividends (a card: +$3 each play), Silo (+4 storage) or Drilling Rights (2 Well cards; from the stage 2 boss on, 2 Rig cards instead, so they survive going multinational; never offered once all 5 plots have a Rig).
 
 ### After each round
 A card is offered (weighted by rarity, like the shop): take it into your deck or turn it down for $3. What happens when an enemy is beaten is not shown in advance.
@@ -242,11 +242,11 @@ Never shown during play. The run keeps a quiet tally (damage by card family, mov
 | Lean Operation | Destroying cards and finishing with a small deck (14 or fewer) |
 | Fortress | Blocking moves and soaking damage and Heat with Cover |
 | Oil Baron | Barrels sold across the run |
-| Spin Doctor | Heat taken off by your own cards |
+| Spin Doctor | Heat taken off by your own cards, and hours wound back on the Truth clock (10 each) |
 | Lawyered Up | Legal cards doing most of the damage |
 | Blitz | Winning rounds in 2 turns or fewer |
 
-Bars were set so roughly 6 in 10 winning bot runs earn a badge, spread fairly evenly across the six. Later: shop and spoils offers will lean towards the tactics a deck is already using.
+Bars are set on full-game wins (through the Truth): about half of winning bot runs earn a badge, spread across Fortress, Spin Doctor, Oil Baron, Lawyered Up and Blitz. Lean Operation (a deck of 15 or fewer, 10+ destroyed) is a human tactic the bot never plays. Later: shop and spoils offers will lean towards the tactics a deck is already using.
 
 ## Stage 4 rules (as built) · 2010–2019 · Battling the Truth
 

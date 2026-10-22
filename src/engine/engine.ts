@@ -301,6 +301,7 @@ function moveClock(r: Run, n: number, why: string, who?: number) {
   const won = r.phase === 'roundWon' || r.phase === 'stageComplete' // a win at the buzzer still counts
   r.clock = Math.max(1, Math.min(won ? CONFIG.clockMax - 1 : CONFIG.clockMax, before + n))
   if (r.clock === before) return
+  if (r.clock < before && why !== 'Admin') tally(r).cooled += (before - r.clock) * CONFIG.tactics.clockHourWorth // Spin Doctor: winding the clock back counts like cooling Heat
   const msg = `${why}: the clock ${n > 0 ? 'moves on' : 'goes back'} to ${clockText(r.clock)}.`
   say(r, msg)
   if (!captured) beat(r, 'board', 'The Truth clock', msg, who)
@@ -862,8 +863,9 @@ function grantReward(r: Run) {
     if (r.residue) r.items.push(r.residue)
   }
   const avoid = r.boon ? BOONS[r.boon].type : null
-  const options = (Object.keys(REWARDS) as RewardKey[]).filter(k => k !== 'steamPump' && REWARDS[k].type !== avoid && !(k === 'silo' && r.items.includes('silo')))
-  const k = pick(r, options)
+  const landFull = r.stage >= 2 && r.plots.filter(Boolean).length >= CONFIG.maxPlots // no plot for new Rigs: Drilling Rights would be two dead cards
+  const options = (Object.keys(REWARDS) as RewardKey[]).filter(k => k !== 'steamPump' && REWARDS[k].type !== avoid && !(k === 'silo' && r.items.includes('silo')) && !(k === 'drillingRights' && landFull))
+  const k = options.length ? pick(r, options) : 'dividends' // every lasting reward ruled out: Dividends, even if it matches the item bought
   r.reward = k
   if (k === 'steamPump') r.items.push('steamPump')
   if (k === 'silo') { r.items.push('silo'); r.storage = r.stage >= 3 ? Math.min(CONFIG.maxStorage, r.storage + 4) : r.storage + 4 }

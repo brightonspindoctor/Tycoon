@@ -287,3 +287,23 @@ describe('stage 4 cards', () => {
     expect(r.heat).toBe(0)
   })
 })
+
+describe('fixes after the first full games', () => {
+  it('Drilling Rights is never the reward once every plot has a Rig', () => {
+    for (let seed = 1; seed < 60; seed++) {
+      const r = adminStart(seed, { ...ADMIN_DEFAULTS, stage: 3, start: 4, wells: 5, capital: 300, gold: 9, deck: 'strong' })
+      r.plots = Array.from({ length: 5 }, () => ({ output: 2, reserve: 0, rig: true }))
+      const won = act(r, { type: 'admin', op: 'winRound' })
+      expect(won.phase).toBe('stageComplete')
+      expect(won.reward).not.toBe('drillingRights')
+    }
+  })
+
+  it('winding the Truth clock back counts towards Spin Doctor', () => {
+    let r = inStage4(['carbonFootprint'])
+    r.clock = 6
+    const before = r.tally?.cooled ?? 0
+    r = playIt(r, 'carbonFootprint')
+    expect((r.tally?.cooled ?? 0) - before).toBe(CONFIG.tactics.clockHourWorth)
+  })
+})

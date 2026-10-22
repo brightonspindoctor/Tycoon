@@ -7,7 +7,7 @@ export interface Tally {
   blocks: number // enemy moves stopped
   absorbed: number // damage and Heat soaked up by your Cover
   destroyed: number // cards destroyed for good
-  cooled: number // Heat taken off by your own cards and the lobbying firm
+  cooled: number // Heat taken off by your own cards and the lobbying firm, plus hours wound back on the Truth clock
   rounds: number // rounds won
   quick: number // rounds won in CONFIG.tactics.quickTurns turns or fewer
 }

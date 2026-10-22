@@ -30,7 +30,7 @@ describe('hidden tactics', () => {
   it('picks the tactic furthest past its bar', () => {
     expect(tacticFor(with_({ damage: { Legal: 90, Dirty: 10 } }), 20, 0)).toBe('lawyeredUp')
     expect(tacticFor(with_({ cooled: bar.spinDoctor * 2, damage: { Legal: 60, Dirty: 40 } }), 20, 0)).toBe('spinDoctor')
-    expect(tacticFor(with_({ blocks: 10 }), 20, 0)).toBe('fortress')
+    expect(tacticFor(with_({ blocks: Math.ceil(bar.fortress / CONFIG.tactics.blockWorth) + 2 }), 20, 0)).toBe('fortress')
     expect(tacticFor(with_({ rounds: 12, quick: 6 }), 20, 0)).toBe('blitz')
     expect(tacticFor(with_({}), 20, bar.oilBaron + 30)).toBe('oilBaron')
   })

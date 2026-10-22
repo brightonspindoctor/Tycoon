@@ -174,8 +174,9 @@ export const CONFIG = {
   // hidden tactics: the bar each one has to clear to earn its badge at the end of a won game
   tactics: {
     quickTurns: 2, // a round won in this many turns or fewer counts towards Blitz
-    leanDeckMax: 14, // Lean Operation: the deck you finish with is this size or smaller
+    leanDeckMax: 15, // Lean Operation: the deck you finish with is this size or smaller
     blockWorth: 6, // Fortress: each blocked move counts as this much Cover used
-    bar: { leanOperation: 8, fortress: 32, oilBaron: 130, spinDoctor: 44, lawyeredUp: 0.5, blitz: 0.3 },
+    clockHourWorth: 10, // Spin Doctor: each hour you wind the Truth clock back counts as this much Heat cooled
+    bar: { leanOperation: 10, fortress: 75, oilBaron: 232, spinDoctor: 50, lawyeredUp: 0.61, blitz: 0.24 }, // set on full-game (stage 4) wins: about half earn a badge
   },
 } as const
