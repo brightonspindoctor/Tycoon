@@ -15,7 +15,7 @@ export type Icon = 'derrick' | 'plot' | 'barrels' | 'fire' | 'bucket' | 'cudgels
   // stage 4 (2010s): items without their own art yet borrow one through src/ui/icons.ts
   | 'recycling' | 'propaganda' | 'onThePayroll' | 'climateBreakdown' | 'astroturfing' | 'carbonFootprint' | 'influencers' | 'ecoRebrand'
   | 'sustainabilityReport' | 'bridgeFuel' | 'netZero' | 'greenProject' | 'worldBank' | 'rig4' | 'compensationClaim'
-  | 'lobbyist' | 'strategicReserve' | 'prAgency' | 'fossilSubsidy' | 'offshoreTrust'
+  | 'lobbyist' | 'strategicReserve' | 'prAgency' | 'fossilSubsidy' | 'offshoreTrust' | 'carbonOffsets' | 'carbonCapture'
 
 export type CardKey =
   | 'prospect' | 'well' | 'wildcat' | 'hiredHand' | 'lawyerUp' | 'shoreUp' | 'bucket' | 'fireBrigade'
@@ -31,8 +31,8 @@ export type CardKey =
   | 'buryEvidence' | 'lobbyCongress' | 'thinkTank' | 'bribeOfficial' | 'retainCounsel' | 'deadWeight' | 'dryLease' | 'draftDeclaration'
   | 'advertorial' | 'buyOut' | 'oilShock' | 'rig'
   // stage 4
-  | 'recycling' | 'propaganda' | 'onThePayroll' | 'climateBreakdown' | 'astroturfing' | 'sustainabilityReport' | 'ecoRebrand'
-  | 'bridgeFuel' | 'carbonFootprint' | 'netZero' | 'influencers' | 'greenProject' | 'compensationClaim'
+  | 'recycling' | 'propaganda' | 'onThePayroll' | 'climateBreakdown' | 'astroturfing' | 'sustainabilityReport' | 'carbonCapture'
+  | 'bridgeFuel' | 'carbonOffsets' | 'influencers' | 'greenProject' | 'compensationClaim'
 
 export interface CardDef {
   name: string
@@ -72,6 +72,8 @@ export interface CardDef {
   recycle?: boolean // shuffles your discard pile into your draw pile (Recycling)
   amplify?: boolean // the next card's Hold damage or Cover is doubled (Influencers)
   sticky?: boolean // stays in your hand from turn to turn until you play it (Green Project)
+  backfire?: number // chance a clock card does the opposite (Carbon Offsets)
+  capture?: boolean // the next move that would move the clock on doesn't (Carbon Capture)
   unique?: boolean // only one in the game: can't be duplicated, and never offered again once yours
 }
 
@@ -215,14 +217,12 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Remove 7 Hold. +4 Cover.', flavour: 'Concerned Citizens for Energy Freedom.' },
   sustainabilityReport: { name: 'Sustainability Report', era: 4, ap: 1, cost: 0, uses: null, family: 'Bury', power: 9, draw: 1, icon: 'sustainabilityReport', price: 25, rarity: 'Common',
     text: 'Remove 9 Hold. Draw 1 card.', flavour: 'Forty pages. Mostly photographs.' },
-  ecoRebrand: { name: 'Eco-Friendly Rebrand', era: 4, ap: 1, cost: 3, uses: null, family: 'Defence', power: 0, cover: 8, draw: 1, icon: 'ecoRebrand', price: 22, rarity: 'Common',
-    text: 'Pay $3. +8 Cover this turn. Draw 1 card.', flavour: 'Now with a leaf.' },
+  carbonCapture: { name: 'Carbon Capture', era: 4, ap: 1, cost: 5, uses: null, capture: true, family: 'Defence', power: 0, icon: 'carbonCapture', price: 30, rarity: 'Common',
+    text: "Pay $5. The next move that would move the clock on doesn't.", flavour: 'Pilot scheme. Results expected in 2050.' },
+  carbonOffsets: { name: 'Carbon Offsets', era: 4, ap: 1, cost: 4, uses: null, clock: -1, backfire: 0.25, family: 'Tempo', power: 0, icon: 'carbonOffsets', price: 30, rarity: 'Uncommon',
+    text: 'Pay $4. The clock goes back 1 hour. 1 in 4: the forest burns down, and it goes on 1 instead.', flavour: 'A tree for every tanker.' },
   bridgeFuel: { name: 'Bridge Fuel', era: 4, ap: 0, cost: 0, uses: null, oncePerRound: true, family: 'Tempo', power: 2, icon: 'bridgeFuel', price: 30, rarity: 'Common',
     text: '+2 AP. Once per round.', flavour: 'A bridge to a cleaner future. Toll applies.' },
-  carbonFootprint: { name: 'Carbon Footprint', era: 4, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 0, clock: -1, draw: 1, icon: 'carbonFootprint', price: 35, rarity: 'Uncommon',
-    text: 'The clock goes back 1 hour. Draw 1 card.', flavour: 'Have you considered your own?' },
-  netZero: { name: 'Net Zero by 2050', era: 4, ap: 1, cost: 0, uses: 1, unique: true, family: 'Tempo', power: 0, clock: -2, icon: 'netZero', price: 40, rarity: 'Rare',
-    text: 'The clock goes back 2 hours. Once a run.', flavour: 'Someone else will be in charge by then.' },
   influencers: { name: 'Influencers', era: 4, ap: 0, cost: 3, uses: null, unique: true, amplify: true, family: 'Tempo', power: 0, icon: 'influencers', price: 35, rarity: 'Rare',
     text: "Pay $3. Your next card's Hold damage or Cover is doubled. Only one in the game.", flavour: '#ad #sponsored #blessed' },
   greenProject: { name: 'Green Project', era: 4, ap: 1, cost: 0, uses: 1, sticky: true, family: 'Junk', power: 0, junk: true, icon: 'greenProject',
@@ -305,9 +305,9 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   climateBreakdown: { power: 15, text: 'Remove 15 Hold. Oil sells +$2 for the rest of the round.' },
   astroturfing: { power: 9, cover: 6, text: 'Remove 9 Hold. +6 Cover.' },
   sustainabilityReport: { power: 12, text: 'Remove 12 Hold. Draw 1 card.' },
-  ecoRebrand: { cover: 11, text: 'Pay $3. +11 Cover this turn. Draw 1 card.' },
+  carbonCapture: { cost: 2, text: "Pay $2. The next move that would move the clock on doesn't." },
   bridgeFuel: { power: 3, text: '+3 AP. Once per round.' },
-  carbonFootprint: { ap: 0, text: 'The clock goes back 1 hour. Draw 1 card.' },
+  carbonOffsets: { clock: -2, text: 'Pay $4. The clock goes back 2 hours. 1 in 4: the forest burns down, and it goes on 1 instead.' },
 }
 
 export const STARTER: CardKey[] = ['prospect', 'hiredHand', 'hiredHand', 'lawyerUp', 'shoreUp', 'bucket', 'bucket', 'improveGear', 'hardGraft']
@@ -321,8 +321,8 @@ export const SHOP_POOL_3: CardKey[] = ['embargoRumours', 'queuesAtPump', 'telex'
 /** Stage 2 incorporation: pick incorporatePicks of these; the rest go on sale at the first Exchange visit. */
 export const INCORPORATE_OFFER_2: CardKey[] = ['derrick', 'payDividend', 'patentThicket', 'tickerTape']
 // stage 4: Big Oil's own stock, heavy on AP and draw
-export const SHOP_POOL_4: CardKey[] = ['recycling', 'propaganda', 'onThePayroll', 'climateBreakdown', 'astroturfing', 'sustainabilityReport', 'ecoRebrand',
-  'bridgeFuel', 'carbonFootprint', 'netZero', 'influencers']
+export const SHOP_POOL_4: CardKey[] = ['recycling', 'propaganda', 'onThePayroll', 'climateBreakdown', 'astroturfing', 'sustainabilityReport', 'carbonCapture',
+  'bridgeFuel', 'carbonOffsets', 'influencers']
 export const shopPool = (stage: number): CardKey[] => (stage >= 4 ? SHOP_POOL_4 : stage >= 3 ? SHOP_POOL_3 : stage >= 2 ? SHOP_POOL_2 : SHOP_POOL)
 /** Going multinational: pick incorporatePicks of these; the rest go on sale at the first Trading Floor visit. */
 export const INCORPORATE_OFFER_3: CardKey[] = ['buryEvidence', 'lobbyCongress', 'buyOut', 'advertorial']

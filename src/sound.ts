@@ -6,6 +6,8 @@ import { loadMuted, loadVolume, saveMuted, saveVolume } from './storage'
 export type Cue =
   | 'card' | 'coin' | 'stamp' | 'fire' | 'hit' | 'win' | 'lose' | 'click' | 'ink'
   | 'whistle' | 'register' | 'straw' | 'prospect' | 'well' | 'sell' | 'ticker' | 'shuffle'
+  // the later stages and their events
+  | 'deco' | 'groovy' | 'startup' | 'telex' | 'ping' | 'tick' | 'rewind' | 'midnight' | 'phase' | 'heal' | 'goldLoss' | 'junk' | 'victory'
 
 export const CUES: { cue: Cue; label: string }[] = [
   { cue: 'whistle', label: 'Steam whistle (start of a run)' },
@@ -23,6 +25,19 @@ export const CUES: { cue: Cue; label: string }[] = [
   { cue: 'stamp', label: 'Stamp' },
   { cue: 'win', label: 'Stage complete' },
   { cue: 'click', label: 'Click' },
+  { cue: 'deco', label: 'Into the 1900s (brass)' },
+  { cue: 'groovy', label: 'Into the 1970s (organ)' },
+  { cue: 'startup', label: 'Into the 2010s (start-up chime)' },
+  { cue: 'telex', label: 'Telex (stage 3 enemy turn)' },
+  { cue: 'ping', label: 'Notification (stage 4 enemy turn)' },
+  { cue: 'tick', label: 'The Truth clock moves on' },
+  { cue: 'rewind', label: 'The Truth clock goes back' },
+  { cue: 'midnight', label: 'Midnight' },
+  { cue: 'phase', label: 'The Truth: next phase' },
+  { cue: 'heal', label: 'Enemy regains Hold' },
+  { cue: 'goldLoss', label: 'Gold taken from your fortune' },
+  { cue: 'junk', label: 'Junk in your hand' },
+  { cue: 'victory', label: 'Big Oil beats the Truth' },
 ]
 
 let ctx: AudioContext | null = null
@@ -231,6 +246,93 @@ function riffle(a: Ctx, out: AudioNode, t: number) {
   thud(a, out, t + 0.7, 160, 0.16, 0.08)
 }
 
+// --------------------------------------------------- stages 2 to 4, and their events
+function brassChord(a: Ctx, out: AudioNode, at: number, freqs: number[], dur: number, gain = 0.06) {
+  const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(600, at); lp.frequency.exponentialRampToValueAtTime(3200, at + 0.12); lp.connect(out)
+  for (const f of freqs) tone(a, lp, at, f, dur, 'sawtooth', gain)
+}
+function deco(a: Ctx, out: AudioNode, t: number) {
+  // a muted brass fanfare: two stabs and a held chord, Jazz Age
+  brassChord(a, out, t, [392, 494, 587], 0.16)
+  brassChord(a, out, t + 0.2, [392, 494, 587], 0.16)
+  brassChord(a, out, t + 0.42, [523, 659, 784, 988], 0.9, 0.05)
+  noise(a, out, t + 0.42, 0.25, 0.06, 6000, 0.7, 'highpass') // a cymbal
+}
+function groovy(a: Ctx, out: AudioNode, t: number) {
+  // a warm organ chord with a slow wobble, and a wah on the bass
+  const vib = a.createOscillator(); const amt = a.createGain(); vib.frequency.value = 6; amt.gain.value = 4; vib.connect(amt); vib.start(t); vib.stop(t + 1.4)
+  for (const f of [220, 277, 330, 415]) {
+    const o = a.createOscillator(); const g = a.createGain()
+    o.type = 'triangle'; o.frequency.value = f; amt.connect(o.frequency)
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.08); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.3)
+    o.connect(g).connect(out); o.start(t); o.stop(t + 1.35)
+  }
+  const bass = a.createOscillator(); const wah = a.createBiquadFilter(); const bg = a.createGain()
+  bass.type = 'sawtooth'; bass.frequency.value = 110; wah.type = 'bandpass'; wah.Q.value = 6
+  wah.frequency.setValueAtTime(300, t); wah.frequency.exponentialRampToValueAtTime(1600, t + 0.35); wah.frequency.exponentialRampToValueAtTime(400, t + 0.8)
+  bg.gain.setValueAtTime(0.0001, t); bg.gain.exponentialRampToValueAtTime(0.12, t + 0.02); bg.gain.exponentialRampToValueAtTime(0.0001, t + 0.9)
+  bass.connect(wah).connect(bg).connect(out); bass.start(t); bass.stop(t + 0.95)
+}
+function startup(a: Ctx, out: AudioNode, t: number) {
+  // a clean, optimistic corporate chime: rising marimba notes, then a soft pad
+  ;[659, 784, 988, 1319].forEach((f, i) => { tone(a, out, t + i * 0.09, f, 0.3, 'sine', 0.12); tone(a, out, t + i * 0.09, f * 4, 0.06, 'sine', 0.02) })
+  for (const f of [330, 494, 659]) tone(a, out, t + 0.36, f, 1.1, 'triangle', 0.04)
+}
+function telex(a: Ctx, out: AudioNode, t: number) {
+  // a fast electric teleprinter, ending on its bell
+  for (let i = 0; i < 10; i++) noise(a, out, t + i * 0.03 + rnd(0, 0.006), 0.014, 0.14, rnd(1800, 2600), 5)
+  metal(a, out, t + 0.33, 2100, 0.3, 0.08, [1, 2.4])
+}
+function ping(a: Ctx, out: AudioNode, t: number) {
+  // a phone notification: two soft glass notes
+  tone(a, out, t, 1318, 0.18, 'sine', 0.1); tone(a, out, t + 0.09, 1760, 0.28, 'sine', 0.09)
+}
+function clockTick(a: Ctx, out: AudioNode, t: number) {
+  // a heavy clock: tick, tock, then a low chime for the new hour
+  noise(a, out, t, 0.03, 0.28, 3200, 8); noise(a, out, t + 0.28, 0.03, 0.24, 2400, 8)
+  metal(a, out, t + 0.5, 196, 1.2, 0.16, [1, 2.01, 3.0, 4.2])
+}
+function rewind(a: Ctx, out: AudioNode, t: number) {
+  // the hands wound back: a ratchet running down, a softer chime
+  for (let i = 0; i < 8; i++) noise(a, out, t + i * 0.035, 0.015, 0.12, 2800 - i * 120, 8)
+  metal(a, out, t + 0.34, 262, 0.6, 0.08, [1, 2.01, 3.0])
+}
+function midnight(a: Ctx, out: AudioNode, t: number) {
+  // the clock strikes: three slow, deep bell strokes, each decaying long
+  for (let i = 0; i < 3; i++) metal(a, out, t + i * 0.85, 98, 2.4, 0.28, [1, 2.0, 2.76, 4.07, 5.4])
+}
+function phaseShift(a: Ctx, out: AudioNode, t: number) {
+  // a dissonant swell: something larger arrives
+  for (const f of [110, 116.5, 164.8]) {
+    const o = a.createOscillator(); const g = a.createGain()
+    o.type = 'sawtooth'; o.frequency.value = f
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2)
+    const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(200, t); lp.frequency.exponentialRampToValueAtTime(1400, t + 0.7)
+    o.connect(lp).connect(g).connect(out); o.start(t); o.stop(t + 1.25)
+  }
+  thud(a, out, t + 0.62, 60, 0.35, 0.4)
+}
+function heal(a: Ctx, out: AudioNode, t: number) {
+  // a rising shimmer: the enemy pulls itself back together
+  ;[523, 659, 784, 1047].forEach((f, i) => tone(a, out, t + i * 0.06, f, 0.22, 'sine', 0.06, f * 0.05))
+}
+function goldLoss(a: Ctx, out: AudioNode, t: number) {
+  // coins slipping away down a drain, falling in pitch
+  for (let i = 0; i < 6; i++) metal(a, out, t + i * 0.07, 3800 - i * 420, 0.12, 0.12, [1, 1.48])
+  tone(a, out, t + 0.45, 220, 0.3, 'triangle', 0.08, -120)
+}
+function junk(a: Ctx, out: AudioNode, t: number) {
+  // paper slapped down on a desk
+  noise(a, out, t, 0.09, 0.3, 900, 0.8); noise(a, out, t + 0.02, 0.12, 0.12, 3000, 1.2)
+  thud(a, out, t, 140, 0.18, 0.08)
+}
+function victory(a: Ctx, out: AudioNode, t: number) {
+  // a big, smug fanfare, with the cash register on top
+  const chords = [[262, 330, 392], [349, 440, 523], [392, 494, 587], [523, 659, 784, 1047]]
+  chords.forEach((c, i) => brassChord(a, out, t + i * 0.28, c, i === 3 ? 1.4 : 0.24, 0.05))
+  cashRegister(a, out, t + 1.3)
+}
+
 /** Draws a cue onto any audio context, starting at time `t`. */
 export function renderCue(cue: Cue, a: Ctx, out: AudioNode, t: number) {
   switch (cue) {
@@ -250,6 +352,19 @@ export function renderCue(cue: Cue, a: Ctx, out: AudioNode, t: number) {
     case 'sell': sellOil(a, out, t); break
     case 'ticker': ticker(a, out, t); break
     case 'shuffle': riffle(a, out, t); break
+    case 'deco': deco(a, out, t); break
+    case 'groovy': groovy(a, out, t); break
+    case 'startup': startup(a, out, t); break
+    case 'telex': telex(a, out, t); break
+    case 'ping': ping(a, out, t); break
+    case 'tick': clockTick(a, out, t); break
+    case 'rewind': rewind(a, out, t); break
+    case 'midnight': midnight(a, out, t); break
+    case 'phase': phaseShift(a, out, t); break
+    case 'heal': heal(a, out, t); break
+    case 'goldLoss': goldLoss(a, out, t); break
+    case 'junk': junk(a, out, t); break
+    case 'victory': victory(a, out, t); break
   }
 }
 

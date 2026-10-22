@@ -10,6 +10,8 @@ const STAND_IN: Partial<Record<Icon, Icon>> = {
   prAgency: 'propaganda',
   fossilSubsidy: 'worldBank',
   offshoreTrust: 'offshore',
+  carbonOffsets: 'netZero',
+  carbonCapture: 'carbonFootprint',
 }
 
 export const iconUrl = (icon: Icon | string) => `${import.meta.env.BASE_URL}art/icons/${STAND_IN[icon as Icon] ?? icon}.png`

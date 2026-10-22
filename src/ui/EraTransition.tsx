@@ -27,7 +27,7 @@ export function EraTransition({ to, onDone }: { to: number; onDone: () => void }
     raf = requestAnimationFrame(tick)
     const s = setTimeout(() => { setStamped(true); play('stamp') }, 2400)
     const d = setTimeout(onDone, 3900)
-    play('whistle')
+    play(to === 2 ? 'deco' : to === 3 ? 'groovy' : to === 4 ? 'startup' : 'whistle') // each era arrives with its own sound
     return () => { cancelAnimationFrame(raf); clearTimeout(s); clearTimeout(d) }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
   return (

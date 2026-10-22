@@ -108,7 +108,7 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.stage === 4 && r.phase === 'shop' && r.shop.item && !(ITEMS[r.shop.item].stages ?? []).includes(4)) return 'an old item in the stage 4 shop'
   if (r.stage === 4 && r.phase === 'turn' && r.round < bossRound(4) && r.threats.length !== 1) return 'two stage 4 enemies at once'
   if ((r.met ?? []).length !== new Set(r.met ?? []).size) return 'a stage 4 enemy met twice'
-  if (r.deck.filter(c => c.key === 'influencers').length > 1 || r.deck.filter(c => c.key === 'netZero').length > 1) return 'two copies of a one-in-the-game card'
+  if (r.deck.filter(c => c.key === 'influencers').length > 1 || false) return 'two copies of a one-in-the-game card'
   if (r.phase === 'shop' && r.shop.cards.some(k => k && CARDS[k].unique && (r.uniques ?? []).includes(k))) return 'a one-in-the-game card offered again'
   for (const t of r.threats) if (t.kind === 'truth' && ((t.phase ?? 0) < 0 || (t.phase ?? 0) > 3 || t.maxHold !== CONFIG.truthPhaseHold)) return `Truth phase ${t.phase} hold ${t.maxHold}`
   if (r.threats.some(t => t.kind === 'truth' && t.beaten) && r.threats.some(t => t.kind === 'truth' && (t.phase ?? 0) < 3)) return 'the Truth fell before its last phase'

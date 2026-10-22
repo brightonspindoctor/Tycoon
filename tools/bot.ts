@@ -24,7 +24,7 @@ function botMultinational(r: Run): Run {
   return act(r, { type: 'leaveShop' })
 }
 
-const UPGRADE_4: CardKey[] = ['climateBreakdown', 'propaganda', 'onThePayroll', 'sustainabilityReport', 'astroturfing', 'buyOut', 'buryEvidence', 'lobbyCongress', 'retainCounsel', 'bridgeFuel', 'recycling', 'ecoRebrand']
+const UPGRADE_4: CardKey[] = ['climateBreakdown', 'propaganda', 'onThePayroll', 'sustainabilityReport', 'astroturfing', 'buyOut', 'buryEvidence', 'lobbyCongress', 'retainCounsel', 'bridgeFuel', 'recycling', 'carbonCapture', 'carbonOffsets']
 /** How useless a card is to Big Oil: junk first, then Heat-only and faded stock, then weak old attacks. */
 const dross = (c: Card) => (CARDS[c.key].junk ? 100 : c.key === 'thinkTank' ? 90 : ['improveGear', 'hiredHand', 'hardGraft', 'telegram', 'pettyCash'].includes(c.key) ? 50 : 0) - (CARDS[c.key].era ?? 1)
 /** The damage types a deck carries: the Truth wants all four. */
@@ -55,9 +55,9 @@ function botShop4(r: Run): Run {
   const have = families(r)
   const lateClock = (r.clock ?? 1) >= 5
   const want: CardKey[] = [
-    ...(lateClock ? ['netZero', 'carbonFootprint'] as CardKey[] : []),
+    ...(lateClock ? ['carbonOffsets', 'carbonCapture'] as CardKey[] : []),
     ...(['climateBreakdown', 'sustainabilityReport', 'propaganda', 'onThePayroll', 'astroturfing'] as CardKey[]).filter(k => !have.has(CARDS[k].family)),
-    'bridgeFuel', 'influencers', 'climateBreakdown', 'carbonFootprint', 'netZero', 'recycling', 'sustainabilityReport', 'propaganda', 'onThePayroll', 'astroturfing', 'ecoRebrand',
+    'bridgeFuel', 'influencers', 'climateBreakdown', 'carbonCapture', 'carbonOffsets', 'recycling', 'sustainabilityReport', 'propaganda', 'onThePayroll', 'astroturfing',
   ]
   for (let n = 0; n < 2; n++) for (const k of want) {
     const i = r.shop.cards.indexOf(k)
@@ -193,7 +193,8 @@ function botTurn4(r: Run): Run {
     const attacks = playable.filter(c => isAttack(c.key) && bestHit(c) > 1).sort((a, b) => bestHit(b) - bestHit(a))
     const tick = ticking(r)[0]
     const stop = tick ? (find('shoreUp') ?? find('securityDetail')) : undefined
-    const clockBack = (r.clock ?? 1) >= 7 ? (find('netZero') ?? find('carbonFootprint')) : (r.clock ?? 1) >= 4 ? find('carbonFootprint') : undefined
+    const clockBack = (r.clock ?? 1) >= 4 && r.capital > 15 ? find('carbonOffsets') : undefined
+    const capture = tick && !r.captured && r.capital > 15 ? find('carbonCapture') : undefined
     const apUp = find('bridgeFuel') ?? find('hardGraft')
     const amp = attacks.length && bestHit(attacks[0]) >= 12 && r.capital > 20 && !r.amplify ? find('influencers') : undefined
     const canSell = r.oil > 0 && !r.current.refuse && r.ap >= sellAP(r)
@@ -203,6 +204,7 @@ function botTurn4(r: Run): Run {
     if (forced) choice = act(r, { type: 'play', cardId: forced.id })
     else if (apUp) choice = act(r, { type: 'play', cardId: apUp.id })
     else if (stop && tick) choice = act(r, { type: 'play', cardId: stop.id, target: tick.id })
+    else if (capture) choice = act(r, { type: 'play', cardId: capture.id })
     else if (clockBack) choice = act(r, { type: 'play', cardId: clockBack.id })
     else if (full) choice = act(r, { type: 'sellOil' })
     else if (cash) choice = act(r, { type: 'play', cardId: cash.id })
@@ -215,7 +217,6 @@ function botTurn4(r: Run): Run {
     else if (find('recycling')) choice = act(r, { type: 'play', cardId: find('recycling')!.id })
     else if (find('telex') && r.ap >= 2) choice = act(r, { type: 'play', cardId: find('telex')!.id })
     else if (canSell && (r.oil >= Math.min(r.storage - 1, 6) || r.capital <= 15)) choice = act(r, { type: 'sellOil' })
-    else if (find('ecoRebrand') && r.capital > 20) choice = act(r, { type: 'play', cardId: find('ecoRebrand')!.id })
     else if (find('greenProject')) choice = act(r, { type: 'play', cardId: find('greenProject')!.id })
     if (!choice || JSON.stringify(choice) === JSON.stringify(r)) break
     r = choice
@@ -283,7 +284,7 @@ export function botRun(r: Run, stopAt = 4): Run {
     else if (r.phase === 'turn') r = botTurn(r)
     else if (r.phase === 'incorporate') r = botIncorporate(r)
     else if (r.phase === 'roundWon') {
-      if (r.spoils) r = act(r, { type: isAttack(r.spoils) || ['expenseAccount', 'prospect', 'thinkTank', 'bridgeFuel', 'carbonFootprint', 'netZero', 'influencers', 'recycling'].includes(r.spoils) ? 'takeSpoils' : 'sellSpoils' })
+      if (r.spoils) r = act(r, { type: isAttack(r.spoils) || ['expenseAccount', 'prospect', 'thinkTank', 'bridgeFuel', 'carbonOffsets', 'carbonCapture', 'influencers', 'recycling'].includes(r.spoils) ? 'takeSpoils' : 'sellSpoils' })
       r = act(r, { type: 'continue' })
     }
     else if (r.phase === 'stageComplete' && r.stage < stopAt) r = act(r, { type: 'continue' })

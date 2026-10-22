@@ -244,9 +244,12 @@ Never shown during play. The run keeps a quiet tally (damage by card family, mov
 | Oil Baron | Barrels sold across the run |
 | Spin Doctor | Heat taken off by your own cards, and hours wound back on the Truth clock (10 each) |
 | Lawyered Up | Legal cards doing most of the damage |
+| Captured State | Lobby cards doing a large share of the damage |
+| One Minute to Midnight | Beating the Truth at 11 o'clock |
+| Business as Usual | Beating the Truth at 2 o'clock or earlier |
 | Blitz | Winning rounds in 2 turns or fewer |
 
-Bars are set on full-game wins (through the Truth): about half of winning bot runs earn a badge, spread across Fortress, Spin Doctor, Oil Baron, Lawyered Up and Blitz. Lean Operation (a deck of 15 or fewer, 10+ destroyed) is a human tactic the bot never plays. Later: shop and spoils offers will lean towards the tactics a deck is already using.
+Bars are set on full-game wins (through the Truth): about 6 in 10 winning bot runs earn a badge, spread across all nine. The two clock badges are yes-or-no and win out over the others when earned. Lean Operation (a deck of 15 or fewer, 10+ destroyed) is checked with a lean-playing bot: about a quarter of its wins earn it. Later: shop and spoils offers will lean towards the tactics a deck is already using.
 
 ## Stage 4 rules (as built) · 2010–2019 · Battling the Truth
 
@@ -258,7 +261,7 @@ Bars are set on full-game wins (through the Truth): about half of winning bot ru
 ### The Truth clock (replaces Heat)
 - Starts at **1 o'clock** (2 with On File). **Midnight loses the run**, at any point, boss fight included.
 - **Every enemy's 2nd and 5th move moves it forward 1 hour.** Nothing else ticks it on its own.
-- **Winding it back:** Carbon Footprint (−1 hour), Net Zero by 2050 (−2 hours, once a run).
+- **Winding it back:** Carbon Offsets (−1 hour, a 1 in 4 gamble), and Carbon Capture to stop the next tick.
 - Heat is worth nothing in stage 4: old cards keep only their other effects (Lobby Congress still removes Hold; Advertorial still gives Cover; Fund a Think Tank does nothing). The Think Tank item still gives Cover.
 
 ### Transition (multinational → Big Oil)
@@ -279,10 +282,9 @@ Bars are set on full-game wins (through the Truth): about half of winning bot ru
 | Climate Breakdown | 1 | Dirty: remove 12 Hold. Oil sells +$2B this round. | 15 Hold | $30B |
 | Astroturfing | 1 | Dirty: remove 7 Hold. +4 Cover. | 9 Hold, +6 Cover | $25B |
 | Sustainability Report | 1 | Bury: remove 9 Hold. Draw 1. | 12 Hold | $25B |
-| Eco-Friendly Rebrand | 1 · $3B | +8 Cover. Draw 1. | +11 Cover | $22B |
+| Carbon Capture | 1 · $5B | The next move that would move the clock on doesn't. | Costs $2B | $30B |
 | Bridge Fuel | 0 | +2 AP. Once a round. | +3 AP | $30B |
-| Carbon Footprint | 1 | The clock goes back 1 hour. Draw 1. | 0 AP | $35B (Uncommon) |
-| Net Zero by 2050 | 1 | The clock goes back 2 hours. Once a run. | — | $40B (Rare) |
+| Carbon Offsets | 1 · $4B | The clock goes back 1 hour. 1 in 4: the forest burns down, and it goes on 1 instead. | Back 2 hours | $30B (Uncommon) |
 | Influencers | 0 · $3B | The next card's Hold damage or Cover is doubled. Only one in the game; can't be duplicated or destroyed by the clear-out. | — | $35B (Rare) |
 | Green Project (junk) | 1 | Does nothing. Not forced: it sits in your hand until you pay to play it. | — | — |
 
@@ -333,3 +335,10 @@ The look is a cheerful corporate sustainability report made by a tech start-up: 
 - **Type:** a rounded geometric sans (Poppins or Nunito) throughout. No serifs, no ink and no ledger texture: the first era where the ledger is hidden.
 - **Shapes:** flat colour with no gradients, rounded cards, pill buttons, soft drop shadows and plenty of white space. Meters are infographics (donut charts, big percentages, smiling icons). The Truth clock is a clean, minimal analogue face.
 - **Icons:** flat vector with the 2013 long shadow, in a solid green circle with a white subject. ChatGPT style line: *Circular game icon, 2010s flat vector design, solid leaf-green circle with a crisp white subject and a long diagonal flat shadow, minimal shapes, no gradients, no outlines, no text, transparent background outside the circle.*
+
+
+## Sound
+Synthesised in the browser (src/sound.ts); hear them all at `?preview=sounds`. Each era arrives with its own sound: a steam whistle (1860s), a muted brass fanfare (1900s), a wobbling organ chord (1970s), a start-up chime (2010s). The enemy turn types out on a stock ticker in stages 1–2, a telex in stage 3 and a phone notification in stage 4. Events: a tick, tock and chime when the Truth clock moves on (a ratchet when it goes back), three deep bell strokes at midnight, a dissonant swell when the Truth changes phase, a rising shimmer when an enemy regains Hold, coins slipping away when gold is taken, paper slapped down for junk, and a fanfare with the cash register for the win.
+
+## Glossary
+Settings → Glossary: plain definitions of the game's words, by topic and stage. It never mentions gold or the fortune.

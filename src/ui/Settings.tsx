@@ -5,6 +5,7 @@ import { loadAdmin, loadReplay, saveAdmin, saveReplay, type Replay } from '../st
 import type { AdminOp } from '../engine/engine'
 import type { CardKey } from '../engine/data'
 import { AdminTools } from './AdminPanel'
+import { Glossary } from './Glossary'
 import { install } from '../install'
 import { OPEN_SETTINGS, openSettings, useInstallable } from './settingsBus'
 
@@ -27,9 +28,10 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
   const [muted, setM] = useState(isMuted())
   const [replay, setReplay] = useState<Replay>(loadReplay())
   const [confirmQuit, setConfirmQuit] = useState(false)
+  const [glossary, setGlossary] = useState(false)
   const { installable, installed, ios } = useInstallable()
   useEffect(() => {
-    const show = () => { setVol(getVolume()); setM(isMuted()); setConfirmQuit(false); setOpen(true) }
+    const show = () => { setVol(getVolume()); setM(isMuted()); setConfirmQuit(false); setGlossary(false); setOpen(true) }
     window.addEventListener(OPEN_SETTINGS, show)
     return () => window.removeEventListener(OPEN_SETTINGS, show)
   }, [])
@@ -40,6 +42,7 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
     return () => window.removeEventListener('keydown', esc)
   }, [open])
   if (!open) return null
+  if (glossary) return <Glossary onClose={() => setGlossary(false)} />
 
   const pct = Math.round(vol * 100)
   return (
@@ -77,6 +80,11 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
                 onClick={() => { setReplay(v); saveReplay(v); play('click') }}>{v === 'normal' ? 'Play it out' : v === 'fast' ? 'Fast' : 'Off'}</button>
             ))}
           </div>
+        </div>
+
+        <div className="settings__row settings__row--inline">
+          <span className="cl-label">Glossary</span>
+          <button type="button" className="cl-btn cl-btn--small" onClick={() => { play('click'); setGlossary(true) }}>What the words mean</button>
         </div>
 
         <div className="settings__row">

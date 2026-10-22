@@ -13,7 +13,7 @@ export interface Tally {
 }
 export const newTally = (): Tally => ({ damage: {}, blocks: 0, absorbed: 0, destroyed: 0, cooled: 0, rounds: 0, quick: 0 })
 
-export type TacticKey = 'leanOperation' | 'fortress' | 'oilBaron' | 'spinDoctor' | 'lawyeredUp' | 'blitz'
+export type TacticKey = 'leanOperation' | 'fortress' | 'oilBaron' | 'spinDoctor' | 'lawyeredUp' | 'blitz' | 'capturedState' | 'oneMinute' | 'businessAsUsual'
 export const TACTICS: Record<TacticKey, { name: string; text: string; icon: string }> = {
   leanOperation: { name: 'Lean Operation', text: 'A small deck, cut to the bone.', icon: 'streamline' },
   fortress: { name: 'Fortress', text: 'Nothing got through.', icon: 'securityDetail' },
@@ -21,10 +21,14 @@ export const TACTICS: Record<TacticKey, { name: string; text: string; icon: stri
   spinDoctor: { name: 'Spin Doctor', text: 'The story never caught up with you.', icon: 'lobbyCongress' },
   lawyeredUp: { name: 'Lawyered Up', text: 'Every problem had a solicitor.', icon: 'patentThicket' },
   blitz: { name: 'Blitz', text: 'They never saw you coming.', icon: 'telegraphLine' },
+  capturedState: { name: 'Captured State', text: 'Every law had your name on it.', icon: 'onThePayroll' },
+  oneMinute: { name: 'One Minute to Midnight', text: 'Close. Not close enough.', icon: 'climateBreakdown' },
+  businessAsUsual: { name: 'Business as Usual', text: 'The Truth never got going.', icon: 'sustainabilityReport' },
 }
 
 /** What each tactic measures, for a finished run. */
-export function tacticScores(t: Tally, deckSize: number, oilSold: number): Record<TacticKey, number> {
+/** `clock` is the hour the Truth clock ended at (0 if the game didn't reach it). */
+export function tacticScores(t: Tally, deckSize: number, oilSold: number, clock = 0): Record<TacticKey, number> {
   const dealt = Object.values(t.damage).reduce((a, b) => a + b, 0)
   return {
     leanOperation: deckSize <= CONFIG.tactics.leanDeckMax ? t.destroyed : 0,
@@ -33,13 +37,16 @@ export function tacticScores(t: Tally, deckSize: number, oilSold: number): Recor
     spinDoctor: t.cooled,
     lawyeredUp: dealt ? (t.damage.Legal ?? 0) / dealt : 0,
     blitz: t.rounds ? t.quick / t.rounds : 0,
+    capturedState: dealt ? (t.damage.Lobby ?? 0) / dealt : 0,
+    oneMinute: clock >= CONFIG.clockMax - 1 ? 1 : 0, // beat the Truth at 11 o'clock
+    businessAsUsual: clock > 0 && clock <= CONFIG.tactics.earlyHour ? 1 : 0, // beat the Truth before it got going
   }
 }
 
 /** The badge a won game earns: the tactic that stands out most against its bar, or none. */
-export function tacticFor(t: Tally | undefined, deckSize: number, oilSold: number): TacticKey | null {
+export function tacticFor(t: Tally | undefined, deckSize: number, oilSold: number, clock = 0): TacticKey | null {
   if (!t) return null
-  const s = tacticScores(t, deckSize, oilSold)
+  const s = tacticScores(t, deckSize, oilSold, clock)
   let best: TacticKey | null = null, bestRatio = 1
   for (const k of Object.keys(s) as TacticKey[]) {
     const ratio = s[k] / CONFIG.tactics.bar[k]

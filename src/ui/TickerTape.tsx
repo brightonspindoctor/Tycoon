@@ -8,9 +8,20 @@ import type { Replay } from '../storage'
 
 const CUE: Record<Beat['kind'], Cue | null> = { enemy: 'ticker', fire: 'fire', money: 'hit', cards: 'ticker', shuffle: 'shuffle', oil: 'ink', info: 'click', board: 'stamp', gold: 'hit' }
 
-interface Props { beats: Beat[]; speed: Replay; onBeat: (b: Beat | null) => void; onDone: () => void }
+interface Props { beats: Beat[]; speed: Replay; stage?: number; onBeat: (b: Beat | null) => void; onDone: () => void }
 
-export function TickerTape({ beats, speed, onBeat, onDone }: Props) {
+/** The sound for a line of the tape: what happened, then the era's own enemy-turn sound. */
+function cueFor(b: Beat, stage: number): Cue | null {
+  if (b.title === 'The Truth clock' || /the clock moves on/.test(b.text)) return /goes back|doesn't move/.test(b.text) ? 'rewind' : 'tick'
+  if (/gold from your fortune/.test(b.text)) return 'goldLoss'
+  if (/\+\d+ Hold|Regains \d+ Hold/.test(b.text)) return 'heal'
+  if (b.kind === 'cards') return 'junk'
+  if (b.kind === 'money' && !b.text.includes('−')) return 'coin'
+  if (b.kind === 'enemy') return stage >= 4 ? 'ping' : stage === 3 ? 'telex' : 'ticker'
+  return CUE[b.kind]
+}
+
+export function TickerTape({ beats, speed, stage = 1, onBeat, onDone }: Props) {
   const [i, setI] = useState(0)
   const [typed, setTyped] = useState(0)
   const fast = speed === 'fast'
@@ -29,7 +40,7 @@ export function TickerTape({ beats, speed, onBeat, onDone }: Props) {
   useEffect(() => {
     if (!b) { finish(); return }
     onBeat(b)
-    const cue = b.kind === 'money' && !b.text.includes('−') ? 'coin' : CUE[b.kind]
+    const cue = cueFor(b, stage)
     if (cue) play(cue)
   }, [i]) // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -105,6 +105,7 @@ export interface Run {
   clock?: number // stage 4: the Truth clock, 1 to clockMax; midnight loses the run
   met?: ThreatKind[] // stage 4 enemies already met this run: never the same one twice
   freeDestroys?: number // becoming Big Oil: free destroys left in the clear-out
+  captured?: boolean // Carbon Capture: the next move that would move the clock on doesn't
   amplify?: boolean // Influencers: the next card's Hold damage or Cover is doubled
   played?: number // cards played this turn (a Subpoena caps it)
   uniques?: CardKey[] // one-in-the-game cards already had: never offered again
@@ -298,6 +299,7 @@ function heat(r: Run, n: number, why: string, who?: number, quiet = false) {
 function moveClock(r: Run, n: number, why: string, who?: number) {
   if (r.stage !== 4 || n === 0 || r.phase === 'lost') return
   const before = r.clock ?? CONFIG.clockStart
+  if (n > 0 && r.captured) { r.captured = false; const msg = `Carbon Capture: ${why} doesn't move the clock.`; say(r, msg); if (!captured) beat(r, 'board', 'The Truth clock', msg, who); return }
   const won = r.phase === 'roundWon' || r.phase === 'stageComplete' // a win at the buzzer still counts
   r.clock = Math.max(1, Math.min(won ? CONFIG.clockMax - 1 : CONFIG.clockMax, before + n))
   if (r.clock === before) return
@@ -918,6 +920,7 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (d.scrap === 'junk' && !r.hand.some(x => x.id !== c.id && CARDS[x.key].junk)) return { ok: false, why: 'No junk in hand' }
   if (c.key === 'payDividend' && r.exposure === 0) return { ok: false, why: 'The board is happy' }
   if (c.key === 'personalLawyer' && r.goldShield) return { ok: false, why: 'Already retained' }
+  if (d.capture && r.captured) return { ok: false, why: 'Already capturing' }
   if (BUILDS.includes(c.key) && !canBuild(r)) return { ok: false, why: 'No free plot' }
   if ((c.key === 'bucket' || c.key === 'fireBrigade' ) && !r.fire) return { ok: false, why: 'No fire' }
   if (d.family === 'Skim' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
@@ -1010,7 +1013,12 @@ function play(r: Run, cardId: number, target?: number) {
     }
     if (d.cover) r.cover += d.cover * amp
     if (d.draw) drawCards(r, d.draw)
-    if (d.clock) moveClock(r, d.clock, d.name)
+    if (d.capture) { r.captured = true; say(r, `${d.name}: the next move that would move the clock on won't.`) }
+    if (d.clock) {
+      const burnt = d.backfire !== undefined && next(r) < d.backfire // Carbon Offsets: sometimes the forest burns down
+      if (burnt) say(r, `${d.name}: the forest burned down.`)
+      moveClock(r, burnt ? 1 : d.clock, burnt ? `${d.name} (the forest burned down)` : d.name)
+    }
     if (d.apNext) r.pending.ap += d.apNext
     if (d.exposure !== undefined && d.exposure !== 0 && d.family !== 'Skim') expose(r, d.exposure, d.name)
     if (d.roundBoost) { r.roundBoost += d.roundBoost; say(r, `${d.name}: oil sells +$${d.roundBoost} for the rest of the round.`) }

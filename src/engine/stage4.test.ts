@@ -123,13 +123,29 @@ describe('the Truth clock', () => {
     expect(r.loss?.reason).toBe('midnight')
   })
 
-  it('Carbon Footprint winds it back an hour; Net Zero two, once a run', () => {
-    let r = inStage4(['carbonFootprint', 'netZero'])
-    r.clock = 6
-    r = playIt(r, 'carbonFootprint'); expect(r.clock).toBe(5)
-    r = playIt(r, 'netZero'); expect(r.clock).toBe(3)
-    expect(r.deck.some(c => c.key === 'netZero')).toBe(false)
-    expect(r.uniques).toContain('netZero')
+  it('Carbon Offsets winds it back an hour, but 1 in 4 times the forest burns down and it goes on', () => {
+    let back = 0, on = 0
+    for (let seed = 1; seed <= 400; seed++) {
+      const r = inStage4(['carbonOffsets'])
+      r.clock = 6; r.rng = seed
+      const after = playIt(r, 'carbonOffsets')
+      if (after.clock === 5) back++; else if (after.clock === 7) on++
+    }
+    expect(back + on).toBe(400)
+    expect(on / 400).toBeGreaterThan(0.17)
+    expect(on / 400).toBeLessThan(0.33)
+  })
+
+  it('Carbon Capture stops the next move that would move the clock on', () => {
+    let r = inStage4(['carbonCapture'], 'greenPoliticians')
+    r = playIt(r, 'carbonCapture')
+    expect(r.captured).toBe(true)
+    const start = r.clock
+    r = moves(r, 2) // the 2nd move would move it on
+    expect(r.clock).toBe(start)
+    expect(r.captured).toBe(false)
+    r = moves(r, 3) // the 5th does
+    expect(r.clock).toBe(start! + 1)
   })
 })
 
@@ -237,15 +253,15 @@ describe('the Truth', () => {
 
 describe('stage 4 cards', () => {
   it('Influencers doubles the next card\'s Hold damage or Cover, costing $3 each play', () => {
-    let r = inStage4(['influencers', 'sustainabilityReport', 'ecoRebrand'], 'fracking')
+    let r = inStage4(['influencers', 'sustainabilityReport', 'astroturfing'], 'fracking')
     const cash = r.capital
     r = playIt(r, 'influencers')
     expect(r.capital).toBe(cash - 3)
     const hold = r.threats[0].hold
     r = playIt(r, 'sustainabilityReport')
     expect(hold - r.threats[0].hold).toBe(18) // Bury 9, doubled (Fracking neither weak to nor resists it)
-    r = playIt(r, 'ecoRebrand')
-    expect(r.cover).toBe(8) // only the next card
+    r = playIt(r, 'astroturfing')
+    expect(r.cover).toBe(4) // only the next card
   })
 
   it('Influencers is never offered again once yours, and can\'t be duplicated or cleared out', () => {
@@ -300,10 +316,10 @@ describe('fixes after the first full games', () => {
   })
 
   it('winding the Truth clock back counts towards Spin Doctor', () => {
-    let r = inStage4(['carbonFootprint'])
-    r.clock = 6
+    let r = inStage4(['carbonOffsets'])
+    r.clock = 6; r.rng = 2
     const before = r.tally?.cooled ?? 0
-    r = playIt(r, 'carbonFootprint')
-    expect((r.tally?.cooled ?? 0) - before).toBe(CONFIG.tactics.clockHourWorth)
+    r = playIt(r, 'carbonOffsets')
+    expect((r.tally?.cooled ?? 0) - before).toBe(r.clock === 5 ? CONFIG.tactics.clockHourWorth : 0)
   })
 })

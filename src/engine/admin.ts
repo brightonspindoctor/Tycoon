@@ -21,7 +21,7 @@ export const ADMIN_DEFAULTS: AdminStart = { stage: 2, start: 1, bonus: 'threeOil
 const STRONG_1: CardKey[] = ['payWages', 'lawyerUp', 'fireBrigade', 'dynamite']
 const STRONG_2: CardKey[] = ['patentThicket', 'espionage', 'derrick', 'telegraphLine', 'personalLawyer']
 const STRONG_3: CardKey[] = ['retainCounsel', 'buryEvidence', 'telex', 'restructure', 'thinkTank']
-const STRONG_4: CardKey[] = ['climateBreakdown', 'sustainabilityReport', 'bridgeFuel', 'ecoRebrand', 'recycling']
+const STRONG_4: CardKey[] = ['climateBreakdown', 'sustainabilityReport', 'bridgeFuel', 'carbonCapture', 'recycling']
 
 export function adminStart(seed: number, o: AdminStart): Run {
   let r = newRun(seed, o.bonus)

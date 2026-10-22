@@ -75,6 +75,10 @@ export default function App() {
     if (a.type === 'sellWell') play('coin')
     const replaying = nextRun.reportSeq !== run.reportSeq && nextRun.report.length > 0 && loadReplay() !== 'off'
     if (nextRun.fire > run.fire && !replaying) play('fire')
+    // stage 4: the clock and the Truth, when it happens on your turn rather than on the tape
+    if (!replaying && (nextRun.clock ?? 0) !== (run.clock ?? 0) && nextRun.stage === 4 && run.stage === 4) play((nextRun.clock ?? 0) > (run.clock ?? 0) ? 'tick' : 'rewind')
+    const phaseOf = (x: Run) => x.threats.find(t => t.kind === 'truth')?.phase ?? 0
+    if (phaseOf(nextRun) > phaseOf(run)) setTimeout(() => play('phase'), 150)
     if (nextRun.capital < run.capital - 1 && a.type === 'endTurn' && !replaying) { play('hit'); setShake(true); setTimeout(() => setShake(false), 350) }
     if (replaying) replay(nextRun, a.type === 'endTurn' ? run : nextRun)
     if (nextRun.stage > run.stage) setEraTo(nextRun.stage) // a new era: turn the page
@@ -140,7 +144,7 @@ export default function App() {
       saveRun({
         id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run),
         outcome: won ? 'Chairman' : LOST[run.loss?.reason ?? 'bankrupt'], gold: won ? run.gold : null, completed: won, stageGold: run.gold, // your gold is the score
-        tactic: won ? (t => t ? TACTICS[t].name : undefined)(tacticFor(run.tally, run.deck.length, run.stats.oilSold)) : undefined,
+        tactic: won ? (t => t ? TACTICS[t].name : undefined)(tacticFor(run.tally, run.deck.length, run.stats.oilSold, run.stage >= 4 ? run.clock : 0)) : undefined,
       })
       setBailout(trustFundOffered(CONFIG.trustFundStreak))
     }
@@ -181,7 +185,7 @@ export default function App() {
   else if (tape) body = (
     <>
       {mobile ? <MobileGame run={tape.frozen} dispatch={() => {}} acting={acting} /> : <GameScreen run={tape.frozen} dispatch={() => {}} acting={acting} />}
-      <TickerTape key={tape.frozen.reportSeq + ':' + tape.beats.length} beats={tape.beats} speed={loadReplay()} onBeat={setActing} onDone={() => setTape(null)} />
+      <TickerTape key={tape.frozen.reportSeq + ':' + tape.beats.length} beats={tape.beats} speed={loadReplay()} stage={tape.frozen.stage} onBeat={setActing} onDone={() => setTape(null)} />
     </>
   )
   else body = (

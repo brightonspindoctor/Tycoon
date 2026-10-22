@@ -35,6 +35,17 @@ describe('hidden tactics', () => {
     expect(tacticFor(with_({}), 20, bar.oilBaron + 30)).toBe('oilBaron')
   })
 
+  it('the clock badges: One Minute to Midnight beats the rest; Business as Usual needs an early hour', () => {
+    expect(tacticFor(with_({ damage: { Legal: 90, Dirty: 10 } }), 20, 0, 11)).toBe('oneMinute')
+    expect(tacticFor(with_({}), 20, 0, CONFIG.tactics.earlyHour)).toBe('businessAsUsual')
+    expect(tacticFor(with_({}), 20, 0, CONFIG.tactics.earlyHour + 1)).toBeNull()
+    expect(tacticFor(with_({}), 20, 0, 0)).toBeNull() // no clock: the game didn't reach the Truth
+  })
+
+  it('Captured State: most of the damage from Lobby cards', () => {
+    expect(tacticFor(with_({ damage: { Lobby: 40, Dirty: 30, Legal: 30 } }), 20, 0)).toBe('capturedState')
+  })
+
   it('Lean Operation needs a small deck as well as cards destroyed', () => {
     expect(tacticFor(with_({ destroyed: 12 }), CONFIG.tactics.leanDeckMax, 0)).toBe('leanOperation')
     expect(tacticFor(with_({ destroyed: 12 }), CONFIG.tactics.leanDeckMax + 1, 0)).toBeNull()

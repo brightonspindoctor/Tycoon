@@ -177,6 +177,8 @@ export const CONFIG = {
     leanDeckMax: 15, // Lean Operation: the deck you finish with is this size or smaller
     blockWorth: 6, // Fortress: each blocked move counts as this much Cover used
     clockHourWorth: 10, // Spin Doctor: each hour you wind the Truth clock back counts as this much Heat cooled
-    bar: { leanOperation: 10, fortress: 75, oilBaron: 232, spinDoctor: 50, lawyeredUp: 0.61, blitz: 0.24 }, // set on full-game (stage 4) wins: about half earn a badge
+    earlyHour: 2, // Business as Usual: beat the Truth with the clock at this hour or earlier
+    // set on full-game (stage 4) wins: about 6 in 10 earn a badge; the clock badges are yes-or-no, so their bar sets how strongly they win out
+    bar: { leanOperation: 10, fortress: 75, oilBaron: 232, spinDoctor: 50, lawyeredUp: 0.61, blitz: 0.24, capturedState: 0.25, oneMinute: 0.5, businessAsUsual: 0.6 },
   },
 } as const

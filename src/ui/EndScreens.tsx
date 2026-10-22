@@ -26,7 +26,7 @@ function Progress({ reached, dead }: { reached: number; dead: boolean }) {
 }
 
 export function CrashOut({ run, bailout, onAgain, onHistory }: { run: Run; bailout?: boolean; onAgain: () => void; onHistory: () => void }) {
-  useEffect(() => { play('stamp'); const t = setTimeout(() => play('straw'), 500); return () => clearTimeout(t) }, [])
+  useEffect(() => { play('stamp'); const t = setTimeout(() => play(run.loss?.reason === 'midnight' ? 'midnight' : 'straw'), 500); return () => clearTimeout(t) }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const st = run.stage
   const reached = roundsReached(run)
   const reason = run.loss?.reason ?? 'bankrupt'
@@ -79,7 +79,7 @@ export function CrashOut({ run, bailout, onAgain, onHistory }: { run: Run; bailo
 }
 
 export function StageComplete({ run, onMenu, onHistory, onContinue, onScoreboard }: { run: Run; onMenu: () => void; onHistory: () => void; onContinue: () => void; onScoreboard: () => void }) {
-  useEffect(() => { play('register'); const t = setTimeout(() => play('win'), 900); return () => clearTimeout(t) }, [])
+  useEffect(() => { if (run.stage >= 4) return; play('register'); const t = setTimeout(() => play('win'), 900); return () => clearTimeout(t) }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const st = run.stage
   if (st >= 4) return <Victory run={run} onMenu={onMenu} onScoreboard={onScoreboard} />
   const last = st >= 4
@@ -88,7 +88,7 @@ export function StageComplete({ run, onMenu, onHistory, onContinue, onScoreboard
     : st === 2 ? { title: 'The proxy fight is won', sub: 'The board is yours again, for now. A war is coming, and after it, the oil shocks.' }
     : { title: 'The Geneva Climate Summit is over', sub: 'The declaration calls for further research. Your delegates helped write it. Now everyone wants it to look green.' }
   const wells = run.plots.filter(Boolean).length
-  const tactic = last ? tacticFor(run.tally, run.deck.length, run.stats.oilSold) : null
+  const tactic = last ? tacticFor(run.tally, run.deck.length, run.stats.oilSold, run.stage >= 4 ? run.clock : 0) : null
   return (
     <div className="screen end" data-theme={ERA_THEME[st] ?? 'victorian'}>
       <header className="end__head">
@@ -163,7 +163,8 @@ export function StageComplete({ run, onMenu, onHistory, onContinue, onScoreboard
 
 /** The end of the game: Big Oil beats the Truth. Your gold is the score. */
 function Victory({ run, onMenu, onScoreboard }: { run: Run; onMenu: () => void; onScoreboard: () => void }) {
-  const tactic = tacticFor(run.tally, run.deck.length, run.stats.oilSold)
+  useEffect(() => { const t = setTimeout(() => play('victory'), 300); return () => clearTimeout(t) }, [])
+  const tactic = tacticFor(run.tally, run.deck.length, run.stats.oilSold, run.stage >= 4 ? run.clock : 0)
   return (
     <div className="screen end victory" data-theme="greenwash">
       <img className="victory__banner" src={`${import.meta.env.BASE_URL}art/screens/victory.jpg`} alt="A chairman raises a glass of champagne in a glass boardroom while the city burns outside" />

@@ -838,3 +838,11 @@ button.m-threat { cursor: pointer; }
 .m .victory__banner { height: 180px; }
 .m .scoreboard__banner { height: 140px; }
 .bigoil__loan .cl-slot__desc .cl-minus { display: block; }
+
+/* the glossary, opened from Settings */
+.glossary { width: min(560px, 100%); max-height: min(86vh, 820px); display: flex; flex-direction: column; }
+.glossary__body { overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding-right: 4px; }
+.glossary__section h3 { margin: 0 0 6px; color: var(--accent); }
+.glossary__section dl { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.glossary__term dt { font-weight: 700; }
+.glossary__term dd { margin: 2px 0 0; color: var(--ink-muted); line-height: 1.4; }
