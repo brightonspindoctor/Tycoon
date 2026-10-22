@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, apCost, canPlay, damageFor, debtPerTurn, intent, intentText, isAttack, netPrice, newRun, targetsFor, type Run } from './engine'
+import { act, apCost, highestWell, infiltrateTarget, rumbleTarget, weakestWell, canPlay, damageFor, debtPerTurn, intent, intentText, isAttack, netPrice, newRun, targetsFor, type Run } from './engine'
 import { lossStreak, type RunRecord } from '../storage'
 import { CONFIG } from './config'
 import { money } from './format'
@@ -779,5 +779,31 @@ describe('fire holds the round open', () => {
     after = act(after, { type: 'endTurn' }) // stage 1: the fire takes a Well
     expect(after.plots.filter(Boolean).length).toBe(1)
     expect(after.phase).toBe('turn')
+  })
+})
+
+describe('unlocks from beating bosses', () => {
+  it('beating the Baron once: later runs start with 1 more storage', () => {
+    expect(newRun(5, 'threeOil').storage).toBe(CONFIG.startStorage)
+    expect(newRun(5, 'threeOil', { baron: true }).storage).toBe(CONFIG.startStorage + 1)
+  })
+
+  it('Old Faithful: a Well that never runs dry, survives everything, and carries through the stages', () => {
+    const r = newRun(5, 'oldFaithful')
+    expect(r.plots[0]).toMatchObject({ faithful: true, output: 1 })
+    expect(highestWell(r)).toBe(-1) // fires, the Claim Jumper and the Blowout have nothing to aim at
+    expect(rumbleTarget(r)).toBe(-1)
+    expect(weakestWell(r)).toBe(-1) // a Firebreak can't sacrifice it
+    expect(infiltrateTarget(r)).toBe(-1)
+    r.ap = 3
+    const sold = act(r, { type: 'sellWell', plot: 0 })
+    expect(sold.plots[0]?.faithful).toBe(true) // not for sale
+  })
+
+  it('Old Faithful is never a target when other Wells are standing', () => {
+    const r = newRun(5, 'oldFaithful')
+    r.plots.push({ output: 1, reserve: 3 })
+    expect(highestWell(r)).toBe(1)
+    expect(weakestWell(r)).toBe(1)
   })
 })

@@ -9,8 +9,10 @@ import { next, pick, shuffle } from './rng'
 import { newTally, type Tally } from './tactics'
 
 export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean; free?: boolean; up?: boolean; up2?: boolean; faded?: boolean } // free: costs no AP · up: upgraded · up2: upgraded twice (stage 3) · faded: unused
-export interface Well { output: number; reserve: number; unstable?: boolean; field?: boolean; lasting?: boolean; rig?: boolean } // a Field (an old Well), a stage 2 Well (lasting) and a stage 3 Rig never run dry
-export const neverDry = (w: Well) => !!(w.field || w.lasting || w.rig)
+export interface Well { output: number; reserve: number; unstable?: boolean; field?: boolean; lasting?: boolean; rig?: boolean; faithful?: boolean } // faithful: Old Faithful, which nothing can touch // a Field (an old Well), a stage 2 Well (lasting) and a stage 3 Rig never run dry
+export const neverDry = (w: Well) => !!(w.field || w.lasting || w.rig || w.faithful)
+/** Wells enemies, fires and Firebreaks can go for: every one but Old Faithful. */
+const exposed = (w: Well | null): w is Well => !!w && !w.faithful
 export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string; stopped?: boolean; cover?: number; poison?: Poison[] }
 /** Damage still to land on an enemy as one of your turns ends (Infiltrate). */
 export interface Poison { turn: number; family: Family; power: number }
@@ -209,11 +211,11 @@ export function debtPerTurn(r: Run): number {
 export const prospectAP = (r: Run, c?: Card) => (c ? cardDef(c).ap! : CARDS.prospect.ap!) + (r.modifier === 'hardRock' ? 1 : 0)
 export const apCost = (r: Run, c: Card) => (c.free ? 0 : isProspect(c.key) ? prospectAP(r, c) : cardDef(c).ap ?? 0)
 export const freePlot = (r: Run) => r.plots.findIndex(p => p === null)
-export const highestWell = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (r.plots[i]) return i; return -1 }
+export const highestWell = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (exposed(r.plots[i])) return i; return -1 }
 /** Where a Rumble lands: your highest stable Well, or if every Well is already unstable, the highest one. */
 /** Where a Blow lands: the Well the last Rumble shook (the highest-numbered unstable one), or −1. */
 export const blowTarget = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (r.plots[i]?.unstable) return i; return -1 }
-export const rumbleTarget = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (r.plots[i] && !r.plots[i]!.unstable) return i; return highestWell(r) }
+export const rumbleTarget = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (exposed(r.plots[i]) && !r.plots[i]!.unstable) return i; return highestWell(r) }
 export const liveThreats = (r: Run) => r.threats.filter(t => !t.beaten)
 export const wellCount = (r: Run) => r.plots.filter(Boolean).length
 const pumps = (w: Well | null) => (w && !w.unstable ? (neverDry(w) ? w.output : Math.min(w.output, w.reserve)) : 0)
@@ -351,6 +353,7 @@ function badBloodRoll(r: Run): boolean {
   return false
 }
 function loseWell(r: Run, i: number, how: 'burnt' | 'stolen' | 'lost' | 'dry') {
+  if (r.plots[i]?.faithful) return // Old Faithful stands
   if (!r.plots[i]) return
   r.plots[i] = null
   if (r.marked === i) r.marked = null
@@ -361,12 +364,14 @@ function loseWell(r: Run, i: number, how: 'burnt' | 'stolen' | 'lost' | 'dry') {
 }
 
 // ---------------------------------------------------------------- new run
-export function newRun(seed: number, bonus: BonusKey): Run {
+/** What earlier runs have unlocked: kept by the app, passed in so the engine stays pure. */
+export interface Unlocks { baron?: boolean; proxy?: boolean }
+export function newRun(seed: number, bonus: BonusKey, unlocks: Unlocks = {}): Run {
   const r: Run = {
     seed, rng: seed, bonus, phase: 'shop', stage: 1, round: 0, turn: 0,
     capital: CONFIG.startCapital, gold: 0, debt: bonus === 'trustFund' ? CONFIG.trustFundDebt : CONFIG.startDebt, ap: 0, cover: 0, nextId: 1,
     deck: [], draw: [], hand: [], discard: [], plots: [], oil: bonus === 'threeOil' ? 3 : 0,
-    storage: CONFIG.startStorage, fire: 0, marked: null, threats: [], modifier: null,
+    storage: CONFIG.startStorage + (unlocks.baron ? CONFIG.baronSilo : 0), fire: 0, marked: null, threats: [], modifier: null,
     short: 0, freight: 0, pending: { ap: 0, audit: false, refuse: false, margin: 0, cease: 0, prorate: false }, current: { audit: false, refuse: false, prorate: false },
     items: [], destroyCost: CONFIG.destroyCost, prospectPrice: CONFIG.prospectPrice,
     shop: { cards: [], item: null, loanTaken: false, prospectSold: false, bucketSold: false, boon: null, dividendPaid: false }, ledger: [], events: [],
@@ -381,6 +386,7 @@ export function newRun(seed: number, bonus: BonusKey): Run {
   if (bonus === 'extraProspect') r.deck.push(card(r, 'prospect'))
   if (bonus === 'pettyCash') r.deck.push(card(r, 'pettyCash'))
   if (bonus === 'gearGraft') r.deck.push(card(r, 'improveGear'), card(r, 'hardGraft'))
+  if (bonus === 'oldFaithful') r.plots = [{ output: 1, reserve: 0, faithful: true }]
   startRound(r, 1) // straight into the first fight; the Land Office opens after it
   return r
 }
@@ -704,14 +710,14 @@ function drawUpTo(r: Run, n: number) { while (r.hand.length < n && drawOne(r)); 
 function drawCards(r: Run, n: number): number { let got = 0; for (let i = 0; i < n && drawOne(r); i++) got++; return got }
 
 /** "Well No. 2" or "Field No. 2". */
-export const plotName = (r: Run, i: number) => `${r.plots[i]?.rig ? 'Rig' : r.plots[i]?.field ? 'Field' : 'Well'} No. ${i + 1}`
+export const plotName = (r: Run, i: number) => (r.plots[i]?.faithful ? 'Old Faithful' : `${r.plots[i]?.rig ? 'Rig' : r.plots[i]?.field ? 'Field' : 'Well'} No. ${i + 1}`)
 /** What the Saboteur goes for: your best Field, or your best Well if you have none. */
 export function infiltrateTarget(r: Run): number {
   let best = -1
   r.plots.forEach((w, i) => {
     const b = best >= 0 ? r.plots[best]! : null
     const score = (x: Well) => (x.field ? 100 : 0) + x.output * 10 + Math.min(9, x.reserve)
-    if (w && (!b || score(w) > score(b))) best = i
+    if (exposed(w) && (!b || score(w) > score(b))) best = i
   })
   return best
 }
@@ -1038,7 +1044,7 @@ export const wellValue = (w: Well) => (w.rig ? CONFIG.rigValue : neverDry(w) ? C
 
 function sellWell(r: Run, plot: number) {
   const w = r.plots[plot]
-  if (r.ap < 1 || !w) return
+  if (r.ap < 1 || !w || w.faithful) return // Old Faithful isn't for sale
   r.ap -= 1
   const value = wellValue(w)
   loseWell(r, plot, 'lost')
@@ -1051,7 +1057,7 @@ export function weakestWell(r: Run): number {
   let best = -1
   r.plots.forEach((w, i) => {
     const b = best >= 0 ? r.plots[best]! : null
-    if (w && (!b || w.output < b.output || (w.output === b.output && w.reserve < b.reserve))) best = i
+    if (exposed(w) && (!b || w.output < b.output || (w.output === b.output && w.reserve < b.reserve))) best = i
   })
   return best
 }
@@ -1251,7 +1257,7 @@ function endTurn(r: Run) {
       case 'Picket': dmg += 2; break
       case 'Sabotage':
       { // one random Well
-        const standing = r.plots.map((w, i) => (w ? i : -1)).filter(i => i >= 0)
+        const standing = r.plots.map((w, i) => (exposed(w) ? i : -1)).filter(i => i >= 0)
         if (standing.length) { const i = pick(r, standing); loseWell(r, i, 'lost'); say(r, `${name} sabotaged Well No. ${i + 1}.`) }
         break
       }
@@ -1364,7 +1370,7 @@ export function incorporate(r: Run) {
   r.round = 0
   r.phase = 'incorporate'
   r.stageGold = r.gold
-  r.plots = r.plots.map(w => (w ? { output: CONFIG.stage2Output, reserve: w.reserve, field: true } : null))
+  r.plots = r.plots.map(w => (w ? { output: CONFIG.stage2Output, reserve: w.reserve, field: true, faithful: w.faithful } : null))
   for (const c of r.deck) if (c.key === 'prospect') { c.key = 'oldProspect'; c.uses = CARDS.oldProspect.uses; c.up = false }
   r.offer = [...INCORPORATE_OFFER_2]; r.picked = []
   r.skimBase = r.stats.skims
@@ -1391,7 +1397,7 @@ export function goMultinational(r: Run) {
   r.round = 0
   r.phase = 'incorporate'
   r.stageGold = r.gold
-  r.plots = r.plots.filter(Boolean).slice(0, CONFIG.maxPlots).map(() => ({ output: CONFIG.rigOutput, reserve: 0, rig: true }))
+  r.plots = r.plots.filter(Boolean).slice(0, CONFIG.maxPlots).map(w => ({ output: CONFIG.rigOutput, reserve: 0, rig: true, faithful: w!.faithful }))
   r.deck = r.deck.filter(c => c.key !== 'badBlood' && !c.temp) // no fires in stage 3
   for (const c of r.deck) {
     if (TO_DRY_LEASE.includes(c.key)) { c.key = 'dryLease'; c.uses = CARDS.dryLease.uses; c.up = false }

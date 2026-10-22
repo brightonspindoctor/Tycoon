@@ -370,3 +370,12 @@ describe('reworked items', () => {
     expect(itemCover(r)).toBe(2 * CONFIG.thinkTankCover + CONFIG.auditingFirmCover)
   })
 })
+
+describe('Old Faithful across the stages', () => {
+  it('stays Old Faithful as it becomes a Rig', () => {
+    const r = afterProxyFight()
+    r.plots = [{ output: 1, reserve: 0, field: true, faithful: true }]
+    const after = act(r, { type: 'continue' })
+    expect(after.plots[0]).toMatchObject({ rig: true, faithful: true, output: CONFIG.rigOutput })
+  })
+})

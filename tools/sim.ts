@@ -5,7 +5,7 @@ import type { BonusKey } from '../src/engine/data'
 import { botRun } from './bot'
 
 const N = Number(process.argv[2] ?? 2000)
-const bonuses: BonusKey[] = ['extraProspect', 'threeOil', 'pettyCash', 'gearGraft', 'trustFund']
+const bonuses: BonusKey[] = ['extraProspect', 'threeOil', 'pettyCash', 'gearGraft', 'trustFund', 'oldFaithful']
 const pct = (x: number, of = N) => `${((100 * x) / Math.max(1, of)).toFixed(1)}%`.padStart(6)
 const roundsCleared = (r: Run) => (r.phase === 'stageComplete' ? r.stage * 4 : (r.stage - 1) * 4 + Math.max(0, r.round - 1))
 

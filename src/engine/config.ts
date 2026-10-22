@@ -11,6 +11,7 @@ export const CONFIG = {
   oilPrice2: 4, // stage 2: the motor car arrives
   oilFloor: 1, // the price never drops below this, freight included
   startStorage: 3,
+  baronSilo: 1, // beat the Rival Baron once: every later run starts with this much more storage, silently
   siloStorage: 2, // the Land Office's Silo item (the boss reward Silo is separate)
   maxPlots: 5,
   wellReserve: 6, // barrels a Well pumps before it runs dry

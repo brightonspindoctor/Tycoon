@@ -91,6 +91,15 @@ export function lossStreak(runs: RunRecord[]): number {
 /** The Trust Fund is offered after enough stage 1 losses in a row. */
 export const trustFundOffered = (needed: number) => lossStreak(loadRuns()) >= needed
 
+const UNLOCKS = 'tycoon.unlocks'
+/** What beating bosses has unlocked for every later run: Baron → +1 storage, Proxy Fight → Old Faithful. */
+export function loadUnlocks(): { baron?: boolean; proxy?: boolean } {
+  try { return JSON.parse(localStorage.getItem(UNLOCKS) ?? '{}') } catch { return {} }
+}
+export function saveUnlock(k: 'baron' | 'proxy') {
+  try { localStorage.setItem(UNLOCKS, JSON.stringify({ ...loadUnlocks(), [k]: true })) } catch { /* not kept */ }
+}
+
 const ADMIN = 'tycoon.admin'
 /** Admin mode: playtest tools. Turned on in Settings, or with ?admin=1 (?admin=0 turns it off). */
 export function loadAdmin(): boolean {

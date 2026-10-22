@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { act, newRun, roundsReached, type Action, type AdminOp, type Beat, type Run } from './engine/engine'
 import type { BonusKey, CardKey } from './engine/data'
-import { loadAdmin, loadReplay, markWelcomed, saveAdmin, saveRun, trustFundOffered, welcomeSeen } from './storage'
+import { loadAdmin, loadReplay, loadUnlocks, markWelcomed, saveAdmin, saveRun, saveUnlock, trustFundOffered, welcomeSeen } from './storage'
 import { adminStart, type AdminStart } from './engine/admin'
 import { Welcome } from './ui/Welcome'
 import { TickerTape } from './ui/TickerTape'
@@ -120,6 +120,13 @@ export default function App() {
     })
   }, [])
 
+  // beating a boss unlocks something for every later run (never from an admin playtest)
+  useEffect(() => {
+    if (!run || run.admin || run.phase !== 'stageComplete') return
+    if (run.stage === 1) saveUnlock('baron')
+    if (run.stage === 2) saveUnlock('proxy')
+  }, [run])
+
   // record finished runs once
   useEffect(() => {
     if (!run || saved.current === run.seed || run.admin) return // admin playtests are never recorded
@@ -147,7 +154,7 @@ export default function App() {
   const [pendingBonus, setPendingBonus] = useState<BonusKey | null>(null)
   function start(bonus: BonusKey) {
     if (!welcomeSeen()) { setPendingBonus(bonus); setScreen('welcome'); return }
-    const r = newRun(Math.floor(Math.random() * 2 ** 31), bonus)
+    const r = newRun(Math.floor(Math.random() * 2 ** 31), bonus, loadUnlocks())
     setRun(r)
     setScreen('run')
     play('whistle')

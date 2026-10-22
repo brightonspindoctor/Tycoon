@@ -159,7 +159,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
           {plotMenu !== null && run.plots[plotMenu] && (
             <div className="m-plotmenu">
               <span>{plotName(run, plotMenu)}</span>
-              <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < 1} onClick={() => { dispatch({ type: 'sellWell', plot: plotMenu }); setPlotMenu(null) }}>Sell · 1 AP · {money(wellValue(run.plots[plotMenu]!), st, true)}</button>
+              <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < 1 || !!run.plots[plotMenu]?.faithful} onClick={() => { dispatch({ type: 'sellWell', plot: plotMenu }); setPlotMenu(null) }}>Sell · 1 AP · {money(wellValue(run.plots[plotMenu]!), st, true)}</button>
               <button type="button" className="cl-btn cl-btn--small" onClick={() => setPlotMenu(null)}>Keep</button>
             </div>
           )}

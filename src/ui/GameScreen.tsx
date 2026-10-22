@@ -103,7 +103,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
                   {burning && <span className="plot__flag plot__flag--fire">Burns next</span>}
                   {plotMenu === i && w && (
                     <div className="plot__menu">
-                      <button type="button" className="cl-btn" disabled={run.ap < 1} onClick={() => { dispatch({ type: 'sellWell', plot: i }); setPlotMenu(null) }}>Sell {w.rig ? 'Rig' : w.field ? 'Field' : 'Well'} · 1 AP · {money(wellValue(w), st, true)}</button>
+                      <button type="button" className="cl-btn" disabled={run.ap < 1 || !!w.faithful} onClick={() => { dispatch({ type: 'sellWell', plot: i }); setPlotMenu(null) }}>Sell {w.rig ? 'Rig' : w.field ? 'Field' : 'Well'} · 1 AP · {money(wellValue(w), st, true)}</button>
                     </div>
                   )}
                 </div>
