@@ -9,7 +9,7 @@ Unlocked one after another: **Oil → Fishing → Pharma → Tech**, then a hidd
 ## Structure
 - 4 stages × 4 rounds. Round 4 of each stage is a boss. A shop follows every round (there is none before round 1: picking a starting bonus goes straight into the first fight); the shop after a boss has a new card pool.
 - Rounds get harder: round 1 one threat (weaker pool); round 2 one threat and a modifier; round 3 two threats; round 4 the boss.
-- Stages are eras, and the whole look changes: Victorian (1860s–90s), Art Deco (1900s–30s), 1970s flower power (1970–79), corporate greenwash (1980s–now). Cards keep the look of the era they came from.
+- Stages are eras, and the whole look changes: Victorian (1860s–90s), Art Deco (1900s–30s), 1970s flower power (1970–79), 2010s flat-design greenwash (2010–19). Cards keep the look of the era they came from.
 - Money gets a unit per stage but keeps its value: $15 → $15K → $15M → $15B.
 - Unlocks for every later run on the device (never from admin playtests): beat the Rival Baron once and runs start with 4 storage instead of 3 (silently); beat the Proxy Fight once and **Old Faithful** joins the starting bonuses: a Well that pumps 1, never runs dry, and nothing can target (fires, enemies, Firebreak, selling). It stops pumping in a fire, and becomes a Field and a Rig with the rest.
 - Front page: three industry tiles (Oil, then two sealed), and Run history, Settings, About and a locked **?** button. The **?** becomes the Scoreboard (finished games on this device, best gold first) the first time you win the game. About credits Jonny Sadler and links to buymeacoffee.com/jonnysadler.
@@ -247,3 +247,12 @@ Never shown during play. The run keeps a quiet tally (damage by card family, mov
 | Blitz | Winning rounds in 2 turns or fewer |
 
 Bars were set so roughly 6 in 10 winning bot runs earn a badge, spread fairly evenly across the six. Later: shop and spoils offers will lean towards the tactics a deck is already using.
+
+## Stage 4 look (planned, not built) · 2010–2019 · Battling the Truth · 2010s flat design
+The company is now **Big Oil**, and money is in billions ($B). Rounds are 2010, 2013, 2016 and 2019 (Deepwater Horizon, the fracking boom, Paris 2015, the school strikes). The shop is **the Investor Portal**, and the header tagline reads "Powering a better tomorrow™".
+
+The look is a cheerful corporate sustainability report made by a tech start-up: the leaves, wind turbines and friendly type Big Oil sold in the 2010s.
+- **Palette:** clean white with a pale grey-green paper, leaf green as the main colour, sky blue second, one accent of millennial pink. Oil black is used sparingly, only for the Truth clock and losses, so the real business shows through the green.
+- **Type:** a rounded geometric sans (Poppins or Nunito) throughout. No serifs, no ink and no ledger texture: the first era where the ledger is hidden.
+- **Shapes:** flat colour with no gradients, rounded cards, pill buttons, soft drop shadows and plenty of white space. Meters are infographics (donut charts, big percentages, smiling icons). The Truth clock is a clean, minimal analogue face.
+- **Icons:** flat vector with the 2013 long shadow, in a solid green circle with a white subject. ChatGPT style line: *Circular game icon, 2010s flat vector design, solid leaf-green circle with a crisp white subject and a long diagonal flat shadow, minimal shapes, no gradients, no outlines, no text, transparent background outside the circle.*
