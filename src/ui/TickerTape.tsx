@@ -1,7 +1,7 @@
 // The enemy turn, played back one event at a time, the way news arrived in each era:
 // ticker tape (stage 1), silent-film intertitles (stage 2), a telex printout (stage 3)
 // and phone notifications (stage 4). The thing each line is about lights up on the
-// board. Tap to hurry it along; Skip jumps to your turn.
+// board. Tap to hurry it along.
 import { useEffect, useRef, useState } from 'react'
 import type { Beat } from '../engine/engine'
 import { play, type Cue } from '../sound'
@@ -89,7 +89,6 @@ export function TickerTape({ beats, speed, stage = 1, onBeat, onDone }: Props) {
       )}
       <div className="tape__foot">
         <span className="cl-num">{i + 1} / {beats.length}</span>
-        <button type="button" className="cl-btn cl-btn--small" onClick={e => { e.stopPropagation(); finish() }}>Skip ›</button>
       </div>
     </div>
   )

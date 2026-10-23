@@ -918,7 +918,8 @@ button.m-threat { cursor: pointer; }
 .left-behind__side { display: flex; flex-direction: column; gap: 4px; }
 .left-behind__side .cl-label { color: var(--loss); }
 .left-behind__side p { margin: 0; }
-.threat__after { border-left-color: var(--loss); }
+.after-fight { display: flex; flex-direction: column; gap: 4px; border: 1.5px solid var(--rule); border-radius: var(--cl-radius); padding: 10px 14px; background: var(--paper-raised); }
+.after-fight ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
 .m .left-behind { flex-direction: column; align-items: flex-start; }
 
 /* glossary: terms found by buying cards, each with a real case */

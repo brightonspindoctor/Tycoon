@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { type Action, type Run, snapshot } from '../engine/engine'
-import { CARDS } from '../engine/data'
+import { CARDS, THREATS } from '../engine/data'
 import { CONFIG } from '../engine/config'
 import { CardView } from './CardView'
 import { ERA_THEME, SHOP_NAME, money, units, year } from '../engine/format'
@@ -49,6 +49,8 @@ export function RoundSummary({ run, onContinue, dispatch }: { run: Run; onContin
   const y = useCountUp(fromYear, toYear, 1400, 200)
   useEffect(() => { play('register') }, [])
   const m = (n: number) => money(n, st)
+  // what each beaten enemy did on its way out (the Bank Inspector's report has its own box below)
+  const after = run.threats.filter(t => THREATS[t.kind].whenBeaten && t.kind !== 'inspector')
   return (
     <div className="overlay" role="dialog" aria-label={`Round ${run.round} complete`}>
       <div className="summary" data-theme={ERA_THEME[st] ?? 'victorian'}>
@@ -62,6 +64,12 @@ export function RoundSummary({ run, onContinue, dispatch }: { run: Run; onContin
           <Row label="Cards in deck" from={a.deck} to={b.deck} delay={1700} fmt={n => `${n}`} />
           {st === 2 && <Row label="Board Exposure" from={a.exposure} to={b.exposure} delay={2000} fmt={n => `${n}/${CONFIG.exposureMax}`} diffFmt={n => `${n}`} worseUp />}
         </ul>
+        {after.length > 0 && (
+          <section className="after-fight" aria-label="After the fight">
+            <span className="cl-label">After the fight</span>
+            <ul>{after.map(t => <li key={t.id}><b>{THREATS[t.kind].name}.</b> {units(THREATS[t.kind].whenBeaten!, st)}.</li>)}</ul>
+          </section>
+        )}
         {run.leftBehind && (
           <section className="left-behind" aria-label="Left in your deck">
             <div className="left-behind__cards">{run.leftBehind.cards.map((k, i) => <CardView key={i} card={{ id: -60 - i, key: k, uses: CARDS[k].uses }} small stage={st} />)}</div>
