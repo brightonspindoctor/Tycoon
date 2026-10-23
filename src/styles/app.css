@@ -905,3 +905,8 @@ button.m-threat { cursor: pointer; }
 .note__text { font-size: 15px; line-height: 20px; }
 @keyframes note-in { from { transform: translateY(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .tape-wrap--reel .tape, .tape-wrap--telex .tape, .note--new { animation: none; } }
+
+/* the Bank Inspector's reserves: green when you'd impress him by ending the turn now */
+.threat__rule { border-left-color: var(--ink-muted); }
+.threat__rule.is-met { border-left-color: var(--gain); background: color-mix(in srgb, var(--gain) 12%, transparent); }
+.threat__rule.is-met b { color: var(--gain); }

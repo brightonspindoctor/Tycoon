@@ -817,3 +817,19 @@ describe('the Slush Fund', () => {
     expect(itemCover(r)).toBe(2 + CONFIG.thinkTankCover)
   })
 })
+
+describe('the Bank Inspector and your reserves', () => {
+  it('says why he loses Hold, and says so when it finishes him', () => {
+    let r = newRun(4, 'threeOil')
+    r.threats = [{ id: 900, kind: 'inspector', hold: 6, maxHold: 6, step: 0, cycle: 0, round3: false, beaten: false }]
+    r.capital = 40
+    r = act(r, { type: 'endTurn' })
+    const line = r.report.find(b => b.title.endsWith('· Impressed'))!
+    expect(line.text).toContain('$40')
+    expect(r.threats[0].hold).toBe(6 - CONFIG.inspectorReserveDamage)
+    r.threats[0].hold = CONFIG.inspectorReserveDamage; r.capital = 40
+    r = act(r, { type: 'endTurn' })
+    expect(r.report.find(b => b.title.endsWith('· Impressed'))!.text).toContain('signs off')
+    expect(r.threats[0].beaten).toBe(true)
+  })
+})

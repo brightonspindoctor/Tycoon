@@ -1310,6 +1310,8 @@ export const truthGold = (t: Threat) => CONFIG.asthmaGold + Math.floor(Math.max(
 export const testimony = (cycle: number) => CONFIG.testimonyHeat + CONFIG.testimonyStep * cycle
 export const resolution = (cycle: number) => CONFIG.resolutionCash + CONFIG.resolutionStep * cycle
 
+/** The Bank Inspector's reserves rule, as it stands this turn: met or not, and by how much. */
+export const reserves = (r: Run) => ({ met: r.capital >= CONFIG.inspectorReserve, need: CONFIG.inspectorReserve, have: r.capital, damage: CONFIG.inspectorReserveDamage })
 /** Leaky Tanks takes a quarter of your Capital. */
 export const leakyLoss = (r: Run) => `$${Math.floor(r.capital * CONFIG.leakyTanksShare)}`
 
@@ -1342,8 +1344,11 @@ function endTurn(r: Run) {
   }
   for (const t of liveThreats(r)) {
     if (t.kind === 'inspector' && r.capital >= CONFIG.inspectorReserve) {
-      say(r, 'The Inspector is impressed by your reserves.')
-      beat(r, 'enemy', THREATS[t.kind].name, `Impressed by your reserves: −${CONFIG.inspectorReserveDamage} Hold.`, t.id)
+      const last = t.hold <= CONFIG.inspectorReserveDamage
+      say(r, `The Inspector is impressed by your reserves of $${r.capital}.`)
+      beat(r, 'enemy', `${THREATS[t.kind].name} · Impressed`, last
+        ? `You ended the turn with $${r.capital}, at least $${CONFIG.inspectorReserve}. −${CONFIG.inspectorReserveDamage} Hold: the books are in order, and he signs off.`
+        : `You ended the turn with $${r.capital}, at least $${CONFIG.inspectorReserve}. −${CONFIG.inspectorReserveDamage} Hold.`, t.id)
       hit(r, t, CONFIG.inspectorReserveDamage)
     }
   }

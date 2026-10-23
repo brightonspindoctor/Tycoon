@@ -1,5 +1,5 @@
 import { ROLE_LABEL, THREATS } from '../engine/data'
-import { infiltrated, intent, intentText, phaseName, weakOf, type Run, type Threat } from '../engine/engine'
+import { infiltrated, intent, intentText, phaseName, reserves, weakOf, type Run, type Threat } from '../engine/engine'
 import { TRUTH_PHASES } from '../engine/data'
 import { units } from '../engine/format'
 import { Portrait } from './Portrait'
@@ -37,7 +37,13 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget,
           {targeting && preview && <span className="cl-label threat__preview">{preview}</span>}
         </div>
       </div>
-      {d.rule && !threat.beaten && <div className="opened threat__rule"><b>Rule</b> {units(d.rule, run.stage)}</div>}
+      {d.rule && !threat.beaten && (threat.kind === 'inspector' ? (x => (
+        <div className={`opened threat__rule ${x.met ? 'is-met' : ''}`}>
+          <b>{x.met ? 'Reserves met' : 'Reserves'}</b> {x.met
+            ? units(`You have $${x.have}. End your turn now and he loses ${x.damage} Hold.`, run.stage)
+            : units(`You have $${x.have} of $${x.need}. End a turn with $${x.need} or more and he loses ${x.damage} Hold.`, run.stage)}
+        </div>
+      ))(reserves(run)) : <div className="opened threat__rule"><b>Rule</b> {units(d.rule, run.stage)}</div>)}
       {threat.opened && run.turn === 1 && !threat.beaten && <div className="opened"><b>Opened with</b> {units(threat.opened, run.stage)}</div>}
       {!threat.beaten && (n => n.length ? <div className="opened infiltrated"><b>Infiltrated</b> −{n.join(', then −')} Hold as your turns end</div> : null)(infiltrated(run, threat))}
       {threat.beaten ? <div className="warn warn--done">Beaten</div> : threat.stopped ? (

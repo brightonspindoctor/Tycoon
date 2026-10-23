@@ -14,6 +14,7 @@ interface Props { beats: Beat[]; speed: Replay; stage?: number; onBeat: (b: Beat
 /** The sound for a line of the tape: what happened, then the era's own enemy-turn sound. */
 function cueFor(b: Beat, stage: number): Cue | null {
   if (b.title === 'The Truth clock' || /the clock moves on/.test(b.text)) return /goes back|doesn't move/.test(b.text) ? 'rewind' : 'tick'
+  if (/· Impressed$/.test(b.title)) return 'register' // the Bank Inspector likes what he sees
   if (/gold from your fortune/.test(b.text)) return 'goldLoss'
   if (/\+\d+ Hold|Regains \d+ Hold/.test(b.text)) return 'heal'
   if (b.kind === 'cards') return 'junk'
