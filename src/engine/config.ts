@@ -33,6 +33,7 @@ export const CONFIG = {
   inspectorReserve: 12, // end a turn holding this much and the Inspector loses Hold
   inspectorReserveDamage: 2,
   skimRate: { 0: 1, 1: 1, 2: 2, 3: 3, 4: 4 } as Record<number, number>, // $ per gold, by round (stage 1)
+  expenseAccountOff: 2, // the upgraded Expense Account skims this much under the rate (still +1 Exposure)
   skimRate2: { 0: 10, 1: 10, 2: 12, 3: 14, 4: 16 } as Record<number, number>, // stage 2: the Expense Account card, from $10 a gold
   bossGold: 3, // gold for beating a stage's boss
   // stage 2

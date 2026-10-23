@@ -176,6 +176,15 @@ describe('Board Exposure', () => {
     expect(r.gold).toBe(g)
   })
 
+  it('the upgraded Expense Account skims $2 under the rate, and the board still sees it', () => {
+    let r = inStage2(['expenseAccount'])
+    inHand(r, 'expenseAccount').up = true
+    const cap = r.capital
+    r = act(r, { type: 'play', cardId: inHand(r, 'expenseAccount').id })
+    expect(r.capital).toBe(cap - (10 - CONFIG.expenseAccountOff))
+    expect(r.exposure).toBe(1)
+  })
+
   it('dividends bring it down: the shop for −2, the card for −1', () => {
     let r = inStage2(['payDividend'])
     r.exposure = 4
@@ -465,7 +474,7 @@ describe('fire in stage 2 comes from Bad Blood', () => {
   })
   it('every stage 2 enemy has 2 more Hold than before', () => {
     expect([THREATS.muckraker.hold, THREATS.combine.hold, THREATS.clawback.hold, THREATS.patentHolder.hold, THREATS.saboteur.hold, THREATS.commission.hold, THREATS.proxyFight.hold])
-      .toEqual([11, 11, 10, 12, 10, 8, 46])
+      .toEqual([11, 11, 10, 12, 10, 8, 52])
   })
   it('R&D Sprint counts every Well and Field', () => {
     let r = inStage2(['rdSprint'])

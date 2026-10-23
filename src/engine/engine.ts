@@ -954,7 +954,7 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (d.capture && r.captured) return { ok: false, why: 'Already capturing' }
   if (BUILDS.includes(c.key) && !canBuild(r)) return { ok: false, why: 'No free plot' }
   if ((c.key === 'bucket' || c.key === 'fireBrigade' ) && !r.fire) return { ok: false, why: 'No fire' }
-  if (d.family === 'Skim' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
+  if (d.family === 'Skim' && r.capital - Math.max(1, skimRate(r) - (d.skimOff ?? 0)) < 1) return { ok: false, why: 'Not enough Capital' }
   if (d.stop && !liveThreats(r).length) return { ok: false, why: 'No enemies left' }
   if (d.stop && !targetsFor(r, c).length) return { ok: false, why: 'Every move is already stopped' }
   if (c.key === 'pettyCash' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
@@ -1105,7 +1105,7 @@ function playCard(r: Run, c: Card, target?: number) {
       case 'improveGear': break
       case 'hardGraft': case 'bridgeFuel': r.ap += d.power; break
       case 'pettyCash': case 'expenseAccount': {
-        const rate = skimRate(r)
+        const rate = Math.max(1, skimRate(r) - (d.skimOff ?? 0))
         if (r.capital - rate >= 1) { money(r, `${d.name} (skim)`, -rate); r.gold += 1; r.stats.skims++; expose(r, d.exposure ?? 1, d.name) }
         break
       }

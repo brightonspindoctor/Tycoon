@@ -76,6 +76,7 @@ export interface CardDef {
   capture?: boolean // the next move that would move the clock on doesn't (Carbon Capture)
   unique?: boolean // only one in the game: can't be duplicated, and never offered again once yours
   spendCover?: boolean // spends all your Cover as damage, plus its power (Retain Counsel)
+  skimOff?: number // skims this much under the rate (the upgraded Expense Account)
 }
 
 export const CARDS: Record<CardKey, CardDef> = {
@@ -287,7 +288,7 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   derrick: { ap: 0, text: 'Build a Well: 1 oil a turn, never dry.' },
   securityDetail: { cover: 4, text: 'Block one enemy move. +4 Cover.' },
   insurance: { cost: 0, cover: 7, text: '+7 Cover this turn.' },
-  expenseAccount: { exposure: 0, text: 'Skim 1 gold at the rate. The board never sees it.' },
+  expenseAccount: { skimOff: CONFIG.expenseAccountOff, text: `Skim 1 gold at the rate −$${CONFIG.expenseAccountOff}. +1 Board Exposure.` },
   // stage 3
   embargoRumours: { ap: 0, text: 'Oil sells +$1 this turn.' },
   queuesAtPump: { ap: 1, text: 'Oil sells +$2 for the rest of the round.' },
@@ -398,7 +399,7 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   patentHolder: { role: 'engine', name: 'The Patent Holder', hold: 12, weak: 'Legal', cycle: ['Cease and Desist', 'New Patent Claim', 'Royalty'], portrait: 'patentHolder' },
   saboteur: { role: 'engine', name: 'The Saboteur', hold: 10, weak: 'Dirty', cycle: ['Wreck', 'Lit Fuse', 'Infiltrate'], movesFirst: 'Infiltrate', whenBeaten: 'Starts a fire', portrait: 'saboteur' },
   commission: { role: 'engine', name: 'The Railroad Commission', hold: 8, weak: 'Dirty', cycle: ['Proration', 'Inspection', 'Leaky Tanks'], portrait: 'commission' },
-  proxyFight: { role: 'boss', name: 'The Proxy Fight', hold: 46, weak: 'Legal', cycle: ['Hostile Bid', 'Proxy Meeting', 'The Vote'], movesFirst: 'Canvass', portrait: 'proxyFight' },
+  proxyFight: { role: 'boss', name: 'The Proxy Fight', hold: 52, weak: 'Legal', cycle: ['Hostile Bid', 'Proxy Meeting', 'The Vote'], movesFirst: 'Canvass', portrait: 'proxyFight' },
   // stage 3
   spill: { role: 'engine', name: 'The Spill', hold: 29, weak: 'Bury', resist: 'Legal', chip: 2, cycle: ['Slick', 'Shut Down', 'Clean-up Bill'], portrait: 'spill' },
   climateScience: { role: 'engine', name: 'Climate Science', hold: 31, weak: 'Bury', resist: 'Dirty', chip: 1, cycle: ['Measure', 'Publish', 'Peer Review'], round3: 'Consensus', portrait: 'climateScience' },
