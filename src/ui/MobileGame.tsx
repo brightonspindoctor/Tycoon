@@ -105,6 +105,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                     <span className="cl-num m-threat__hold">{t.cover && !t.beaten ? <span className="enemy-cover">Cover {t.cover} · </span> : null}{Math.max(0, t.hold)}/{t.maxHold}</span>
                   </div>
                   <span className="hold-bar"><span style={{ width: `${Math.max(0, (t.hold / t.maxHold) * 100)}%` }} /></span>
+                  {d.rule && !t.beaten && <div className="opened threat__rule"><b>Rule</b> {units(d.rule, st)}</div>}
                   {t.opened && run.turn === 1 && !t.beaten && <div className="opened"><b>Opened with</b> {units(t.opened, st)}</div>}
                   {!t.beaten && (n => n.length ? <div className="opened infiltrated"><b>Infiltrated</b> −{n.join(', then −')} Hold as your turns end</div> : null)(infiltrated(run, t))}
                   {t.beaten ? <div className="m-intent m-intent--done">Beaten</div> : t.stopped ? (

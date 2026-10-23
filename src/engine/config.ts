@@ -22,7 +22,7 @@ export const CONFIG = {
   bucketPrice: 2, // Bucket of Water, always for sale at the Land Office
   bribeGold: 1, // Bribe: costs this much of your own fortune to play
   bribeChance: 0.5, // chance the bribe is taken
-  bribeDamage: 4,
+  bribeDamage: 8, // Grease a Palm, when it lands
   spoilsCash: 3, // turning down the card offered after a round
   boonGold: 1, // the item offered before the boss costs this much of your fortune
   inheritance: 5, // Inheritance card: $ once, then gone

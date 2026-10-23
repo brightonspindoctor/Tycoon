@@ -106,7 +106,7 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Remove 6 Hold. Adds Bad Blood.', flavour: 'An unfortunate accident.' },
   bribe: { name: 'Bribe the Sheriff', ap: 1, cost: 2, uses: null, family: 'Dirty', badBlood: true, power: 5, icon: 'sheriff', price: 5, rarity: 'Uncommon',
     text: 'Pay $2. Remove 5 Hold. Adds Bad Blood.', flavour: 'A contribution to local order.' },
-  payOff: { name: 'Bribe', ap: 1, cost: 0, gold: CONFIG.bribeGold, chance: CONFIG.bribeChance, uses: null, family: 'Dirty', power: CONFIG.bribeDamage, icon: 'envelope', price: 4, rarity: 'Uncommon',
+  payOff: { name: 'Grease a Palm', ap: 1, cost: 0, gold: CONFIG.bribeGold, chance: CONFIG.bribeChance, uses: null, family: 'Dirty', power: CONFIG.bribeDamage, icon: 'envelope', price: 4, rarity: 'Uncommon',
     text: `Pay ${CONFIG.bribeGold} gold. ${Math.round(CONFIG.bribeChance * 100)}%: remove ${CONFIG.bribeDamage} Hold. Else Bad Blood.`, flavour: 'Everyone has a price. Most of them remember it.' },
   infiltrate: { name: 'Infiltrate', ap: 2, cost: 0, uses: null, family: 'Dirty', power: 3, poison: [2, 1], icon: 'infiltrate', price: 4, rarity: 'Common',
     text: 'Remove 3 Hold. 2 more next turn, then 1.', flavour: 'A new man on the payroll. Theirs, then ours.' },
@@ -375,6 +375,7 @@ export interface ThreatDef {
   movesFirst?: string
   cover?: number // Cover it gets each turn: blocks that much of your damage (doesn't stack)
   whenBeaten?: string
+  rule?: string // a standing rule shown on its panel (the Bank Inspector's reserves)
   chip?: number // stage 3: $ every move also takes, on top of what the move does (Cover blocks it)
   ticks?: number[] // stage 4: the moves in its cycle (0-based) that move the Truth clock on an hour
   portrait: string
@@ -383,7 +384,8 @@ export interface ThreatDef {
 export const THREATS: Record<ThreatKind, ThreatDef> = {
   blowout: { role: 'engine', name: 'The Blowout', hold: 5, immune: 'Legal', cycle: ['Rumble', 'Spray', 'Blow'], whenBeaten: 'Gusher: +3 oil', portrait: 'blowout' },
   strike: { role: 'engine', name: 'The Strike', hold: 8, weak: 'Dirty', cycle: ['Picket', 'Sabotage'], round3: 'Torch', movesFirst: 'Walkout', portrait: 'strike' },
-  inspector: { role: 'cash', name: 'The Bank Inspector', hold: 6, weak: 'Legal', immune: 'Dirty', cycle: ['Audit', 'Fine'], whenBeaten: '2 Loose Threads', portrait: 'inspector' },
+  inspector: { role: 'cash', name: 'The Bank Inspector', hold: 6, weak: 'Legal', immune: 'Dirty', cycle: ['Audit', 'Fine'], whenBeaten: '2 Loose Threads', portrait: 'inspector',
+    rule: `End a turn with $${CONFIG.inspectorReserve} or more and he loses ${CONFIG.inspectorReserveDamage} Hold.` },
   railroad: { role: 'cash', name: 'The Railroad Agent', hold: 7, resist: 'Legal', cycle: ['Raise Rates', 'Refuse'], portrait: 'railroad' },
   claimJumper: { role: 'engine', name: 'The Claim Jumper', hold: 6, weak: 'Dirty', cycle: ['Jump', 'Scout'], movesFirst: 'Scout', whenBeaten: 'Starts a fire', portrait: 'claimJumper' },
   speculator: { role: 'cash', name: 'The Speculator', hold: 7, weak: 'Legal', cycle: ['Short', 'Margin Call', 'Rumours'], round3: 'Paper Promise', whenBeaten: 'Price recovers', portrait: 'speculator' },

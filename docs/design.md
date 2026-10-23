@@ -51,7 +51,7 @@ A card is offered (weighted by rarity, like the shop): take it into your deck or
 - Lawyer Up deals 3 (was 4). Bribe the Sheriff: pay $2, 5 Hold. Hired Hand and Pay Wages are Dirty.
 - Pay Wages: pay $2, remove 4 Hold (Dirty). Costs $1 to buy. No card is tied to one enemy; enemy weaknesses and resistances decide what works.
 - Hard Graft (+1 AP, 0 AP to play) can be played once per round: it then sits out until the next round. It is never destroyed. It can be bought ($4).
-- **Bribe** ($4): pay 1 gold from your fortune; 50% chance of 4 Hold (Dirty, so doubled against the Strike, Claim Jumper and Baron), otherwise it is refused and adds Bad Blood.
+- **Grease a Palm** ($4): pay 1 gold from your fortune; 50% chance of 8 Hold (Dirty, so doubled against the Strike, Claim Jumper and Baron), otherwise it is refused and adds Bad Blood. Upgraded: 75%.
 - Enemies that move first show what they opened with on turn 1, above their next move.
 - **Infiltrate** ($4, Common, 2 AP, stage 1 shop): Dirty, remove 3 Hold now, then 2 and 1 more as your next two turns end (before the enemies move; the follow-ups go past enemy Cover). Weakness and immunity apply to every hit, so it's 6/4/2 against the Strike and useless on the Inspector. The enemy shows what's still to land. Upgraded: 4, then 3 and 2. Fair in stage 1, falls behind in stages 2–3.
 
@@ -201,7 +201,7 @@ Four damage types: Legal, Dirty, **Bury** (hiding evidence) and **Lobby** (Washi
 | **Buy Out** | 1 AP, $8M | Legal, remove 14 Hold | 18 (++: 22) |
 | **Advertorial** | 1 AP, $4M | +6 Cover (blocks enemy Heat too) | +9 (++: +12) |
 | **Oil Shock** | 0 AP, one use | Your next oil sale this turn pays double. Sold once a run ($15M) | — |
-Every bribe (Bribe the Sheriff, Bribe, Bribe an Official) feeds a Bribery Scandal. Junk: Dead Weight, Dry Lease, Draft Declaration (the summit's: must play, 1 AP, does nothing).
+Every bribe (Bribe the Sheriff, Grease a Palm, Bribe an Official) feeds a Bribery Scandal. Junk: Dead Weight, Dry Lease, Draft Declaration (the summit's: must play, 1 AP, does nothing).
 
 ### Stage 3 items
 **Refinery** ($22M: oil sells +$1M; moved here from stage 2), Rolodex ($20M: +1 hand size, up to 7, buy more than one), Paper Shredder ($35M: once a fight, destroy a card in hand for free), Supertanker ($30M: +4 storage, up to 12; each one makes oil sell $1M less), **Think Tank** ($15M: +3 Cover every turn).

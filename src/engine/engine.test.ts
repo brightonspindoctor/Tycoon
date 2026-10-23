@@ -284,7 +284,7 @@ describe('card and enemy changes', () => {
 let cid = 5000
 function card(key: CardKey) { return { id: cid++, key, uses: null as number | null } }
 
-describe('Bribe', () => {
+describe('Grease a Palm', () => {
   it('costs 1 gold, then either lands cleanly or backfires with Bad Blood', () => {
     let landed = 0, refused = 0
     for (let seed = 1; seed <= 400; seed++) {
