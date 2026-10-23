@@ -29,6 +29,7 @@ export const CONFIG = {
   dividends: 3, // Dividends card: $ every time it's played
   tempSilo: 4, // Temporary Silo: storage for the boss round only
   badBloodFireChance: 1 / 3,
+  badBloodCost: 5, // from stage 3 Bad Blood can't start fires: must play, pay this instead
   inspectorReserve: 12, // end a turn holding this much and the Inspector loses Hold
   inspectorReserveDamage: 2,
   skimRate: { 0: 1, 1: 1, 2: 2, 3: 3, 4: 4 } as Record<number, number>, // $ per gold, by round (stage 1)

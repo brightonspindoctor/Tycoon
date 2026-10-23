@@ -160,7 +160,7 @@ Money is in millions ($M). Rounds are 1970, 1973, 1976 and 1979. The shop is **t
 ### Going multinational (between stages)
 Winning the Proxy Fight pays 3 gold, then a page-turn to 1970 stamped MULTINATIONAL, then the Multinational screen:
 - Every Field and Well becomes an **offshore Rig**: 2 oil a turn, never runs dry, sells for $10M. Empty plots go. At most 5 Rigs.
-- **Some old cards turn to junk.** Land cards (Prospects, Steel Derricks, Well cards) become **Dry Leases** (1 AP, do nothing, destroyed once played). Fire and board cards (Bucket, Fire Brigade, Pay a Dividend) become **Dead Weight** (unplayable). Shore Up carries over, like Security Detail: both still block a move once per fight. Every other old card works exactly as before, upgrades included; stage 3 enemies are simply far tougher. Bad Blood is gone (no fires in stage 3).
+- **Some old cards turn to junk.** Land cards (Prospects, Steel Derricks, Well cards) become **Dry Leases** (1 AP, do nothing, destroyed once played). Fire and board cards (Bucket, Fire Brigade, Pay a Dividend) become **Dead Weight** (unplayable). Shore Up carries over, like Security Detail: both still block a move once per fight. Every other old card works exactly as before, upgrades included; stage 3 enemies are simply far tougher. There are no fires from stage 3, so **Bad Blood** becomes a must-play card that costs $5 (2 uses). Dynamite, Bribe the Sheriff and a refused Bribe still add it.
 - **Pick 2 new cards** from 4: Bury Evidence, Lobby Congress, Buy Out and Advertorial. The 2 you leave are on sale at the first Trading Floor visit.
 - **No Bank Debt** in stage 3, and no loans. Heat is the only clock.
 - Heat starts at 0, +5 for every 3 gold skimmed in stage 2 (15 at most).
@@ -266,8 +266,7 @@ Bars are set on full-game wins (through the Truth): about 6 in 10 winning bot ru
 
 ### Transition (multinational → Big Oil)
 - Any loan from earlier is **paid off**. The **World Bank** offers **$30B** of "development finance": $2B a turn in debt, and a **Green Project** card in your deck.
-- **Clear-out:** destroy up to 3 cards for free.
-- Pick 2 of 4 stage 4 cards offered; the other two go on sale at the first visit.
+- In three steps. **1. Big Oil:** pick 2 of 4 stage 4 cards (one of each damage type), with the World Bank's offer alongside. **2. The clear-out:** destroy up to 3 cards for free (not Influencers). **3. The Investor Portal:** the usual shop before round 1, with the two cards you didn't pick on sale.
 - Rigs carry over (2 oil a turn). Money is in $B.
 
 ### Economy

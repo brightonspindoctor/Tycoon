@@ -67,7 +67,7 @@ export function CardView({ card, apCost, playable = true, why, selected, onClick
       <div className="cl-card__effect" ref={effect}>{text}</div>
       <div className="cl-card__foot">
         <div className="cl-pips" aria-hidden="true">
-          {d.oncePerRound ? <span className="cl-num card-once">1 / round</span> : card.uses === null ? <span className="cl-num">∞</span> : Array.from({ length: Math.max(card.uses, base ?? 0) }, (_, i) => <span key={i} className={`cl-pip ${i < card.uses! ? 'cl-pip--on' : ''}`} />)}
+          {d.oncePerRound ? <span className="cl-num card-once">1 / round</span> : card.uses === null ? null : Array.from({ length: Math.max(card.uses, base ?? 0) }, (_, i) => <span key={i} className={`cl-pip ${i < card.uses! ? 'cl-pip--on' : ''}`} />)}
         </div>
         {why && !playable && why !== 'Not enough AP' && <span className="cl-label card-why">{why}</span>}
       </div>

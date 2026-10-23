@@ -30,21 +30,20 @@ const dross = (c: Card) => (CARDS[c.key].junk ? 100 : c.key === 'thinkTank' ? 90
 /** The damage types a deck carries: the Truth wants all four. */
 const families = (r: Run) => new Set(r.deck.filter(c => isAttack(c.key)).map(c => CARDS[c.key].family))
 
-/** Stage 3 → 4: the World Bank if cash is short, the free clear-out, then pick the damage types the deck lacks. */
+/** Stage 3 → 4, in its two steps: pick the damage types the deck lacks (and the World Bank if cash is short), then the free clear-out. */
 function botBigOil(r: Run): Run {
-  if (r.capital < 60) r = act(r, { type: 'takeLoan' })
-  for (let i = 0; i < CONFIG.clearOut && (r.freeDestroys ?? 0) > 0; i++) {
-    const worst = [...r.deck].sort((a, b) => dross(b) - dross(a))[0]
-    if (!worst || dross(worst) <= 0) break
-    r = act(r, { type: 'destroyCard', cardId: worst.id })
+  if (r.bigOilStep === 'clear') {
+    for (let i = 0; i < CONFIG.clearOut && (r.freeDestroys ?? 0) > 0; i++) {
+      const worst = [...r.deck].sort((a, b) => dross(b) - dross(a))[0]
+      if (!worst || dross(worst) <= 0) break
+      r = act(r, { type: 'destroyCard', cardId: worst.id })
+    }
+    return act(r, { type: 'leaveShop' })
   }
+  if (r.capital < 60) r = act(r, { type: 'takeLoan' })
   const have = families(r)
   const offer = [...(r.offer ?? [])].sort((a, b) => Number(have.has(CARDS[a].family)) - Number(have.has(CARDS[b].family)))
   for (const k of offer) if ((r.picked ?? []).length < CONFIG.incorporatePicks) r = act(r, { type: 'pickCard', key: k })
-  for (const k of UPGRADE_4) {
-    const c = r.deck.find(x => x.key === k && canUpgrade(x, r.stage))
-    if (c && r.capital > r.upgradeCost + 25) r = act(r, { type: 'upgradeCard', cardId: c.id })
-  }
   return act(r, { type: 'leaveShop' })
 }
 

@@ -20,7 +20,7 @@ export type Icon = 'derrick' | 'plot' | 'barrels' | 'fire' | 'bucket' | 'cudgels
 export type CardKey =
   | 'prospect' | 'well' | 'wildcat' | 'hiredHand' | 'lawyerUp' | 'shoreUp' | 'bucket' | 'fireBrigade'
   | 'improveGear' | 'hardGraft' | 'pettyCash' | 'payWages' | 'dynamite' | 'bribe' | 'telegram'
-  | 'looseThread' | 'badBlood' | 'marginCall' | 'iou' | 'payOff' | 'infiltrate' | 'inheritance' | 'dividends'
+  | 'looseThread' | 'badBlood' | 'badBloodLate' | 'marginCall' | 'iou' | 'payOff' | 'infiltrate' | 'inheritance' | 'dividends'
   // stage 2
   | 'oldProspect' | 'telegraphLine' | 'tickerTape' | 'nightShift' | 'efficiencyExpert'
   | 'streamline' | 'shredFiles' | 'scrapParts' | 'cleanHouse' | 'patentThicket' | 'espionage' | 'poachEngineer'
@@ -118,6 +118,9 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $3. A random attack card, free to play.', flavour: 'STOP. SEND HELP. STOP.' },
   looseThread: { name: 'Loose Thread', ap: 0, cost: 1, uses: null, family: 'Junk', power: 0, icon: 'redtape', forced: true, junk: true,
     text: 'Must play. Lose $1.', flavour: 'Someone kept a copy.' },
+  // from stage 3 there are no fires: Bad Blood costs you money instead
+  badBloodLate: { name: 'Bad Blood', ap: 0, cost: CONFIG.badBloodCost, uses: 2, family: 'Junk', power: 0, icon: 'redtape', forced: true, junk: true,
+    text: `Must play. Pay $${CONFIG.badBloodCost}.`, flavour: 'They remember. They send invoices.' },
   badBlood: { name: 'Bad Blood', ap: 0, cost: 0, uses: 2, family: 'Junk', power: 0, icon: 'fire', forced: true, junk: true,
     text: 'Must play. 1 in 3 chance of a fire.', flavour: 'They remember. For a while.' },
   marginCall: { name: 'Margin Call', ap: 1, cost: 2, uses: 1, family: 'Junk', power: 0, icon: 'phone', forced: true, junk: true,
@@ -327,6 +330,8 @@ export const shopPool = (stage: number): CardKey[] => (stage >= 4 ? SHOP_POOL_4 
 /** Going multinational: pick incorporatePicks of these; the rest go on sale at the first Trading Floor visit. */
 export const INCORPORATE_OFFER_3: CardKey[] = ['buryEvidence', 'lobbyCongress', 'buyOut', 'advertorial']
 /** Becoming Big Oil: pick incorporatePicks of these, one of each damage type; the rest go on sale at the first Investor Portal visit. */
+/** Bad Blood: a fire risk in stages 1 and 2, a $5 bill from stage 3 (no fires). */
+export const badBloodFor = (stage: number): CardKey => (stage >= 3 ? 'badBloodLate' : 'badBlood')
 export const INCORPORATE_OFFER_4: CardKey[] = ['propaganda', 'onThePayroll', 'sustainabilityReport', 'astroturfing']
 /** Old cards that are useless in stage 3: land cards become Dry Leases; fire and board cards, Dead Weight. Shore Up carries over, like Security Detail. */
 export const TO_DRY_LEASE: CardKey[] = ['prospect', 'oldProspect', 'derrick', 'well', 'wildcat']

@@ -3,7 +3,7 @@
 import { CONFIG } from './config'
 import {
   ATTACK_CARDS, BOSS, CARDS, INCORPORATE_OFFER_2, CASH_POOLS, ENGINE_POOLS, ITEMS, MODS, PROSPECTS, PROSPECT_FOR, WATER_FOR, STARTER, THREATS, UPGRADES, shopPool,
-  BOONS, REWARDS, BRIBES, INCORPORATE_OFFER_3, INCORPORATE_OFFER_4, STAGE4_POOL, TRUTH_PHASES, bossRound, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, boonInfo, landCardFor, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
+  BOONS, REWARDS, BRIBES, INCORPORATE_OFFER_3, INCORPORATE_OFFER_4, STAGE4_POOL, badBloodFor, TRUTH_PHASES, bossRound, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, boonInfo, landCardFor, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
 } from './data'
 import { next, pick, shuffle } from './rng'
 import { newTally, type Tally } from './tactics'
@@ -105,6 +105,7 @@ export interface Run {
   clock?: number // stage 4: the Truth clock, 1 to clockMax; midnight loses the run
   met?: ThreatKind[] // stage 4 enemies already met this run: never the same one twice
   freeDestroys?: number // becoming Big Oil: free destroys left in the clear-out
+  bigOilStep?: 'pick' | 'clear' // becoming Big Oil: pick the new cards, then the free clear-out, then the shop
   captured?: boolean // Carbon Capture: the next move that would move the clock on doesn't
   amplify?: boolean // Influencers: the next card's Hold damage or Cover is doubled
   played?: number // cards played this turn (a Subpoena caps it)
@@ -523,7 +524,7 @@ function shopAction(r: Run, a: Action) {
       if (r.shop.loanTaken || (r.phase === 'shop' && r.stage >= 2)) return // no Cheap Loan at the Exchange
       if (r.stage === 3) return // no loans in stage 3
       if (r.stage >= 4) { // the World Bank: development finance, with a green project attached
-        if (r.phase !== 'incorporate') return
+        if (r.phase !== 'incorporate' || r.bigOilStep !== 'pick') return // offered with the new cards
         money(r, 'World Bank loan', CONFIG.worldBankLoan); r.debt += CONFIG.worldBankDebt
         r.deck.push(card(r, 'greenProject'))
         r.shop.loanTaken = true
@@ -537,7 +538,7 @@ function shopAction(r: Run, a: Action) {
       return
     case 'upgradeCard': {
       const c = r.deck.find(x => x.id === a.cardId)
-      if (!c || !canUpgrade(c, r.stage) || r.stage < 2 || !pay(r, r.upgradeCost, `Upgrade ${cardDef(c).name}`)) return
+      if (!c || !canUpgrade(c, r.stage) || r.stage < 2 || (r.phase === 'incorporate' && r.stage >= 4) || !pay(r, r.upgradeCost, `Upgrade ${cardDef(c).name}`)) return
       if (c.up) c.up2 = true; else c.up = true
       r.upgradeCost += r.stage >= 3 ? CONFIG.cost3Step : 1
       say(r, `${cardDef(c).name}: upgraded.`)
@@ -577,7 +578,8 @@ function shopAction(r: Run, a: Action) {
     case 'destroyCard': {
       const c = r.deck.find(x => x.id === a.cardId)
       if (!c) return
-      if (r.phase === 'incorporate' && (r.freeDestroys ?? 0) > 0 && c.key !== 'influencers') { // becoming Big Oil: the clear-out is free
+      if (r.phase === 'incorporate' && r.stage >= 4) { // becoming Big Oil: only the clear-out step destroys, and only for free
+        if (r.bigOilStep !== 'clear' || (r.freeDestroys ?? 0) <= 0 || c.key === 'influencers') return
         removeFromDeck(r, c); tally(r).destroyed++; r.freeDestroys! -= 1
         say(r, `Cleared out: ${CARDS[c.key].name}. ${r.freeDestroys} free left.`)
         return
@@ -608,11 +610,17 @@ function shopAction(r: Run, a: Action) {
       return
     }
     case 'leaveShop':
+      if (r.phase === 'incorporate' && r.stage >= 4 && r.bigOilStep === 'clear') { // clear-out done: on to the Investor Portal
+        r.bigOilStep = undefined; r.freeDestroys = 0
+        r.phase = 'shop'; r.round = 0; openShop(r); r.ledger = []; r.events = []
+        return
+      }
       if (r.phase === 'incorporate') {
         if (r.offer && (r.picked ?? []).length < Math.min(CONFIG.incorporatePicks, r.offer.length)) { say(r, `Pick ${CONFIG.incorporatePicks} new cards first.`); return }
         for (const k of r.picked ?? []) { r.deck.push(card(r, k)); gotCard(r, k) }
         r.leftover = (r.offer ?? []).filter(k => !(r.picked ?? []).includes(k) && k !== PROSPECT_FOR[r.stage]) // the Derrick is always on sale anyway
         r.offer = undefined; r.picked = undefined
+        if (r.stage >= 4) { r.bigOilStep = 'clear'; return } // Big Oil: the free clear-out comes next
         r.phase = 'shop'; startRound(r, 1); return
       }
       startRound(r, r.round + 1)
@@ -754,7 +762,7 @@ function beginTurn(r: Run) {
   for (let i = 0; i < margins; i++) r.hand.push(card(r, 'marginCall', true))
   if (margins) beat(r, 'cards', 'Margin Call', `${margins > 1 ? `${margins} Margin Calls` : 'A Margin Call'} in your hand.`)
   for (let i = 0; i < ceases; i++) r.hand.push(card(r, 'ceaseDesist', true))
-  for (let i = 0; i < fuses; i++) { const b = card(r, 'badBlood'); r.deck.push(b); r.hand.push(b) } // lasts until it decays
+  for (let i = 0; i < fuses; i++) { const b = card(r, badBloodFor(r.stage)); r.deck.push(b); r.hand.push(b) } // lasts until it decays
   if (fuses) beat(r, 'cards', 'Bad Blood', `${fuses > 1 ? `${fuses} Bad Blood cards` : 'A Bad Blood card'} in your hand: 1 in 3 chance of a fire.`)
   for (let i = 0; i < claims; i++) r.hand.push(card(r, 'patentClaim', true))
   for (let i = 0; i < declarations; i++) r.hand.push(card(r, 'draftDeclaration', true))
@@ -880,7 +888,7 @@ function hit(r: Run, t: Threat, dmg: number, badBlood = false, ignoreCover = fal
   if (t.cover && !ignoreCover) { const blocked = Math.min(t.cover, dmg); t.cover -= blocked; dmg -= blocked; if (blocked) say(r, `${THREATS[t.kind].name}'s Cover blocked ${blocked}.`) }
   if (family) { const d = tally(r).damage; d[family] = (d[family] ?? 0) + Math.max(0, Math.min(dmg, t.hold)) }
   t.hold -= dmg
-  if (badBlood && r.stage < 3) { addJunk(r, 'badBlood', 'discard'); say(r, 'Bad Blood added to your discard pile.') }
+  if (badBlood) { addJunk(r, badBloodFor(r.stage), 'discard'); say(r, 'Bad Blood added to your discard pile.') }
   if (t.hold <= 0 && t.kind === 'truth' && (t.phase ?? 0) < TRUTH_PHASES.length - 1) { // the Truth is only beaten in its last phase
     t.phase = (t.phase ?? 0) + 1; t.hold = CONFIG.truthPhaseHold; t.maxHold = CONFIG.truthPhaseHold; t.poison = []
     say(r, `The Truth: ${phaseName(t)}. Weak to ${weakOf(t.kind, t.phase)}.`)
@@ -968,8 +976,7 @@ function play(r: Run, cardId: number, target?: number) {
     if (d.chance !== undefined) {
       // a gamble: it either lands cleanly or backfires with Bad Blood
       if (next(r) < d.chance) { say(r, `${d.name} taken: ${THREATS[t.kind].name} −${dmg} Hold.`); hit(r, t, dmg, false, false, d.family) }
-      else if (r.stage < 3) { addJunk(r, 'badBlood', 'discard'); say(r, `${THREATS[t.kind].name} refused the bribe. Bad Blood added to your discard pile.`) }
-      else say(r, `${THREATS[t.kind].name} refused the bribe.`)
+      else { addJunk(r, badBloodFor(r.stage), 'discard'); say(r, `${THREATS[t.kind].name} refused the bribe. Bad Blood added to your discard pile.`) }
     } else {
       say(r, `${d.name}: ${THREATS[t.kind].name} −${dmg} Hold.`)
       hit(r, t, dmg, !!d.badBlood, false, d.family)
@@ -1077,7 +1084,7 @@ function play(r: Run, cardId: number, target?: number) {
       case 'telegram': { const help = card(r, pick(r, ATTACK_CARDS), true); help.free = true; r.hand.push(help); say(r, `Help is on its way: ${CARDS[help.key].name}, free to play.`); break }
       case 'telegraphLine': case 'efficiencyExpert': break
       case 'badBlood': badBloodRoll(r); break
-      case 'looseThread': case 'marginCall': case 'iou': break
+      case 'looseThread': case 'marginCall': case 'iou': case 'badBloodLate': break
     }
   }
   // a card's own Heat and the Heat of the AP it cost land together, so cooling isn't lost at 0 and can save you at the top
@@ -1407,7 +1414,7 @@ function endTurn(r: Run) {
       case 'Scout': { const i = highestWell(r); r.marked = i >= 0 ? i : null; break }
       case 'Short': r.short += 1; break
       case 'Margin Call': r.pending.margin += 1; break
-      case 'Rumours': addJunk(r, 'badBlood'); say(r, 'Rumours: Bad Blood added to your deck.'); break
+      case 'Rumours': addJunk(r, badBloodFor(r.stage)); say(r, 'Rumours: Bad Blood added to your deck.'); break
       case 'Paper Promise': r.hand.push(card(r, 'iou', true)); break
       case 'Lease': {
         const v = mostValuable(r)
@@ -1558,7 +1565,8 @@ export function goMultinational(r: Run) {
   r.phase = 'incorporate'
   r.stageGold = r.gold
   r.plots = r.plots.filter(Boolean).slice(0, CONFIG.maxPlots).map(w => ({ output: CONFIG.rigOutput, reserve: 0, rig: true, faithful: w!.faithful }))
-  r.deck = r.deck.filter(c => c.key !== 'badBlood' && !c.temp) // no fires in stage 3
+  r.deck = r.deck.filter(c => !c.temp)
+  for (const c of r.deck) if (c.key === 'badBlood') c.key = 'badBloodLate' // no fires in stage 3: Bad Blood becomes a $5 bill
   for (const c of r.deck) {
     if (TO_DRY_LEASE.includes(c.key)) { c.key = 'dryLease'; c.uses = CARDS.dryLease.uses; c.up = false }
     else if (TO_DEAD_WEIGHT.includes(c.key)) { c.key = 'deadWeight'; c.uses = null; c.up = false }
@@ -1600,6 +1608,7 @@ export function goBigOil(r: Run) {
   r.heat = 0 // Heat is worth nothing now
   r.clock = CONFIG.clockStart + (r.items.includes('regulators') ? 1 : 0)
   r.freeDestroys = CONFIG.clearOut
+  r.bigOilStep = 'pick'
   r.met = []
   r.skimBase = r.stats.skims
   r.shop = { cards: [], item: null, loanTaken: false, prospectSold: true, bucketSold: true, boon: null, dividendPaid: true }

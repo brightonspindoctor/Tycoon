@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { act, canPlay, damageFor, debtPerTurn, intentText, price, production, type Card, type Run, type Threat } from './engine'
 import { adminStart, ADMIN_DEFAULTS } from './admin'
 import { CONFIG } from './config'
-import { CARDS, STAGE4_POOL, type CardKey, type ThreatKind } from './data'
+import { CARDS, INCORPORATE_OFFER_4, STAGE4_POOL, type CardKey, type ThreatKind } from './data'
 
-/** Just through the Big Oil screen: the clear-out and the pick still to do. */
+/** On the first Big Oil screen: the pick, then the clear-out, still to do. */
 const bigOil = (seed = 7, extra: Partial<typeof ADMIN_DEFAULTS> = {}) => adminStart(seed, { ...ADMIN_DEFAULTS, stage: 4, start: 'incorporate', wells: 2, capital: 60, gold: 6, deck: 'starter', ...extra })
 
 /** Stage 4, round `round`, against one enemy you choose, with a hand you choose. */
@@ -50,16 +50,30 @@ describe('becoming Big Oil (stage 3 → 4)', () => {
     expect(act(r, { type: 'takeLoan' }).capital).toBe(r.capital) // once
   })
 
-  it('clears out up to three cards for free, then destroying costs again', () => {
+  it('in three steps: pick two cards, then clear out up to three for free, then the shop', () => {
     let r = bigOil()
-    const cash = r.capital
-    for (let i = 0; i < 3; i++) r = act(r, { type: 'destroyCard', cardId: r.deck[0].id })
-    expect(r.capital).toBe(cash)
-    expect(r.freeDestroys).toBe(0)
-    const n = r.deck.length
+    expect(r.bigOilStep).toBe('pick')
+    const n0 = r.deck.length
     r = act(r, { type: 'destroyCard', cardId: r.deck[0].id })
-    expect(r.deck.length).toBe(n - 1)
-    expect(r.capital).toBe(cash - CONFIG.destroyCost4)
+    expect(r.deck.length).toBe(n0) // no destroying while picking
+    r = act(r, { type: 'leaveShop' })
+    expect(r.bigOilStep).toBe('pick') // not until two are picked
+    r = act(act(r, { type: 'pickCard', key: r.offer![0] }), { type: 'pickCard', key: r.offer![1] })
+    r = act(r, { type: 'leaveShop' })
+    expect(r.bigOilStep).toBe('clear')
+    expect(r.deck.length).toBe(n0 + 2)
+    const cash = r.capital
+    for (let i = 0; i < 4; i++) r = act(r, { type: 'destroyCard', cardId: r.deck[0].id })
+    expect(r.deck.length).toBe(n0 + 2 - 3) // three free, and no fourth
+    expect(r.capital).toBe(cash)
+    expect(act(r, { type: 'takeLoan' }).capital).toBe(cash) // the World Bank was on the first step
+    r = act(r, { type: 'leaveShop' })
+    expect(r.phase).toBe('shop')
+    expect(r.round).toBe(0)
+    expect(r.shop.cards.filter(k => k && INCORPORATE_OFFER_4.includes(k))).toHaveLength(2) // the two not picked are on sale
+    r = act(r, { type: 'leaveShop' })
+    expect(r.phase).toBe('turn')
+    expect(r.round).toBe(1)
   })
 })
 
@@ -265,7 +279,9 @@ describe('stage 4 cards', () => {
   })
 
   it('Influencers is never offered again once yours, and can\'t be duplicated or cleared out', () => {
-    const r = bigOil()
+    let r = bigOil()
+    r = act(act(r, { type: 'pickCard', key: r.offer![0] }), { type: 'pickCard', key: r.offer![1] })
+    r = act(r, { type: 'leaveShop' })
     r.deck.push({ id: 9999, key: 'influencers', uses: null })
     expect(act(r, { type: 'destroyCard', cardId: 9999 }).freeDestroys).toBe(CONFIG.clearOut)
   })
@@ -321,5 +337,28 @@ describe('fixes after the first full games', () => {
     const before = r.tally?.cooled ?? 0
     r = playIt(r, 'carbonOffsets')
     expect((r.tally?.cooled ?? 0) - before).toBe(r.clock === 5 ? CONFIG.tactics.clockHourWorth : 0)
+  })
+})
+
+describe('Bad Blood from stage 3', () => {
+  it('no fires from stage 3: Bad Blood is a must-play $5 card', () => {
+    const d = CARDS.badBloodLate
+    expect(d.forced).toBe(true)
+    expect(d.cost).toBe(CONFIG.badBloodCost)
+    let r = inStage4(['badBloodLate'], 'greenPoliticians')
+    expect(canPlay(r, r.hand.find(c => c.key !== 'badBloodLate') ?? r.hand[0]).ok).toBe(true)
+    r.hand.push({ id: 7100, key: 'propaganda', uses: null }); r.deck.push(r.hand[r.hand.length - 1])
+    expect(canPlay(r, r.hand.find(c => c.key === 'propaganda')!).ok).toBe(false) // must play first
+    const cash = r.capital
+    r = playIt(r, 'badBloodLate')
+    expect(r.capital).toBe(cash - CONFIG.badBloodCost)
+    expect(r.fire).toBe(0)
+  })
+
+  it('Dynamite still adds Bad Blood from stage 3, the $5 kind', () => {
+    let r = inStage4(['dynamite'], 'greenPoliticians')
+    r = playIt(r, 'dynamite')
+    expect(r.discard.some(c => c.key === 'badBloodLate')).toBe(true)
+    expect(r.deck.some(c => c.key === 'badBlood')).toBe(false)
   })
 })

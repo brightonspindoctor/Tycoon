@@ -47,7 +47,8 @@ describe('going multinational (stage 2 → 3)', () => {
     expect(keys.filter(k => k === 'dryLease')).toHaveLength(2) // Worn Prospect, Steel Derrick
     expect(keys.filter(k => k === 'deadWeight')).toHaveLength(2) // Bucket, Pay a Dividend
     expect(keys).toContain('shoreUp') // blocks still work in stage 3, like Security Detail
-    expect(keys).not.toContain('badBlood') // no fires in stage 3
+    expect(keys).not.toContain('badBlood') // no fires in stage 3...
+    expect(keys).toContain('badBloodLate') // ...so Bad Blood becomes a $5 bill
   })
 
   it('leaves every other old card exactly as it was, upgrades and all', () => {

@@ -52,7 +52,7 @@ export function adminStart(seed: number, o: AdminStart): Run {
     r = act(r, { type: 'continue' }) // Big Oil: the clock starts, the World Bank calls
     r.admin = true
     // jumping past the Big Oil screen: skip the pick and take Propaganda and On the Payroll
-    if (o.start !== 'incorporate') { r.offer = undefined; r.picked = undefined; (['propaganda', 'onThePayroll'] as CardKey[]).forEach(k => add(k)) }
+    if (o.start !== 'incorporate') { r.offer = undefined; r.picked = undefined; r.bigOilStep = undefined; r.freeDestroys = 0; (['propaganda', 'onThePayroll'] as CardKey[]).forEach(k => add(k)) }
     if (o.deck === 'strong') STRONG_4.forEach(k => add(k))
     r.clock = Math.max(1, Math.min(11, o.clock ?? 1))
   }
@@ -61,7 +61,7 @@ export function adminStart(seed: number, o: AdminStart): Run {
   if (o.start === 'incorporate' && o.stage >= 2) return r
   const round = o.start === 'incorporate' ? 1 : o.start
   if (o.stage === 1 && round === 1) { r.phase = 'shop'; r.round = 0 } // replay round 1 with the kit
-  else if (o.stage >= 2 && round === 1) return act(r, { type: 'leaveShop' })
+  else if (o.stage >= 2 && o.stage < 4 && round === 1) return act(r, { type: 'leaveShop' })
   else { r.phase = 'shop'; r.round = round - 1 }
   r.shop.prospectSold = false; r.shop.bucketSold = false
   return act(r, { type: 'leaveShop' })
