@@ -204,7 +204,7 @@ Four damage types: Legal, Dirty, **Bury** (hiding evidence) and **Lobby** (Washi
 Every bribe (Bribe the Sheriff, Bribe, Bribe an Official) feeds a Bribery Scandal. Junk: Dead Weight, Dry Lease, Draft Declaration (the summit's: must play, 1 AP, does nothing).
 
 ### Stage 3 items
-**Refinery** ($22M: oil sells +$1M; moved here from stage 2), Rolodex ($20M: +1 hand size, up to 7, buy more than one), Paper Shredder ($35M: once a round, destroy a card in hand for free), Supertanker ($30M: +4 storage, up to 12; each one makes oil sell $1M less), **Think Tank** ($15M: +3 Cover every turn).
+**Refinery** ($22M: oil sells +$1M; moved here from stage 2), Rolodex ($20M: +1 hand size, up to 7, buy more than one), Paper Shredder ($35M: once a fight, destroy a card in hand for free), Supertanker ($30M: +4 storage, up to 12; each one makes oil sell $1M less), **Think Tank** ($15M: +3 Cover every turn).
 
 ### Stage 3 enemies
 **Every stage 3 enemy move also takes Capital** ($1–3M, the last column), on top of what the move does. Cover blocks it.
@@ -337,7 +337,7 @@ The look is a cheerful corporate sustainability report made by a tech start-up: 
 
 
 ## Sound
-Synthesised in the browser (src/sound.ts); hear them all at `?preview=sounds`. Each era arrives with its own sound: a steam whistle (1860s), a muted brass fanfare (1900s), a wobbling organ chord (1970s), a start-up chime (2010s). The enemy turn types out on a stock ticker in stages 1–2, a telex in stage 3 and a phone notification in stage 4. Events: a tick, tock and chime when the Truth clock moves on (a ratchet when it goes back), three deep bell strokes at midnight, a dissonant swell when the Truth changes phase, a rising shimmer when an enemy regains Hold, coins slipping away when gold is taken, paper slapped down for junk, and a fanfare with the cash register for the win.
+Synthesised in the browser (src/sound.ts); hear them all at `?preview=sounds`. Each era arrives with its own sound: a steam whistle (1860s), a muted brass fanfare (1900s), a wobbling organ chord (1970s), a start-up chime (2010s). The enemy turn arrives the way news did in each era: ticker tape (stage 1), silent-film intertitles in a gold Deco frame with a projector clatter (stage 2), a telex printing on green-bar paper (stage 3), and phone notifications stacking from the top, with clock moves as black Breaking alerts (stage 4). Events: a tick, tock and chime when the Truth clock moves on (a ratchet when it goes back), three deep bell strokes at midnight, a dissonant swell when the Truth changes phase, a rising shimmer when an enemy regains Hold, coins slipping away when gold is taken, paper slapped down for junk, and a fanfare with the cash register for the win.
 
 ## Glossary
 Settings → Glossary: five words and nothing else: Hold, Cover, Gold, Capital and AP.

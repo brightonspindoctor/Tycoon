@@ -175,7 +175,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
           {run.amplify && <span className="amplify-badge">Influencers: next card doubled</span>}
           {!!run.current.cardCap && <span className="cap-badge">Subpoena: {run.played ?? 0} of {run.current.cardCap} cards</span>}
           <div className="action-strip__actions">
-            {run.items.includes('paperShredder') && <button type="button" className="cl-btn" disabled={run.shredded || !run.hand.length} onClick={() => { setSelected(null); setShredding(!shredding) }}>{run.shredded ? 'Shredder used this round' : shredding ? 'Cancel' : 'Paper Shredder · free · once a round'}</button>}
+            {run.items.includes('paperShredder') && <button type="button" className="cl-btn" disabled={run.shredded || !run.hand.length} onClick={() => { setSelected(null); setShredding(!shredding) }}>{run.shredded ? 'Shredder used this fight' : shredding ? 'Cancel' : 'Paper Shredder · free · once a fight'}</button>}
             {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose Well No. {weakestWell(run) + 1}, put out every fire</button>}
           </div>
         </div>

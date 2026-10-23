@@ -1,6 +1,7 @@
-// The enemy turn, played back one event at a time on a strip of ticker tape.
-// Each line types out, the thing it's about lights up on the board, then the
-// tape feeds on. Tap to hurry it along; Skip jumps to your turn.
+// The enemy turn, played back one event at a time, the way news arrived in each era:
+// ticker tape (stage 1), silent-film intertitles (stage 2), a telex printout (stage 3)
+// and phone notifications (stage 4). The thing each line is about lights up on the
+// board. Tap to hurry it along; Skip jumps to your turn.
 import { useEffect, useRef, useState } from 'react'
 import type { Beat } from '../engine/engine'
 import { play, type Cue } from '../sound'
@@ -17,7 +18,7 @@ function cueFor(b: Beat, stage: number): Cue | null {
   if (/\+\d+ Hold|Regains \d+ Hold/.test(b.text)) return 'heal'
   if (b.kind === 'cards') return 'junk'
   if (b.kind === 'money' && !b.text.includes('−')) return 'coin'
-  if (b.kind === 'enemy') return stage >= 4 ? 'ping' : stage === 3 ? 'telex' : 'ticker'
+  if (b.kind === 'enemy') return stage >= 4 ? 'ping' : stage === 3 ? 'telex' : stage === 2 ? 'reel' : 'ticker'
   return CUE[b.kind]
 }
 
@@ -25,6 +26,7 @@ export function TickerTape({ beats, speed, stage = 1, onBeat, onDone }: Props) {
   const [i, setI] = useState(0)
   const [typed, setTyped] = useState(0)
   const fast = speed === 'fast'
+  const instant = stage === 2 || stage >= 4 // intertitles and notifications arrive whole; tape and telex print
   const b = beats[i]
   const full = b ? b.text.length : 0
   const finished = useRef(false)
@@ -48,23 +50,42 @@ export function TickerTape({ beats, speed, stage = 1, onBeat, onDone }: Props) {
   useEffect(() => {
     if (!b) return
     if (typed < full) {
-      const step = fast ? 3 : 1
+      if (instant) { setTyped(full); return }
+      const step = fast ? 3 : stage === 3 ? 2 : 1 // the telex prints faster than the ticker
       const t = setTimeout(() => setTyped(n => Math.min(full, n + step)), fast ? 10 : 18)
       return () => clearTimeout(t)
     }
-    const hold = (b.kind === 'shuffle' ? 1100 : b.kind === 'info' ? 700 : 900) * (fast ? 0.45 : 1)
+    // a line that arrives whole stays a little longer, by its length, so it can be read
+    const hold = ((b.kind === 'shuffle' ? 1100 : b.kind === 'info' ? 700 : 900) + (instant ? Math.min(900, full * 14) : 0)) * (fast ? 0.45 : 1)
     const t = setTimeout(advance, hold)
     return () => clearTimeout(t)
   }, [typed, i]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!b) return null
+  const era = stage >= 4 ? 'feed' : stage === 3 ? 'telex' : stage === 2 ? 'reel' : 'ticker'
+  const breaking = (x: Beat) => x.title === 'The Truth clock' || x.kind === 'board'
   return (
-    <div className="tape-wrap" onClick={advance} role="status" aria-live="polite">
-      <div className="tape" key={i}>
-        <span className={`tape__stamp tape__stamp--${b.kind}`}>{b.title}</span>
-        <span className="tape__text">{b.text.slice(0, typed)}<span className="tape__caret" /></span>
-        {b.kind === 'shuffle' && <Riffle />}
-      </div>
+    <div className={`tape-wrap tape-wrap--${era}`} onClick={advance} role="status" aria-live="polite">
+      {era === 'feed' ? (
+        // notifications stack: the newest slides in on top, the last two stay below it
+        <div className="feed">
+          {beats.slice(Math.max(0, i - 2), i + 1).reverse().map((x, k) => (
+            <div key={i - k} className={`note ${k === 0 ? 'note--new' : ''} ${breaking(x) ? 'note--breaking' : ''}`}>
+              <span className="note__icon" aria-hidden="true">{breaking(x) ? '!' : x.kind === 'money' ? '$' : x.kind === 'gold' ? '£' : '●'}</span>
+              <div className="note__body">
+                <div className="note__head"><b>{breaking(x) ? `Breaking · ${x.title}` : x.title}</b><span>{k === 0 ? 'now' : `${k}m ago`}</span></div>
+                <span className="note__text">{x.text}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="tape" key={i}>
+          <span className={`tape__stamp tape__stamp--${b.kind}`}>{b.title}</span>
+          <span className="tape__text">{b.text.slice(0, typed)}{!instant && <span className="tape__caret" />}</span>
+          {b.kind === 'shuffle' && <Riffle />}
+        </div>
+      )}
       <div className="tape__foot">
         <span className="cl-num">{i + 1} / {beats.length}</span>
         <button type="button" className="cl-btn cl-btn--small" onClick={e => { e.stopPropagation(); finish() }}>Skip ›</button>

@@ -859,3 +859,49 @@ button.m-threat { cursor: pointer; }
 /* admin mode's PIN, in Settings */
 .admin-pin__row { display: flex; gap: 8px; align-items: center; }
 .admin-pin__input { width: 7ch; font: inherit; font-family: var(--font-figures); font-size: 20px; letter-spacing: .3em; text-align: center; padding: 6px 8px; border: 1.5px solid var(--ink); border-radius: var(--cl-radius); background: var(--paper); color: var(--ink); }
+
+/* ---------- the enemy turn, era by era ----------
+   1860s: ticker tape (above). 1900s: silent-film intertitles. 1970s: telex printout. 2010s: phone notifications. */
+/* stage 2: a black title card in a gold Deco frame, cut in with a flicker */
+.tape-wrap--reel { background: rgba(10, 8, 4, .55); }
+.tape-wrap--reel .tape { min-height: 150px; justify-content: center; flex-direction: column; gap: 10px; text-align: center; padding: 26px 48px;
+  background: #0d0b08; color: #f3ead2; background-image: none; border: 2px solid #c9a24a; outline: 1px solid #c9a24a; outline-offset: -9px;
+  box-shadow: 0 0 0 6px #0d0b08, 0 18px 40px -10px rgba(0,0,0,.8); animation: reel-cut .45s steps(6, end); }
+.tape-wrap--reel .tape::before, .tape-wrap--reel .tape::after { content: "◆"; position: absolute; top: 50%; translate: 0 -50%; color: #c9a24a; font-size: 12px; }
+.tape-wrap--reel .tape::before { left: 18px; } .tape-wrap--reel .tape::after { right: 18px; }
+.tape-wrap--reel .tape__stamp { border: 0; transform: none; color: #c9a24a !important; font-family: var(--font-figures); letter-spacing: .3em; padding: 0; max-width: none; }
+.tape-wrap--reel .tape__text { flex: none; font-family: var(--font-display-1900); font-size: 30px; line-height: 38px; text-transform: none; letter-spacing: .01em; font-weight: 400; }
+@keyframes reel-cut { 0% { opacity: 0; } 20% { opacity: .9; } 35% { opacity: .4; } 55% { opacity: 1; } 70% { opacity: .75; } 100% { opacity: 1; } }
+
+/* stage 3: green-bar printer paper with tractor holes, orange dot-matrix type, feeding up */
+.tape-wrap--telex .tape { flex-wrap: wrap; gap: 4px 16px; padding: 14px 44px; min-height: 96px;
+  background-color: #f4f7ee; color: #c4501a; font-family: "VT323", "Courier New", monospace;
+  background-image: radial-gradient(circle at 16px 12px, #d8ddcf 4px, transparent 4.6px), radial-gradient(circle at calc(100% - 16px) 12px, #d8ddcf 4px, transparent 4.6px),
+    repeating-linear-gradient(to bottom, #dfeccf 0 24px, transparent 24px 48px);
+  background-size: 100% 24px, 100% 24px, 100% 48px; background-repeat: repeat-y, repeat-y, repeat;
+  box-shadow: 0 10px 24px -8px rgba(0,0,0,.5); animation: telex-feed .35s ease-out; }
+.tape-wrap--telex .tape__stamp { border: 0; transform: none; padding: 0; color: #3a2314 !important; font-family: inherit; font-size: 20px; letter-spacing: .08em; max-width: none; }
+.tape-wrap--telex .tape__stamp::after { content: " ////"; color: #c9a577; }
+.tape-wrap--telex .tape__text { flex-basis: 100%; font-size: 28px; line-height: 30px; font-weight: 400; letter-spacing: .06em; }
+.tape-wrap--telex .tape__caret { background: #c4501a; height: 22px; }
+@keyframes telex-feed { from { transform: translateY(26px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* stage 4: notifications slide down from the top and stack */
+.tape-wrap--feed { justify-content: flex-start; padding-top: 28px; background: rgba(23, 51, 43, .18); }
+.m .tape-wrap--feed { padding-top: 16px; }
+.feed { width: min(460px, calc(100% - 24px)); display: flex; flex-direction: column; gap: 8px; }
+.note { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 18px; background: rgba(255, 255, 255, .96); color: #17332b;
+  font-family: Nunito, system-ui, sans-serif; box-shadow: 0 10px 30px -10px rgba(0,0,0,.4); }
+.note:not(.note--new) { opacity: .85; transform: scale(.97); }
+.note--new { animation: note-in .35s cubic-bezier(.2, 1.3, .4, 1); }
+.note__icon { flex: none; width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: #2e9e4f; color: #fff; font-weight: 900; font-size: 15px; }
+.note--breaking { background: #141414; color: #fff; }
+.note--breaking .note__icon { background: #c9302c; }
+.note__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.note__head { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.note__head b { font-weight: 800; }
+.note__head span { color: #5c7a6f; flex: none; }
+.note--breaking .note__head span { color: #aaa; }
+.note__text { font-size: 15px; line-height: 20px; }
+@keyframes note-in { from { transform: translateY(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .tape-wrap--reel .tape, .tape-wrap--telex .tape, .note--new { animation: none; } }

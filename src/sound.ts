@@ -7,7 +7,7 @@ export type Cue =
   | 'card' | 'coin' | 'stamp' | 'fire' | 'hit' | 'win' | 'lose' | 'click' | 'ink'
   | 'whistle' | 'register' | 'straw' | 'prospect' | 'well' | 'sell' | 'ticker' | 'shuffle'
   // the later stages and their events
-  | 'deco' | 'groovy' | 'startup' | 'telex' | 'ping' | 'tick' | 'rewind' | 'midnight' | 'phase' | 'heal' | 'goldLoss' | 'junk' | 'victory'
+  | 'deco' | 'groovy' | 'startup' | 'telex' | 'ping' | 'reel' | 'tick' | 'rewind' | 'midnight' | 'phase' | 'heal' | 'goldLoss' | 'junk' | 'victory'
 
 export const CUES: { cue: Cue; label: string }[] = [
   { cue: 'whistle', label: 'Steam whistle (start of a run)' },
@@ -28,6 +28,7 @@ export const CUES: { cue: Cue; label: string }[] = [
   { cue: 'deco', label: 'Into the 1900s (brass)' },
   { cue: 'groovy', label: 'Into the 1970s (organ)' },
   { cue: 'startup', label: 'Into the 2010s (start-up chime)' },
+  { cue: 'reel', label: 'Film projector (stage 2 enemy turn)' },
   { cue: 'telex', label: 'Telex (stage 3 enemy turn)' },
   { cue: 'ping', label: 'Notification (stage 4 enemy turn)' },
   { cue: 'tick', label: 'The Truth clock moves on' },
@@ -278,6 +279,11 @@ function startup(a: Ctx, out: AudioNode, t: number) {
   ;[659, 784, 988, 1319].forEach((f, i) => { tone(a, out, t + i * 0.09, f, 0.3, 'sine', 0.12); tone(a, out, t + i * 0.09, f * 4, 0.06, 'sine', 0.02) })
   for (const f of [330, 494, 659]) tone(a, out, t + 0.36, f, 1.1, 'triangle', 0.04)
 }
+function reel(a: Ctx, out: AudioNode, t: number) {
+  // a film projector: the shutter clatters at 18 frames a second under a low motor hum
+  for (let i = 0; i < 11; i++) noise(a, out, t + i / 18, 0.02, 0.1, 1500, 4)
+  tone(a, out, t, 98, 0.65, 'sawtooth', 0.025)
+}
 function telex(a: Ctx, out: AudioNode, t: number) {
   // a fast electric teleprinter, ending on its bell
   for (let i = 0; i < 10; i++) noise(a, out, t + i * 0.03 + rnd(0, 0.006), 0.014, 0.14, rnd(1800, 2600), 5)
@@ -355,6 +361,7 @@ export function renderCue(cue: Cue, a: Ctx, out: AudioNode, t: number) {
     case 'deco': deco(a, out, t); break
     case 'groovy': groovy(a, out, t); break
     case 'startup': startup(a, out, t); break
+    case 'reel': reel(a, out, t); break
     case 'telex': telex(a, out, t); break
     case 'ping': ping(a, out, t); break
     case 'tick': clockTick(a, out, t); break
