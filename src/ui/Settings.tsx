@@ -6,6 +6,7 @@ import type { AdminOp } from '../engine/engine'
 import type { CardKey } from '../engine/data'
 import { AdminTools } from './AdminPanel'
 import { Glossary } from './Glossary'
+import { setSharing, sharing } from '../telemetry'
 import { install } from '../install'
 import { OPEN_SETTINGS, openSettings, useInstallable } from './settingsBus'
 
@@ -29,6 +30,7 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
   const [replay, setReplay] = useState<Replay>(loadReplay())
   const [confirmQuit, setConfirmQuit] = useState(false)
   const [glossary, setGlossary] = useState(false)
+  const [share, setShare] = useState(sharing())
   const { installable, installed, ios } = useInstallable()
   useEffect(() => {
     const show = () => { setVol(getVolume()); setM(isMuted()); setConfirmQuit(false); setGlossary(false); setOpen(true) }
@@ -85,6 +87,17 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
         <div className="settings__row settings__row--inline">
           <span className="cl-label">Glossary</span>
           <button type="button" className="cl-btn cl-btn--small" onClick={() => { play('click'); setGlossary(true) }}>What the words mean</button>
+        </div>
+
+        <div className="settings__row">
+          <div className="settings__row--inline">
+            <span className="cl-label">Share anonymous play data</span>
+            <button type="button" role="switch" aria-checked={share} className={`switch ${share ? 'is-on' : ''}`}
+              onClick={() => { const v = !share; setShare(v); setSharing(v); play('click') }}>
+              <span className="switch__knob" /><span className="switch__text">{share ? 'On' : 'Off'}</span>
+            </button>
+          </div>
+          <p className="res-note">How far runs get and how long people play, linked to a random ID. Never your name or location.</p>
         </div>
 
         <div className="settings__row">

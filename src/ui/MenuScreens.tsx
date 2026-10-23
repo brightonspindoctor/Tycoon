@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { loadGlobalScores, type GlobalScore } from '../telemetry'
 import { BONUSES, type BonusKey } from '../engine/data'
 import { bestScore, completedIndustries, loadRuns, loadUnlocks, trustFundOffered, type RunRecord } from '../storage'
 import { CONFIG } from '../engine/config'
@@ -61,14 +62,19 @@ export function About({ onBack }: { onBack: () => void }) {
         <p>This game was made by Jonny Sadler as a passion project.</p>
         <p>If you enjoyed it please consider buying him a coffee.</p>
         <a className="cl-btn cl-btn--primary" href="https://buymeacoffee.com/jonnysadler" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
+        <p className="res-note about__privacy">The game shares anonymous play data so it can be improved: how far runs get, where they end, and how long people play. It is linked to a random ID made on this device, never to your name, email or location. Switch it off in Settings. Your name goes on the global scoreboard only if you type one in.</p>
       </div>
     </div>
   )
 }
 
-/** The scoreboard: every finished game on this device, best first. Unlocked by winning once. */
+/** The scoreboard: everyone's finished games (global), or this device's. Unlocked by winning once. */
 export function Scoreboard({ onBack }: { onBack: () => void }) {
-  const board = loadRuns().filter(r => r.completed && r.gold !== null).sort((a, b) => (b.gold as number) - (a.gold as number))
+  const [tab, setTab] = useState<'global' | 'device'>('global')
+  const [global, setGlobal] = useState<GlobalScore[] | null | 'error'>(null)
+  useEffect(() => { void loadGlobalScores().then(g => setGlobal(g ?? 'error')) }, [])
+  const mine = loadRuns().filter(r => r.completed && r.gold !== null).sort((a, b) => (b.gold as number) - (a.gold as number))
+  const date = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
   return (
     <div className="screen history scoreboard" data-theme="victorian">
       <header className="game__head">
@@ -76,15 +82,29 @@ export function Scoreboard({ onBack }: { onBack: () => void }) {
         <button type="button" className="cl-btn" onClick={onBack}>Back</button>
       </header>
       <img className="scoreboard__banner" src={`${import.meta.env.BASE_URL}art/screens/scoreboard.jpg`} alt="The Earth from orbit, every continent on fire" />
+      <div className="segmented" role="tablist" aria-label="Scoreboard">
+        <button type="button" role="tab" aria-selected={tab === 'global'} className={tab === 'global' ? 'is-on' : ''} onClick={() => setTab('global')}>Everyone</button>
+        <button type="button" role="tab" aria-selected={tab === 'device'} className={tab === 'device' ? 'is-on' : ''} onClick={() => setTab('device')}>This device</button>
+      </div>
       <div className="history__table">
-        <table className="cl-table">
-          <thead><tr><th>#</th><th>Date</th><th>Industry</th><th>Badge</th><th className="num">Gold</th></tr></thead>
-          <tbody>
-            {board.map((r, i) => (
-              <tr key={r.id}><td>{i + 1}</td><td>{new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td><td>{r.industry}</td><td>{r.tactic ?? '—'}</td><td className="num">{r.gold}</td></tr>
-            ))}
-          </tbody>
-        </table>
+        {tab === 'global' ? (
+          global === null ? <p className="res-note">Loading the scoreboard…</p>
+            : global === 'error' ? <p className="res-note">Couldn't reach the scoreboard. Check your connection.</p>
+            : !global.length ? <p className="res-note">Nobody on it yet. Win a game and you're first.</p>
+            : <table className="cl-table">
+                <thead><tr><th>#</th><th>Name</th><th>Date</th><th>Badge</th><th className="num">Gold</th></tr></thead>
+                <tbody>{global.map((g, i) => <tr key={i}><td>{i + 1}</td><td>{g.name}</td><td>{date(g.created_at)}</td><td>{g.tactic ?? '—'}</td><td className="num">{g.gold}</td></tr>)}</tbody>
+              </table>
+        ) : (
+          <table className="cl-table">
+            <thead><tr><th>#</th><th>Date</th><th>Industry</th><th>Badge</th><th className="num">Gold</th></tr></thead>
+            <tbody>
+              {mine.map((r, i) => (
+                <tr key={r.id}><td>{i + 1}</td><td>{date(r.date)}</td><td>{r.industry}</td><td>{r.tactic ?? '—'}</td><td className="num">{r.gold}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   )

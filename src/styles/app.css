@@ -846,3 +846,12 @@ button.m-threat { cursor: pointer; }
 .glossary__body dl, .glossary__section dl { margin: 0; display: flex; flex-direction: column; gap: 8px; }
 .glossary__term dt { font-weight: 700; }
 .glossary__term dd { margin: 2px 0 0; color: var(--ink-muted); line-height: 1.4; }
+
+/* the global scoreboard entry on the win screen */
+.global-entry { display: flex; flex-direction: column; gap: 6px; background: var(--paper-raised); border-radius: var(--cl-radius); padding: 14px 16px; box-shadow: 0 4px 14px rgba(23, 51, 43, .09); }
+.global-entry p { margin: 0; }
+.global-entry__row { display: flex; gap: 10px; flex-wrap: wrap; }
+.global-entry__name { flex: 1 1 200px; font: inherit; font-size: 16px; padding: 10px 14px; border-radius: 999px; border: 1.5px solid var(--rule); background: var(--paper); color: var(--ink); }
+.global-entry__name:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.scoreboard .segmented { align-self: flex-start; }
+.about__privacy { max-width: 520px; font-size: 13px; line-height: 1.5; }

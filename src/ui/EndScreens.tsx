@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { submitScore } from '../telemetry'
 import type { Run } from '../engine/engine'
 import { roundsReached } from '../engine/engine'
 import { BONUSES, ITEMS, rewardInfo } from '../engine/data'
@@ -78,10 +79,10 @@ export function CrashOut({ run, bailout, onAgain, onHistory }: { run: Run; bailo
   )
 }
 
-export function StageComplete({ run, onMenu, onHistory, onContinue, onScoreboard }: { run: Run; onMenu: () => void; onHistory: () => void; onContinue: () => void; onScoreboard: () => void }) {
+export function StageComplete({ run, runId, onMenu, onHistory, onContinue, onScoreboard }: { run: Run; runId?: string | null; onMenu: () => void; onHistory: () => void; onContinue: () => void; onScoreboard: () => void }) {
   useEffect(() => { if (run.stage >= 4) return; play('register'); const t = setTimeout(() => play('win'), 900); return () => clearTimeout(t) }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const st = run.stage
-  if (st >= 4) return <Victory run={run} onMenu={onMenu} onScoreboard={onScoreboard} />
+  if (st >= 4) return <Victory run={run} runId={runId ?? null} onMenu={onMenu} onScoreboard={onScoreboard} />
   const last = st >= 4
   const copy = st === 1
     ? { title: 'The Rival Baron is finished', sub: 'His fields are yours. The new century is coming, and so is the competition.' }
@@ -162,7 +163,15 @@ export function StageComplete({ run, onMenu, onHistory, onContinue, onScoreboard
 }
 
 /** The end of the game: Big Oil beats the Truth. Your gold is the score. */
-function Victory({ run, onMenu, onScoreboard }: { run: Run; onMenu: () => void; onScoreboard: () => void }) {
+function Victory({ run, runId, onMenu, onScoreboard }: { run: Run; runId: string | null; onMenu: () => void; onScoreboard: () => void }) {
+  const [name, setName] = useState('')
+  const [sent, setSent] = useState<'idle' | 'sending' | 'done' | 'failed'>('idle')
+  async function send() {
+    if (!runId || sent === 'sending' || sent === 'done') return
+    setSent('sending')
+    setSent((await submitScore(runId, name)) ? 'done' : 'failed')
+    play('coin')
+  }
   useEffect(() => { const t = setTimeout(() => play('victory'), 300); return () => clearTimeout(t) }, [])
   const tactic = tacticFor(run.tally, run.deck.length, run.stats.oilSold, run.stage >= 4 ? run.clock : 0)
   return (
@@ -202,6 +211,19 @@ function Victory({ run, onMenu, onScoreboard }: { run: Run; onMenu: () => void; 
             <div className="tile"><span className="cl-label">Oil sold</span><b className="cl-num">{run.stats.oilSold} bbl</b><span className="res-note">over a century and a half</span></div>
             <div className="tile"><span className="cl-label">The Truth clock</span><b className="cl-num">{run.clock} o'clock</b><span className="res-note">and still ticking</span></div>
           </div>
+          {runId && (
+            <section className="global-entry" aria-label="The global scoreboard">
+              <span className="cl-label">The global scoreboard</span>
+              {sent === 'done' ? <p>You're on it, as {name.trim() || 'Anonymous tycoon'}.</p> : <>
+                <p className="res-note">Your gold, a name you choose and your badge go on the scoreboard everyone sees. Nothing else.</p>
+                <div className="global-entry__row">
+                  <input className="global-entry__name" maxLength={20} placeholder="Anonymous tycoon" value={name} onChange={e => setName(e.target.value)} aria-label="Your name on the scoreboard" />
+                  <button type="button" className="cl-btn cl-btn--primary" disabled={sent === 'sending'} onClick={() => void send()}>{sent === 'sending' ? 'Sending…' : 'Put me on it'}</button>
+                </div>
+                {sent === 'failed' && <p className="cl-minus res-note">Couldn't reach the scoreboard. Check your connection and try again.</p>}
+              </>}
+            </section>
+          )}
           <div className="end__buttons">
             <button type="button" className="cl-btn cl-btn--primary" onClick={onScoreboard}>See the scoreboard</button>
             <button type="button" className="cl-btn" onClick={onMenu}>Back to the start</button>

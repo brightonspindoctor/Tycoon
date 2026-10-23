@@ -341,3 +341,13 @@ Synthesised in the browser (src/sound.ts); hear them all at `?preview=sounds`. E
 
 ## Glossary
 Settings → Glossary: five words and nothing else: Hold, Cover, Gold, Capital and AP.
+
+## Play data and the global scoreboard
+Supabase project **tycoon** (London, eu-west-2), separate from brighton-weekend in the same organisation. The game talks only to `tycoon_*` functions; the tables are closed to the public.
+- **Players:** a random ID made on the device (no name, email or IP), platform, first and last seen, when it was added to the home screen.
+- **Sessions:** start and a ping every minute while the game is on screen: time played.
+- **Runs:** bonus, how it ended, stage and round reached, who finished it, gold and badge for a win, time spent.
+- **Rounds:** every round won or lost, with its enemies and turns: where people get stuck.
+- **Scores:** a won game goes on the global scoreboard only if the player asks, under a name they type (20 characters, letters and numbers; blank is "Anonymous tycoon").
+- Reports in the `reports` schema (dashboard only): `daily`, `totals`, `funnel`, `killers`, `bonuses`.
+- Settings → Share anonymous play data (on by default; the About page explains it). Admin playtests are never sent.

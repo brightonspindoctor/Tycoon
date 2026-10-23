@@ -7,4 +7,5 @@
 - Money is always shown through `money()` in `src/engine/format.ts` so the unit changes by stage.
 - Game copy is deadpan and short. Cards say what they do, not why.
 - The full design is in `docs/design.md`; keep it current when rules change.
+- Play data and the global scoreboard live in the Supabase project `tycoon` (src/telemetry.ts). The browser key there is the publishable one; it can only call the `tycoon_*` functions.
 - Art that isn't drawn yet borrows an existing icon through `src/ui/icons.ts`; drop the line there once the real file is in `public/art/icons`.

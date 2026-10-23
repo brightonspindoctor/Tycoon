@@ -24,6 +24,8 @@ import { BigOilScreen } from './ui/BigOil'
 import { EraTransition } from './ui/EraTransition'
 import { units } from './engine/format'
 import { About, BonusPick, History, Intro, Scoreboard } from './ui/MenuScreens'
+import { hello, roundEnded, runEnded, runStarted } from './telemetry'
+import { THREATS } from './engine/data'
 
 type Screen = 'intro' | 'bonus' | 'welcome' | 'run' | 'history' | 'about' | 'scoreboard'
 
@@ -133,6 +135,19 @@ export default function App() {
     if (run.stage === 2) saveUnlock('proxy')
   }, [run])
 
+  // anonymous play data: say hello once the game is open
+  useEffect(() => { void hello() }, [])
+  const [wonRunId, setWonRunId] = useState<string | null>(null)
+  // each round that ends, won or lost: where people get stuck
+  const lastRun = useRef<Run | null>(null)
+  useEffect(() => {
+    const prev = lastRun.current
+    lastRun.current = run
+    if (!run || run.admin || !prev || prev.seed !== run.seed || prev.phase !== 'turn') return
+    if (run.phase !== 'roundWon' && run.phase !== 'stageComplete' && run.phase !== 'lost') return
+    roundEnded(run.seed, run.stage, run.round, run.threats.map(t => THREATS[t.kind].name), run.phase !== 'lost', run.turn)
+  }, [run])
+
   // record finished runs once
   useEffect(() => {
     if (!run || saved.current === run.seed || run.admin) return // admin playtests are never recorded
@@ -147,6 +162,12 @@ export default function App() {
         tactic: won ? (t => t ? TACTICS[t].name : undefined)(tacticFor(run.tally, run.deck.length, run.stats.oilSold, run.stage >= 4 ? run.clock : 0)) : undefined,
       })
       setBailout(trustFundOffered(CONFIG.trustFundStreak))
+      const t = won ? tacticFor(run.tally, run.deck.length, run.stats.oilSold, run.clock) : null
+      const id = runEnded(run.seed, {
+        outcome: won ? 'won' : run.loss?.reason ?? 'bankrupt', stage: run.stage, round: run.round, roundsReached: won ? 17 : roundsReached(run),
+        killedBy: run.loss?.by[0], gold: won ? run.gold : undefined, tactic: t ? TACTICS[t].name : undefined, clock: run.stage >= 4 ? run.clock : undefined,
+      })
+      setWonRunId(won ? id : null)
     }
   }, [run])
 
@@ -162,6 +183,7 @@ export default function App() {
   function start(bonus: BonusKey) {
     if (!welcomeSeen()) { setPendingBonus(bonus); setScreen('welcome'); return }
     const r = newRun(Math.floor(Math.random() * 2 ** 31), bonus, loadUnlocks())
+    runStarted(r.seed, bonus)
     setRun(r)
     setScreen('run')
     play('whistle')
@@ -180,7 +202,7 @@ export default function App() {
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />
   else if (run.phase === 'shop' && !tape) body = <ShopScreen run={run} dispatch={dispatch} />
   else if (run.phase === 'lost' && !tape) body = <CrashOut run={run} bailout={bailout} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
-  else if (run.phase === 'stageComplete' && !tape) body = <StageComplete run={run} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} onScoreboard={() => setScreen('scoreboard')} onContinue={() => dispatch({ type: 'continue' })} />
+  else if (run.phase === 'stageComplete' && !tape) body = <StageComplete run={run} runId={wonRunId} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} onScoreboard={() => setScreen('scoreboard')} onContinue={() => dispatch({ type: 'continue' })} />
   else if (run.phase === 'incorporate') body = <>{run.stage >= 4 ? <BigOilScreen run={run} dispatch={dispatch} /> : run.stage >= 3 ? <MultinationalScreen run={run} dispatch={dispatch} /> : <IncorporateScreen run={run} dispatch={dispatch} />}{eraTo && <EraTransition to={eraTo} onDone={() => setEraTo(null)} />}</>
   else if (tape) body = (
     <>
@@ -200,7 +222,10 @@ export default function App() {
   function quitRun() {
     if (!run) return
     saved.current = run.seed
-    if (!run.admin) saveRun({ id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run), outcome: 'Quit', gold: null, completed: false, stageGold: run.gold })
+    if (!run.admin) {
+      saveRun({ id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run), outcome: 'Quit', gold: null, completed: false, stageGold: run.gold })
+      runEnded(run.seed, { outcome: 'quit', stage: run.stage, round: run.round, roundsReached: roundsReached(run) })
+    }
     setTape(null); setActing(null); setRun(null); setScreen('intro')
   }
   const adminProps = {
