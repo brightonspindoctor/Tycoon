@@ -7,7 +7,7 @@ import { CONFIG } from '../src/engine/config'
 import { botIncorporate, botShop, botTurn } from './bot'
 import { adminStart, ADMIN_DEFAULTS } from '../src/engine/admin'
 
-let seed = 12345
+let seed = Number(process.env.FUZZ_SEED ?? 12345)
 const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
 const pick = <T,>(xs: T[]): T => xs[Math.floor(rand() * xs.length)]
 

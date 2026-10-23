@@ -278,6 +278,14 @@ describe('stage 4 cards', () => {
     expect(r.cover).toBe(4) // only the next card
   })
 
+  it('Influencers doubles a blocking card\'s Cover too', () => {
+    let r = inStage4(['influencers', 'securityDetail'], 'fracking')
+    r = playIt(r, 'influencers')
+    r = playIt(r, 'securityDetail')
+    expect(r.cover).toBe(2 * CARDS.securityDetail.cover!)
+    expect(r.amplify).toBe(false)
+  })
+
   it('Influencers is never offered again once yours, and can\'t be duplicated or cleared out', () => {
     let r = bigOil()
     r = act(act(r, { type: 'pickCard', key: r.offer![0] }), { type: 'pickCard', key: r.offer![1] })

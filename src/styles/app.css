@@ -974,3 +974,6 @@ button.m-threat { cursor: pointer; }
   .trophy__icon { width: 60px; height: 60px; }
   .achievements__list { grid-template-columns: 1fr; }
 }
+/* a price tag sits on the top edge: keep a two-line card name clear of it */
+.card:has(> .card-price) .cl-card__top { margin-top: 8px; }
+.card:has(> .card-price) .cl-card__art { height: 58px; }

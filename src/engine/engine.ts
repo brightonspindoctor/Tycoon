@@ -1024,7 +1024,7 @@ function playCard(r: Run, c: Card, target?: number) {
     spendCard(r, c)
     t.stopped = true
     tally(r).blocks++
-    if (d.cover) r.cover += d.cover
+    if (d.cover) r.cover += d.cover * amp // Influencers doubles a blocking card's Cover too
     say(r, `${d.name}: ${THREATS[t.kind].name}'s ${intent(r, t)} is stopped this turn.`)
   } else if (d.scrap) {
     spendCard(r, c)
