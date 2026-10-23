@@ -11,12 +11,30 @@ import { AdminStartPanel } from './AdminPanel'
 import type { AdminStart } from '../engine/admin'
 
 const INDUSTRIES = ['Oil', 'Pharmaceutical', 'Fishing', 'Tech']
+// the front page motto: the first one until you've played a run, then a different one each visit
+const FIRST_MOTTO = 'Industry. Influence. Plausible deniability.'
+const MOTTOS = [
+  'Drill. Drill. Drill.', 'Profits now. Apologies later.', 'Today\'s oil. Tomorrow\'s problem.', 'Keep calm and keep pumping.',
+  'Externalities are someone else\'s department.', 'The ground has plenty more.', 'Growth is the only weather that matters.',
+  'What spill?', 'Fortune favours the extractive.', 'The planet will cope.', 'Every barrel is a vote of confidence.',
+  'Doubt is our product.', 'Nobody remembers the regulators.', 'Plausible deniability is a renewable resource.', 'The science can wait.',
+]
+function pickMotto(): string {
+  if (!loadRuns().length) return FIRST_MOTTO
+  let last = ''
+  try { last = sessionStorage.getItem('tycoon.motto') ?? '' } catch { /* ignore */ }
+  const options = MOTTOS.filter(m => m !== last)
+  const m = options[Math.floor(Math.random() * options.length)]
+  try { sessionStorage.setItem('tycoon.motto', m) } catch { /* ignore */ }
+  return m
+}
 const ANNOUNCED = ['Pharmaceutical'] // shown as Coming soon before Oil is finished
 // a run that died, rather than one that finished a stage or the game
 const ended = (r: RunRecord) => ['Bankrupt', 'Out of time', 'Quit', 'Ousted', 'Ruined'].includes(r.outcome)
 
 export function Intro({ onBegin, onHistory, onAbout, onScoreboard, onAchievements, admin, onAdminStart }: { onBegin: () => void; onHistory: () => void; onAbout: () => void; onScoreboard: () => void; onAchievements: () => void; admin?: boolean; onAdminStart?: (o: AdminStart) => void }) {
   const done = completedIndustries()
+  const [motto] = useState(pickMotto)
   const got = loadAchieved()
   const feats = ACHIEVEMENT_KEYS.filter(k => got[k]).length
   const best = bestScore('Oil')
@@ -28,7 +46,7 @@ export function Intro({ onBegin, onHistory, onAbout, onScoreboard, onAchievement
     <div className="screen intro" data-theme="victorian">
       <img className="intro__art" src={`${import.meta.env.BASE_URL}art/title.jpg`} alt="Tycoon: a share certificate with the industries arranged around a globe" />
       <div className="intro__side">
-        <span className="cl-label">Industry. Influence. Plausible deniability.</span>
+        <span className="cl-label">{motto}</span>
         <h1 className="cl-display intro__title">Choose your industry</h1>
         <div className="industries">
           {shown.map(name => open.includes(name) ? (
@@ -107,14 +125,14 @@ export function Scoreboard({ onBack, onCabinet }: { onBack: () => void; onCabine
             : !global.length ? <p className="res-note">Nobody on it yet. Win a game and you're first.</p>
             : <table className="cl-table">
                 <thead><tr><th>#</th><th>Name</th><th>Date</th><th>Badge</th><th className="num">Gold</th></tr></thead>
-                <tbody>{global.map((g, i) => <tr key={i}><td>{i + 1}</td><td>{g.name}</td><td>{date(g.created_at)}</td><td>{g.tactic ?? '—'}</td><td className="num">{g.gold}</td></tr>)}</tbody>
+                <tbody>{global.map((g, i) => <tr key={i}><td>{i + 1}</td><td>{g.name}</td><td>{date(g.created_at)}</td><td>{g.tactic ?? '—'}{g.hard && <span className="history__badge">Self-Made</span>}</td><td className="num">{g.gold}</td></tr>)}</tbody>
               </table>
         ) : (
           <table className="cl-table">
             <thead><tr><th>#</th><th>Date</th><th>Industry</th><th>Badge</th><th className="num">Gold</th></tr></thead>
             <tbody>
               {mine.map((r, i) => (
-                <tr key={r.id}><td>{i + 1}</td><td>{date(r.date)}</td><td>{r.industry}</td><td>{r.tactic ?? '—'}</td><td className="num">{r.gold}</td></tr>
+                <tr key={r.id}><td>{i + 1}</td><td>{date(r.date)}</td><td>{r.industry}</td><td>{r.tactic ?? '—'}{r.hard && <span className="history__badge">Self-Made</span>}</td><td className="num">{r.gold}</td></tr>
               ))}
             </tbody>
           </table>
@@ -134,8 +152,9 @@ export function BonusPick({ onPick, onBack }: { onPick: (b: BonusKey) => void; o
         <div><span className="cl-label">Oil · Pennsylvania · 1863</span><h1 className="cl-display game__title">Choose your advantage</h1></div>
         <button type="button" className="cl-btn" onClick={onBack}>Back</button>
       </header>
+      <p className="bonus__loan"><b>The bank has lent you ${CONFIG.startCapital} to start.</b> You pay it back at ${CONFIG.startDebt} a turn, as Bank Debt. Choose one advantage.</p>
       <div className="bonus__grid">
-        {(Object.keys(BONUSES) as BonusKey[]).filter(k => (k !== 'trustFund' || offered) && (k !== 'oldFaithful' || faithful) && (k !== 'slushFund' || slush)).map(k => (
+        {(Object.keys(BONUSES) as BonusKey[]).filter(k => k !== 'none' && (k !== 'trustFund' || offered) && (k !== 'oldFaithful' || faithful) && (k !== 'slushFund' || slush)).map(k => (
           <button key={k} type="button" className={`bonus__card ${k === 'trustFund' ? 'bonus__card--earned' : ''}`} onClick={() => { play('card'); onPick(k) }}>
             {k === 'trustFund' && <span className="cl-label bonus__tag">{CONFIG.trustFundStreak} failures in a row</span>}
             <span className="cl-display bonus__name">{BONUSES[k].name}</span>
@@ -143,6 +162,9 @@ export function BonusPick({ onPick, onBack }: { onPick: (b: BonusKey) => void; o
           </button>
         ))}
       </div>
+      <button type="button" className="bonus__none" onClick={() => { play('card'); onPick('none') }}>
+        <span className="cl-display">{BONUSES.none.name}</span><span>{BONUSES.none.text}</span>
+      </button>
     </div>
   )
 }
@@ -173,7 +195,7 @@ export function History({ onBack }: { onBack: () => void }) {
               <tr key={r.id}>
                 <td>{runs.length - i}</td><td>{new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td><td>{r.industry}</td>
                 <td><span className="mini-bar">{Array.from({ length: 16 }, (_, k) => <i key={k} className={k + 1 < r.rounds || (k + 1 === r.rounds && !ended(r)) ? 'd' : k + 1 === r.rounds ? 'x' : ''} />)}</span> {r.completed ? 'Complete' : `Stage ${Math.ceil(r.rounds / 4)} · Round ${((r.rounds - 1) % 4) + 1}`}</td>
-                <td className={r.outcome === 'Quit' ? 'res-note' : ended(r) ? 'cl-minus' : ''}>{r.outcome}{r.tactic && <span className="history__badge">{r.tactic}</span>}</td>
+                <td className={r.outcome === 'Quit' ? 'res-note' : ended(r) ? 'cl-minus' : ''}>{r.outcome}{r.tactic && <span className="history__badge">{r.tactic}</span>}{r.hard && <span className="history__badge">{r.completed ? 'Self-Made' : 'Hard mode'}</span>}</td>
                 <td className="num">{r.gold !== null ? `${r.gold} gold` : <span className="res-note">— ({r.stageGold} gold)</span>}</td>
               </tr>
             ))}</tbody>

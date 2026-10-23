@@ -102,3 +102,15 @@ describe('achievements', () => {
     expect(achievedBy(g)).toContain('richCompany')
   })
 })
+
+describe('hard mode', () => {
+  it('no advantage: the starter deck, the full Bank Debt, no oil, no items', () => {
+    const plain = newRun(5, 'none')
+    expect(plain.bonus).toBe('none')
+    expect(plain.debt).toBe(CONFIG.startDebt)
+    expect(plain.oil).toBe(0)
+    expect(plain.items).toEqual([])
+    expect(plain.plots.filter(Boolean)).toHaveLength(0)
+    expect(plain.deck.length).toBe(newRun(5, 'threeOil').deck.length)
+  })
+})

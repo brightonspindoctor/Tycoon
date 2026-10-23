@@ -7,7 +7,7 @@ import { ERA_THEME, money, units, year } from '../engine/format'
 import { CONFIG } from '../engine/config'
 import { play } from '../sound'
 import { iconUrl } from './icons'
-import { TACTICS, tacticFor } from '../engine/tactics'
+import { SELF_MADE, TACTICS, tacticFor } from '../engine/tactics'
 
 function Progress({ reached, dead }: { reached: number; dead: boolean }) {
   return (
@@ -202,6 +202,16 @@ function Victory({ run, runId, onMenu, onScoreboard }: { run: Run; runId: string
                 <span className="cl-label">How you won</span>
                 <b className="cl-display">{TACTICS[tactic].name}</b>
                 <span>{TACTICS[tactic].text}</span>
+              </div>
+            </section>
+          )}
+          {run.bonus === 'none' && (
+            <section className="badge badge--hard" role="status" aria-label="Hard mode badge">
+              <img src={iconUrl(SELF_MADE.icon)} alt="" />
+              <div>
+                <span className="cl-label">Hard mode</span>
+                <b className="cl-display">{SELF_MADE.name}</b>
+                <span>{SELF_MADE.text}</span>
               </div>
             </section>
           )}

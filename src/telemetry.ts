@@ -92,7 +92,7 @@ export function runEnded(seed: number, e: RunEnd): string | null {
 }
 
 // ------------------------------------------------------------- the global scoreboard
-export interface GlobalScore { name: string; gold: number; tactic: string | null; created_at: string }
+export interface GlobalScore { name: string; gold: number; tactic: string | null; created_at: string; hard?: boolean } // hard: once the scoreboard function returns it
 /** Puts a won game on the global scoreboard. This one goes even with play data off: the player asked for it. */
 let last: { id: string; bonus: string; args: Record<string, unknown> } | null = null
 export async function submitScore(runId: string, name: string): Promise<boolean> {

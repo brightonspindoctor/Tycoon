@@ -1,3 +1,4 @@
+import { SELF_MADE } from './engine/tactics'
 // Run history and progress, kept in this browser.
 export interface RunRecord {
   id: string
@@ -9,6 +10,7 @@ export interface RunRecord {
   completed: boolean
   stageGold: number
   tactic?: string // the badge a won game earned
+  hard?: boolean // played with no starting advantage
 }
 
 const KEY = 'tycoon.runs.v1'
@@ -126,5 +128,10 @@ export function saveAchieved(keys: string[]): string[] {
 }
 /** How many times each badge has been won on this device, by badge name. */
 export function badgeCounts(): Record<string, number> {
-  return loadRuns().reduce<Record<string, number>>((m, r) => (r.tactic ? { ...m, [r.tactic]: (m[r.tactic] ?? 0) + 1 } : m), {})
+  const m: Record<string, number> = {}
+  for (const r of loadRuns()) {
+    if (r.tactic) m[r.tactic] = (m[r.tactic] ?? 0) + 1
+    if (r.hard && r.completed) m[SELF_MADE.name] = (m[SELF_MADE.name] ?? 0) + 1 // hard mode wins
+  }
+  return m
 }

@@ -1,6 +1,6 @@
 // The Achievements page (from the front page) and the Trophy Cabinet (from the Scoreboard).
 import { ACHIEVEMENTS, ACHIEVEMENT_KEYS } from '../engine/achievements'
-import { TACTICS, type TacticKey } from '../engine/tactics'
+import { SELF_MADE, TACTICS } from '../engine/tactics'
 import { badgeCounts, loadAchieved } from '../storage'
 import { iconUrl } from './icons'
 
@@ -44,28 +44,28 @@ export function Achievements({ onBack }: { onBack: () => void }) {
 
 export function TrophyCabinet({ onBack }: { onBack: () => void }) {
   const counts = badgeCounts()
-  const keys = Object.keys(TACTICS) as TacticKey[]
-  const have = keys.filter(k => counts[TACTICS[k].name]).length
+  const badges = [SELF_MADE, ...Object.values(TACTICS)] // hard mode's badge first, on its own shelf
+  const have = badges.filter(t => counts[t.name]).length
   return (
     <div className="screen history cabinet" data-theme="victorian">
       <header className="game__head">
-        <div><span className="cl-label">Tycoon · {have} of {keys.length} badges</span><h1 className="cl-display game__title">Trophy cabinet</h1></div>
+        <div><span className="cl-label">Tycoon · {have} of {badges.length} badges</span><h1 className="cl-display game__title">Trophy cabinet</h1></div>
         <button type="button" className="cl-btn" onClick={onBack}>Back</button>
       </header>
       <div className="cabinet__shelves">
-        {keys.map(k => {
-          const t = TACTICS[k], n = counts[t.name] ?? 0
+        {badges.map(t => {
+          const n = counts[t.name] ?? 0, hard = t === SELF_MADE
           return (
-            <div key={k} className={`trophy ${n ? 'is-earned' : ''}`}>
+            <div key={t.name} className={`trophy ${n ? 'is-earned' : ''} ${hard ? 'trophy--hard' : ''}`}>
               <div className="trophy__plinth">{n ? <img className="trophy__icon" src={iconUrl(t.icon)} alt="" /> : <span className="trophy__unknown" aria-hidden="true">?</span>}</div>
-              <b className="cl-display">{n ? t.name : 'Not yet won'}</b>
-              <span className="res-note">{n ? t.text : '—'}</span>
+              <b className="cl-display">{n ? t.name : hard ? 'Hard mode' : 'Not yet won'}</b>
+              <span className="res-note">{n ? t.text : hard ? 'Win with no advantage.' : '—'}</span>
               {n > 0 && <span className="cl-label trophy__count">Won {n === 1 ? 'once' : `${n} times`}</span>}
             </div>
           )
         })}
       </div>
-      <p className="res-note">Each game you win as Chairman earns one badge, for how you played it.</p>
+      <p className="res-note">Each game you win as Chairman earns one badge, for how you played it. Win with no advantage and you earn Self-Made as well.</p>
     </div>
   )
 }

@@ -32,7 +32,7 @@ export const ACHIEVEMENTS: Record<AchievementKey, Achievement> = {
 
   dynasty: { name: 'Dynasty', goal: `Win the game with ${A.dynasty} gold or more.`, icon: 'inheritance3', group: 'Collecting', check: r => won(r) && r.gold >= A.dynasty },
   fluentInSpin: { name: 'Fluent in Spin', goal: 'Unlock every term in the glossary.', icon: 'pressOffice', group: 'Collecting' },
-  fullCabinet: { name: 'Full Cabinet', goal: 'Earn all nine badges.', icon: 'payDividend', group: 'Collecting' },
+  fullCabinet: { name: 'Full Cabinet', goal: 'Earn every badge in the trophy cabinet.', icon: 'payDividend', group: 'Collecting' },
 
   shortCareer: { name: 'Short Career', goal: 'Go bankrupt in the first round.', icon: 'iou', group: 'Failures', check: r => lostTo(r, 'bankrupt') && r.stage === 1 && r.round <= 1 },
   richCompany: { name: 'Rich Company, Poor Chairman', goal: `Be ruined with $${A.richCompany} or more still in the company.`, icon: 'offshoreTrust', group: 'Failures', check: r => lostTo(r, 'ruined') && r.capital >= A.richCompany },

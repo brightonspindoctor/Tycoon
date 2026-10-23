@@ -17,7 +17,7 @@ import { InstallPrompt } from './ui/InstallPrompt'
 import { ShopScreen } from './ui/ShopScreen'
 import { RoundSummary } from './ui/RoundSummary'
 import { CrashOut, StageComplete } from './ui/EndScreens'
-import { TACTICS, tacticFor } from './engine/tactics'
+import { SELF_MADE, TACTICS, tacticFor } from './engine/tactics'
 import { IncorporateScreen } from './ui/Incorporate'
 import { MultinationalScreen } from './ui/Multinational'
 import { BigOilScreen } from './ui/BigOil'
@@ -175,6 +175,7 @@ export default function App() {
         id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run),
         outcome: won ? 'Chairman' : LOST[run.loss?.reason ?? 'bankrupt'], gold: won ? run.gold : null, completed: won, stageGold: run.gold, // your gold is the score
         tactic: won ? (t => t ? TACTICS[t].name : undefined)(tacticFor(run.tally, run.deck.length, run.stats.oilSold, run.stage >= 4 ? run.clock : 0)) : undefined,
+        hard: run.bonus === 'none' || undefined,
       })
       // the Trust Fund is earned once, by a losing streak, and kept for good: the notice shows only the first time
       const earned = !loadUnlocks().trustFund && trustFundOffered(CONFIG.trustFundStreak)
@@ -196,7 +197,7 @@ export default function App() {
     const keys: AchievementKey[] = achievedBy(run)
     if (loadFound().length >= Object.keys(TERMS).length) keys.push('fluentInSpin')
     const badges = badgeCounts()
-    if (Object.values(TACTICS).every(t => badges[t.name])) keys.push('fullCabinet')
+    if ([...Object.values(TACTICS), SELF_MADE].every(t => badges[t.name])) keys.push('fullCabinet')
     const fresh = saveAchieved(keys) as AchievementKey[]
     if (!fresh.length) return
     setNewFeat(fresh.map(k => ACHIEVEMENTS[k].name).join(' · '))

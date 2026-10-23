@@ -35,7 +35,10 @@ Unlocked one after another: **Oil → Pharmaceutical → Fishing → Tech** (Pha
 - Enemies have **Hold** (health). Cards remove Hold. There are two kinds, **Legal** and **Dirty**; an enemy can be weak to one (double), resist one (half) or be immune. No card is tied to one enemy.
 - Starting deck (9): Prospect, Hired Hand ×2, Lawyer Up, Shore Up, Bucket of Water ×2, Improve Gear, Hard Graft.
 - Starting bonus (pick one): Extra Prospect, 3 Oil, Petty Cash (skim 1 gold, 0 AP, 3 uses), Improve Gear + Hard Graft.
-- Bailout bonus: **Trust Fund** ($15 and no Bank Debt for stage 1). Earned by losing 3 runs in a row in stage 1 (bankrupt or out of time), and from then on a permanent starting bonus.
+- The advantage screen opens with a note: the bank has lent you $15 to start, paid back at $1 a turn as Bank Debt.
+- **No advantage (hard mode)**: a dashed option under the advantages. The loan and nothing else. Winning this way earns the **Self-Made** badge on top of the usual one (victory screen, history, both scoreboards, the trophy cabinet's top shelf). The bot does about as well in hard mode as with 3 Oil (stage 1 47% vs 44%; the Truth 54% vs 65%), so the advantages are worth little to it.
+- The front page motto is "Industry. Influence. Plausible deniability." until you've played a run; after that it's a different one each visit ("Drill. Drill. Drill.", "What spill?" …).
+- Bailout bonus: **Trust Fund**: cancels your Bank Debt for stage 1. Earned by losing 3 runs in a row in stage 1 (bankrupt or out of time), and from then on a permanent starting bonus.
 - Junk: Loose Thread (must play, 0 AP, −$1), Bad Blood (must play, 0 AP, 1 in 3 chance of a fire, destroyed after 2 plays; Dynamite, Bribe the Sheriff and a refused Bribe put one in your discard pile; Dirty cards alone never do), Margin Call (must play, −$2), IOU (−$1 a turn until cleared).
 
 ### Before and after the boss
@@ -253,7 +256,7 @@ Bars are set on full-game wins (through the Truth): about 6 in 10 winning bot ru
 
 ## Trophy cabinet
 
-Reached from the Scoreboard. Shows the nine badges on shelves: won ones in colour with how many times, the rest as a "?" with no name.
+Reached from the Scoreboard. Self-Made (hard mode) has the top shelf, then the nine tactic badges: won ones in colour with how many times, the rest as a "?" with no name.
 
 ## Achievements
 

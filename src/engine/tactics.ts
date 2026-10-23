@@ -26,6 +26,9 @@ export const TACTICS: Record<TacticKey, { name: string; text: string; icon: stri
   businessAsUsual: { name: 'Business as Usual', text: 'The Truth never got going.', icon: 'sustainabilityReport' },
 }
 
+/** Won with no starting advantage (hard mode): earned on top of the tactic badge. */
+export const SELF_MADE = { name: 'Self-Made', text: 'No advantage. No excuses.', icon: 'personalGuarantee' }
+
 /** What each tactic measures, for a finished run. */
 /** `clock` is the hour the Truth clock ended at (0 if the game didn't reach it). */
 export function tacticScores(t: Tally, deckSize: number, oilSold: number, clock = 0): Record<TacticKey, number> {
