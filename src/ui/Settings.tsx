@@ -7,6 +7,8 @@ import type { CardKey } from '../engine/data'
 import { AdminTools } from './AdminPanel'
 import { Glossary } from './Glossary'
 import { setSharing, sharing } from '../telemetry'
+
+const ADMIN_PIN = '3333'
 import { install } from '../install'
 import { OPEN_SETTINGS, openSettings, useInstallable } from './settingsBus'
 
@@ -31,9 +33,10 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
   const [confirmQuit, setConfirmQuit] = useState(false)
   const [glossary, setGlossary] = useState(false)
   const [share, setShare] = useState(sharing())
+  const [pin, setPin] = useState<string | null>(null) // admin mode needs its PIN to switch on
   const { installable, installed, ios } = useInstallable()
   useEffect(() => {
-    const show = () => { setVol(getVolume()); setM(isMuted()); setConfirmQuit(false); setGlossary(false); setOpen(true) }
+    const show = () => { setVol(getVolume()); setM(isMuted()); setConfirmQuit(false); setGlossary(false); setPin(null); setOpen(true) }
     window.addEventListener(OPEN_SETTINGS, show)
     return () => window.removeEventListener(OPEN_SETTINGS, show)
   }, [])
@@ -110,10 +113,28 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
         <div className="settings__row settings__row--inline">
           <span className="cl-label">Admin mode</span>
           <button type="button" role="switch" aria-checked={adminOn} className={`switch ${adminOn ? 'is-on' : ''}`}
-            onClick={() => { const v = !adminOn; setAdminOn(v); saveAdmin(v); admin?.onToggle(v); play('click') }}>
+            onClick={() => {
+              play('click')
+              if (adminOn) { setAdminOn(false); saveAdmin(false); admin?.onToggle(false); setPin(null); return }
+              setPin(pin === null ? '' : null) // ask for the PIN first
+            }}>
             <span className="switch__knob" /><span className="switch__text">{adminOn ? 'On' : 'Off'}</span>
           </button>
         </div>
+        {pin !== null && !adminOn && (
+          <form className="settings__row admin-pin" onSubmit={e => {
+            e.preventDefault()
+            if (pin === ADMIN_PIN) { setAdminOn(true); saveAdmin(true); admin?.onToggle(true); setPin(null); play('coin') }
+            else { setPin(''); play('hit') }
+          }}>
+            <label className="cl-label" htmlFor="admin-pin">PIN</label>
+            <div className="admin-pin__row">
+              <input id="admin-pin" className="admin-pin__input" type="password" inputMode="numeric" autoComplete="off" maxLength={4} autoFocus
+                value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ''))} aria-label="Admin PIN" />
+              <button type="submit" className="cl-btn cl-btn--small" disabled={pin.length < 4}>Unlock</button>
+            </div>
+          </form>
+        )}
         {adminOn && admin?.onAdmin && <AdminTools onAdmin={admin.onAdmin} inTurn={admin.inTurn} stage={admin.stage} />}
         {onQuit && (
           <div className="settings__row settings__quit">

@@ -855,3 +855,7 @@ button.m-threat { cursor: pointer; }
 .global-entry__name:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .scoreboard .segmented { align-self: flex-start; }
 .about__privacy { max-width: 520px; font-size: 13px; line-height: 1.5; }
+
+/* admin mode's PIN, in Settings */
+.admin-pin__row { display: flex; gap: 8px; align-items: center; }
+.admin-pin__input { width: 7ch; font: inherit; font-family: var(--font-figures); font-size: 20px; letter-spacing: .3em; text-align: center; padding: 6px 8px; border: 1.5px solid var(--ink); border-radius: var(--cl-radius); background: var(--paper); color: var(--ink); }

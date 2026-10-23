@@ -101,7 +101,7 @@ export function saveUnlock(k: 'baron' | 'proxy') {
 }
 
 const ADMIN = 'tycoon.admin'
-/** Admin mode: playtest tools. Turned on in Settings, or with ?admin=1 (?admin=0 turns it off). */
+/** Admin mode: playtest tools. Turned on in Settings with the PIN (?admin=0 turns it off). */
 export function loadAdmin(): boolean {
   try { return localStorage.getItem(ADMIN) === '1' } catch { return false }
 }

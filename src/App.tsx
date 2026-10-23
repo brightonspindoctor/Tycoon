@@ -51,7 +51,7 @@ export default function App() {
   const [bailout, setBailout] = useState(false) // a losing streak earns the Trust Fund next run
   const [admin, setAdmin] = useState(() => {
     const q = new URLSearchParams(location.search).get('admin')
-    if (q === '1' || q === '0') saveAdmin(q === '1')
+    if (q === '0') saveAdmin(false) // ?admin=0 switches it off; switching it on needs the PIN in Settings
     return loadAdmin()
   })
   // the enemy turn being played back: the board stays as it was until the tape has run
