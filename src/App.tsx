@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { act, newRun, roundsReached, type Action, type AdminOp, type Beat, type Run } from './engine/engine'
 import { bossRound, type BonusKey, type CardKey } from './engine/data'
-import { loadAdmin, loadReplay, loadUnlocks, markWelcomed, saveAdmin, saveRun, saveUnlock, trustFundOffered, welcomeSeen } from './storage'
+import { badgeCounts, loadAdmin, loadReplay, loadUnlocks, saveAchieved, markWelcomed, saveAdmin, saveRun, saveUnlock, trustFundOffered, welcomeSeen } from './storage'
 import { adminStart, type AdminStart } from './engine/admin'
 import { Welcome } from './ui/Welcome'
 import { TickerTape } from './ui/TickerTape'
@@ -24,11 +24,13 @@ import { BigOilScreen } from './ui/BigOil'
 import { EraTransition } from './ui/EraTransition'
 import { units } from './engine/format'
 import { About, BonusPick, History, Intro, Scoreboard } from './ui/MenuScreens'
+import { Achievements, TrophyCabinet } from './ui/Achievements'
 import { hello, roundEnded, runEnded, runStarted } from './telemetry'
-import { findTerms } from './terms'
+import { findTerms, loadFound, TERMS } from './terms'
+import { ACHIEVEMENTS, achievedBy, type AchievementKey } from './engine/achievements'
 import { THREATS } from './engine/data'
 
-type Screen = 'intro' | 'bonus' | 'welcome' | 'run' | 'history' | 'about' | 'scoreboard'
+type Screen = 'intro' | 'bonus' | 'welcome' | 'run' | 'history' | 'about' | 'scoreboard' | 'achievements' | 'cabinet'
 
 // Phones held upright get their own layout; anything wider gets the 1440×900 board scaled to fit.
 const MOBILE_MAX = 760
@@ -187,6 +189,22 @@ export default function App() {
     }
   }, [run])
 
+  // achievements: checked as the run changes (never in an admin playtest), after the run is recorded
+  const [newFeat, setNewFeat] = useState<string | null>(null)
+  useEffect(() => {
+    if (!run || run.admin) return
+    const keys: AchievementKey[] = achievedBy(run)
+    if (loadFound().length >= Object.keys(TERMS).length) keys.push('fluentInSpin')
+    const badges = badgeCounts()
+    if (Object.values(TACTICS).every(t => badges[t.name])) keys.push('fullCabinet')
+    const fresh = saveAchieved(keys) as AchievementKey[]
+    if (!fresh.length) return
+    setNewFeat(fresh.map(k => ACHIEVEMENTS[k].name).join(' · '))
+    setTimeout(() => play('ping'), 200)
+    const t = setTimeout(() => setNewFeat(null), 4500)
+    return () => clearTimeout(t)
+  }, [run])
+
   function startAdmin(o: AdminStart) {
     const r = adminStart(Math.floor(Math.random() * 2 ** 31), o)
     saved.current = null
@@ -210,9 +228,11 @@ export default function App() {
   let body: JSX.Element
   if (previewPage === 'cards') body = <CardGallery />
   else if (previewPage === 'sounds') body = <SoundBoard />
-  else if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} onAbout={() => setScreen('about')} onScoreboard={() => setScreen('scoreboard')} admin={admin} onAdminStart={startAdmin} />
+  else if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} onAbout={() => setScreen('about')} onScoreboard={() => setScreen('scoreboard')} onAchievements={() => setScreen('achievements')} admin={admin} onAdminStart={startAdmin} />
+  else if (screen === 'achievements') body = <Achievements onBack={() => setScreen('intro')} />
+  else if (screen === 'cabinet') body = <TrophyCabinet onBack={() => setScreen('scoreboard')} />
   else if (screen === 'about') body = <About onBack={() => setScreen('intro')} />
-  else if (screen === 'scoreboard') body = <Scoreboard onBack={() => setScreen('intro')} />
+  else if (screen === 'scoreboard') body = <Scoreboard onBack={() => setScreen('intro')} onCabinet={() => setScreen('cabinet')} />
   else if (screen === 'bonus') body = <BonusPick onPick={start} onBack={() => setScreen('intro')} />
   else if (screen === 'welcome') body = <Welcome onBegin={() => { markWelcomed(); start(pendingBonus ?? 'threeOil') }} />
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />
@@ -251,7 +271,8 @@ export default function App() {
   }
   const badge = run?.admin && screen === 'run' ? <span className="admin-badge cl-label">Admin playtest</span> : null
   const termToast = newTerm ? <div className="term-toast" role="status"><span className="cl-label">New in the glossary</span><b>{newTerm}</b><span className="res-note">Settings › Glossary</span></div> : null
-  const overlays = <><SettingsPanel onQuit={inRun ? quitRun : undefined} admin={adminProps} /><InstallPrompt />{badge}{termToast}</>
+  const featToast = newFeat ? <div className={`term-toast term-toast--feat ${termToast ? 'is-raised' : ''}`} role="status"><span className="cl-label">Achievement</span><b>{newFeat}</b><span className="res-note">Front page › Achievements</span></div> : null
+  const overlays = <><SettingsPanel onQuit={inRun ? quitRun : undefined} admin={adminProps} /><InstallPrompt />{badge}{termToast}{featToast}</>
   if (mobile) return <div className={`m ${shake ? 'is-shaking' : ''}`} data-theme={ERA_THEME[run?.stage ?? 1] ?? 'victorian'}>{fade}{overlays}</div>
 
   return (

@@ -251,6 +251,37 @@ Never shown during play. The run keeps a quiet tally (damage by card family, mov
 
 Bars are set on full-game wins (through the Truth): about 6 in 10 winning bot runs earn a badge, spread across all nine. The two clock badges are yes-or-no and win out over the others when earned. Lean Operation (a deck of 15 or fewer, 10+ destroyed) is checked with a lean-playing bot: about a quarter of its wins earn it. Later: shop and spoils offers will lean towards the tactics a deck is already using.
 
+## Trophy cabinet
+
+Reached from the Scoreboard. Shows the nine badges on shelves: won ones in colour with how many times, the rest as a "?" with no name.
+
+## Achievements
+
+A panel on the front page from the very first visit: all 18 icons (earned in colour), "X of 18", and the latest one earned. Tapping it opens the full list, grouped, with each goal and the date it was earned. Earning one during a run shows a toast. Kept on the device (`tycoon.achievements`); admin playtests never earn them. Definitions and checks are in `src/engine/achievements.ts`; the numbers in `CONFIG.achievements`. `npx vite-node tools/achievements.ts` reports how often the bot earns each one.
+
+| Group | Achievement | Goal |
+|---|---|---|
+| In a run | Gusher | Pump 100 oil in one run |
+| | Cash Rich | Have $100 at once in stage 1 |
+| | Bulletproof | 25+ Cover in one turn |
+| | Skeleton Crew | Beat the Truth with only 1 Rig |
+| | Hostile Takeover | Beat a boss on your first turn |
+| | Not a Scratch | Win a stage 3 or 4 fight without an enemy taking any Capital (stage 1 was too easy: 9 in 10 runs) |
+| | Mercy Rule | Remove 30+ Hold with one card |
+| Clean hands | Squeaky Clean | Finish stage 2 with 0 Board Exposure |
+| | Cool Customer | Finish stage 3 with Heat under 20 |
+| | Above Board | Win the game without skimming |
+| The deck | Lean Machine | Win with 12 cards or fewer |
+| | Paper Trail | Destroy 15 cards in one run |
+| Collecting | Dynasty | Win with 20+ gold |
+| | Fluent in Spin | Unlock every glossary term |
+| | Full Cabinet | Earn all nine badges |
+| Failures | Short Career | Go bankrupt in the first round |
+| | Rich Company, Poor Chairman | Be ruined with $50+ in the company |
+| | Stopped Clock | Lose at midnight |
+
+The run keeps a few extra counts for these (`Run.feats`): oil pumped, the most Hold one card removed, whether an enemy has taken Capital this fight, a clean stage 3–4 fight won, a boss beaten on turn 1.
+
 ## Stage 4 rules (as built) · 2010–2019 · Battling the Truth
 
 ### Shape

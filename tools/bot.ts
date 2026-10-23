@@ -1,7 +1,12 @@
 // A simple rule-following player, used by the tests and the balance simulator.
-import { act, attackPower, canBuild, canPlay, canUpgrade, cardDef, damageOn, handTargetsFor, intent, isAttack, liveThreats, netPrice, rigCount, sellAP, skimRate, type Card, type Run } from '../src/engine/engine'
+import { act as engineAct, attackPower, canBuild, canPlay, canUpgrade, cardDef, damageOn, handTargetsFor, intent, isAttack, liveThreats, netPrice, rigCount, sellAP, skimRate, type Card, type Run } from '../src/engine/engine'
 import { CARDS, PROSPECT_FOR, THREATS, type CardKey } from '../src/engine/data'
 import { CONFIG } from '../src/engine/config'
+import type { Action } from '../src/engine/engine'
+
+/** Lets a tool watch every state the bot passes through (the achievements check). */
+export const botHooks: { onAct?: (r: Run) => void } = {}
+const act = (r: Run, a: Action): Run => { const next = engineAct(r, a); botHooks.onAct?.(next); return next }
 
 // which cards are worth upgrading first
 /** How the bot plays the money: for the stage 2 playtest. */

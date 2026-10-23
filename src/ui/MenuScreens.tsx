@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { loadGlobalScores, type GlobalScore } from '../telemetry'
 import { BONUSES, type BonusKey } from '../engine/data'
-import { bestScore, completedIndustries, loadRuns, loadUnlocks, trustFundOffered, type RunRecord } from '../storage'
+import { ACHIEVEMENTS, ACHIEVEMENT_KEYS } from '../engine/achievements'
+import { bestScore, completedIndustries, loadAchieved, loadRuns, loadUnlocks, trustFundOffered, type RunRecord } from '../storage'
 import { CONFIG } from '../engine/config'
 import { play } from '../sound'
 import { openSettings } from './settingsBus'
+import { iconUrl } from './icons'
 import { AdminStartPanel } from './AdminPanel'
 import type { AdminStart } from '../engine/admin'
 
@@ -13,8 +15,10 @@ const ANNOUNCED = ['Pharmaceutical'] // shown as Coming soon before Oil is finis
 // a run that died, rather than one that finished a stage or the game
 const ended = (r: RunRecord) => ['Bankrupt', 'Out of time', 'Quit', 'Ousted', 'Ruined'].includes(r.outcome)
 
-export function Intro({ onBegin, onHistory, onAbout, onScoreboard, admin, onAdminStart }: { onBegin: () => void; onHistory: () => void; onAbout: () => void; onScoreboard: () => void; admin?: boolean; onAdminStart?: (o: AdminStart) => void }) {
+export function Intro({ onBegin, onHistory, onAbout, onScoreboard, onAchievements, admin, onAdminStart }: { onBegin: () => void; onHistory: () => void; onAbout: () => void; onScoreboard: () => void; onAchievements: () => void; admin?: boolean; onAdminStart?: (o: AdminStart) => void }) {
   const done = completedIndustries()
+  const got = loadAchieved()
+  const feats = ACHIEVEMENT_KEYS.filter(k => got[k]).length
   const best = bestScore('Oil')
   const won = done.length > 0 // the scoreboard unlocks the first time you win the game
   // each industry is revealed when the one before it is finished; three tiles on the page
@@ -37,6 +41,13 @@ export function Intro({ onBegin, onHistory, onAbout, onScoreboard, admin, onAdmi
             <div key={name} className="industry industry--sealed"><span className="cl-display industry__name">? ? ?</span><span className="cl-label">Sealed</span></div>
           ))}
         </div>
+        <button type="button" className="intro-feats" onClick={() => { play('click'); onAchievements() }} aria-label={`Achievements: ${feats} of ${ACHIEVEMENT_KEYS.length}. See them all`}>
+          <span className="intro-feats__head"><span className="cl-label">Achievements</span><span className="cl-num">{feats} of {ACHIEVEMENT_KEYS.length}</span></span>
+          <span className="intro-feats__row" aria-hidden="true">
+            {ACHIEVEMENT_KEYS.map(k => <img key={k} className={got[k] ? 'is-earned' : ''} src={iconUrl(ACHIEVEMENTS[k].icon)} alt="" title={got[k] ? ACHIEVEMENTS[k].name : undefined} />)}
+          </span>
+          <span className="res-note">{feats ? `Latest: ${ACHIEVEMENTS[ACHIEVEMENT_KEYS.filter(k => got[k]).sort((a, b) => got[b].localeCompare(got[a]))[0]].name}` : 'None yet. See what there is to earn.'}</span>
+        </button>
         {admin && onAdminStart && <AdminStartPanel onStart={onAdminStart} />}
         <div className="intro__menu">
           <button type="button" className="cl-btn" onClick={onHistory}>Run history</button>
@@ -69,7 +80,7 @@ export function About({ onBack }: { onBack: () => void }) {
 }
 
 /** The scoreboard: everyone's finished games (global), or this device's. Unlocked by winning once. */
-export function Scoreboard({ onBack }: { onBack: () => void }) {
+export function Scoreboard({ onBack, onCabinet }: { onBack: () => void; onCabinet: () => void }) {
   const [tab, setTab] = useState<'global' | 'device'>('global')
   const [global, setGlobal] = useState<GlobalScore[] | null | 'error'>(null)
   useEffect(() => { void loadGlobalScores().then(g => setGlobal(g ?? 'error')) }, [])
@@ -79,7 +90,10 @@ export function Scoreboard({ onBack }: { onBack: () => void }) {
     <div className="screen history scoreboard" data-theme="victorian">
       <header className="game__head">
         <div><span className="cl-label">Tycoon · Big Oil beats the Truth</span><h1 className="cl-display game__title">Scoreboard</h1></div>
-        <button type="button" className="cl-btn" onClick={onBack}>Back</button>
+        <div className="game__head-buttons">
+          <button type="button" className="cl-btn" onClick={() => { play('click'); onCabinet() }}>Trophy cabinet</button>
+          <button type="button" className="cl-btn" onClick={onBack}>Back</button>
+        </div>
       </header>
       <img className="scoreboard__banner" src={`${import.meta.env.BASE_URL}art/screens/scoreboard.jpg`} alt="The Earth from orbit, every continent on fire" />
       <div className="segmented" role="tablist" aria-label="Scoreboard">

@@ -108,3 +108,23 @@ export function loadAdmin(): boolean {
 export function saveAdmin(on: boolean) {
   try { localStorage.setItem(ADMIN, on ? '1' : '0') } catch { /* ignore */ }
 }
+
+// achievements earned on this device, with the date each was first earned
+const ACHIEVED = 'tycoon.achievements'
+export function loadAchieved(): Record<string, string> {
+  try { return JSON.parse(localStorage.getItem(ACHIEVED) ?? '{}') as Record<string, string> } catch { return {} }
+}
+/** Marks these as earned; returns the ones that are new. */
+export function saveAchieved(keys: string[]): string[] {
+  const had = loadAchieved()
+  const fresh = [...new Set(keys)].filter(k => !had[k])
+  if (!fresh.length) return []
+  const now = new Date().toISOString()
+  for (const k of fresh) had[k] = now
+  try { localStorage.setItem(ACHIEVED, JSON.stringify(had)) } catch { return [] }
+  return fresh
+}
+/** How many times each badge has been won on this device, by badge name. */
+export function badgeCounts(): Record<string, number> {
+  return loadRuns().reduce<Record<string, number>>((m, r) => (r.tactic ? { ...m, [r.tactic]: (m[r.tactic] ?? 0) + 1 } : m), {})
+}

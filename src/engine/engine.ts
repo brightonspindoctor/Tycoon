@@ -111,7 +111,12 @@ export interface Run {
   played?: number // cards played this turn (a Subpoena caps it)
   uniques?: CardKey[] // one-in-the-game cards already had: never offered again
   leftBehind?: { by: string; cards: CardKey[] } // cards a beaten enemy put in your deck this round (the Bank Inspector's report)
+  feats?: Feats // for achievements: things the run state alone doesn't show
 }
+
+/** Kept for achievements. pumped: oil pumped this run; bestHit: most Hold one card removed; scratched: an enemy took Capital this fight; cleanFight: won a stage 3 or 4 fight untouched; quickBoss: beat a boss on turn 1. */
+export interface Feats { pumped: number; bestHit: number; scratched: boolean; cleanFight: boolean; quickBoss: boolean }
+export const feats = (r: Run): Feats => (r.feats ??= { pumped: 0, bestHit: 0, scratched: false, cleanFight: false, quickBoss: false })
 
 export type AdminOp = 'cash' | 'gold' | 'exposureUp' | 'exposureDown' | 'heatUp' | 'heatDown' | 'clockUp' | 'clockDown' | 'ap' | 'winRound' | 'addCard' | 'hold20'
 
@@ -255,7 +260,9 @@ function money(r: Run, label: string, amount: number) {
   r.capital += amount
   r.ledger.push({ label, amount })
   if (amount > 0) r.stats.earned += amount; else r.stats.spent -= amount
+  if (amount < 0 && captured) feats(r).scratched = true // an enemy move took it
 }
+let playHit = 0 // Hold removed by the card being played
 let captured: string[] | null = null // messages from the move being resolved, for the turn report
 function say(r: Run, msg: string) { r.events.unshift(msg); r.events = r.events.slice(0, 6); captured?.push(msg) }
 function beat(r: Run, kind: Beat['kind'], title: string, text: string, who?: number) { r.report.push({ kind, title, text, who }) }
@@ -635,6 +642,7 @@ function shopAction(r: Run, a: Action) {
 // ------------------------------------------------------------------ rounds
 function startRound(r: Run, round: number) {
   r.roundStart = snapshot(r)
+  feats(r).scratched = false
   r.round = round
   r.leftBehind = undefined
   r.turn = 0
@@ -760,6 +768,7 @@ function beginTurn(r: Run) {
       if (w.reserve <= 0) { loseWell(r, i, 'dry'); say(r, `Well No. ${i + 1} has run dry.`); beat(r, 'oil', `Well No. ${i + 1}`, 'Has run dry.') }
     })
     const room = r.storage - r.oil
+    feats(r).pumped += made
     r.oil += Math.min(room, made)
     if (made > room) say(r, `Storage full: ${made - room} oil lost.`)
     beat(r, 'oil', r.current.prorate ? 'Pumps · prorated' : 'Pumps', made <= room ? `+${made} oil.` : room > 0 ? `+${room} oil. Storage full: ${made - room} lost.` : `Storage full: ${made} oil lost.`)
@@ -863,6 +872,8 @@ function endRound(r: Run) {
     tally(r).rounds++
     if (r.turn <= CONFIG.tactics.quickTurns) tally(r).quick++
     r.phase = r.round >= bossRound(r.stage) ? 'stageComplete' : 'roundWon'
+    if (!feats(r).scratched && r.stage >= 3) feats(r).cleanFight = true // stage 3 and 4 moves all cost something: only Cover keeps them off
+    if (r.phase === 'stageComplete' && r.turn <= 1) feats(r).quickBoss = true
     if (r.phase === 'stageComplete') grantReward(r)
     // a card to take, or turn down for cash. After stage 2's first fight, it's the Expense Account: skimming from now on
     else r.spoils = r.stage === 2 && r.round === 1 && !r.deck.some(c => c.key === 'expenseAccount') ? 'expenseAccount' : weightedCard(r, [...poolFor(r)])
@@ -898,6 +909,7 @@ function grantReward(r: Run) {
 function hit(r: Run, t: Threat, dmg: number, badBlood = false, ignoreCover = false, family?: string) {
   if (t.cover && !ignoreCover) { const blocked = Math.min(t.cover, dmg); t.cover -= blocked; dmg -= blocked; if (blocked) say(r, `${THREATS[t.kind].name}'s Cover blocked ${blocked}.`) }
   if (family) { const d = tally(r).damage; d[family] = (d[family] ?? 0) + Math.max(0, Math.min(dmg, t.hold)) }
+  playHit += Math.max(0, Math.min(dmg, t.hold))
   t.hold -= dmg
   if (badBlood) { addJunk(r, badBloodFor(r.stage), 'discard'); say(r, 'Bad Blood added to your discard pile.') }
   if (t.hold <= 0 && t.kind === 'truth' && (t.phase ?? 0) < TRUTH_PHASES.length - 1) { // the Truth is only beaten in its last phase
@@ -968,6 +980,10 @@ function spendCard(r: Run, c: Card) {
 function play(r: Run, cardId: number, target?: number) {
   const c = r.hand.find(x => x.id === cardId)
   if (!c || !canPlay(r, c).ok) return
+  playHit = 0
+  try { playCard(r, c, target) } finally { if (playHit > feats(r).bestHit) feats(r).bestHit = playHit }
+}
+function playCard(r: Run, c: Card, target?: number) {
   const d = cardDef(c)
   const spent = apCost(r, c)
   r.ap -= spent
@@ -1532,7 +1548,7 @@ function endTurn(r: Run) {
   const taken = dmg - blocked
   r.cover -= blocked // Cover is used up as it blocks
   tally(r).absorbed += blocked
-  if (taken) money(r, 'Fines and losses', -taken)
+  if (taken) { money(r, 'Fines and losses', -taken); feats(r).scratched = true }
   if (blocked) say(r, `Cover blocked $${blocked}.`)
   if (dmg) beat(r, 'money', 'Fines and losses', blocked ? (taken ? `−$${taken}. Cover blocked $${blocked}.` : `Cover blocked all $${dmg}.`) : `−$${taken}.`)
   if (checkBankrupt(r)) return
