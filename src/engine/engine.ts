@@ -15,6 +15,7 @@ export const neverDry = (w: Well) => !!(w.field || w.lasting || w.rig || w.faith
 const exposed = (w: Well | null): w is Well => !!w && !w.faithful
 export interface Threat { id: number; kind: ThreatKind; hold: number; maxHold: number; step: number; cycle: number; round3: boolean; beaten: boolean; opened?: string; stopped?: boolean; cover?: number; poison?: Poison[]
   phase?: number // the Truth: which of its four phases it's in
+  fed?: number // the Bribery Scandal: bribes paid this fight
   baseCover?: number // the Truth: its Cover each turn (the hour it was met at)
   coverNext?: number // Cover it has next turn instead of its usual (Containment Fails)
   entryHour?: number // the Truth: the hour on the clock when you met it
@@ -1147,11 +1148,15 @@ function infiltration(r: Run) {
 }
 
 /** A bribe paid while a Bribery Scandal is on the board makes it bigger. */
+/** How much the next bribe grows a Bribery Scandal: 4, then 2 more each time this fight. */
+export const scandalGrowth = (t: Threat) => CONFIG.bribeFeedsScandal + (t.fed ?? 0) * CONFIG.bribeFeedsStep
 function feedScandal(r: Run) {
   for (const t of liveThreats(r)) {
     if (t.kind !== 'briberyScandal') continue
-    t.hold += CONFIG.bribeFeedsScandal; t.maxHold += CONFIG.bribeFeedsScandal
-    say(r, `The Bribery Scandal grows: +${CONFIG.bribeFeedsScandal} Hold.`)
+    const grow = scandalGrowth(t)
+    t.fed = (t.fed ?? 0) + 1
+    t.hold += grow; t.maxHold += grow
+    say(r, `The Bribery Scandal grows: +${grow} Hold.`)
   }
 }
 
@@ -1229,7 +1234,10 @@ export function intent(_r: Run, t: Threat): string {
 }
 
 export function intentText(r: Run, t: Threat): string {
-  const text = moveText(r, t)
+  let text = moveText(r, t)
+  // stage 3: every move also costs Capital and adds Heat; say so
+  if (t.kind === 'spill') text += ` −${CONFIG.spillAP} AP next turn.`
+  if (r.stage === 3 && THREATS[t.kind].chip) text += ` Plus −$${THREATS[t.kind].chip}${CONFIG.moveHeat3 ? `, +${CONFIG.moveHeat3} Heat` : ''}.`
   // the Truth moves the clock on with every 5th move it makes
   return t.kind === 'truth' && (t.step + 1) % CONFIG.truthTickEvery === 0 ? `${text} The clock moves on an hour.` : text
 }
@@ -1539,9 +1547,18 @@ function endTurn(r: Run) {
       if (tick) moveClock(r, 1, a, t.id)
     }
     if (r.stage >= 3 && THREATS[t.kind].chip) dmg += THREATS[t.kind].chip! // every stage 3 and 4 move also costs you
-    if (isLost(r)) { if (captured.length) line.text = captured.join(' '); captured = null; return }
+    if (t.kind === 'spill' && !isLost(r)) r.pending.ap += CONFIG.spillAP // the Spill: every move costs you an AP next turn
+    let scrutiny = 0 // stage 3: every move also adds Heat; Cover blocks it
+    if (r.stage === 3 && CONFIG.moveHeat3 && !isLost(r)) {
+      const blocked = Math.min(CONFIG.moveHeat3, r.cover)
+      r.cover -= blocked; tally(r).absorbed += blocked
+      scrutiny = CONFIG.moveHeat3 - blocked
+      heat(r, scrutiny, a, t.id, true)
+    }
+    if (isLost(r)) { if (captured.length) line.text = captured.join(' '); if (scrutiny) line.text += ` +${scrutiny} Heat.`; captured = null; return }
     // report what actually happened, if the move said so; otherwise what it promised
     if (captured.length) line.text = captured.join(' ')
+    if (scrutiny) line.text += ` +${scrutiny} Heat (${r.heat}/${CONFIG.heatMax}).`
     captured = null
   }
   const blocked = Math.min(dmg, r.cover)

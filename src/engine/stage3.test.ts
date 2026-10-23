@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { act, canPlay, cardDef, goMultinational, handSize, intentText, itemCover, itemPrice, newRun, price, production, type Run } from './engine'
 import { CONFIG } from './config'
-import { CARDS, boonInfo, landCardFor, rewardInfo, type CardKey, type ThreatKind } from './data'
+import { CARDS, THREATS, boonInfo, landCardFor, rewardInfo, type CardKey, type ThreatKind } from './data'
 
 /** A run that has just won the proxy fight, with some old stock in the deck. */
 function afterProxyFight(seed = 3): Run {
@@ -137,10 +137,10 @@ describe('Heat', () => {
     expect(after.heat).toBe(CONFIG.heatMax - 1)
   })
 
-  it('Climate Science adds Heat on its own', () => {
+  it('Climate Science adds Heat on its own (plus any per-move Heat)', () => {
     const r = inStage3([], 'climateScience')
     const after = act(r, { type: 'endTurn' })
-    expect(after.heat).toBe(r.heat + CONFIG.measureHeat)
+    expect(after.heat).toBe(r.heat + CONFIG.measureHeat + CONFIG.moveHeat3)
   })
 
   it('the Lobbying Firm at the Trading Floor: $ for −10 Heat, once a visit', () => {
@@ -203,6 +203,26 @@ describe('stage 3 cards', () => {
     expect(after.threats[0].hold).toBe(20 - 8 + CONFIG.bribeFeedsScandal)
   })
 
+  it('each bribe in the same fight grows the Scandal by 2 more: 4, then 6, then 8', () => {
+    let r = inStage3(['bribeOfficial', 'bribeOfficial', 'bribeOfficial'], 'briberyScandal')
+    r.threats[0].hold = 60; r.threats[0].maxHold = 60; r.ap = 6
+    const grew: number[] = []
+    for (let i = 0; i < 3; i++) {
+      const before = r.threats[0].hold
+      r = act(r, { type: 'play', cardId: r.hand.find(c => c.key === 'bribeOfficial')!.id, target: 900 })
+      grew.push(r.threats[0].hold - before + 8)
+    }
+    expect(grew).toEqual([4, 6, 8])
+  })
+
+  it('every move the Spill makes costs an AP next turn', () => {
+    const r = inStage3([], 'spill')
+    r.capital = 200
+    const after = act(r, { type: 'endTurn' })
+    const calm = act(inStage3([], 'diversified'), { type: 'endTurn' })
+    expect(after.ap).toBe(calm.ap - CONFIG.spillAP)
+  })
+
   it('Bury Evidence hits Climate Science twice as hard', () => {
     const r = inStage3(['buryEvidence'], 'climateScience')
     const after = act(r, { type: 'play', cardId: inHand(r, 'buryEvidence').id, target: 900 })
@@ -230,11 +250,12 @@ describe('Buy Out, Advertorial, the Oil Shock and Cover', () => {
     const r = inStage3(['advertorial'], 'climateScience')
     const a = act(r, { type: 'play', cardId: inHand(r, 'advertorial').id })
     expect(a.cover).toBe(6)
-    const b = act(a, { type: 'endTurn' }) // Measure: +5 Heat, blocked; then $1 chip, blocked by what's left
-    expect(b.heat).toBe(a.heat)
-    expect(b.capital).toBe(a.capital)
+    // Measure's 5 Heat is blocked; the last 1 Cover blocks the $1 the move also takes
+    const b = act(a, { type: 'endTurn' })
+    expect(b.heat).toBe(a.heat + Math.max(0, CONFIG.moveHeat3 - 1))
+    expect(a.capital - b.capital).toBe(Math.max(0, THREATS.climateScience.chip! - (CONFIG.moveHeat3 ? 0 : 1)))
     const c = act(inStage3([], 'climateScience'), { type: 'endTurn' })
-    expect(c.heat).toBe(10 + CONFIG.measureHeat)
+    expect(c.heat).toBe(10 + CONFIG.measureHeat + CONFIG.moveHeat3)
   })
 
   it('the Oil Shock doubles your next sale this turn, and is sold once a run', () => {
@@ -295,8 +316,9 @@ describe('stage 3 items and the shop', () => {
 describe('the Geneva Climate Summit', () => {
   it('opens with Heat, then testimony grows each cycle', () => {
     const r = inStage3([], 'geneva')
-    expect(intentText(r, r.threats[0])).toBe(`+${CONFIG.testimonyHeat} Heat.`)
-    expect(intentText(r, { ...r.threats[0], cycle: 2 })).toBe(`+${CONFIG.testimonyHeat + 2 * CONFIG.testimonyStep} Heat.`)
+    const plus = ` Plus −$${THREATS.geneva.chip}${CONFIG.moveHeat3 ? `, +${CONFIG.moveHeat3} Heat` : ''}.` // what every stage 3 move also does
+    expect(intentText(r, r.threats[0])).toBe(`+${CONFIG.testimonyHeat} Heat.${plus}`)
+    expect(intentText(r, { ...r.threats[0], cycle: 2 })).toBe(`+${CONFIG.testimonyHeat + 2 * CONFIG.testimonyStep} Heat.${plus}`)
   })
 
   it('puts a Draft Declaration in your next hand', () => {

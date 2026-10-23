@@ -198,7 +198,7 @@ export const CARDS: Record<CardKey, CardDef> = {
   thinkTank: { name: 'Fund a Think Tank', era: 3, ap: 1, cost: 5, uses: null, family: 'Lobby', power: 0, heat: -10, icon: 'thinkTank', price: 22, rarity: 'Uncommon',
     text: 'Pay $5. −10 Heat.', flavour: 'Independent research, independently funded by us.' },
   bribeOfficial: { name: 'Bribe an Official', era: 3, ap: 1, cost: 3, uses: null, family: 'Dirty', power: 8, icon: 'bribeOfficial', price: 18, rarity: 'Common',
-    text: `Pay $3. Remove 8 Hold. Scandal +${CONFIG.bribeFeedsScandal} Hold.`, flavour: 'A consultancy fee.' },
+    text: `Pay $3. Remove 8 Hold. The Bribery Scandal gains ${CONFIG.bribeFeedsScandal} Hold, ${CONFIG.bribeFeedsStep} more each time.`, flavour: 'A consultancy fee.' },
   retainCounsel: { name: 'Retain Counsel', era: 3, ap: 1, cost: 0, uses: null, family: 'Legal', power: 0, spendCover: true, icon: 'retainCounsel', price: 18, rarity: 'Common',
     text: 'Use your Cover for Hold damage.', flavour: 'Billed in six-minute units.' },
   advertorial: { name: 'Advertorial', era: 3, ap: 1, cost: 4, uses: null, family: 'Defence', power: 0, cover: 6, icon: 'advertorial', price: 15, rarity: 'Common',
@@ -301,7 +301,7 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   advertorial: { cover: 9, text: 'Pay $4. +9 Cover this turn. Blocks Heat too.' },
   buyOut: { power: 18, text: 'Pay $8. Remove 18 Hold.' },
   thinkTank: { cost: 3, heat: -14, text: 'Pay $3. −14 Heat.' },
-  bribeOfficial: { power: 11, text: `Pay $3. Remove 11 Hold. Scandal +${CONFIG.bribeFeedsScandal} Hold.` },
+  bribeOfficial: { power: 11, text: `Pay $3. Remove 11 Hold. The Bribery Scandal gains ${CONFIG.bribeFeedsScandal} Hold, ${CONFIG.bribeFeedsStep} more each time.` },
   retainCounsel: { power: 3, text: 'Use your Cover for Hold damage, +3.' },
   // stage 4
   recycling: { ap: 0, text: 'Shuffle your discard pile into your draw pile. Draw 2 cards.' },

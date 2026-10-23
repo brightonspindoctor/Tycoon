@@ -210,15 +210,15 @@ Every bribe (Bribe the Sheriff, Grease a Palm, Bribe an Official) feeds a Briber
 **Refinery** ($22M: oil sells +$1M; moved here from stage 2), Rolodex ($20M: +1 hand size, up to 7, buy more than one), Paper Shredder ($35M: once a fight, destroy a card in hand for free), Supertanker ($30M: +4 storage, up to 12; each one makes oil sell $1M less), **Think Tank** ($15M: +3 Cover every turn).
 
 ### Stage 3 enemies
-**Every stage 3 enemy move also takes Capital** ($1–3M, the last column), on top of what the move does. Cover blocks it.
+**Every stage 3 enemy move also takes Capital** ($1–3M, the last column), on top of what the move does, and the enemy panel says so ("Plus −$3M"). Cover blocks it. (Cash attacks were raised by half in October 2026 because stage 3 felt too easy; a +Heat-every-move rule exists in `CONFIG.moveHeat3` but is set to 0.)
 | Enemy | Role | Hold | Weak | Resists | Immune | Cycle | Per move |
 |---|---|---|---|---|---|---|---|
-| Rival Companies | Cash | 30 | Legal | Dirty | — | Price War (oil −$1M) → Undercut (−$4M) → Poach Contracts (−$6M). Beaten: prices recover | $3M |
-| Diversified Assets | Cash | 27 | Legal | — | — | Running Costs (−$4M) → Bad Quarter (−$4M) → Write-down (−$8M) | $3M |
-| The Bribery Scandal | Cash | 28 | Legal | Lobby | — | Leak (−1 gold) → Hearing (−$5M) → Exposé (−$8M) (+ Indictment: −2 gold in R3). Grows 3 Hold for every bribe you pay | $2M |
-| The Spill | Engine | 29 | Bury | Legal | — | Slick (lose 2 stored oil) → Shut Down (a Rig pumps nothing next turn) → Clean-up Bill (−$5M) | $2M |
+| Rival Companies | Cash | 30 | Legal | Dirty | — | Price War (oil −$1M) → Undercut (−$6M) → Poach Contracts (−$9M). Beaten: prices recover | $3M |
+| Diversified Assets | Cash | 27 | Legal | — | — | Running Costs (−$6M) → Bad Quarter (−$6M) → Write-down (−$12M) | $3M |
+| The Bribery Scandal | Cash | 28 | Legal | Lobby | — | Leak (−1 gold) → Hearing (−$8M) → Exposé (−$12M) (+ Indictment: −2 gold in R3). Each bribe you pay this fight grows it: 4 Hold, then 6, then 8… | $2M |
+| The Spill | Engine | 29 | Bury | Legal | — | Slick (lose 2 stored oil) → Shut Down (a Rig pumps nothing next turn) → Clean-up Bill (−$8M). **Every move also costs 1 AP next turn** (selling oil takes 2 AP, so while it lives you mostly can't sell) | $2M |
 | Climate Science | Engine | 31 | Bury | Dirty | — | Measure (+5 Heat) → Publish (+8 Heat) → Peer Review (regains 3 Hold) (+ Consensus: +10 Heat in R3) | $1M |
-| **The Geneva Climate Summit** (boss, 1979) | Boss | 47 | — | Dirty | — | Expert Testimony (+8 Heat, +4 each cycle) → Draft Declaration (must-play junk in your next hand) → Resolution (−$6M, +$2M each cycle). Moves first: Opening Session (+6 Heat) | $3M |
+| **The Geneva Climate Summit** (boss, 1979) | Boss | 47 | — | Dirty | — | Expert Testimony (+8 Heat, +4 each cycle) → Draft Declaration (must-play junk in your next hand) → Resolution (−$9M, +$3M each cycle). Moves first: Opening Session (+6 Heat) | $3M |
 
 ## Endings
 - Bankrupt (Capital 0) · Ousted (Exposure 8, stage 2) · Ruined (gold below 0, stage 2 on) · Broken up (Heat 100, stage 3) · Out of time · later: Stranded (stage 4).

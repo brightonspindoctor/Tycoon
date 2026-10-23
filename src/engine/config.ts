@@ -96,32 +96,35 @@ export const CONFIG = {
   maxStorage: 12, // Supertankers stop here
   supertanker: 4, // storage a Supertanker adds
   handMax: 7, // Rolodexes stop here
-  bribeFeedsScandal: 3, // every bribe you pay: a Bribery Scandal on the board gains this much Hold
+  bribeFeedsScandal: 4, // the first bribe you pay in a fight: a Bribery Scandal on the board gains this much Hold...
+  bribeFeedsStep: 2, // ...and this much more for each bribe after it in the same fight (4, 6, 8…)
+  spillAP: 1, // every move the Spill makes: −1 AP next turn
   lobbyFirmCost: 25, // the Trading Floor's Lobbying Firm: $ for −lobbyFirmDrop Heat, once per visit
   lobbyFirmDrop: 10,
   heatLow: 30, // stage 3 ends at or below this: Clean Image
   heatHigh: 70, // at or above this: On File
   skimRate3: { 0: 20, 1: 20, 2: 24, 3: 28, 4: 32 } as Record<number, number>, // stage 3: the Expense Account, from $20 a gold
   // stage 3 enemies
+  moveHeat3: 0, // every stage 3 enemy move can also add this much Heat (Cover blocks it); off for now
   slickOil: 2, // the Spill's Slick: stored oil lost
-  cleanupBill: 5,
+  cleanupBill: 8,
   measureHeat: 5, // Climate Science
   publishHeat: 8,
   consensusHeat: 10, // round 3 only
   peerReview: 3, // Hold it regains
-  undercut: 4, // Rival Companies
-  poachContracts: 6,
-  runningCosts: 4, // Diversified Assets
-  writeDown: 8,
+  undercut: 6, // Rival Companies
+  poachContracts: 9,
+  runningCosts: 6, // Diversified Assets
+  writeDown: 12,
   leakGold: 1, // the Bribery Scandal
-  hearing: 5,
-  exposeCash: 8, // the Bribery Scandal's Exposé
+  hearing: 8,
+  exposeCash: 12, // the Bribery Scandal's Exposé
   indictGold: 2, // round 3 only
   genevaOpening: 6, // the Geneva Climate Summit: Heat as it opens
   testimonyHeat: 8, // Expert Testimony, +testimonyStep each cycle
   testimonyStep: 4,
-  resolutionCash: 6, // Resolution, +resolutionStep each cycle
-  resolutionStep: 2,
+  resolutionCash: 9, // Resolution, +resolutionStep each cycle
+  resolutionStep: 3,
   personalGuaranteeCash: 6,
   dipTrustCash: 20,
   dipTrustGold: 3,
