@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, cardDef, goMultinational, handSize, intentText, itemCover, itemPrice, newRun, price, production, type Run } from './engine'
+import { act, canPlay, cardDef, goMultinational, handSize, intentText, itemCover, itemPrice, newRun, price, production, type Run } from './engine'
 import { CONFIG } from './config'
 import { CARDS, boonInfo, landCardFor, rewardInfo, type CardKey, type ThreatKind } from './data'
 
@@ -378,5 +378,24 @@ describe('Old Faithful across the stages', () => {
     r.plots = [{ output: 1, reserve: 0, field: true, faithful: true }]
     const after = act(r, { type: 'continue' })
     expect(after.plots[0]).toMatchObject({ rig: true, faithful: true, output: CONFIG.rigOutput })
+  })
+})
+
+describe('Retain Counsel spends your Cover', () => {
+  it('turns all your Cover into Legal damage and leaves you none', () => {
+    const r = inStage3(['retainCounsel'], 'diversified') // weak to Legal: double
+    r.cover = 5; r.threats[0].hold = 30
+    const s = act(r, { type: 'play', cardId: inHand(r, 'retainCounsel').id, target: 900 })
+    expect(s.cover).toBe(0)
+    expect(s.threats[0].hold).toBe(30 - 10)
+  })
+
+  it("can't be played with no Cover; upgraded it adds 3, and 6 when upgraded twice", () => {
+    const r = inStage3(['retainCounsel'])
+    r.cover = 0
+    expect(canPlay(r, inHand(r, 'retainCounsel')).ok).toBe(false)
+    expect(cardDef({ key: 'retainCounsel', up: true }).power).toBe(3)
+    expect(cardDef({ key: 'retainCounsel', up: true, up2: true }).power).toBe(6)
+    expect(cardDef({ key: 'retainCounsel', up: true, up2: true }).text).toContain('+6')
   })
 })

@@ -1,5 +1,5 @@
 // A simple rule-following player, used by the tests and the balance simulator.
-import { act, canBuild, canPlay, canUpgrade, cardDef, damageOn, handTargetsFor, intent, isAttack, liveThreats, netPrice, rigCount, sellAP, skimRate, type Card, type Run } from '../src/engine/engine'
+import { act, attackPower, canBuild, canPlay, canUpgrade, cardDef, damageOn, handTargetsFor, intent, isAttack, liveThreats, netPrice, rigCount, sellAP, skimRate, type Card, type Run } from '../src/engine/engine'
 import { CARDS, PROSPECT_FOR, THREATS, type CardKey } from '../src/engine/data'
 import { CONFIG } from '../src/engine/config'
 
@@ -141,7 +141,7 @@ function botTurn3(r: Run): Run {
     const forced = playable.find(c => CARDS[c.key].forced)
     const live = liveThreats(r)
     // the hardest-hitting attack, if it hits for more than 1
-    const bestHit = (c: Card) => Math.max(0, ...live.map(t => damageOn(t, cardDef(c).family, cardDef(c).power)))
+    const bestHit = (c: Card) => Math.max(0, ...live.map(t => damageOn(t, cardDef(c).family, attackPower(r, cardDef(c)))))
     const attacks = playable.filter(c => isAttack(c.key) && bestHit(c) > 1).sort((a, b) => bestHit(b) - bestHit(a))
     const scrapper = playable.find(c => cardDef(c).scrap === 'one' && handTargetsFor(r, c).some(stale))
     const cool = r.heat >= 35 && r.capital > 15 ? (find('thinkTank') ?? (r.heat >= 55 ? find('lobbyCongress') : undefined)) : undefined
@@ -163,7 +163,7 @@ function botTurn3(r: Run): Run {
     else if (scrapper) choice = act(r, { type: 'play', cardId: scrapper.id, target: handTargetsFor(r, scrapper).find(stale)!.id })
     else if (attacks.length) {
       const c = attacks[0]
-      const t = live.reduce((a, b) => (damageOn(b, cardDef(c).family, cardDef(c).power) > damageOn(a, cardDef(c).family, cardDef(c).power) ? b : a))
+      const t = live.reduce((a, b) => (damageOn(b, cardDef(c).family, attackPower(r, cardDef(c))) > damageOn(a, cardDef(c).family, attackPower(r, cardDef(c))) ? b : a))
       choice = act(r, { type: 'play', cardId: c.id, target: t.id })
     }
     else if (spin) choice = act(r, { type: 'play', cardId: spin.id })
@@ -188,7 +188,7 @@ function botTurn4(r: Run): Run {
     const find = (k: CardKey) => playable.find(c => c.key === k)
     const forced = playable.find(c => CARDS[c.key].forced)
     const live = liveThreats(r)
-    const bestHit = (c: Card) => Math.max(0, ...live.map(t => damageOn(t, cardDef(c).family, cardDef(c).power)))
+    const bestHit = (c: Card) => Math.max(0, ...live.map(t => damageOn(t, cardDef(c).family, attackPower(r, cardDef(c)))))
     const attacks = playable.filter(c => isAttack(c.key) && bestHit(c) > 1).sort((a, b) => bestHit(b) - bestHit(a))
     const tick = ticking(r)[0]
     const stop = tick ? (find('shoreUp') ?? find('securityDetail')) : undefined
@@ -210,7 +210,7 @@ function botTurn4(r: Run): Run {
     else if (amp) choice = act(r, { type: 'play', cardId: amp.id })
     else if (attacks.length) {
       const c = attacks[0]
-      const t = live.reduce((a, b) => (damageOn(b, cardDef(c).family, cardDef(c).power) > damageOn(a, cardDef(c).family, cardDef(c).power) ? b : a))
+      const t = live.reduce((a, b) => (damageOn(b, cardDef(c).family, attackPower(r, cardDef(c))) > damageOn(a, cardDef(c).family, attackPower(r, cardDef(c))) ? b : a))
       choice = act(r, { type: 'play', cardId: c.id, target: t.id })
     }
     else if (find('recycling')) choice = act(r, { type: 'play', cardId: find('recycling')!.id })

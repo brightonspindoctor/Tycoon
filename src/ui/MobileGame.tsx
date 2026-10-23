@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, MODS, ROLE_LABEL, THREATS, bossRound } from '../engine/data'
 import {
-  apCost, phaseName, reserves, weakOf, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, infiltrated, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, attackPower, phaseName, reserves, weakOf, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, infiltrated, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run, type Threat,
 } from '../engine/engine'
 import { FIELD_PLACE, money, units, year } from '../engine/format'
@@ -33,7 +33,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
   const sel = run.hand.find(c => c.id === selected) ?? null
   const selDef = sel ? cardDef(sel) : null
   const selCheck = sel ? canPlay(run, sel) : null
-  const dmgOn = (t: Threat) => (selDef ? damageOn(t, selDef.family, selDef.power) : 0)
+  const dmgOn = (t: Threat) => (selDef ? damageOn(t, selDef.family, attackPower(run, selDef)) : 0)
   const targets = sel ? targetsFor(run, sel) : []
   const stopping = !!selDef?.stop
   const needsTarget = !!sel && !!selCheck?.ok && targets.length > 1

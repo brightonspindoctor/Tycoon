@@ -75,6 +75,7 @@ export interface CardDef {
   backfire?: number // chance a clock card does the opposite (Carbon Offsets)
   capture?: boolean // the next move that would move the clock on doesn't (Carbon Capture)
   unique?: boolean // only one in the game: can't be duplicated, and never offered again once yours
+  spendCover?: boolean // spends all your Cover as damage, plus its power (Retain Counsel)
 }
 
 export const CARDS: Record<CardKey, CardDef> = {
@@ -197,8 +198,8 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $5. −10 Heat.', flavour: 'Independent research, independently funded by us.' },
   bribeOfficial: { name: 'Bribe an Official', era: 3, ap: 1, cost: 3, uses: null, family: 'Dirty', power: 8, icon: 'bribeOfficial', price: 18, rarity: 'Common',
     text: `Pay $3. Remove 8 Hold. Scandal +${CONFIG.bribeFeedsScandal} Hold.`, flavour: 'A consultancy fee.' },
-  retainCounsel: { name: 'Retain Counsel', era: 3, ap: 1, cost: 2, uses: null, family: 'Legal', power: 7, icon: 'retainCounsel', price: 18, rarity: 'Common',
-    text: 'Pay $2. Remove 7 Hold.', flavour: 'Billed in six-minute units.' },
+  retainCounsel: { name: 'Retain Counsel', era: 3, ap: 1, cost: 0, uses: null, family: 'Legal', power: 0, spendCover: true, icon: 'retainCounsel', price: 18, rarity: 'Common',
+    text: 'Lose all your Cover. Remove that much Hold.', flavour: 'Billed in six-minute units.' },
   advertorial: { name: 'Advertorial', era: 3, ap: 1, cost: 4, uses: null, family: 'Defence', power: 0, cover: 6, icon: 'advertorial', price: 15, rarity: 'Common',
     text: 'Pay $4. +6 Cover this turn. Blocks Heat too.', flavour: 'Paid opinion, opposite the editorial page.' },
   buyOut: { name: 'Buy Out', era: 3, ap: 1, cost: 8, uses: null, family: 'Legal', power: 14, icon: 'buyOut', price: 20, rarity: 'Uncommon',
@@ -300,7 +301,7 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   buyOut: { power: 18, text: 'Pay $8. Remove 18 Hold.' },
   thinkTank: { cost: 3, heat: -14, text: 'Pay $3. −14 Heat.' },
   bribeOfficial: { power: 11, text: `Pay $3. Remove 11 Hold. Scandal +${CONFIG.bribeFeedsScandal} Hold.` },
-  retainCounsel: { power: 10, text: 'Pay $2. Remove 10 Hold.' },
+  retainCounsel: { power: 3, text: 'Lose all your Cover. Remove that much Hold, +3.' },
   // stage 4
   recycling: { ap: 0, text: 'Shuffle your discard pile into your draw pile. Draw 2 cards.' },
   propaganda: { power: 13, text: 'Remove 13 Hold. Draw 1 card.' },

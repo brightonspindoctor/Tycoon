@@ -361,7 +361,9 @@ export function damageFor(family: Family, power: number, kind: ThreatKind, phase
 /** Hold an attack would actually remove from this enemy now, after its Cover. */
 export const damageOn = (t: Threat, family: Family, power: number) => Math.max(0, damageFor(family, power, t.kind, t.phase) - (t.cover ?? 0))
 export const ATTACK_FAMILIES: Family[] = ['Legal', 'Dirty', 'Bury', 'Lobby']
-export const isAttack = (key: CardKey) => ATTACK_FAMILIES.includes(CARDS[key].family) && CARDS[key].power > 0
+export const isAttack = (key: CardKey) => ATTACK_FAMILIES.includes(CARDS[key].family) && (CARDS[key].power > 0 || !!CARDS[key].spendCover)
+/** An attack's strength now: Retain Counsel spends all your Cover as damage, plus its own power. */
+export const attackPower = (r: Run, d: CardDef) => (d.spendCover ? r.cover + d.power : d.power)
 
 export const fires = (n: number) => `${n} fire${n === 1 ? '' : 's'}`
 /** Starts `count` new fires (Fire is the number of fires burning, up to fireMax). */
@@ -911,7 +913,7 @@ function hit(r: Run, t: Threat, dmg: number, badBlood = false, ignoreCover = fal
 export function targetsFor(r: Run, c: Card): Threat[] {
   const d = cardDef(c)
   if (d.stop) return liveThreats(r).filter(t => !t.stopped)
-  if (isAttack(c.key)) return liveThreats(r).filter(t => damageFor(d.family, d.power, t.kind, t.phase) > 0)
+  if (isAttack(c.key)) return liveThreats(r).filter(t => damageFor(d.family, attackPower(r, d), t.kind, t.phase) > 0)
   return []
 }
 /** The cards in your hand a destroy card (Streamline, Shred the Files, Scrap for Parts) can be used on. */
@@ -945,7 +947,8 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (d.stop && !targetsFor(r, c).length) return { ok: false, why: 'Every move is already stopped' }
   if (c.key === 'pettyCash' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
   if (isAttack(c.key) && !liveThreats(r).length) return { ok: false, why: 'No enemies left' }
-  if (isAttack(c.key) && !liveThreats(r).some(t => damageFor(d.family, d.power, t.kind, t.phase) > 0)) return { ok: false, why: 'No effect on these enemies' }
+  if (d.spendCover && attackPower(r, d) <= 0) return { ok: false, why: 'No Cover to spend' }
+  if (isAttack(c.key) && !liveThreats(r).some(t => damageFor(d.family, attackPower(r, d), t.kind, t.phase) > 0)) return { ok: false, why: 'No effect on these enemies' }
   return { ok: true }
 }
 
@@ -976,10 +979,12 @@ function play(r: Run, cardId: number, target?: number) {
   if (r.amplify && !d.amplify) r.amplify = false
   if (isAttack(c.key)) {
     const live = liveThreats(r)
-    const best = live.reduce((a, b) => (damageFor(d.family, d.power, b.kind, b.phase) > damageFor(d.family, d.power, a.kind, a.phase) ? b : a))
+    const pw = attackPower(r, d)
+    const best = live.reduce((a, b) => (damageFor(d.family, pw, b.kind, b.phase) > damageFor(d.family, pw, a.kind, a.phase) ? b : a))
     const chosen = live.find(x => x.id === target)
-    const t = chosen && damageFor(d.family, d.power, chosen.kind, chosen.phase) > 0 ? chosen : best
-    const dmg = damageFor(d.family, d.power, t.kind, t.phase) * amp
+    const t = chosen && damageFor(d.family, pw, chosen.kind, chosen.phase) > 0 ? chosen : best
+    const dmg = damageFor(d.family, pw, t.kind, t.phase) * amp
+    if (d.spendCover) { say(r, `${d.name}: ${r.cover} Cover spent.`); r.cover = 0 }
     spendCard(r, c)
     if (d.gold) r.gold -= d.gold
     if (d.chance !== undefined) {
