@@ -35,7 +35,7 @@ Unlocked one after another: **Oil → Pharmaceutical → Fishing → Tech** (Pha
 - Enemies have **Hold** (health). Cards remove Hold. There are two kinds, **Legal** and **Dirty**; an enemy can be weak to one (double), resist one (half) or be immune. No card is tied to one enemy.
 - Starting deck (9): Prospect, Hired Hand ×2, Lawyer Up, Shore Up, Bucket of Water ×2, Improve Gear, Hard Graft.
 - Starting bonus (pick one): Extra Prospect, 3 Oil, Petty Cash (skim 1 gold, 0 AP, 3 uses), Improve Gear + Hard Graft.
-- Bailout bonus: **Trust Fund** ($15 and no Bank Debt for stage 1). Offered only after 3 runs in a row lost in stage 1 (bankrupt or out of time); finishing stage 1 resets the streak.
+- Bailout bonus: **Trust Fund** ($15 and no Bank Debt for stage 1). Earned by losing 3 runs in a row in stage 1 (bankrupt or out of time), and from then on a permanent starting bonus.
 - Junk: Loose Thread (must play, 0 AP, −$1), Bad Blood (must play, 0 AP, 1 in 3 chance of a fire, destroyed after 2 plays; Dynamite, Bribe the Sheriff and a refused Bribe put one in your discard pile; Dirty cards alone never do), Margin Call (must play, −$2), IOU (−$1 a turn until cleared).
 
 ### Before and after the boss
@@ -56,7 +56,7 @@ A card is offered (weighted by rarity, like the shop): take it into your deck or
 - **Infiltrate** ($4, Common, 2 AP, stage 1 shop): Dirty, remove 3 Hold now, then 2 and 1 more as your next two turns end (before the enemies move; the follow-ups go past enemy Cover). Weakness and immunity apply to every hit, so it's 6/4/2 against the Strike and useless on the Inspector. The enemy shows what's still to land. Upgraded: 4, then 3 and 2. Fair in stage 1, falls behind in stages 2–3.
 
 ### Settings during a run
-The gear on the board and in the Land Office opens Settings (volume, sound, enemy-turn replay) plus Quit run, which asks to confirm, records the run as "Quit" in history and returns to the title. A quit neither counts towards nor breaks the Trust Fund losing streak.
+The gear on the board and in the Land Office opens Settings (volume, sound, enemy-turn replay) plus Quit run, which asks to confirm, records the run as "Quit" in history and returns to the title. A quit neither counts towards nor breaks the losing streak that earns the Trust Fund.
 
 ### First run
 Before your first run ever, after picking a starting bonus, a screen stamps out the game in four lines (Prospect fields. Build wells. Sell oil. Grow your capital.) with a Begin button. It never shows again.
@@ -230,7 +230,7 @@ Every bribe (Bribe the Sheriff, Bribe, Bribe an Official) feeds a Bribery Scanda
 `npm run sim` plays 2,000 runs per starting bonus with a simple bot, through stages 1, 2 and 3, and reports each round. Current target: a careful player wins stage 1 about a quarter to a third of the time; the bot beats stage 2 about a third of the time it gets there, with the Proxy Fight the main wall and about a quarter of stage 2 losses by being ousted; the bot beats stage 3 about 60% of the time it gets there (players who reach it are strong), with the Geneva Climate Summit the wall and most losses broken up by Heat.
 `npx vite-node tools/stage3.ts` plays stage 3 from a middling admin start ($30M, 3 Rigs, starter deck) and breaks it down by round and enemy; `npx vite-node tools/trace3.ts [seed]` prints one stage 3 run turn by turn.
 `npm run fuzz` plays thousands of random runs through all three stages (a third of them start in stage 3) checking the rules never reach an impossible state.
-**Admin mode** (playtesting): turn it on in Settings with the PIN (3333); `?admin=0` turns it off. The title screen then shows **Admin · jump in**: pick stage 1 to 4, where to start (the screen between stages, any round or the boss), Wells/Fields/Rigs, Capital, gold, Board Exposure, Heat or the clock, the bonus and a starter or strong deck. During an admin run, Settings has tools: +10 Capital, +1 gold, Exposure ±1, Heat ±10, clock ±1 hour, +1 AP, win the round, and add any card. Admin runs are never recorded in history or sent as play data, and don't touch the Trust Fund streak or unlocks. Admin runs are never recorded in history and don't touch the Trust Fund streak.
+**Admin mode** (playtesting): turn it on in Settings with the PIN (3333); `?admin=0` turns it off. The title screen then shows **Admin · jump in**: pick stage 1 to 4, where to start (the screen between stages, any round or the boss), Wells/Fields/Rigs, Capital, gold, Board Exposure, Heat or the clock, the bonus and a starter or strong deck. During an admin run, Settings has tools: +10 Capital, +1 gold, Exposure ±1, Heat ±10, clock ±1 hour, +1 AP, win the round, and add any card. Admin runs are never recorded in history or sent as play data, and don't touch the Trust Fund streak or unlocks.
 Preview pages for design checks: `?preview=incorporate`, `?preview=complete2`, `?preview=crash2`, `?preview=multinational`, `?preview=complete3`, `?preview=crash3`, and any of shop, bossshop, summary, round3, boss with `&stage=2` or `&stage=3`.
 
 ## Hidden tactics

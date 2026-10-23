@@ -88,15 +88,15 @@ export function lossStreak(runs: RunRecord[]): number {
   return n
 }
 
-/** The Trust Fund is offered after enough stage 1 losses in a row. */
-export const trustFundOffered = (needed: number) => lossStreak(loadRuns()) >= needed
+/** The Trust Fund is earned by enough stage 1 losses in a row, and then stays on offer for good. */
+export const trustFundOffered = (needed: number) => !!loadUnlocks().trustFund || lossStreak(loadRuns()) >= needed
 
 const UNLOCKS = 'tycoon.unlocks'
-/** What beating bosses has unlocked for every later run: Baron → +1 storage, Proxy Fight → Old Faithful. */
-export function loadUnlocks(): { baron?: boolean; proxy?: boolean } {
+/** What earlier runs have unlocked for every later one: Baron → +1 storage, Proxy Fight → Old Faithful, a losing streak → the Trust Fund. */
+export function loadUnlocks(): { baron?: boolean; proxy?: boolean; trustFund?: boolean } {
   try { return JSON.parse(localStorage.getItem(UNLOCKS) ?? '{}') } catch { return {} }
 }
-export function saveUnlock(k: 'baron' | 'proxy') {
+export function saveUnlock(k: 'baron' | 'proxy' | 'trustFund') {
   try { localStorage.setItem(UNLOCKS, JSON.stringify({ ...loadUnlocks(), [k]: true })) } catch { /* not kept */ }
 }
 

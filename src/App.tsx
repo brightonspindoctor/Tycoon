@@ -161,7 +161,10 @@ export default function App() {
         outcome: won ? 'Chairman' : LOST[run.loss?.reason ?? 'bankrupt'], gold: won ? run.gold : null, completed: won, stageGold: run.gold, // your gold is the score
         tactic: won ? (t => t ? TACTICS[t].name : undefined)(tacticFor(run.tally, run.deck.length, run.stats.oilSold, run.stage >= 4 ? run.clock : 0)) : undefined,
       })
-      setBailout(trustFundOffered(CONFIG.trustFundStreak))
+      // the Trust Fund is earned once, by a losing streak, and kept for good: the notice shows only the first time
+      const earned = !loadUnlocks().trustFund && trustFundOffered(CONFIG.trustFundStreak)
+      if (earned) saveUnlock('trustFund')
+      setBailout(earned)
       const t = won ? tacticFor(run.tally, run.deck.length, run.stats.oilSold, run.clock) : null
       const id = runEnded(run.seed, {
         outcome: won ? 'won' : run.loss?.reason ?? 'bankrupt', stage: run.stage, round: run.round, roundsReached: won ? 17 : roundsReached(run),

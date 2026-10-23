@@ -64,7 +64,7 @@ export function CrashOut({ run, bailout, onAgain, onHistory }: { run: Run; bailo
             <div className="unlock" role="status">
               <span className="cl-label">{CONFIG.trustFundStreak} failures in a row · Father has written</span>
               <b className="cl-display">{BONUSES.trustFund.name}</b>
-              <span>{BONUSES.trustFund.text} On offer for your next run.</span>
+              <span>{BONUSES.trustFund.text} A starting bonus from now on.</span>
             </div>
           )}
           <div className="end__buttons"><button type="button" className="cl-btn cl-btn--primary" onClick={onAgain}>Try again</button><button type="button" className="cl-btn" onClick={onHistory}>Run history</button></div>
