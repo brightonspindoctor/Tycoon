@@ -65,7 +65,9 @@ export function TickerTape({ beats, speed, stage = 1, onBeat, onDone }: Props) {
   if (!b) return null
   const era = stage >= 4 ? 'feed' : stage === 3 ? 'telex' : stage === 2 ? 'reel' : 'ticker'
   const breaking = (x: Beat) => x.title === 'The Truth clock' || x.kind === 'board'
-  return (
+  return (<>
+    {/* the dimming sits under whatever the line is about (lit above it); the tape sits above both */}
+    <div className={`tape-dim tape-dim--${era}`} aria-hidden="true" />
     <div className={`tape-wrap tape-wrap--${era}`} onClick={advance} role="status" aria-live="polite">
       {era === 'feed' ? (
         // notifications stack: the newest slides in on top, the last two stay below it
@@ -91,7 +93,8 @@ export function TickerTape({ beats, speed, stage = 1, onBeat, onDone }: Props) {
         <span className="cl-num">{i + 1} / {beats.length}</span>
       </div>
     </div>
-  )
+  </>)
+
 }
 
 /** Two half-decks riffled together and squared up. */

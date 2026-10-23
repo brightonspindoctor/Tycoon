@@ -571,8 +571,10 @@ button.m-threat { cursor: pointer; }
 .m-sell { font-size: 10px; letter-spacing: .02em; padding-left: 8px; padding-right: 8px; }
 
 /* ---------- enemy turn: ticker tape ---------- */
-.tape-wrap { position: absolute; inset: 0; z-index: 15; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-  background: color-mix(in srgb, #120f0b 18%, transparent); cursor: pointer; animation: fade-in .2s; }
+.tape-wrap { position: absolute; inset: 0; z-index: 17; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
+/* the dimming is its own layer under whatever the line is about (lit at z 16); the tape (z 17) sits above both */
+.tape-dim { position: absolute; inset: 0; z-index: 15; pointer-events: none; background: color-mix(in srgb, #120f0b 18%, transparent); animation: fade-in .2s; }
+.m .tape-dim { position: fixed; }
 .m .tape-wrap { position: fixed; justify-content: flex-start; padding-top: 34vh; }
 .tape { position: relative; width: min(980px, calc(100% - 24px)); min-height: 74px; display: flex; align-items: center; gap: 18px; padding: 14px 26px;
   background: #f6efdc; color: #1e1610; font-family: var(--font-figures);
@@ -863,7 +865,7 @@ button.m-threat { cursor: pointer; }
 /* ---------- the enemy turn, era by era ----------
    1860s: ticker tape (above). 1900s: silent-film intertitles. 1970s: telex printout. 2010s: phone notifications. */
 /* stage 2: a black title card in a gold Deco frame, cut in with a flicker */
-.tape-wrap--reel { background: rgba(10, 8, 4, .55); }
+.tape-dim--reel { background: rgba(10, 8, 4, .55); }
 .tape-wrap--reel .tape { min-height: 150px; justify-content: center; flex-direction: column; gap: 10px; text-align: center; padding: 26px 48px;
   background: #0d0b08; color: #f3ead2; background-image: none; border: 2px solid #c9a24a; outline: 1px solid #c9a24a; outline-offset: -9px;
   box-shadow: 0 0 0 6px #0d0b08, 0 18px 40px -10px rgba(0,0,0,.8); animation: reel-cut .45s steps(6, end); }
@@ -887,8 +889,12 @@ button.m-threat { cursor: pointer; }
 @keyframes telex-feed { from { transform: translateY(26px); opacity: 0; } to { transform: none; opacity: 1; } }
 
 /* stage 4: notifications slide down from the top and stack */
-.tape-wrap--feed { justify-content: flex-start; padding-top: 28px; background: rgba(23, 51, 43, .18); }
+.tape-wrap--feed { justify-content: flex-start; padding-top: 28px; }
+.tape-dim--feed { background: rgba(23, 51, 43, .18); }
 .m .tape-wrap--feed { padding-top: 16px; }
+.m .tape-wrap--telex .tape { padding: 12px 30px; }
+.m .tape-wrap--telex .tape__stamp { font-size: 16px; white-space: normal; }
+.m .tape-wrap--telex .tape__text { font-size: 22px; line-height: 24px; }
 .feed { width: min(460px, calc(100% - 24px)); display: flex; flex-direction: column; gap: 8px; }
 .note { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 18px; background: rgba(255, 255, 255, .96); color: #17332b;
   font-family: Nunito, system-ui, sans-serif; box-shadow: 0 10px 30px -10px rgba(0,0,0,.4); }
@@ -978,3 +984,5 @@ button.m-threat { cursor: pointer; }
 /* a price tag sits on the top edge: keep a two-line card name clear of it */
 .card:has(> .card-price) .cl-card__top { margin-top: 8px; }
 .card:has(> .card-price) .cl-card__art { height: 58px; }
+/* notifications carry their own timestamps: no "2 / 5" counter sitting on the board */
+.tape-wrap--feed .tape__foot { display: none; }
