@@ -197,7 +197,7 @@ Four damage types: Legal, Dirty, **Bury** (hiding evidence) and **Lobby** (Washi
 | Lobby Congress | 1 AP, $6M | Lobby, remove 9 Hold, −6 Heat | −9 Heat (++: −12) |
 | Fund a Think Tank | 1 AP, $5M | −10 Heat | $3M, −14 Heat |
 | Bribe an Official | 1 AP, $3M | Dirty, remove 8 Hold. A Bribery Scandal on the board gains 3 Hold | 11 |
-| Retain Counsel | 1 AP | Legal: lose all your Cover, remove that much Hold (no Cover, no play) | +3, then +6 |
+| Retain Counsel | 1 AP | Legal: "Use your Cover for Hold damage." All your Cover goes (no Cover, no play) | +3, then +6 |
 | **Buy Out** | 1 AP, $8M | Legal, remove 14 Hold | 18 (++: 22) |
 | **Advertorial** | 1 AP, $4M | +6 Cover (blocks enemy Heat too) | +9 (++: +12) |
 | **Oil Shock** | 0 AP, one use | Your next oil sale this turn pays double. Sold once a run ($15M) | — |
