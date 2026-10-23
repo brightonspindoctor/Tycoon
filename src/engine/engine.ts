@@ -1312,7 +1312,7 @@ function moveText(r: Run, t: Threat): string {
     case 'Cheap Gas': return `Oil price −$${CONFIG.cheapGas} for the round.`
     case 'Tremors': return 'Next turn you have 1 AP.'
     case 'Moratorium': return `Lose $${CONFIG.moratorium}.`
-    case 'Subsidies': case 'Grid Deal': return t.hold < t.maxHold ? `Regains ${Math.min(CONFIG.subsidies, t.maxHold - t.hold)} Hold.` : 'Gets cheaper. Nothing else happens.'
+    case 'Subsidies': case 'Grid Deal': return t.hold < t.maxHold ? `Regains ${Math.min(CONFIG.subsidies, t.maxHold - t.hold)} Hold.` : 'Already at full strength. Nothing happens.'
     case 'Blowout': return `Lose $${CONFIG.blowout4}.`
     case 'Containment Fails': return `${CONFIG.containment} Cover next turn.`
     case 'Oiled Seabirds': case 'Water Pollution': return `A Compensation Claim in your next hand: must play, −$${CONFIG.claimCost}.`
@@ -1465,7 +1465,7 @@ function endTurn(r: Run) {
       case 'Price War': r.short += 1; break
       case 'Rail Deal': r.freight += 1; break
       case 'Squeeze': dmg += cash(r, CONFIG.squeeze); break
-      case 'Clawback': if (exposureHigh(r)) takeGold(r, CONFIG.clawbackGold, name); else dmg += cash(r, CONFIG.clawbackCash); break
+      case 'Clawback': if (exposureHigh(r)) takeGold(r, CONFIG.clawbackGold, name); else { const n = cash(r, CONFIG.clawbackCash); dmg += n; say(r, `Lose $${n}.`) } break // the tape says what happened, not the rule
       case 'Cease and Desist': r.pending.cease += 1; break
       case 'Royalty': dmg += royalty(r); break
       case 'Injunction': r.pending.ap += 1; break
