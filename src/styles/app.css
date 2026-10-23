@@ -920,3 +920,14 @@ button.m-threat { cursor: pointer; }
 .left-behind__side p { margin: 0; }
 .threat__after { border-left-color: var(--loss); }
 .m .left-behind { flex-direction: column; align-items: flex-start; }
+
+/* glossary: terms found by buying cards, each with a real case */
+.glossary__found { margin-top: 18px; padding-top: 14px; border-top: 1.5px solid var(--rule); }
+.glossary__found h3 { margin: 0 0 8px; color: var(--accent); }
+.glossary__real { margin-top: 6px !important; padding-left: 10px; border-left: 3px solid var(--rule); font-size: 14px; }
+.glossary__real b { display: block; font-family: var(--font-figures); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+.term-toast { position: fixed; left: 50%; bottom: 22px; translate: -50% 0; z-index: 60; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: #1e1610; color: #f6efdc; padding: 10px 20px; border-radius: 14px; box-shadow: 0 10px 30px -8px rgba(0,0,0,.5); animation: rise .35s ease-out; text-align: center; }
+.term-toast .cl-label { color: #c9b991; }
+.term-toast b { font-size: 18px; }
+.term-toast .res-note { color: #c9b991; font-size: 12px; }

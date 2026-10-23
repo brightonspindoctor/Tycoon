@@ -25,6 +25,7 @@ import { EraTransition } from './ui/EraTransition'
 import { units } from './engine/format'
 import { About, BonusPick, History, Intro, Scoreboard } from './ui/MenuScreens'
 import { hello, roundEnded, runEnded, runStarted } from './telemetry'
+import { findTerms } from './terms'
 import { THREATS } from './engine/data'
 
 type Screen = 'intro' | 'bonus' | 'welcome' | 'run' | 'history' | 'about' | 'scoreboard'
@@ -136,6 +137,17 @@ export default function App() {
     if (run.stage === 3) saveUnlock('geneva')
   }, [run])
 
+  // a card you get for the first time can unlock a term in the glossary
+  const [newTerm, setNewTerm] = useState<string | null>(null)
+  useEffect(() => {
+    if (!run || run.admin) return // admin playtests hand you cards you never bought
+    const fresh = findTerms(run.deck.map(c => c.key))
+    if (!fresh.length) return
+    setNewTerm(fresh.length > 2 ? `${fresh.length} new terms` : fresh.map(t => t.term).join(' and '))
+    const t = setTimeout(() => setNewTerm(null), 4000)
+    return () => clearTimeout(t)
+  }, [run?.deck.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // anonymous play data: say hello once the game is open
   useEffect(() => { void hello() }, [])
   const [wonRunId, setWonRunId] = useState<string | null>(null)
@@ -238,7 +250,8 @@ export default function App() {
     inTurn: run?.phase === 'turn', stage: run?.stage ?? 1,
   }
   const badge = run?.admin && screen === 'run' ? <span className="admin-badge cl-label">Admin playtest</span> : null
-  const overlays = <><SettingsPanel onQuit={inRun ? quitRun : undefined} admin={adminProps} /><InstallPrompt />{badge}</>
+  const termToast = newTerm ? <div className="term-toast" role="status"><span className="cl-label">New in the glossary</span><b>{newTerm}</b><span className="res-note">Settings › Glossary</span></div> : null
+  const overlays = <><SettingsPanel onQuit={inRun ? quitRun : undefined} admin={adminProps} /><InstallPrompt />{badge}{termToast}</>
   if (mobile) return <div className={`m ${shake ? 'is-shaking' : ''}`} data-theme={ERA_THEME[run?.stage ?? 1] ?? 'victorian'}>{fade}{overlays}</div>
 
   return (

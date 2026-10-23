@@ -340,7 +340,7 @@ The look is a cheerful corporate sustainability report made by a tech start-up: 
 Synthesised in the browser (src/sound.ts); hear them all at `?preview=sounds`. Each era arrives with its own sound: a steam whistle (1860s), a muted brass fanfare (1900s), a wobbling organ chord (1970s), a start-up chime (2010s). The enemy turn arrives the way news did in each era: ticker tape (stage 1), silent-film intertitles in a gold Deco frame with a projector clatter (stage 2), a telex printing on green-bar paper (stage 3), and phone notifications stacking from the top, with clock moves as black Breaking alerts (stage 4). Events: a tick, tock and chime when the Truth clock moves on (a ratchet when it goes back), three deep bell strokes at midnight, a dissonant swell when the Truth changes phase, a rising shimmer when an enemy regains Hold, coins slipping away when gold is taken, paper slapped down for junk, and a fanfare with the cash register for the win.
 
 ## Glossary
-Settings → Glossary: five words and nothing else: Hold, Cover, Gold, Capital and AP.
+Settings → Glossary: five key words (Hold, Cover, Gold, Capital, AP), then **The business**: terms that unlock, for good on that device, the first time you get the card that uses them (Greenwashing, Astroturfing, Carbon offsets and so on, 17 in all, in src/terms.ts). Each says what it means and gives a real case. A toast announces a new one. Admin playtests unlock nothing.
 
 ## Play data and the global scoreboard
 Supabase project **tycoon** (London, eu-west-2), separate from brighton-weekend in the same organisation. The game talks only to `tycoon_*` functions; the tables are closed to the public.
