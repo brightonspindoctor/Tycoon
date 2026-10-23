@@ -341,4 +341,4 @@ The look is a cheerful corporate sustainability report made by a tech start-up: 
 Synthesised in the browser (src/sound.ts); hear them all at `?preview=sounds`. Each era arrives with its own sound: a steam whistle (1860s), a muted brass fanfare (1900s), a wobbling organ chord (1970s), a start-up chime (2010s). The enemy turn types out on a stock ticker in stages 1–2, a telex in stage 3 and a phone notification in stage 4. Events: a tick, tock and chime when the Truth clock moves on (a ratchet when it goes back), three deep bell strokes at midnight, a dissonant swell when the Truth changes phase, a rising shimmer when an enemy regains Hold, coins slipping away when gold is taken, paper slapped down for junk, and a fanfare with the cash register for the win.
 
 ## Glossary
-Settings → Glossary: plain definitions of the game's words, by topic and stage. It never mentions gold or the fortune.
+Settings → Glossary: five words and nothing else: Hold, Cover, Gold, Capital and AP.
