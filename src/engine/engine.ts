@@ -110,6 +110,7 @@ export interface Run {
   amplify?: boolean // Influencers: the next card's Hold damage or Cover is doubled
   played?: number // cards played this turn (a Subpoena caps it)
   uniques?: CardKey[] // one-in-the-game cards already had: never offered again
+  leftBehind?: { by: string; cards: CardKey[] } // cards a beaten enemy put in your deck this round (the Bank Inspector's report)
 }
 
 export type AdminOp = 'cash' | 'gold' | 'exposureUp' | 'exposureDown' | 'heatUp' | 'heatDown' | 'clockUp' | 'clockDown' | 'ap' | 'winRound' | 'addCard' | 'hold20'
@@ -633,6 +634,7 @@ function shopAction(r: Run, a: Action) {
 function startRound(r: Run, round: number) {
   r.roundStart = snapshot(r)
   r.round = round
+  r.leftBehind = undefined
   r.turn = 0
   r.modifier = null
   let kinds: ThreatKind[]
@@ -818,7 +820,13 @@ function threatBeaten(r: Run, t: Threat) {
   t.hold = 0
   say(r, `${THREATS[t.kind].name} is beaten.`)
   switch (t.kind) {
-    case 'inspector': addJunk(r, 'looseThread'); addJunk(r, 'looseThread'); say(r, 'He filed his report: 2 Loose Threads added to your deck.'); break
+    case 'inspector': {
+      addJunk(r, 'looseThread'); addJunk(r, 'looseThread')
+      r.leftBehind = { by: THREATS[t.kind].name, cards: ['looseThread', 'looseThread'] }
+      say(r, 'He filed his report: 2 Loose Threads added to your deck.')
+      beat(r, 'cards', `${THREATS[t.kind].name} · His report`, 'He filed his report: 2 Loose Threads in your deck. Must play, −$1 each.', t.id)
+      break
+    }
     case 'claimJumper': startFire(r, CONFIG.claimJumperFires); break
     case 'blowout': r.oil = Math.min(r.storage, r.oil + 3); say(r, 'Gusher! +3 oil.'); break
     case 'speculator': r.short = 0; break

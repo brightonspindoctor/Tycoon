@@ -3,7 +3,7 @@ import { type Action, type Run, snapshot } from '../engine/engine'
 import { CARDS } from '../engine/data'
 import { CONFIG } from '../engine/config'
 import { CardView } from './CardView'
-import { ERA_THEME, SHOP_NAME, money, year } from '../engine/format'
+import { ERA_THEME, SHOP_NAME, money, units, year } from '../engine/format'
 import { play } from '../sound'
 
 /** Counts a number from `from` to `to` over `ms`, starting after `delay`. */
@@ -62,6 +62,15 @@ export function RoundSummary({ run, onContinue, dispatch }: { run: Run; onContin
           <Row label="Cards in deck" from={a.deck} to={b.deck} delay={1700} fmt={n => `${n}`} />
           {st === 2 && <Row label="Board Exposure" from={a.exposure} to={b.exposure} delay={2000} fmt={n => `${n}/${CONFIG.exposureMax}`} diffFmt={n => `${n}`} worseUp />}
         </ul>
+        {run.leftBehind && (
+          <section className="left-behind" aria-label="Left in your deck">
+            <div className="left-behind__cards">{run.leftBehind.cards.map((k, i) => <CardView key={i} card={{ id: -60 - i, key: k, uses: CARDS[k].uses }} small stage={st} />)}</div>
+            <div className="left-behind__side">
+              <span className="cl-label">Left in your deck</span>
+              <p>{run.leftBehind.by} filed his report: {run.leftBehind.cards.length} {CARDS[run.leftBehind.cards[0]].name}s. {units(CARDS[run.leftBehind.cards[0]].text, st)}</p>
+            </div>
+          </section>
+        )}
         {offered && (
           <section className="spoils" aria-label="Spoils">
             <CardView card={{ id: -50, key: offered, uses: CARDS[offered].uses }} playable small stage={st} />

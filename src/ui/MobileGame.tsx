@@ -112,6 +112,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
             : units(`You have $${x.have} of $${x.need}. End a turn with $${x.need} or more and he loses ${x.damage} Hold.`, st)}
         </div>
       ))(reserves(run)) : <div className="opened threat__rule"><b>Rule</b> {units(d.rule, st)}</div>)}
+                  {d.whenBeaten && !t.beaten && <div className="opened threat__after"><b>When beaten</b> {units(d.whenBeaten, st)}</div>}
                   {t.opened && run.turn === 1 && !t.beaten && <div className="opened"><b>Opened with</b> {units(t.opened, st)}</div>}
                   {!t.beaten && (n => n.length ? <div className="opened infiltrated"><b>Infiltrated</b> −{n.join(', then −')} Hold as your turns end</div> : null)(infiltrated(run, t))}
                   {t.beaten ? <div className="m-intent m-intent--done">Beaten</div> : t.stopped ? (

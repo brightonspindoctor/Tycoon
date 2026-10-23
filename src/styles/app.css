@@ -910,3 +910,13 @@ button.m-threat { cursor: pointer; }
 .threat__rule { border-left-color: var(--ink-muted); }
 .threat__rule.is-met { border-left-color: var(--gain); background: color-mix(in srgb, var(--gain) 12%, transparent); }
 .threat__rule.is-met b { color: var(--gain); }
+
+/* what a beaten enemy left in your deck (the Bank Inspector's report), on the round summary */
+.left-behind { display: flex; gap: 14px; align-items: center; border: 2px solid var(--loss); border-radius: var(--cl-radius); padding: 10px 14px; background: color-mix(in srgb, var(--loss) 8%, var(--paper-raised)); }
+.left-behind__cards { display: flex; gap: 6px; flex: none; }
+.left-behind__cards .card { pointer-events: none; }
+.left-behind__side { display: flex; flex-direction: column; gap: 4px; }
+.left-behind__side .cl-label { color: var(--loss); }
+.left-behind__side p { margin: 0; }
+.threat__after { border-left-color: var(--loss); }
+.m .left-behind { flex-direction: column; align-items: flex-start; }

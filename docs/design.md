@@ -74,7 +74,7 @@ Only a few enemies resist a kind of card (the Railroad Agent and the Baron); the
 |---|---|---|---|---|---|---|
 | Blowout | Engine | 5 | — | Legal (immune) | Rumble → Spray → Blow | Beaten = +3 oil |
 | Strike | Engine | 8 | Dirty | — | Picket (lose $2) → Sabotage (a random Well) (+ Torch in R3) | Moves first: Walkout (−1 AP) |
-| Bank Inspector | Cash | 6 | Legal | Dirty (immune) | Audit → Fine | Ending a turn with $12+ removes 2 of his Hold: his panel shows your reserves live (green when met), and the turn report says so (and when it finishes him); beaten = 2 Loose Threads |
+| Bank Inspector | Cash | 6 | Legal | Dirty (immune) | Audit → Fine | Ending a turn with $12+ removes 2 of his Hold: his panel shows your reserves live (green when met), and the turn report says so (and when it finishes him); beaten = 2 Loose Threads, shown on his panel beforehand and on the round summary as "Left in your deck" |
 | Railroad Agent | Cash | 7 | — | Legal | Raise Rates → Refuse | Owns the railway: freight is her toll per barrel sold, and Raise Rates adds $1 to it |
 | Claim Jumper | Engine | 6 | Dirty | — | Jump → Scout | Moves first: Scout. Beaten = 1 fire |
 | Speculator | Cash | 7 | Legal | — | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |
