@@ -133,6 +133,7 @@ export default function App() {
     if (!run || run.admin || run.phase !== 'stageComplete') return
     if (run.stage === 1) saveUnlock('baron')
     if (run.stage === 2) saveUnlock('proxy')
+    if (run.stage === 3) saveUnlock('geneva')
   }, [run])
 
   // anonymous play data: say hello once the game is open

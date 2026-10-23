@@ -92,11 +92,11 @@ export function lossStreak(runs: RunRecord[]): number {
 export const trustFundOffered = (needed: number) => !!loadUnlocks().trustFund || lossStreak(loadRuns()) >= needed
 
 const UNLOCKS = 'tycoon.unlocks'
-/** What earlier runs have unlocked for every later one: Baron → +1 storage, Proxy Fight → Old Faithful, a losing streak → the Trust Fund. */
-export function loadUnlocks(): { baron?: boolean; proxy?: boolean; trustFund?: boolean } {
+/** What earlier runs have unlocked for every later one: Baron → +1 storage, Proxy Fight → Old Faithful, Geneva → the Slush Fund, a losing streak → the Trust Fund. */
+export function loadUnlocks(): { baron?: boolean; proxy?: boolean; geneva?: boolean; trustFund?: boolean } {
   try { return JSON.parse(localStorage.getItem(UNLOCKS) ?? '{}') } catch { return {} }
 }
-export function saveUnlock(k: 'baron' | 'proxy' | 'trustFund') {
+export function saveUnlock(k: 'baron' | 'proxy' | 'geneva' | 'trustFund') {
   try { localStorage.setItem(UNLOCKS, JSON.stringify({ ...loadUnlocks(), [k]: true })) } catch { /* not kept */ }
 }
 

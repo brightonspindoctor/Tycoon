@@ -2,6 +2,8 @@
 // until the new file lands in public/art/icons (delete a line here once it does).
 import type { Icon } from '../engine/data'
 
-const STAND_IN: Partial<Record<Icon, Icon>> = {}
+const STAND_IN: Partial<Record<Icon, Icon>> = {
+  slushFund: 'envelope',
+}
 
 export const iconUrl = (icon: Icon | string) => `${import.meta.env.BASE_URL}art/icons/${STAND_IN[icon as Icon] ?? icon}.png`

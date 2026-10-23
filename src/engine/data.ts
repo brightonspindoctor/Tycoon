@@ -15,7 +15,7 @@ export type Icon = 'derrick' | 'plot' | 'barrels' | 'fire' | 'bucket' | 'cudgels
   // stage 4 (2010s): items without their own art yet borrow one through src/ui/icons.ts
   | 'recycling' | 'propaganda' | 'onThePayroll' | 'climateBreakdown' | 'astroturfing' | 'carbonFootprint' | 'influencers' | 'ecoRebrand'
   | 'sustainabilityReport' | 'bridgeFuel' | 'netZero' | 'greenProject' | 'worldBank' | 'rig4' | 'compensationClaim'
-  | 'lobbyist' | 'strategicReserve' | 'prAgency' | 'fossilSubsidy' | 'offshoreTrust' | 'carbonOffsets' | 'carbonCapture'
+  | 'lobbyist' | 'strategicReserve' | 'prAgency' | 'fossilSubsidy' | 'offshoreTrust' | 'carbonOffsets' | 'carbonCapture' | 'slushFund'
 
 export type CardKey =
   | 'prospect' | 'well' | 'wildcat' | 'hiredHand' | 'lawyerUp' | 'shoreUp' | 'bucket' | 'fireBrigade'
@@ -345,13 +345,14 @@ export const WATER_FOR: Record<number, CardKey> = { 1: 'bucket' }
 export const PROSPECTS: CardKey[] = ['prospect', 'oldProspect']
 export const ATTACK_CARDS: CardKey[] = ['hiredHand', 'lawyerUp', 'dynamite']
 
-export type BonusKey = 'extraProspect' | 'threeOil' | 'pettyCash' | 'gearGraft' | 'trustFund' | 'oldFaithful'
+export type BonusKey = 'extraProspect' | 'threeOil' | 'pettyCash' | 'gearGraft' | 'trustFund' | 'oldFaithful' | 'slushFund'
 export const BONUSES: Record<BonusKey, { name: string; text: string }> = {
   extraProspect: { name: 'Extra Prospect', text: 'A second Prospect card in your deck.' },
   threeOil: { name: '3 Oil', text: 'Start with 3 barrels in the stockpile.' },
   pettyCash: { name: 'Petty Cash', text: 'Skim 1 gold for 0 AP. Three uses.' },
   gearGraft: { name: 'Improve Gear + Hard Graft', text: 'One more of each in your deck.' },
   trustFund: { name: 'Trust Fund', text: 'No Bank Debt in stage 1. Father has taken care of it.' },
+  slushFund: { name: 'Slush Fund', text: `An item for the whole run: +${CONFIG.slushFundCover} Cover every turn.` },
   oldFaithful: { name: 'Old Faithful', text: 'Start with a Well that never runs dry and nothing can touch. It stops in a fire.' },
 }
 
@@ -444,7 +445,7 @@ export const MODS: Record<ModKey, { name: string; text: string; stages?: number[
 export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'accountant' | 'refinery' | 'offshore' | 'boardGrudge' | 'loyalDirectors'
   | 'pressOffice' | 'fillingStations' | 'auditingFirm'
   | 'rolodex' | 'paperShredder' | 'supertanker' | 'thinkTankItem' | 'furtherResearch' | 'regulators'
-  | 'lobbyist' | 'strategicReserve' | 'prAgency' | 'fossilSubsidy' | 'offshoreTrust'
+  | 'lobbyist' | 'strategicReserve' | 'prAgency' | 'fossilSubsidy' | 'offshoreTrust' | 'slushFund'
 // stages: which stages' shops sell it (all if unset); never: a residue item, only ever given
 export const ITEMS: Record<ItemKey, { name: string; text: string; price: number; repeatable?: boolean; icon: Icon; stages?: number[]; never?: boolean; negative?: boolean }> = {
   storageTank: { name: 'Storage Tank', text: '+2 oil storage', price: 4, repeatable: true, icon: 'storageTank', stages: [1] },
@@ -464,6 +465,7 @@ export const ITEMS: Record<ItemKey, { name: string; text: string; price: number;
   supertanker: { name: 'Supertanker', text: `+${CONFIG.supertanker} oil storage (up to ${CONFIG.maxStorage}). Oil sells $${CONFIG.supertankerCut} less`, price: CONFIG.supertankerPrice, repeatable: true, icon: 'supertanker', stages: [3] },
   thinkTankItem: { name: 'Think Tank', text: `+${CONFIG.thinkTankCover} Cover every turn`, price: 15, icon: 'thinkTank', stages: [3] },
   furtherResearch: { name: 'Clean Image', text: `A free Think Tank: +${CONFIG.thinkTankCover} Cover every turn`, price: 0, icon: 'cleanImage', never: true },
+  slushFund: { name: 'Slush Fund', text: `+${CONFIG.slushFundCover} Cover every turn`, price: 0, icon: 'slushFund', never: true },
   regulators: { name: 'On File', text: 'Stage 4: the Truth clock starts an hour later', price: 0, icon: 'onFile', never: true, negative: true },
   // stage 4
   lobbyist: { name: 'Lobbyist on Retainer', text: `+${CONFIG.lobbyistAP} AP every turn`, price: 40, icon: 'lobbyist', stages: [4] },

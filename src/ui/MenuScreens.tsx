@@ -113,6 +113,7 @@ export function Scoreboard({ onBack }: { onBack: () => void }) {
 export function BonusPick({ onPick, onBack }: { onPick: (b: BonusKey) => void; onBack: () => void }) {
   const [offered] = useState(() => trustFundOffered(CONFIG.trustFundStreak))
   const [faithful] = useState(() => !!loadUnlocks().proxy)
+  const [slush] = useState(() => !!loadUnlocks().geneva)
   return (
     <div className="screen bonus" data-theme="victorian">
       <header className="game__head">
@@ -120,7 +121,7 @@ export function BonusPick({ onPick, onBack }: { onPick: (b: BonusKey) => void; o
         <button type="button" className="cl-btn" onClick={onBack}>Back</button>
       </header>
       <div className="bonus__grid">
-        {(Object.keys(BONUSES) as BonusKey[]).filter(k => (k !== 'trustFund' || offered) && (k !== 'oldFaithful' || faithful)).map(k => (
+        {(Object.keys(BONUSES) as BonusKey[]).filter(k => (k !== 'trustFund' || offered) && (k !== 'oldFaithful' || faithful) && (k !== 'slushFund' || slush)).map(k => (
           <button key={k} type="button" className={`bonus__card ${k === 'trustFund' ? 'bonus__card--earned' : ''}`} onClick={() => { play('card'); onPick(k) }}>
             {k === 'trustFund' && <span className="cl-label bonus__tag">{CONFIG.trustFundStreak} failures in a row</span>}
             <span className="cl-display bonus__name">{BONUSES[k].name}</span>

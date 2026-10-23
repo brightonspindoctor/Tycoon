@@ -409,7 +409,7 @@ function loseWell(r: Run, i: number, how: 'burnt' | 'stolen' | 'lost' | 'dry') {
 
 // ---------------------------------------------------------------- new run
 /** What earlier runs have unlocked: kept by the app, passed in so the engine stays pure. */
-export interface Unlocks { baron?: boolean; proxy?: boolean }
+export interface Unlocks { baron?: boolean; proxy?: boolean; geneva?: boolean }
 export function newRun(seed: number, bonus: BonusKey, unlocks: Unlocks = {}): Run {
   const r: Run = {
     seed, rng: seed, bonus, phase: 'shop', stage: 1, round: 0, turn: 0,
@@ -431,6 +431,7 @@ export function newRun(seed: number, bonus: BonusKey, unlocks: Unlocks = {}): Ru
   if (bonus === 'pettyCash') r.deck.push(card(r, 'pettyCash'))
   if (bonus === 'gearGraft') r.deck.push(card(r, 'improveGear'), card(r, 'hardGraft'))
   if (bonus === 'oldFaithful') r.plots = [{ output: 1, reserve: 0, faithful: true }]
+  if (bonus === 'slushFund') r.items.push('slushFund')
   startRound(r, 1) // straight into the first fight; the Land Office opens after it
   return r
 }
@@ -719,7 +720,7 @@ function startRound(r: Run, round: number) {
 /** Cover your items give at the start of every turn. Clean Image is a free Think Tank, and stacks with a bought one. */
 export const itemCover = (r: Run) => (r.items.includes('auditingFirm') ? CONFIG.auditingFirmCover : 0)
   + (r.items.includes('thinkTankItem') ? CONFIG.thinkTankCover : 0) + (r.items.includes('furtherResearch') ? CONFIG.thinkTankCover : 0)
-  + (r.items.includes('prAgency') ? CONFIG.prAgencyCover : 0)
+  + (r.items.includes('prAgency') ? CONFIG.prAgencyCover : 0) + (r.items.includes('slushFund') ? CONFIG.slushFundCover : 0)
 function beginTurn(r: Run) {
   r.turn += 1
   r.ledger = [{ label: 'Brought forward', amount: r.capital }]

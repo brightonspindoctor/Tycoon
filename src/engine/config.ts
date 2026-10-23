@@ -78,6 +78,7 @@ export const CONFIG = {
   heatPerSkims: 5, // stage 3 starts with this much Heat for every heatSkimsEvery gold skimmed in stage 2...
   heatSkimsEvery: 3,
   heatStartCap: 15, // ...up to this
+  slushFundCover: 2, // the Slush Fund starting bonus (unlocked by beating the Geneva Climate Summit): Cover every turn
   thinkTankCover: 3, // the Think Tank item (and Clean Image, a free one): Cover at the start of every turn
   auditingFirmCover: 2, // the Auditing Firm: Cover at the start of every turn
   supertankerPrice: 30,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, apCost, highestWell, infiltrateTarget, rumbleTarget, weakestWell, canPlay, damageFor, debtPerTurn, intent, intentText, isAttack, netPrice, newRun, targetsFor, type Run } from './engine'
+import { act, apCost, itemCover, highestWell, infiltrateTarget, rumbleTarget, weakestWell, canPlay, damageFor, debtPerTurn, intent, intentText, isAttack, netPrice, newRun, targetsFor, type Run } from './engine'
 import { lossStreak, type RunRecord } from '../storage'
 import { CONFIG } from './config'
 import { money } from './format'
@@ -805,5 +805,15 @@ describe('unlocks from beating bosses', () => {
     r.plots.push({ output: 1, reserve: 3 })
     expect(highestWell(r)).toBe(1)
     expect(weakestWell(r)).toBe(1)
+  })
+})
+
+describe('the Slush Fund', () => {
+  it('a starting bonus: an item giving 2 Cover every turn, stacking with the others', () => {
+    const r = newRun(9, 'slushFund')
+    expect(r.items).toContain('slushFund')
+    expect(r.cover).toBe(2)
+    r.items.push('thinkTankItem')
+    expect(itemCover(r)).toBe(2 + CONFIG.thinkTankCover)
   })
 })
