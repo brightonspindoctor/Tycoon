@@ -146,6 +146,7 @@ export function BonusPick({ onPick, onBack }: { onPick: (b: BonusKey) => void; o
   const [offered] = useState(() => trustFundOffered(CONFIG.trustFundStreak))
   const [faithful] = useState(() => !!loadUnlocks().proxy)
   const [slush] = useState(() => !!loadUnlocks().geneva)
+  const [hardOpen] = useState(() => completedIndustries().includes('Oil')) // hard mode opens once you've won the game
   return (
     <div className="screen bonus" data-theme="victorian">
       <header className="game__head">
@@ -162,9 +163,11 @@ export function BonusPick({ onPick, onBack }: { onPick: (b: BonusKey) => void; o
           </button>
         ))}
       </div>
-      <button type="button" className="bonus__none" onClick={() => { play('card'); onPick('none') }}>
-        <span className="cl-display">{BONUSES.none.name}</span><span>{BONUSES.none.text}</span>
-      </button>
+      {hardOpen
+        ? <button type="button" className="bonus__none" onClick={() => { play('card'); onPick('none') }}>
+            <span className="cl-display">{BONUSES.none.name}</span><span>{BONUSES.none.text}</span>
+          </button>
+        : <div className="bonus__none bonus__none--locked" aria-label="Hard mode: locked"><span className="cl-display">Hard mode</span><span>Win the game to unlock.</span></div>}
     </div>
   )
 }

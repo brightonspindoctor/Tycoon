@@ -356,7 +356,7 @@ export const BONUSES: Record<BonusKey, { name: string; text: string }> = {
   trustFund: { name: 'Trust Fund', text: 'Cancels your Bank Debt for stage 1. Father has taken care of it.' },
   slushFund: { name: 'Slush Fund', text: `An item for the whole run: +${CONFIG.slushFundCover} Cover every turn.` },
   oldFaithful: { name: 'Old Faithful', text: 'Start with a Well that never runs dry and nothing can touch. It stops in a fire.' },
-  none: { name: 'No advantage', text: 'Hard mode. The loan and nothing else.' },
+  none: { name: 'No advantage', text: 'Hard mode. The loan, and no Prospect card.' },
 }
 
 export type ThreatKind = 'blowout' | 'strike' | 'inspector' | 'railroad' | 'claimJumper' | 'speculator' | 'baron'

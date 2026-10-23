@@ -436,7 +436,7 @@ export function newRun(seed: number, bonus: BonusKey, unlocks: Unlocks = {}): Ru
     exposure: 0, goldShield: false, boost: 0, upgradeCost: CONFIG.upgradeCost, residue: null, stageGold: 0,
     heat: 0, roundBoost: 0, shredded: false, clock: CONFIG.clockStart, met: [],
   }
-  r.deck = STARTER.map(k => card(r, k))
+  r.deck = (bonus === 'none' ? STARTER.filter(k => k !== 'prospect') : STARTER).map(k => card(r, k)) // hard mode: no Prospect either
   if (bonus === 'extraProspect') r.deck.push(card(r, 'prospect'))
   if (bonus === 'pettyCash') r.deck.push(card(r, 'pettyCash'))
   if (bonus === 'gearGraft') r.deck.push(card(r, 'improveGear'), card(r, 'hardGraft'))

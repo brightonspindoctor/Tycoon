@@ -244,6 +244,8 @@ button.threat { cursor: crosshair; }
 .bonus__none { align-self: flex-start; display: flex; gap: 12px; align-items: baseline; padding: 10px 16px; border: 1.5px dashed var(--ink-muted); border-radius: var(--radius-1860); background: transparent; color: var(--ink-muted); cursor: pointer; font: inherit; font-size: 15px; text-align: left; }
 .bonus__none .cl-display { font-size: 20px; color: var(--ink); }
 .bonus__none:hover { border-color: var(--loss); border-style: solid; }
+.bonus__none--locked { cursor: default; opacity: .6; }
+.bonus__none--locked:hover { border-color: var(--ink-muted); border-style: dashed; }
 .unlock { display: flex; flex-direction: column; gap: 4px; border: 2.5px solid var(--personal); background: var(--paper-raised); padding: 14px 16px; border-radius: var(--radius-1860); animation: rise .5s ease-out both .6s; }
 .unlock .cl-label { color: var(--personal); }
 .unlock b { font-size: 26px; line-height: 30px; color: var(--personal); }
