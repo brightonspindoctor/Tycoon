@@ -84,7 +84,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
       </header>
 
       <main className="m-main" onClick={e => { if (e.target === e.currentTarget) { setSelected(null); setPlotMenu(null) } }}>
-        {run.modifier && <div className="m-chip"><b>{MODS[run.modifier].name}</b> · {units(MODS[run.modifier].text, st)}</div>}
+        {run.modifier && <div className="round-mod" role="note"><span className="cl-label">This round</span><b className="cl-display">{MODS[run.modifier].name}</b><span>{units(MODS[run.modifier].text, st)}</span></div>}
 
         <section className="m-threats" aria-label="Opposition">
           {run.fire > 0 && !run.threats.some(t => !t.beaten) && <span className="cl-label m-prompt">Every enemy is beaten. Put the fire out to end the round.</span>}
@@ -133,7 +133,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
         {run.fire > 0 && (
           <section className={`m-fire ${lit('fire')}`} aria-label={`${fires(run.fire)} burning`}>
             <img src={art('icons/fire.png')} alt="" />
-            <div><b className="cl-label">{fires(run.fire)} burning · pumps stopped</b><span>End of turn: {fireTarget(run)}</span></div>
+            <div><b className="cl-label">{fires(run.fire)} burning{run.fireBy ? ` · started by ${run.fireBy}` : ''} · pumps stopped</b><span>End of turn: {fireTarget(run)}</span></div>
           </section>
         )}
 

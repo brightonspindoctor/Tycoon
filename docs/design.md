@@ -83,10 +83,14 @@ Only a few enemies resist a kind of card (the Railroad Agent and the Baron); the
 | Speculator | Cash | 7 | Legal | — | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |
 | **Rival Baron** (boss) | Boss | 20 | Dirty | Legal | Sabotage (a random Well) → Lease → Arson | Moves first: Arson (1). Arson grows each cycle |
 
-Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown.
+Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown. The modifier is a "This round" banner at the top of the opposition, and the round's opening tape stamps it like a headline.
+
+No Bank Debt is taken on the very first turn of the game (the loan has only just been made); it starts on turn 2.
+
+A fire started on your own turn (the Claim Jumper or the Saboteur on their way out, Bad Blood) brings up a "Fire!" alert saying who started it and, if every enemy is beaten, that you must put it out to end the round. The fire panel also names who started it.
 
 ### Shop
-3 cards, one Prospect and one Bucket of Water ($2) per visit (they then sell out; Prospect's price rises quietly), Destroy a card from $2 (rises quietly by $1 each time), no hint of the next enemy, 1 item, the Cheap Loan, Destroy a card, Reroll, and Skim. Items: Storage Tank, Silo (+2 storage), Steam Pump, Accountant ($4: Cover you don't use carries over to the next turn within a round; Cover is used up as it blocks, and resets every round).
+3 cards, one Prospect and one Bucket of Water ($2) per visit (they then sell out; Prospect's price rises quietly), Destroy a card from $2 (rises quietly by $1 each time), no hint of the next enemy, 1 item, the Cheap Loan, Destroy a card, Reroll, and Skim. Items: Storage Tank, Silo (+2 storage), Steam Pump ($10: +1 AP on every other turn of a fight, turns 1, 3, 5…; it used to be every turn, which was too strong), Accountant ($4: Cover you don't use carries over to the next turn within a round; Cover is used up as it blocks, and resets every round).
 
 ## Stage 2 rules (as built) · 1901–1930 · Technical race · Art Deco
 ### Incorporation (between stages)

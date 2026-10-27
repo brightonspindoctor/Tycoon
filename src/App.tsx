@@ -59,6 +59,7 @@ export default function App() {
   })
   // the enemy turn being played back: the board stays as it was until the tape has run
   const [tape, setTape] = useState<{ beats: Beat[]; frozen: Run } | null>(null)
+  const [fireNote, setFireNote] = useState<string | null>(null) // a fire started on your own turn (the Claim Jumper on his way out, say)
   const [acting, setActing] = useState<Beat | null>(null)
   const replay = (next: Run, frozen: Run) => {
     if (!next.report.length || loadReplay() === 'off') return
@@ -79,7 +80,12 @@ export default function App() {
     if (a.type === 'sellOil' && nextRun.capital > run.capital) play('sell')
     if (a.type === 'sellWell') play('coin')
     const replaying = nextRun.reportSeq !== run.reportSeq && nextRun.report.length > 0 && loadReplay() !== 'off'
-    if (nextRun.fire > run.fire && !replaying) play('fire')
+    if (nextRun.fire > run.fire && !replaying) {
+      play('fire')
+      const over = !nextRun.threats.some(t => !t.beaten)
+      setFireNote(`${nextRun.fireBy ? `Started by ${nextRun.fireBy}. ` : ''}${over ? 'Put it out to end the round.' : 'Pumps stop until it\'s out.'}`)
+      setTimeout(() => setFireNote(null), 4500)
+    }
     // stage 4: the clock and the Truth, when it happens on your turn rather than on the tape
     if (!replaying && (nextRun.clock ?? 0) !== (run.clock ?? 0) && nextRun.stage === 4 && run.stage === 4) play((nextRun.clock ?? 0) > (run.clock ?? 0) ? 'tick' : 'rewind')
     const phaseOf = (x: Run) => x.threats.find(t => t.kind === 'truth')?.phase ?? 0
@@ -273,7 +279,8 @@ export default function App() {
   const badge = run?.admin && screen === 'run' ? <span className="admin-badge cl-label">Admin playtest</span> : null
   const termToast = newTerm ? <div className="term-toast" role="status"><span className="cl-label">New in the glossary</span><b>{newTerm}</b><span className="res-note">Settings › Glossary</span></div> : null
   const featToast = newFeat ? <div className={`term-toast term-toast--feat ${termToast ? 'is-raised' : ''}`} role="status"><span className="cl-label">Achievement</span><b>{newFeat}</b><span className="res-note">Front page › Achievements</span></div> : null
-  const overlays = <><SettingsPanel onQuit={inRun ? quitRun : undefined} admin={adminProps} /><InstallPrompt />{badge}{termToast}{featToast}</>
+  const fireToast = fireNote && screen === 'run' ? <div className="term-toast term-toast--fire" role="alert"><span className="cl-label">Fire!</span><b>{fireNote}</b></div> : null
+  const overlays = <>{fireToast}<SettingsPanel onQuit={inRun ? quitRun : undefined} admin={adminProps} /><InstallPrompt />{badge}{termToast}{featToast}</>
   if (mobile) return <div className={`m ${shake ? 'is-shaking' : ''}`} data-theme={ERA_THEME[run?.stage ?? 1] ?? 'victorian'}>{fade}{overlays}</div>
 
   return (

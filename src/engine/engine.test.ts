@@ -11,7 +11,7 @@ const begin = (bonus: Parameters<typeof newRun>[1] = 'threeOil', seed = 7): Run 
 describe('a new run', () => {
   it('starts with the agreed economy', () => {
     const r = newRun(1, 'threeOil')
-    expect(r.capital).toBe(CONFIG.startCapital - 1) // first turn's Bank Debt is paid
+    expect(r.capital).toBe(CONFIG.startCapital) // no Bank Debt on the very first turn: the loan has only just been made
     expect(r.debt).toBe(1)
     expect(r.deck).toHaveLength(9)
     expect(r.oil).toBe(3)
@@ -19,13 +19,35 @@ describe('a new run', () => {
     expect(r.round).toBe(1)
   })
 
-  it('round 1 charges the debt and deals a hand of five', () => {
+  it('round 1 deals a hand of five, and the Bank Debt starts on turn 2', () => {
     const r = begin()
     expect(r.phase).toBe('turn')
     expect(r.round).toBe(1)
     expect(r.hand.length).toBeGreaterThanOrEqual(5)
-    expect(r.capital).toBeLessThan(CONFIG.startCapital)
+    expect(r.capital).toBe(CONFIG.startCapital)
     expect(r.threats).toHaveLength(1)
+    expect(r.ledger.some(l => l.label.startsWith('Bank debt') && l.amount < 0)).toBe(false)
+    const t2 = act(r, { type: 'endTurn' })
+    expect(t2.ledger.some(l => l.label.startsWith('Bank debt') && l.amount < 0)).toBe(true) // (the Bank Inspector may have doubled it)
+  })
+
+  it('the Steam Pump adds an AP on every other turn: 1, 3, 5…', () => {
+    let r = newRun(4, 'threeOil')
+    r.items.push('steamPump')
+    r.threats[0].hold = 999; r.threats[0].maxHold = 999
+    const aps: number[] = []
+    for (let i = 0; i < 4 && r.phase === 'turn'; i++) { r.capital = 99; r = act(r, { type: 'endTurn' }); aps.push(r.ap - (r.turn % 2 === 1 ? 1 : 0)) }
+    expect(new Set(aps).size).toBe(1) // the same base AP every turn once the pump's turns are taken off
+    expect(r.items.includes('steamPump')).toBe(true)
+  })
+
+  it('a fire knows who started it: the Claim Jumper on his way out', () => {
+    let r = newRun(6, 'threeOil')
+    r.threats = [{ id: 900, kind: 'claimJumper', hold: 1, maxHold: 1, step: 0, cycle: 0, round3: false, beaten: false }]
+    r.hand = [{ id: 7000, key: 'hiredHand', uses: null }]; r.ap = 2
+    r = act(r, { type: 'play', cardId: 7000, target: 900 })
+    expect(r.fire).toBeGreaterThan(0)
+    expect(r.fireBy).toBe('the Claim Jumper')
   })
 })
 

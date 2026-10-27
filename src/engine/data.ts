@@ -455,7 +455,7 @@ export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'accountant' | 'ref
 export const ITEMS: Record<ItemKey, { name: string; text: string; price: number; repeatable?: boolean; icon: Icon; stages?: number[]; never?: boolean; negative?: boolean }> = {
   storageTank: { name: 'Storage Tank', text: '+2 oil storage', price: 4, repeatable: true, icon: 'storageTank', stages: [1] },
   silo: { name: 'Silo', text: `+${CONFIG.siloStorage} oil storage`, price: 7, icon: 'barrels', stages: [1] },
-  steamPump: { name: 'Steam Pump', text: '+1 AP every turn', price: 10, icon: 'steamPump', stages: [1] },
+  steamPump: { name: 'Steam Pump', text: '+1 AP every other turn', price: 10, icon: 'steamPump', stages: [1] },
   accountant: { name: 'Accountant', text: 'Cover you don\'t use carries over to the next turn', price: 4, icon: 'deed', stages: [1] },
   refinery: { name: 'Refinery', text: 'Oil sells +$1', price: 22, icon: 'refinery', stages: [3] },
   offshore: { name: 'Offshore Account', text: 'Enemies take 1 less gold from your fortune', price: 5, icon: 'offshore', stages: [2] },
@@ -493,7 +493,7 @@ export const BOONS: Record<BoonKey, { name: string; text: string; type: BoonType
 }
 export type RewardKey = 'steamPump' | 'dividends' | 'silo' | 'drillingRights'
 export const REWARDS: Record<RewardKey, { name: string; text: string; type: BoonType; icon: Icon }> = {
-  steamPump: { name: 'Steam Pump', text: '+1 AP every turn.', type: 'ap', icon: 'steamPump' },
+  steamPump: { name: 'Steam Pump', text: '+1 AP every other turn.', type: 'ap', icon: 'steamPump' },
   dividends: { name: 'Dividends', text: `A card that gives $${CONFIG.dividends} every time you play it.`, type: 'cash', icon: 'shares' },
   silo: { name: 'Silo', text: '+4 oil storage, for good.', type: 'storage', icon: 'barrels' },
   drillingRights: { name: 'Drilling Rights', text: '2 Well cards for your deck.', type: 'wells', icon: 'derrick' },

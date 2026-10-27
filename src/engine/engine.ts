@@ -111,6 +111,7 @@ export interface Run {
   amplify?: boolean // Influencers: the next card's Hold damage or Cover is doubled
   played?: number // cards played this turn (a Subpoena caps it)
   uniques?: CardKey[] // one-in-the-game cards already had: never offered again
+  fireBy?: string // who started the latest fire, for the fire panel
   leftBehind?: { by: string; cards: CardKey[] } // cards a beaten enemy put in your deck this round (the Bank Inspector's report)
   feats?: Feats // for achievements: things the run state alone doesn't show
 }
@@ -375,8 +376,9 @@ export const attackPower = (r: Run, d: CardDef) => (d.spendCover ? r.cover + d.p
 
 export const fires = (n: number) => `${n} fire${n === 1 ? '' : 's'}`
 /** Starts `count` new fires (Fire is the number of fires burning, up to fireMax). */
-function startFire(r: Run, count: number) {
+function startFire(r: Run, count: number, by?: string) {
   if (r.stage >= 3) return // no fires in stage 3
+  r.fireBy = by ?? r.fireBy
   const bonus = r.modifier === 'drySeason' ? 1 : 0
   r.fire = Math.min(CONFIG.fireMax, r.fire + count + bonus)
   say(r, `Fire! ${fires(r.fire)} burning. Pumps stopped.`)
@@ -403,7 +405,7 @@ function addJunk(r: Run, key: CardKey, where: 'draw' | 'discard' = 'draw') {
 
 /** Bad Blood, played (or forced at end of turn): 1 in 3 chance of a fire. */
 function badBloodRoll(r: Run): boolean {
-  if (next(r) < CONFIG.badBloodFireChance) { say(r, 'Bad Blood: someone set a fire.'); startFire(r, 1); return true }
+  if (next(r) < CONFIG.badBloodFireChance) { say(r, 'Bad Blood: someone set a fire.'); startFire(r, 1, 'Bad Blood'); return true }
   say(r, 'Bad Blood: nothing happened. This time.')
   return false
 }
@@ -688,7 +690,7 @@ function startRound(r: Run, round: number) {
   r.cover = 0
   newReport(r)
   for (const t of r.threats) { say(r, `${THREATS[t.kind].name} arrives.`); beat(r, 'enemy', `Round ${round}`, `${THREATS[t.kind].name} arrives.`, t.id) }
-  if (r.modifier) { say(r, `${MODS[r.modifier].name}: ${MODS[r.modifier].text}.`); beat(r, 'info', MODS[r.modifier].name, `${MODS[r.modifier].text}.`) }
+  if (r.modifier) { say(r, `${MODS[r.modifier].name}: ${MODS[r.modifier].text}.`); beat(r, 'board', `This round · ${MODS[r.modifier].name}`, `${MODS[r.modifier].text}.`) }
   if (r.modifier === 'scandal') expose(r, 1, 'Scandal')
   if (r.modifier === 'earthDay') heat(r, CONFIG.earthDayHeat, 'Earth Day')
   if (r.items.includes('pressOffice')) expose(r, -1, 'Press Office')
@@ -702,7 +704,7 @@ function startRound(r: Run, round: number) {
       if (i >= 0) say(r, `The Claim Jumper has marked Well No. ${i + 1}.`)
       beat(r, 'enemy', `${THREATS[t.kind].name} · Scout`, i >= 0 ? `Marked Well No. ${i + 1}.` : 'Found no Well to mark.', t.id)
     }
-    if (op === 'Arson') { startFire(r, 1); t.opened = 'Arson: started a fire.'; beat(r, 'enemy', `${THREATS[t.kind].name} · Arson`, 'Started a fire.', t.id) }
+    if (op === 'Arson') { startFire(r, 1, THREATS[t.kind].name); t.opened = 'Arson: started a fire.'; beat(r, 'enemy', `${THREATS[t.kind].name} · Arson`, 'Started a fire.', t.id) }
     if (op === 'Canvass' || op === 'Minutes') {
       beat(r, 'enemy', `${THREATS[t.kind].name} · ${op}`, '+1 Board Exposure.', t.id)
       captured = []; expose(r, 1, op); captured = null
@@ -734,6 +736,8 @@ function startRound(r: Run, round: number) {
 export const itemCover = (r: Run) => (r.items.includes('auditingFirm') ? CONFIG.auditingFirmCover : 0)
   + (r.items.includes('thinkTankItem') ? CONFIG.thinkTankCover : 0) + (r.items.includes('furtherResearch') ? CONFIG.thinkTankCover : 0)
   + (r.items.includes('prAgency') ? CONFIG.prAgencyCover : 0) + (r.items.includes('slushFund') ? CONFIG.slushFundCover : 0)
+/** The Steam Pump adds 1 AP on every other turn of a fight: turns 1, 3, 5… */
+export const steamPumpTurn = (r: Run) => r.items.includes('steamPump') && r.turn % 2 === 1
 function beginTurn(r: Run) {
   r.turn += 1
   r.ledger = [{ label: 'Brought forward', amount: r.capital }]
@@ -753,7 +757,8 @@ function beginTurn(r: Run) {
   for (const t of liveThreats(r)) { t.cover = t.coverNext ?? t.baseCover ?? THREATS[t.kind].cover; t.coverNext = undefined } // enemy Cover: fresh each turn, never stacks
   r.boost = 0
   r.goldShield = false
-  const d = debtPerTurn(r) * (r.current.audit ? 2 : 1)
+  const first = r.stage === 1 && r.round === 1 && r.turn === 1 // the loan has only just been made: nothing is owed yet
+  const d = first ? 0 : debtPerTurn(r) * (r.current.audit ? 2 : 1)
   money(r, r.current.audit ? 'Bank debt (audited)' : 'Bank debt', -d)
   if (d && r.turn > 1) beat(r, 'money', r.current.audit ? 'Bank debt · audited' : 'Bank debt', `−$${d}.`)
   if (r.items.includes('fillingStations')) money(r, 'Filling Stations', 1)
@@ -790,7 +795,7 @@ function beginTurn(r: Run) {
   const n = handSize(r) - (r.modifier === 'badWeather' ? 1 : 0)
   drawUpTo(r, n)
   const loyal = r.round === bossRound(r.stage) && r.items.includes('loyalDirectors') ? 1 : 0
-  r.ap = Math.max(0, CONFIG.baseAP + (r.items.includes('steamPump') ? 1 : 0) + (r.items.includes('lobbyist') ? CONFIG.lobbyistAP : 0) + loyal - apPenalty)
+  r.ap = Math.max(0, CONFIG.baseAP + (steamPumpTurn(r) ? 1 : 0) + (r.items.includes('lobbyist') ? CONFIG.lobbyistAP : 0) + loyal - apPenalty)
   if (r.current.apTo1) { r.ap = Math.min(r.ap, 1); beat(r, 'info', 'Tremors', 'You have 1 AP this turn.') }
 }
 
@@ -839,14 +844,14 @@ function threatBeaten(r: Run, t: Threat) {
       beat(r, 'cards', `${THREATS[t.kind].name} · His report`, 'He filed his report: 2 Loose Threads in your deck. Must play, −$1 each.', t.id)
       break
     }
-    case 'claimJumper': startFire(r, CONFIG.claimJumperFires); break
+    case 'claimJumper': say(r, 'The Claim Jumper set a fire on his way out.'); startFire(r, CONFIG.claimJumperFires, 'the Claim Jumper'); break
     case 'blowout': r.oil = Math.min(r.storage, r.oil + 3); say(r, 'Gusher! +3 oil.'); break
     case 'speculator': r.short = 0; break
     case 'railroad': r.freight = 0; break
     case 'muckraker': expose(r, -1, 'Retraction'); break
     case 'clawback': expose(r, -1, 'The committee is satisfied'); break
     case 'combine': r.short = 0; r.freight = 0; say(r, 'The Combine folds. Prices and freight recover.'); break
-    case 'saboteur': startFire(r, 1); say(r, 'The Saboteur left a parting gift.'); break
+    case 'saboteur': startFire(r, 1, 'the Saboteur'); say(r, 'The Saboteur left a parting gift.'); break
     case 'rivals': r.short = 0; say(r, 'The rivals fold. Prices recover.'); break
     case 'fracking': r.short = 0; break
     case 'war': say(r, 'Ceasefire. Prices and output recover.'); break
@@ -1445,7 +1450,7 @@ function endTurn(r: Run) {
         if (standing.length) { const i = pick(r, standing); loseWell(r, i, 'lost'); say(r, `${name} sabotaged Well No. ${i + 1}.`) }
         break
       }
-      case 'Torch': startFire(r, 1); break
+      case 'Torch': startFire(r, 1, name); break
       case 'Audit': r.pending.audit = true; break
       case 'Fine': dmg += 3; break
       case 'Raise Rates': r.freight += 1; break
@@ -1464,7 +1469,7 @@ function endTurn(r: Run) {
         if (v) { removeFromDeck(r, v); say(r, `Hostile Lease: ${CARDS[v.key].name} taken for good.`) }
         break
       }
-      case 'Arson': startFire(r, Math.min(CONFIG.fireMax, 2 + c)); break
+      case 'Arson': startFire(r, Math.min(CONFIG.fireMax, 2 + c), name); break
       // stage 2
       case 'Dig': case 'Minutes': case 'Canvass': expose(r, 1, a, t.id); break
       case 'Front Page': expose(r, 2, a, t.id); break

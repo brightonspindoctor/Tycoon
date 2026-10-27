@@ -67,13 +67,13 @@ export function GameScreen({ run, dispatch, acting }: Props) {
             )
           })()}
           <SettingsButton />
-          {run.modifier && <div className="modifier"><span className="cl-label">Modifier</span><b>{MODS[run.modifier].name}</b> · {units(MODS[run.modifier].text, st)}</div>}
         </div>
       </header>
 
       <div className="game__grid">
         <section className="col-threats" aria-label="Opposition">
           <span className="cl-label">Opposition{targeting ? (stopping ? ' · Choose a move to stop' : ' · Choose a target') : ''}</span>
+          {run.modifier && <div className="round-mod" role="note"><span className="cl-label">This round</span><b className="cl-display">{MODS[run.modifier].name}</b><span>{units(MODS[run.modifier].text, st)}</span></div>}
           {run.threats.map(t => (
             <ThreatPanel key={t.id} run={run} threat={t} acting={acting?.who === t.id}
               targeting={targeting && targets.some(x => x.id === t.id)}
@@ -83,7 +83,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
           ))}
           {run.fire > 0 && (
             <section className={`hazard ${lit('fire')}`} aria-label={`${fires(run.fire)} burning`}>
-              <div className="hazard__head"><img src={`${import.meta.env.BASE_URL}art/icons/fire.png`} alt="" /><span className="cl-label">{fires(run.fire)} burning</span><span className="cl-num hazard__level">max {CONFIG.fireMax}</span></div>
+              <div className="hazard__head"><img src={`${import.meta.env.BASE_URL}art/icons/fire.png`} alt="" /><span className="cl-label">{fires(run.fire)} burning{run.fireBy ? ` · started by ${run.fireBy}` : ''}</span><span className="cl-num hazard__level">max {CONFIG.fireMax}</span></div>
               <div className="warn warn--heat"><b>End of turn</b><span>{fireNext}</span></div>
               <span className="hazard__note">{live.length ? 'Pumps stopped.' : 'Every enemy is beaten. Put the fire out to end the round.'}</span>
             </section>

@@ -985,6 +985,16 @@ button.m-threat { cursor: pointer; }
 .trophy.is-earned b { color: var(--ink); }
 .trophy__count { color: var(--personal); }
 .term-toast--feat { border: 2px solid #d4ae55; }
+.term-toast--fire { top: 22%; bottom: auto; background: #6b1a0a; border: 2px solid #f2a073; max-width: min(460px, calc(100% - 32px)); }
+.term-toast--fire .cl-label { color: #ffd0a8; font-size: 14px; }
+.term-toast--fire b { font-size: 17px; line-height: 23px; }
+/* the round's modifier: a banner at the top of the opposition */
+.round-mod { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 2px solid var(--accent); border-left-width: 6px; border-radius: var(--radius-1860);
+  background: color-mix(in srgb, var(--accent) 10%, var(--paper-raised)); animation: rise .4s ease-out both; }
+.round-mod .cl-label { color: var(--accent); }
+.round-mod .cl-display { font-size: 20px; line-height: 24px; }
+.m .round-mod { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.m .round-mod .cl-label { flex-basis: 100%; }
 .term-toast--feat.is-raised { bottom: 112px; }
 @media (max-width: 760px) {
   .cabinet__shelves { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 14px 10px 0; }
