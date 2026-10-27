@@ -78,8 +78,8 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
         </div>
 
         <div className="settings__row">
-          <span className="cl-label">Enemy turn</span>
-          <div className="segmented" role="radiogroup" aria-label="Enemy turn replay">
+          <span className="cl-label">Liabilities' turn</span>
+          <div className="segmented" role="radiogroup" aria-label="Liabilities' turn replay">
             {(['normal', 'fast', 'off'] as Replay[]).map(v => (
               <button key={v} type="button" role="radio" aria-checked={replay === v} className={replay === v ? 'is-on' : ''}
                 onClick={() => { setReplay(v); saveReplay(v); play('click') }}>{v === 'normal' ? 'Play it out' : v === 'fast' ? 'Fast' : 'Off'}</button>

@@ -522,6 +522,26 @@ describe('Firebreak', () => {
   })
 })
 
+describe('the Railroad Agent at the floor', () => {
+  it('once oil sells for $1, Raise Rates gives her 2 Hold instead of more freight', () => {
+    let r = newRun(10, 'threeOil')
+    r.threats = [{ id: 900, kind: 'railroad', hold: 7, maxHold: 7, step: 0, cycle: 0, round3: false, beaten: false }]
+    r.freight = 2; r.capital = 50 // $3 oil less $2 freight: $1
+    expect(intentText(r, r.threats[0])).toMatch(/gains 2 Hold/)
+    r = act(r, { type: 'endTurn' })
+    expect(r.freight).toBe(2)
+    expect(r.threats[0].hold).toBe(7 + CONFIG.railroadHoldUp)
+  })
+  it('above the floor she raises freight as before', () => {
+    let r = newRun(10, 'threeOil')
+    r.threats = [{ id: 900, kind: 'railroad', hold: 7, maxHold: 7, step: 0, cycle: 0, round3: false, beaten: false }]
+    r.freight = 0; r.capital = 50
+    r = act(r, { type: 'endTurn' })
+    expect(r.freight).toBe(1)
+    expect(r.threats[0].hold).toBe(7)
+  })
+})
+
 describe('oil price', () => {
   it('starts at $3 and never drops below $1 a barrel, freight included', () => {
     const r = newRun(10, 'threeOil'); r.short = 0; r.freight = 0

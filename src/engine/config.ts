@@ -174,6 +174,7 @@ export const CONFIG = {
   destroyCost: 2, // rises by $1 each time (players find out)
   prospectPrice: 3,
   turnLimit: 25,
+  railroadHoldUp: 2, // the Railroad Agent's Raise Rates once oil already sells for $1: she gains this much Hold instead
   claimJumperFires: 1, // fires the Claim Jumper starts as he's beaten
   oilCarriesOver: true,
   // achievements: the bar each one has to clear

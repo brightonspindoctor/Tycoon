@@ -71,8 +71,8 @@ export function GameScreen({ run, dispatch, acting }: Props) {
       </header>
 
       <div className="game__grid">
-        <section className="col-threats" aria-label="Opposition">
-          <span className="cl-label">Opposition{targeting ? (stopping ? ' · Choose a move to stop' : ' · Choose a target') : ''}</span>
+        <section className="col-threats" aria-label="Liabilities">
+          <span className="cl-label">Liabilities{targeting ? (stopping ? ' · Choose a move to stop' : ' · Choose a target') : ''}</span>
           {run.threats.map(t => (
             <ThreatPanel key={t.id} run={run} threat={t} acting={acting?.who === t.id}
               targeting={targeting && targets.some(x => x.id === t.id)}
@@ -84,7 +84,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
             <section className={`hazard ${lit('fire')}`} aria-label={`${fires(run.fire)} burning`}>
               <div className="hazard__head"><img src={`${import.meta.env.BASE_URL}art/icons/fire.png`} alt="" /><span className="cl-label">{fires(run.fire)} burning{run.fireBy ? ` · started by ${run.fireBy}` : ''}</span><span className="cl-num hazard__level">max {CONFIG.fireMax}</span></div>
               <div className="warn warn--heat"><b>End of turn</b><span>{fireNext}</span></div>
-              <span className="hazard__note">{live.length ? 'Pumps stopped.' : 'Every enemy is beaten. Put the fire out to end the round.'}</span>
+              <span className="hazard__note">{live.length ? 'Pumps stopped.' : 'Every liability is beaten. Put the fire out to end the round.'}</span>
             </section>
           )}
         </section>
@@ -146,7 +146,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
           <TruthClock run={run} compact lit={acting?.kind === 'board'} />
           <section className={`fortune ${lit('gold')}`}>
             <div><span className="cl-label">Your fortune</span><b className={`cl-num ${st >= 2 && run.gold === 0 ? 'cl-minus' : ''}`}>{run.gold} gold</b></div>
-            <span className="res-note">{run.goldShield ? 'Personal Lawyer on retainer this turn.' : st >= 4 ? 'Green Politicians and the Truth take gold. Below 0, you are ruined.' : st >= 3 ? 'The Bribery Scandal takes gold. Below 0, you are ruined.' : st >= 2 ? 'Enemies can take gold now. Below 0, you are ruined.' : `Skim rate: ${money(skimRate(run), st)} → 1 gold`}</span>
+            <span className="res-note">{run.goldShield ? 'Personal Lawyer on retainer this turn.' : st >= 4 ? 'Green Politicians and the Truth take gold. Below 0, you are ruined.' : st >= 3 ? 'The Bribery Scandal takes gold. Below 0, you are ruined.' : st >= 2 ? 'Liabilities can take gold now. Below 0, you are ruined.' : `Skim rate: ${money(skimRate(run), st)} → 1 gold`}</span>
           </section>
           <section className="items">
             <span className="cl-label">Items</span>

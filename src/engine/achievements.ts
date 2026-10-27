@@ -20,7 +20,7 @@ export const ACHIEVEMENTS: Record<AchievementKey, Achievement> = {
   bulletproof: { name: 'Bulletproof', goal: `Have ${A.bulletproof} Cover or more in one turn.`, icon: 'insurance', group: 'In a run', check: r => r.phase === 'turn' && r.cover >= A.bulletproof },
   skeletonCrew: { name: 'Skeleton Crew', goal: 'Beat the Truth with only 1 Rig.', icon: 'rig', group: 'In a run', check: r => won(r) && wellCount(r) === 1 },
   hostileTakeover: { name: 'Hostile Takeover', goal: 'Beat a boss on your first turn.', icon: 'buyOut', group: 'In a run', check: r => !!r.feats?.quickBoss },
-  notAScratch: { name: 'Not a Scratch', goal: 'Win a fight in stage 3 or 4 without an enemy taking any Capital.', icon: 'personalLawyer', group: 'In a run', check: r => !!r.feats?.cleanFight },
+  notAScratch: { name: 'Not a Scratch', goal: 'Win a fight in stage 3 or 4 without a liability taking any Capital.', icon: 'personalLawyer', group: 'In a run', check: r => !!r.feats?.cleanFight },
   mercyRule: { name: 'Mercy Rule', goal: `Remove ${A.mercyRule} Hold or more with one card.`, icon: 'dynamite', group: 'In a run', check: r => (r.feats?.bestHit ?? 0) >= A.mercyRule },
 
   squeakyClean: { name: 'Squeaky Clean', goal: 'Finish stage 2 with 0 Board Exposure.', icon: 'cleanHouse', group: 'Clean hands', check: r => r.stage === 2 && r.phase === 'stageComplete' && r.exposure === 0 },

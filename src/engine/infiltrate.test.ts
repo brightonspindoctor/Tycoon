@@ -12,6 +12,8 @@ const setup = (kind: 'railroad' | 'strike' | 'inspector' = 'railroad', hold = 50
   return r
 }
 const hold = (r: Run) => r.threats[0].hold
+/** Ends a turn with freight cleared, so the Railroad Agent never reaches the $1 floor (where she'd gain Hold). */
+const end = (r: Run) => act({ ...r, freight: 0 }, { type: 'endTurn' })
 
 describe('Infiltrate', () => {
   it('is sold in the stage 1 shop and costs 2 AP', () => {
@@ -25,13 +27,13 @@ describe('Infiltrate', () => {
     r = act(r, { type: 'play', cardId: 8800, target: 900 })
     expect(hold(r)).toBe(47)
     expect(infiltrated(r, r.threats[0])).toEqual([2, 1])
-    r = act(r, { type: 'endTurn' }) // the turn it was played: nothing more yet
+    r = end(r) // the turn it was played: nothing more yet
     expect(hold(r)).toBe(47)
-    r = act(r, { type: 'endTurn' })
+    r = end(r)
     expect(hold(r)).toBe(45)
-    r = act(r, { type: 'endTurn' })
+    r = end(r)
     expect(hold(r)).toBe(44)
-    r = act(r, { type: 'endTurn' })
+    r = end(r)
     expect(hold(r)).toBe(44)
     expect(infiltrated(r, r.threats[0])).toEqual([])
   })

@@ -30,7 +30,7 @@ export function TruthClock({ run, compact, lit }: { run: Run; compact?: boolean;
       <div className="truth-clock__text">
         <span className="cl-label">The Truth clock</span>
         <b className="cl-num">{h >= CONFIG.clockMax ? 'Midnight' : `${h} o'clock`}</b>
-        <span className="res-note">{h >= CONFIG.clockMax ? 'The Truth is out.' : `${left} hour${left === 1 ? '' : 's'} to midnight.${compact ? '' : ' Every enemy\'s 2nd and 5th moves move it on.'}`}</span>
+        <span className="res-note">{h >= CONFIG.clockMax ? 'The Truth is out.' : `${left} hour${left === 1 ? '' : 's'} to midnight.${compact ? '' : ' Every liability\'s 2nd and 5th moves move it on.'}`}</span>
       </div>
     </section>
   )

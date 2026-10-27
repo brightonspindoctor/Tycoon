@@ -65,7 +65,8 @@ export function MobileGame({ run, dispatch, acting }: Props) {
     <div className="m-game">
       <header className="m-hud">
         <div className="m-hud__when">
-          <span className="cl-label">{st >= 4 && run.round >= bossRound(4) ? 'The Truth' : `Round ${run.round}/4`} · Turn {run.turn}{st === 2 && run.turn <= CONFIG.quickWinTurns ? ` · −${CONFIG.quickWinDrop} if won by ${CONFIG.quickWinTurns}` : ''}</span>
+          <span className="cl-label">{st >= 4 && run.round >= bossRound(4) ? 'The Truth' : `Round ${run.round}/4`} · Turn {run.turn}</span>
+          {st === 2 && run.turn <= CONFIG.quickWinTurns && <span className="cl-label m-hud__hint">Exposure −{CONFIG.quickWinDrop} if won by turn {CONFIG.quickWinTurns}</span>}
           <div className="m-hud__year"><b className="cl-display">{year(st, run.round)}</b><SettingsButton /></div>
           <div className="m-pips">{(st >= 4 && run.round >= bossRound(4) ? [1, 2, 3, 4, 5] : [1, 2, 3, 4]).map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 && st < 4 ? 'is-boss' : ''} ${i === 5 ? 'is-truth' : ''}`} />)}</div>
         </div>
@@ -85,9 +86,9 @@ export function MobileGame({ run, dispatch, acting }: Props) {
 
       <main className="m-main" onClick={e => { if (e.target === e.currentTarget) { setSelected(null); setPlotMenu(null) } }}>
 
-        <section className="m-threats" aria-label="Opposition">
-          {run.fire > 0 && !run.threats.some(t => !t.beaten) && <span className="cl-label m-prompt">Every enemy is beaten. Put the fire out to end the round.</span>}
-          {needsTarget && <span className="cl-label m-prompt">{stopping ? 'Tap the move to stop' : 'Tap an enemy to hit'}</span>}
+        <section className="m-threats" aria-label="Liabilities">
+          {run.fire > 0 && !run.threats.some(t => !t.beaten) && <span className="cl-label m-prompt">Every liability is beaten. Put the fire out to end the round.</span>}
+          {needsTarget && <span className="cl-label m-prompt">{stopping ? 'Tap the move to stop' : 'Tap a liability to hit'}</span>}
           {run.threats.map(t => {
             const d = THREATS[t.kind]
             const can = needsTarget && canTarget(t)
@@ -205,7 +206,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
             {selCheck?.ok && (scrapping
               ? <span className="cl-label m-detail__hint">Tap a card to destroy ↓</span>
               : needsTarget
-              ? <span className="cl-label m-detail__hint">{stopping ? 'Tap a move ↑' : 'Tap an enemy ↑'}</span>
+              ? <span className="cl-label m-detail__hint">{stopping ? 'Tap a move ↑' : 'Tap a liability ↑'}</span>
               : <button type="button" className="cl-btn cl-btn--primary" onClick={playSelected}>Play · {apCost(run, sel)} AP</button>)}
           </div>
         ) : (
@@ -257,7 +258,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
             <TruthClock run={run} />
             <section className="fortune">
               <div><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b></div>
-              <span className="res-note">{run.goldShield ? 'Personal Lawyer on retainer this turn.' : st >= 2 ? 'Enemies can take gold now. Below 0, you are ruined.' : `Skim rate: ${money(skimRate(run), st)} → 1 gold`}</span>
+              <span className="res-note">{run.goldShield ? 'Personal Lawyer on retainer this turn.' : st >= 2 ? 'Liabilities can take gold now. Below 0, you are ruined.' : `Skim rate: ${money(skimRate(run), st)} → 1 gold`}</span>
             </section>
             <section className="items">
               <span className="cl-label">Items</span>

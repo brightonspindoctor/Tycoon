@@ -218,6 +218,8 @@ export function price(r: Run): number {
 /** What you get per barrel after freight; never below the floor. */
 export const netPrice = (r: Run) => Math.max(CONFIG.oilFloor, price(r) - freight(r))
 export const freight = (r: Run) => r.freight
+/** Oil already sells for the floor price: more freight would change nothing. */
+export const atFloor = (r: Run) => price(r) - r.freight <= CONFIG.oilFloor
 
 export function debtPerTurn(r: Run): number {
   if (r.stage === 3) return 0 // no Bank Debt in stage 3: Heat is the clock (stage 4 has the World Bank)
@@ -949,12 +951,12 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if (BUILDS.includes(c.key) && !canBuild(r)) return { ok: false, why: 'No free plot' }
   if ((c.key === 'bucket' || c.key === 'fireBrigade' ) && !r.fire) return { ok: false, why: 'No fire' }
   if (d.family === 'Skim' && r.capital - Math.max(1, skimRate(r) - (d.skimOff ?? 0)) < 1) return { ok: false, why: 'Not enough Capital' }
-  if (d.stop && !liveThreats(r).length) return { ok: false, why: 'No enemies left' }
+  if (d.stop && !liveThreats(r).length) return { ok: false, why: 'No liabilities left' }
   if (d.stop && !targetsFor(r, c).length) return { ok: false, why: 'Every move is already stopped' }
   if (c.key === 'pettyCash' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
-  if (isAttack(c.key) && !liveThreats(r).length) return { ok: false, why: 'No enemies left' }
+  if (isAttack(c.key) && !liveThreats(r).length) return { ok: false, why: 'No liabilities left' }
   if (d.spendCover && attackPower(r, d) <= 0) return { ok: false, why: 'No Cover to spend' }
-  if (isAttack(c.key) && !liveThreats(r).some(t => damageFor(d.family, attackPower(r, d), t.kind, t.phase) > 0)) return { ok: false, why: 'No effect on these enemies' }
+  if (isAttack(c.key) && !liveThreats(r).some(t => damageFor(d.family, attackPower(r, d), t.kind, t.phase) > 0)) return { ok: false, why: 'No effect on these liabilities' }
   return { ok: true }
 }
 
@@ -1247,7 +1249,7 @@ function moveText(r: Run, t: Threat): string {
     case 'Torch': return 'Starts a fire.'
     case 'Audit': return 'Your debt doubles next turn.'
     case 'Fine': return 'Lose $3.'
-    case 'Raise Rates': return `Raises her freight charge: you get $1 less for every barrel you sell.`
+    case 'Raise Rates': return atFloor(r) ? `Oil already sells for $${CONFIG.oilFloor}. She gains ${CONFIG.railroadHoldUp} Hold instead.` : `Raises her freight charge: you get $1 less for every barrel you sell.`
     case 'Refuse': return "Won't carry your oil: you can't sell next turn."
     case 'Jump': return r.marked !== null && r.plots[r.marked] ? `Steals Well No. ${r.marked + 1}.` : 'Looks for a Well to steal.'
     case 'Scout': return hw >= 0 ? `Marks Well No. ${hw + 1}.` : 'Watches your claim.'
@@ -1441,7 +1443,7 @@ function endTurn(r: Run) {
       case 'Torch': startFire(r, 1, name); break
       case 'Audit': r.pending.audit = true; break
       case 'Fine': dmg += 3; break
-      case 'Raise Rates': r.freight += 1; break
+      case 'Raise Rates': if (atFloor(r)) { t.hold += CONFIG.railroadHoldUp; t.maxHold += CONFIG.railroadHoldUp; say(r, `Oil can't go lower. ${name} gains ${CONFIG.railroadHoldUp} Hold.`) } else r.freight += 1; break
       case 'Refuse': r.pending.refuse = true; break
       case 'Jump':
         if (r.marked !== null && r.plots[r.marked]) { say(r, `The Claim Jumper stole Well No. ${r.marked + 1}.`); loseWell(r, r.marked, 'stolen') }

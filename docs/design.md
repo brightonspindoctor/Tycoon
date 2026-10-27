@@ -83,6 +83,10 @@ Only a few enemies resist a kind of card (the Railroad Agent and the Baron); the
 | Speculator | Cash | 7 | Legal | — | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |
 | **Rival Baron** (boss) | Boss | 20 | Dirty | Legal | Sabotage (a random Well) → Lease → Arson | Moves first: Arson (1). Arson grows each cycle |
 
+**Players see enemies called liabilities** (the column is headed Liabilities; cards say "Block one liability's move"; Settings has "Liabilities' turn"). This doc and the code still say enemy or threat.
+
+The Railroad Agent's Raise Rates: once oil already sells for $1 (price less freight), more freight would change nothing, so she gains 2 Hold instead (`CONFIG.railroadHoldUp`).
+
 Enemy panels carry no "Takes your cash" / "Breaks your engine" label any more; only "Boss" and "Moves first" show above a name.
 
 Round modifiers (Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown and the later stages' ones) were removed in October 2026: they didn't add much.

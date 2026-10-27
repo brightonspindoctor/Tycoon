@@ -91,7 +91,7 @@ export const CARDS: Record<CardKey, CardDef> = {
   lawyerUp: { name: 'Lawyer Up', ap: 1, cost: 2, uses: null, family: 'Legal', power: 3, icon: 'deed', price: 4, rarity: 'Common',
     text: 'Pay $2. Remove 3 Hold.', flavour: 'The paperwork always wins (eventually).' },
   shoreUp: { name: 'Shore Up', ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, stop: true, oncePerRound: true, icon: 'timber', price: 3, rarity: 'Common',
-    text: 'Block one enemy move.', flavour: 'More timber. More rope.' },
+    text: 'Block one liability\'s move.', flavour: 'More timber. More rope.' },
   bucket: { name: 'Bucket of Water', ap: 1, cost: 0, uses: null, family: 'Water', power: 1, icon: 'bucket',
     text: 'Put out one fire.', flavour: "It won't stop the well, but it might buy a moment." },
   fireBrigade: { name: 'Fire Brigade', ap: 1, cost: 0, uses: null, family: 'Water', power: 3, icon: 'hose', price: 4, rarity: 'Common',
@@ -160,7 +160,7 @@ export const CARDS: Record<CardKey, CardDef> = {
   payDividend: { name: 'Pay a Dividend', era: 2, ap: 1, cost: 3, uses: null, family: 'Board', power: 0, exposure: -1, icon: 'payDividend', price: 4, rarity: 'Common',
     text: 'Pay $3. −1 Board Exposure.', flavour: 'Gentlemen, a token of our esteem.' },
   personalLawyer: { name: 'Personal Lawyer', era: 2, ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, icon: 'personalLawyer', price: 5, rarity: 'Common',
-    text: 'Blocks the next gold an enemy takes this turn.', flavour: 'Retained for the family.' },
+    text: 'Blocks the next gold a liability takes this turn.', flavour: 'Retained for the family.' },
   ceaseDesist: { name: 'Cease and Desist', era: 2, ap: 1, cost: 0, uses: 1, family: 'Junk', power: 0, icon: 'ceaseDesist', forced: true, junk: true,
     text: 'Must play. Does nothing.', flavour: 'Pursuant to patent No. 1,042,117.' },
   proxyBallot: { name: 'Proxy Ballot', era: 2, ap: 0, cost: 0, uses: 1, family: 'Junk', power: 0, exposure: 1, icon: 'proxyBallot', forced: true, junk: true,
@@ -170,7 +170,7 @@ export const CARDS: Record<CardKey, CardDef> = {
   derrick: { name: 'Steel Derrick', era: 2, ap: 1, cost: 0, uses: 1, family: 'Production', power: 1, icon: 'steelDerrick', price: CONFIG.derrickPrice,
     text: 'Build a Well: 1 oil a turn, never dry.', flavour: 'Riveted, not nailed.' },
   securityDetail: { name: 'Security Detail', era: 2, ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, stop: true, oncePerRound: true, cover: 2, icon: 'securityDetail', price: 6, rarity: 'Common',
-    text: 'Block one enemy move. +2 Cover.', flavour: 'Men in good suits, standing very still.' },
+    text: 'Block one liability\'s move. +2 Cover.', flavour: 'Men in good suits, standing very still.' },
   insurance: { name: 'Insurance Policy', era: 2, ap: 1, cost: 1, uses: null, family: 'Defence', power: 0, cover: 5, icon: 'insurance', price: 5, rarity: 'Common',
     text: 'Pay $1. +5 Cover this turn.', flavour: 'Acts of God excluded. Acts of you, also excluded.' },
   expenseAccount: { name: 'Expense Account', era: 2, ap: 0, cost: 0, uses: null, family: 'Skim', power: 1, exposure: 1, icon: 'expenseAccount', price: 5, rarity: 'Common',
@@ -247,7 +247,7 @@ export function fadedDef(d: CardDef): CardDef {
   const attack = ['Legal', 'Dirty'].includes(d.family) && d.power > 0
   const pay = `${d.gold ? `Pay ${d.gold} gold. ` : ''}${d.cost ? `Pay $${d.cost}. ` : ''}`
   if (attack) return { ...d, power: 1, chance: undefined, badBlood: false, draw: undefined, text: `${pay}Remove 1 Hold.` }
-  if (d.cover) return { ...d, cover: 1, text: `${pay}${d.stop ? 'Block one enemy move. ' : ''}+1 Cover this turn.` }
+  if (d.cover) return { ...d, cover: 1, text: `${pay}${d.stop ? 'Block one liability\'s move. ' : ''}+1 Cover this turn.` }
   if (d.family === 'Tempo' && d.icon === 'shares') return { ...d, power: 1, text: '+$1.' } // Dividends
   return d
 }
@@ -259,7 +259,7 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   hiredHand: { power: 3, text: 'Remove 3 Hold.' },
   infiltrate: { power: 4, poison: [3, 2], text: 'Remove 4 Hold. 3 more next turn, then 2.' },
   lawyerUp: { power: 5, text: 'Pay $2. Remove 5 Hold.' },
-  shoreUp: { cover: 2, text: 'Block one enemy move. +2 Cover.' },
+  shoreUp: { cover: 2, text: 'Block one liability\'s move. +2 Cover.' },
   bucket: { power: 2, text: 'Put out two fires.' },
   fireBrigade: { ap: 0, text: 'Put out every fire.' },
   improveGear: { cost: 0, cover: 5, text: '+5 Cover this turn.' },
@@ -284,9 +284,9 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   poachEngineer: { power: 7, text: 'Remove 7 Hold. Draw 1 card.' },
   rdSprint: { power: 2, text: '+2 oil from every Well and Field now.' },
   payDividend: { exposure: -2, text: 'Pay $3. −2 Board Exposure.' },
-  personalLawyer: { ap: 0, text: 'Blocks the next gold an enemy takes this turn.' },
+  personalLawyer: { ap: 0, text: 'Blocks the next gold a liability takes this turn.' },
   derrick: { ap: 0, text: 'Build a Well: 1 oil a turn, never dry.' },
-  securityDetail: { cover: 4, text: 'Block one enemy move. +4 Cover.' },
+  securityDetail: { cover: 4, text: 'Block one liability\'s move. +4 Cover.' },
   insurance: { cost: 0, cover: 7, text: '+7 Cover this turn.' },
   expenseAccount: { skimOff: CONFIG.expenseAccountOff, text: `Skim 1 gold at the rate −$${CONFIG.expenseAccountOff}. +1 Board Exposure.` },
   // stage 3
@@ -448,7 +448,7 @@ export const ITEMS: Record<ItemKey, { name: string; text: string; price: number;
   steamPump: { name: 'Steam Pump', text: '+1 AP every other turn', price: 10, icon: 'steamPump', stages: [1] },
   accountant: { name: 'Accountant', text: 'Cover you don\'t use carries over to the next turn', price: 4, icon: 'deed', stages: [1] },
   refinery: { name: 'Refinery', text: 'Oil sells +$1', price: 22, icon: 'refinery', stages: [3] },
-  offshore: { name: 'Offshore Account', text: 'Enemies take 1 less gold from your fortune', price: 5, icon: 'offshore', stages: [2] },
+  offshore: { name: 'Offshore Account', text: 'Liabilities take 1 less gold from your fortune', price: 5, icon: 'offshore', stages: [2] },
   pressOffice: { name: 'Press Office', text: 'Board Exposure −1 as each round begins', price: 9, icon: 'pressOffice', stages: [2] },
   fillingStations: { name: 'Filling Stations', text: '+$1 every turn', price: 8, icon: 'fillingStations', stages: [2] },
   auditingFirm: { name: 'Auditing Firm', text: `+${CONFIG.auditingFirmCover} Cover every turn`, price: 6, icon: 'auditingFirm', stages: [2] },
@@ -467,7 +467,7 @@ export const ITEMS: Record<ItemKey, { name: string; text: string; price: number;
   strategicReserve: { name: 'Strategic Reserve', text: `+${CONFIG.strategicReserve} oil storage (up to ${CONFIG.maxStorage4})`, price: 30, repeatable: true, icon: 'strategicReserve', stages: [4] },
   prAgency: { name: 'PR Agency', text: `+${CONFIG.prAgencyCover} Cover every turn`, price: 30, icon: 'prAgency', stages: [4] },
   fossilSubsidy: { name: 'Fossil Fuel Subsidy', text: `+$${CONFIG.subsidyCash} every turn`, price: 30, icon: 'fossilSubsidy', stages: [4] },
-  offshoreTrust: { name: 'Offshore Trust', text: 'Enemies take 1 less gold from your fortune', price: 25, icon: 'offshoreTrust', stages: [4] },
+  offshoreTrust: { name: 'Offshore Trust', text: 'Liabilities take 1 less gold from your fortune', price: 25, icon: 'offshoreTrust', stages: [4] },
 }
 
 // Before the boss: one small, single-use item, bought with gold. Beat the boss: a

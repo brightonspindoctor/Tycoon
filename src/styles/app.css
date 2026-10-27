@@ -508,6 +508,10 @@ button.m-threat { cursor: pointer; }
 .m-hud .settings-btn { width: 30px; height: 30px; min-height: 0; }
 .m-hud .settings-btn svg { width: 16px; height: 16px; }
 .m-hud__when .cl-label, .m-hud__debt { white-space: nowrap; }
+/* the money box never gets pushed off screen: the left side gives way instead */
+.m-hud__when { flex: 1 1 auto; min-width: 0; }
+.m-hud__money { flex: none; }
+.m-hud__when .m-hud__hint { white-space: normal; font-size: 9.5px; line-height: 12px; color: var(--accent); }
 
 /* ---------- first-visit install banner ---------- */
 .install { position: fixed; z-index: 25; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(560px, calc(100% - 24px));
