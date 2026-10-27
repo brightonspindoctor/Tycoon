@@ -433,7 +433,9 @@ button.m-threat { cursor: pointer; }
 .m .industry { padding: 12px 14px; }
 .m .industry__name { font-size: 22px; }
 .m .intro__menu { margin-top: 8px; padding-bottom: 0; }
-.m .intro__menu .cl-btn { flex: 1; }
+/* phones: the four menu buttons in a 2 × 2 grid, so Scoreboard isn't cut off */
+.m .intro__menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.m .intro__menu .cl-btn { width: 100%; min-width: 0; }
 .m .bonus__grid { grid-auto-flow: row; grid-template-columns: 1fr; gap: 10px; margin-top: 0; }
 .m .bonus__card { min-height: 0; padding: 14px 16px; gap: 4px; }
 .m .bonus__card:hover { transform: none; }
