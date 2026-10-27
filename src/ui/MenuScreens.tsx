@@ -124,15 +124,15 @@ export function Scoreboard({ onBack, onCabinet }: { onBack: () => void; onCabine
             : global === 'error' ? <p className="res-note">Couldn't reach the scoreboard. Check your connection.</p>
             : !global.length ? <p className="res-note">Nobody on it yet. Win a game and you're first.</p>
             : <table className="cl-table">
-                <thead><tr><th>#</th><th>Name</th><th>Date</th><th>Badge</th><th className="num">Gold</th></tr></thead>
-                <tbody>{global.map((g, i) => <tr key={i}><td>{i + 1}</td><td>{g.name}</td><td>{date(g.created_at)}</td><td>{g.tactic ?? '—'}{g.hard && <span className="history__badge">Self-Made</span>}</td><td className="num">{g.gold}</td></tr>)}</tbody>
+                <thead><tr><th>#</th><th>Name</th><th className="col-wide">Date</th><th>Badge</th><th className="num">Gold</th></tr></thead>
+                <tbody>{global.map((g, i) => <tr key={i}><td>{i + 1}</td><td>{g.name}</td><td className="col-wide">{date(g.created_at)}</td><td>{g.tactic ?? '—'}{g.hard && <span className="history__badge">Self-Made</span>}</td><td className="num">{g.gold}</td></tr>)}</tbody>
               </table>
         ) : (
           <table className="cl-table">
-            <thead><tr><th>#</th><th>Date</th><th>Industry</th><th>Badge</th><th className="num">Gold</th></tr></thead>
+            <thead><tr><th>#</th><th>Date</th><th className="col-wide">Industry</th><th>Badge</th><th className="num">Gold</th></tr></thead>
             <tbody>
               {mine.map((r, i) => (
-                <tr key={r.id}><td>{i + 1}</td><td>{date(r.date)}</td><td>{r.industry}</td><td>{r.tactic ?? '—'}{r.hard && <span className="history__badge">Self-Made</span>}</td><td className="num">{r.gold}</td></tr>
+                <tr key={r.id}><td>{i + 1}</td><td>{date(r.date)}</td><td className="col-wide">{r.industry}</td><td>{r.tactic ?? '—'}{r.hard && <span className="history__badge">Self-Made</span>}</td><td className="num">{r.gold}</td></tr>
               ))}
             </tbody>
           </table>
@@ -193,10 +193,10 @@ export function History({ onBack }: { onBack: () => void }) {
       <div className="history__table">
         {runs.length === 0 ? <p className="res-note">No runs yet. The ledger is waiting.</p> : (
           <table>
-            <thead><tr><th>#</th><th>Date</th><th>Industry</th><th>How far</th><th>Ended</th><th className="num">Score</th></tr></thead>
+            <thead><tr><th className="col-wide">#</th><th>Date</th><th className="col-wide">Industry</th><th>How far</th><th>Ended</th><th className="num">Score</th></tr></thead>
             <tbody>{runs.map((r, i) => (
               <tr key={r.id}>
-                <td>{runs.length - i}</td><td>{new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td><td>{r.industry}</td>
+                <td className="col-wide">{runs.length - i}</td><td>{new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td><td className="col-wide">{r.industry}</td>
                 <td><span className="mini-bar">{Array.from({ length: 16 }, (_, k) => <i key={k} className={k + 1 < r.rounds || (k + 1 === r.rounds && !ended(r)) ? 'd' : k + 1 === r.rounds ? 'x' : ''} />)}</span> {r.completed ? 'Complete' : `Stage ${Math.ceil(r.rounds / 4)} · Round ${((r.rounds - 1) % 4) + 1}`}</td>
                 <td className={r.outcome === 'Quit' ? 'res-note' : ended(r) ? 'cl-minus' : ''}>{r.outcome}{r.tactic && <span className="history__badge">{r.tactic}</span>}{r.hard && <span className="history__badge">{r.completed ? 'Self-Made' : 'Hard mode'}</span>}</td>
                 <td className="num">{r.gold !== null ? `${r.gold} gold` : <span className="res-note">— ({r.stageGold} gold)</span>}</td>

@@ -468,7 +468,10 @@ button.m-threat { cursor: pointer; }
 /* ---- history ---- */
 .m .history__tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .m .history__table { overflow-x: auto; padding: 4px 6px; }
-.m .history table { font-size: 12px; min-width: 520px; }
+.m .history table { font-size: 12px; min-width: 0; }
+/* phones: drop the columns that don't fit (Industry is always Oil for now), so the score stays on screen */
+.m .col-wide { display: none; }
+.m .history .mini-bar i { width: 4px; }
 .m .history td, .m .history th { padding: 8px 6px; }
 
 @keyframes deal-up { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
