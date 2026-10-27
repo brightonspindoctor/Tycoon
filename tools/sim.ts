@@ -2,7 +2,7 @@
 // Run with: npm run sim
 import { newRun, type Run } from '../src/engine/engine'
 import type { BonusKey } from '../src/engine/data'
-import { botRun } from './bot'
+import { botHooks, botRun } from './bot'
 
 const N = Number(process.argv[2] ?? 2000)
 const bonuses: BonusKey[] = ['extraProspect', 'threeOil', 'pettyCash', 'gearGraft', 'trustFund', 'oldFaithful', 'slushFund', 'none']
@@ -19,12 +19,16 @@ for (const b of bonuses) {
   let s1wins = 0, s2wins = 0, s3wins = 0, s4wins = 0
   const k1: Record<string, number> = {}
   for (let i = 0; i < N; i++) {
+    // Heat has to be read the moment stage 3 is won: going Big Oil straight after resets it to 0
+    let heatAtWin: number | null = null
+    botHooks.onAct = x => { if (x.stage === 3 && x.phase === 'stageComplete') heatAtWin = x.heat }
     const r = botRun(newRun(1000 + i, b))
+    botHooks.onAct = undefined
     const done = roundsCleared(r)
     for (let k = 1; k <= done; k++) reach[k]++
     if (done >= 4) s1wins++
     if (done >= 8) s2wins++
-    if (done >= 12) { s3wins++; heatEnd += r.stage === 3 ? r.heat : 0 }
+    if (done >= 12) { s3wins++; heatEnd += heatAtWin ?? 0 }
     if (r.stage === 4 && r.round === 5) { metTruth++; clockAtTruth += r.threats.find(t => t.kind === 'truth')?.entryHour ?? 0 }
     if (r.stage === 4 && r.phase === 'stageComplete') { s4wins++; goldEnd += r.gold }
     if (r.phase === 'lost') {
