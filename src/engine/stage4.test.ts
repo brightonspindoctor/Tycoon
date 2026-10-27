@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { act, canPlay, damageFor, debtPerTurn, intentText, price, production, type Card, type Run, type Threat } from './engine'
+import { act, apCost, canPlay, damageFor, debtPerTurn, intentText, price, production, type Card, type Run, type Threat } from './engine'
 import { adminStart, ADMIN_DEFAULTS } from './admin'
 import { CONFIG } from './config'
 import { CARDS, INCORPORATE_OFFER_4, STAGE4_POOL, type CardKey, type ThreatKind } from './data'
@@ -284,6 +284,22 @@ describe('stage 4 cards', () => {
     r = playIt(r, 'securityDetail')
     expect(r.cover).toBe(2 * CARDS.securityDetail.cover!)
     expect(r.amplify).toBe(false)
+  })
+
+  it('the Fossil Fuel Subsidy makes your starting cards, and copies of them, cost 0 AP', () => {
+    const r = inStage4(['hiredHand', 'lawyerUp', 'propaganda'], 'fracking')
+    const k = (key: CardKey) => r.hand.find(c => c.key === key)!
+    expect(apCost(r, k('hiredHand'))).toBe(1)
+    r.items.push('fossilSubsidy')
+    expect(apCost(r, k('hiredHand'))).toBe(0)
+    expect(apCost(r, { ...k('lawyerUp'), up: true })).toBe(0) // upgraded too
+    expect(apCost(r, k('propaganda'))).toBe(1) // not a starting card
+  })
+
+  it('the clock cards and On the Payroll run out; Climate Breakdown costs 2 AP', () => {
+    expect([CARDS.carbonOffsets.uses, CARDS.carbonCapture.uses, CARDS.onThePayroll.uses]).toEqual([2, 3, 3])
+    expect(CARDS.onThePayroll.price).toBe(20)
+    expect(CARDS.climateBreakdown.ap).toBe(2)
   })
 
   it('Influencers is never offered again once yours, and can\'t be duplicated or cleared out', () => {

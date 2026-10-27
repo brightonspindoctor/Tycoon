@@ -203,16 +203,26 @@ describe('stage 3 cards', () => {
     expect(after.threats[0].hold).toBe(20 - 8 + CONFIG.bribeFeedsScandal)
   })
 
-  it('each bribe in the same fight grows the Scandal by 2 more: 4, then 6, then 8', () => {
+  it('each bribe grows the Scandal by the same 4, and costs 2 AP', () => {
     let r = inStage3(['bribeOfficial', 'bribeOfficial', 'bribeOfficial'], 'briberyScandal')
     r.threats[0].hold = 60; r.threats[0].maxHold = 60; r.ap = 6
+    expect(CARDS.bribeOfficial.ap).toBe(2)
     const grew: number[] = []
     for (let i = 0; i < 3; i++) {
       const before = r.threats[0].hold
       r = act(r, { type: 'play', cardId: r.hand.find(c => c.key === 'bribeOfficial')!.id, target: 900 })
       grew.push(r.threats[0].hold - before + 8)
     }
-    expect(grew).toEqual([4, 6, 8])
+    expect(grew).toEqual([4, 4, 4])
+  })
+
+  it('the Heat cards run out: Fund a Think Tank twice, Lobby Congress three times', () => {
+    let r = inStage3(['thinkTank'])
+    r.heat = 60; r.capital = 200
+    const id = r.hand[0].id
+    for (let i = 0; i < 2; i++) { r.hand = [r.deck.find(c => c.id === id)!]; r.ap = 2; r = act(r, { type: 'play', cardId: id }) }
+    expect(r.deck.some(c => c.id === id)).toBe(false) // gone after its second use
+    expect(CARDS.lobbyCongress.uses).toBe(3)
   })
 
   it('every move the Spill makes costs an AP next turn', () => {

@@ -187,7 +187,7 @@ Winning the Proxy Fight pays 3 gold, then a page-turn to 1970 stamped MULTINATIO
 ### Heat (0 to 100)
 - **Every AP you spend adds 2 Heat**: cards, selling oil (2 AP, so 4 Heat), selling a Rig. 0 AP cards add none.
 - Climate Science and the Geneva Climate Summit add Heat besides that, and Earth Day. **Cover blocks Heat from enemies**, like cash (not the Heat from your own AP).
-- **Lobbying takes it down**: Lobby Congress (−6), Fund a Think Tank (−10), the Trading Floor's lobbying firm (−10). A card's own Heat and its AP Heat land together.
+- **Lobbying takes it down**: Lobby Congress (−6, three uses), Fund a Think Tank (−10, two uses), the Trading Floor's lobbying firm (−10). Everything that lowers Heat or winds back the Truth has limited uses. A card's own Heat and its AP Heat land together.
 - **At 100: broken up.** A blow that wins the round or the stage still counts if it tips Heat over (Heat holds at 99).
 - **Residue** at the end of stage 3: 70+ leaves **On File** (The Truth starts 1 step further on in stage 4); 30 or less leaves **Clean Image** (a free Think Tank: +3 Cover every turn, stacking with a bought one). Neither does anything until stage 4 is built.
 
@@ -206,9 +206,9 @@ Four damage types: Legal, Dirty, **Bury** (hiding evidence) and **Lobby** (Washi
 | Personal Guarantee | 1 AP | Pay 1 gold: +$6M | +$8M |
 | Dip into the Trust | 0 AP, one use | Pay 3 gold: +$20M | — |
 | Bury Evidence | 1 AP | Bury, remove 6 Hold | 9 (++: 12) |
-| Lobby Congress | 1 AP, $6M | Lobby, remove 9 Hold, −6 Heat | −9 Heat (++: −12) |
-| Fund a Think Tank | 1 AP, $5M | −10 Heat | $3M, −14 Heat |
-| Bribe an Official | 1 AP, $3M | Dirty, remove 8 Hold. A Bribery Scandal on the board gains 3 Hold | 11 |
+| Lobby Congress | 1 AP, $6M | Lobby, remove 9 Hold, −6 Heat. Three uses | −9 Heat (++: −12) |
+| Fund a Think Tank | 1 AP, $5M | −10 Heat. Two uses | $3M, −14 Heat |
+| Bribe an Official | 2 AP, $3M | Dirty, remove 8 Hold. A Bribery Scandal on the board gains 4 Hold, every time | 11 |
 | Retain Counsel | 1 AP | Legal: "Use your Cover for Hold damage." All your Cover goes (no Cover, no play) | +3, then +6 |
 | **Buy Out** | 1 AP, $8M | Legal, remove 14 Hold | 18 (++: 22) |
 | **Advertorial** | 1 AP, $4M | +6 Cover (blocks enemy Heat too) | +9 (++: +12) |
@@ -224,7 +224,7 @@ Every bribe (Bribe the Sheriff, Grease a Palm, Bribe an Official) feeds a Briber
 |---|---|---|---|---|---|---|---|
 | Rival Companies | Cash | 30 | Legal | Dirty | — | Price War (oil −$1M) → Undercut (−$6M) → Poach Contracts (−$9M). Beaten: prices recover | $3M |
 | Diversified Assets | Cash | 27 | Legal | — | — | Running Costs (−$6M) → Bad Quarter (−$6M) → Write-down (−$12M) | $3M |
-| The Bribery Scandal | Cash | 28 | Legal | Lobby | — | Leak (−1 gold) → Hearing (−$8M) → Exposé (−$12M) (+ Indictment: −2 gold in R3). Each bribe you pay this fight grows it: 4 Hold, then 6, then 8… | $2M |
+| The Bribery Scandal | Cash | 28 | Legal | Lobby | — | Leak (−1 gold) → Hearing (−$8M) → Exposé (−$12M) (+ Indictment: −2 gold in R3). Each bribe you pay grows it by 4 Hold | $2M |
 | The Spill | Engine | 29 | Bury | Legal | — | Slick (lose 2 stored oil) → Shut Down (a Rig pumps nothing next turn) → Clean-up Bill (−$8M). **Every move also costs 1 AP next turn** (selling oil takes 2 AP, so while it lives you mostly can't sell) | $2M |
 | Climate Science | Engine | 31 | Bury | Dirty | — | Measure (+5 Heat) → Publish (+8 Heat) → Peer Review (regains 3 Hold) (+ Consensus: +10 Heat in R3) | $1M |
 | **The Geneva Climate Summit** (boss, 1979) | Boss | 47 | — | Dirty | — | Expert Testimony (+8 Heat, +4 each cycle) → Draft Declaration (must-play junk in your next hand) → Resolution (−$9M, +$3M each cycle). Moves first: Opening Session (+6 Heat) | $3M |
@@ -304,7 +304,7 @@ The run keeps a few extra counts for these (`Run.feats`): oil pumped, the most H
 ### The Truth clock (replaces Heat)
 - Starts at **1 o'clock** (2 with On File). **Midnight loses the run**, at any point, boss fight included.
 - **Every enemy's 2nd and 5th move moves it forward 1 hour.** Nothing else ticks it on its own.
-- **Winding it back:** Carbon Offsets (−1 hour, a 1 in 4 gamble), and Carbon Capture to stop the next tick.
+- **Winding it back:** Carbon Offsets (−1 hour, a 1 in 4 gamble; two uses), and Carbon Capture to stop the next tick (three uses).
 - Heat is worth nothing in stage 4: old cards keep only their other effects (Lobby Congress still removes Hold; Advertorial still gives Cover; Fund a Think Tank does nothing). The Think Tank item still gives Cover.
 
 ### Transition (multinational → Big Oil)
@@ -320,13 +320,13 @@ The run keeps a few extra counts for these (`Run.feats`): oil pumped, the most H
 |---|---|---|---|---|
 | Recycling | 1 | Shuffle your discard pile into your draw pile. Draw 2. | 0 AP | $25B |
 | Propaganda | 1 | Lobby: remove 10 Hold. Draw 1. | 13 Hold | $28B |
-| On the Payroll | 1 · $4B | Legal: remove 10 Hold. +1 AP. | 13 Hold | $30B |
-| Climate Breakdown | 1 | Dirty: remove 12 Hold. Oil sells +$2B this round. | 15 Hold | $30B |
+| On the Payroll | 1 · $4B | Legal: remove 10 Hold. +1 AP. Three uses. | 13 Hold | $20B |
+| Climate Breakdown | 2 | Dirty: remove 12 Hold. Oil sells +$2B this round. | 15 Hold | $30B |
 | Astroturfing | 1 | Dirty: remove 7 Hold. +4 Cover. | 9 Hold, +6 Cover | $25B |
 | Sustainability Report | 1 | Bury: remove 9 Hold. Draw 1. | 12 Hold | $25B |
-| Carbon Capture | 1 · $5B | The next move that would move the clock on doesn't. | Costs $2B | $30B |
+| Carbon Capture | 1 · $5B | The next move that would move the clock on doesn't. Three uses. | Costs $2B | $30B |
 | Bridge Fuel | 0 | +2 AP. Once a round. | +3 AP | $30B |
-| Carbon Offsets | 1 · $4B | The clock goes back 1 hour. 1 in 4: the forest burns down, and it goes on 1 instead. | Back 2 hours | $30B (Uncommon) |
+| Carbon Offsets | 1 · $4B | The clock goes back 1 hour. 1 in 4: the forest burns down, and it goes on 1 instead. Two uses. | Back 2 hours | $30B (Uncommon) |
 | Influencers | 0 · $3B | The next card's Hold damage or Cover is doubled. Only one in the game; can't be duplicated or destroyed by the clear-out. | — | $35B (Rare) |
 | Green Project (junk) | 1 | Does nothing. Not forced: it sits in your hand until you pay to play it. | — | — |
 
@@ -336,7 +336,7 @@ The run keeps a few extra counts for these (`Run.feats`): oil pumped, the most H
 | Lobbyist on Retainer | +1 AP every turn | $40B |
 | Strategic Reserve | +4 oil storage (up to 16) | $30B |
 | PR Agency | +4 Cover every turn | $30B |
-| Fossil Fuel Subsidy | +$3B every turn | $30B |
+| Fossil Fuel Subsidy | Your starting cards (and copies and upgrades of them) cost 0 AP | $30B |
 | Offshore Trust | Enemies take 1 less gold from your fortune | $25B |
 
 ### Enemies (each cycles five moves; ⏰ = the clock moves forward 1 hour)

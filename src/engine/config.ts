@@ -96,7 +96,7 @@ export const CONFIG = {
   supertanker: 4, // storage a Supertanker adds
   handMax: 7, // Rolodexes stop here
   bribeFeedsScandal: 4, // the first bribe you pay in a fight: a Bribery Scandal on the board gains this much Hold...
-  bribeFeedsStep: 2, // ...and this much more for each bribe after it in the same fight (4, 6, 8…)
+  bribeFeedsStep: 0, // ...and this much more for each bribe after it in the same fight (0: a flat 4 each time)
   spillAP: 1, // every move the Spill makes: −1 AP next turn
   lobbyFirmCost: 25, // the Trading Floor's Lobbying Firm: $ for −lobbyFirmDrop Heat, once per visit
   lobbyFirmDrop: 10,
@@ -169,7 +169,6 @@ export const CONFIG = {
   truthTickEvery: 5, // the Truth moves the clock on with every 5th move it makes
   lobbyistAP: 1,
   prAgencyCover: 4,
-  subsidyCash: 3,
 
   destroyCost: 2, // rises by $1 each time (players find out)
   prospectPrice: 3,

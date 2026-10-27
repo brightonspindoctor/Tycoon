@@ -226,7 +226,9 @@ export function debtPerTurn(r: Run): number {
   return r.debt
 }
 
-export const apCost = (_r: Run, c: Card) => (c.free ? 0 : cardDef(c).ap ?? 0)
+/** The Fossil Fuel Subsidy: the cards you started the game with (and copies of them) cost 0 AP. */
+const STARTER_KEYS = new Set<CardKey>(STARTER)
+export const apCost = (r: Run, c: Card) => (c.free || (r.items.includes('fossilSubsidy') && STARTER_KEYS.has(c.key)) ? 0 : cardDef(c).ap ?? 0)
 export const freePlot = (r: Run) => r.plots.findIndex(p => p === null)
 export const highestWell = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (exposed(r.plots[i])) return i; return -1 }
 /** Where a Rumble lands: your highest stable Well, or if every Well is already unstable, the highest one. */
@@ -752,7 +754,6 @@ function beginTurn(r: Run) {
   money(r, r.current.audit ? 'Bank debt (audited)' : 'Bank debt', -d)
   if (d && r.turn > 1) beat(r, 'money', r.current.audit ? 'Bank debt · audited' : 'Bank debt', `−$${d}.`)
   if (r.items.includes('fillingStations')) money(r, 'Filling Stations', 1)
-  if (r.items.includes('fossilSubsidy')) money(r, 'Fossil Fuel Subsidy', CONFIG.subsidyCash)
   const ious = r.hand.filter(c => c.key === 'iou').length
   if (ious) { money(r, 'IOU', -ious); beat(r, 'money', 'IOU', `−$${ious}.`) }
   if (checkBankrupt(r)) return
