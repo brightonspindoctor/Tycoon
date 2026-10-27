@@ -75,7 +75,6 @@ export const CONFIG = {
   heatMax: 100, // Heat at this: the company is broken up
   heatPerAP: 2, // every AP you spend adds this much Heat
   sellAP3: 2, // stage 3: selling oil takes 2 AP
-  earthDayHeat: 8, // the Earth Day modifier
   heatPerSkims: 5, // stage 3 starts with this much Heat for every heatSkimsEvery gold skimmed in stage 2...
   heatSkimsEvery: 3,
   heatStartCap: 15, // ...up to this

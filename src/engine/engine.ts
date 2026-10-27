@@ -2,8 +2,8 @@
 // drives the game screens, the tests and the balance simulator.
 import { CONFIG } from './config'
 import {
-  ATTACK_CARDS, BOSS, CARDS, INCORPORATE_OFFER_2, CASH_POOLS, ENGINE_POOLS, ITEMS, MODS, PROSPECTS, PROSPECT_FOR, WATER_FOR, STARTER, THREATS, UPGRADES, shopPool,
-  BOONS, REWARDS, BRIBES, INCORPORATE_OFFER_3, INCORPORATE_OFFER_4, STAGE4_POOL, badBloodFor, TRUTH_PHASES, bossRound, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, boonInfo, landCardFor, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ModKey, type ThreatKind,
+  ATTACK_CARDS, BOSS, CARDS, INCORPORATE_OFFER_2, CASH_POOLS, ENGINE_POOLS, ITEMS, PROSPECTS, PROSPECT_FOR, WATER_FOR, STARTER, THREATS, UPGRADES, shopPool,
+  BOONS, REWARDS, BRIBES, INCORPORATE_OFFER_3, INCORPORATE_OFFER_4, STAGE4_POOL, badBloodFor, TRUTH_PHASES, bossRound, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, boonInfo, landCardFor, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ThreatKind,
 } from './data'
 import { next, pick, shuffle } from './rng'
 import { newTally, type Tally } from './tactics'
@@ -64,7 +64,6 @@ export interface Run {
   fire: number
   marked: number | null
   threats: Threat[]
-  modifier: ModKey | null
   short: number
   freight: number
   pending: { ap: number; audit: boolean; refuse: boolean; margin: number; cease: number; prorate: boolean; claims?: number; badBlood?: number; shutdown?: number; declarations?: number; compensation?: number; apTo1?: boolean; cardCap?: number }
@@ -214,9 +213,6 @@ export function price(r: Run): number {
   const base = atWar(r) ? CONFIG.warPrice : r.stage >= 4 ? CONFIG.oilPrice4 : r.stage >= 3 ? CONFIG.oilPrice3 : r.stage >= 2 ? CONFIG.oilPrice2 : CONFIG.oilPrice
   let p = base - r.short + r.boost + (r.roundBoost ?? 0) + (r.items.includes('refinery') ? 1 : 0)
     - r.items.filter(i => i === 'supertanker').length * CONFIG.supertankerCut
-  if (r.modifier === 'glut') p -= 1
-  if (r.modifier === 'boomtown') p += 1
-  if (r.modifier === 'embargo') p += 2
   return Math.max(CONFIG.oilFloor, p)
 }
 /** What you get per barrel after freight; never below the floor. */
@@ -225,13 +221,10 @@ export const freight = (r: Run) => r.freight
 
 export function debtPerTurn(r: Run): number {
   if (r.stage === 3) return 0 // no Bank Debt in stage 3: Heat is the clock (stage 4 has the World Bank)
-  let d = r.debt
-  if (r.modifier === 'bankSqueeze' || r.modifier === 'boomtown') d += 1
-  return d
+  return r.debt
 }
 
-export const prospectAP = (r: Run, c?: Card) => (c ? cardDef(c).ap! : CARDS.prospect.ap!) + (r.modifier === 'hardRock' ? 1 : 0)
-export const apCost = (r: Run, c: Card) => (c.free ? 0 : isProspect(c.key) ? prospectAP(r, c) : cardDef(c).ap ?? 0)
+export const apCost = (_r: Run, c: Card) => (c.free ? 0 : cardDef(c).ap ?? 0)
 export const freePlot = (r: Run) => r.plots.findIndex(p => p === null)
 export const highestWell = (r: Run) => { for (let i = r.plots.length - 1; i >= 0; i--) if (exposed(r.plots[i])) return i; return -1 }
 /** Where a Rumble lands: your highest stable Well, or if every Well is already unstable, the highest one. */
@@ -379,8 +372,7 @@ export const fires = (n: number) => `${n} fire${n === 1 ? '' : 's'}`
 function startFire(r: Run, count: number, by?: string) {
   if (r.stage >= 3) return // no fires in stage 3
   r.fireBy = by ?? r.fireBy
-  const bonus = r.modifier === 'drySeason' ? 1 : 0
-  r.fire = Math.min(CONFIG.fireMax, r.fire + count + bonus)
+  r.fire = Math.min(CONFIG.fireMax, r.fire + count)
   say(r, `Fire! ${fires(r.fire)} burning. Pumps stopped.`)
 }
 
@@ -428,7 +420,7 @@ export function newRun(seed: number, bonus: BonusKey, unlocks: Unlocks = {}): Ru
     seed, rng: seed, bonus, phase: 'shop', stage: 1, round: 0, turn: 0,
     capital: CONFIG.startCapital, gold: 0, debt: bonus === 'trustFund' ? CONFIG.trustFundDebt : CONFIG.startDebt, ap: 0, cover: 0, nextId: 1,
     deck: [], draw: [], hand: [], discard: [], plots: [], oil: bonus === 'threeOil' ? 3 : 0,
-    storage: CONFIG.startStorage + (unlocks.baron ? CONFIG.baronSilo : 0), fire: 0, marked: null, threats: [], modifier: null,
+    storage: CONFIG.startStorage + (unlocks.baron ? CONFIG.baronSilo : 0), fire: 0, marked: null, threats: [],
     short: 0, freight: 0, pending: { ap: 0, audit: false, refuse: false, margin: 0, cease: 0, prorate: false }, current: { audit: false, refuse: false, prorate: false },
     items: [], destroyCost: CONFIG.destroyCost, prospectPrice: CONFIG.prospectPrice,
     shop: { cards: [], item: null, loanTaken: false, prospectSold: false, bucketSold: false, boon: null, dividendPaid: false }, ledger: [], events: [],
@@ -649,7 +641,6 @@ function startRound(r: Run, round: number) {
   r.round = round
   r.leftBehind = undefined
   r.turn = 0
-  r.modifier = null
   let kinds: ThreatKind[]
   const cash = CASH_POOLS[r.stage] ?? CASH_POOLS[2], engine = ENGINE_POOLS[r.stage] ?? ENGINE_POOLS[2]
   if (r.stage >= 4) { // one enemy a round, never one already met this run; then the Truth
@@ -658,7 +649,7 @@ function startRound(r: Run, round: number) {
     r.met = [...(r.met ?? []), ...kinds.filter(k => k !== 'truth')]
   }
   else if (round === 1) kinds = [pick(r, cash)]
-  else if (round === 2) { kinds = [pick(r, engine)]; r.modifier = pick(r, (Object.keys(MODS) as ModKey[]).filter(m => !MODS[m].stages || MODS[m].stages!.includes(r.stage))) }
+  else if (round === 2) kinds = [pick(r, engine)]
   else if (round === 3) kinds = [pick(r, cash), pick(r, engine)]
   else kinds = [BOSS[r.stage] ?? BOSS[2]]
   const extra = r.stage >= 4 && round < bossRound(4) ? (round - 1) * CONFIG.stage4HoldStep : 0 // stage 4 enemies toughen round by round
@@ -690,9 +681,6 @@ function startRound(r: Run, round: number) {
   r.cover = 0
   newReport(r)
   for (const t of r.threats) { say(r, `${THREATS[t.kind].name} arrives.`); beat(r, 'enemy', `Round ${round}`, `${THREATS[t.kind].name} arrives.`, t.id) }
-  if (r.modifier) { say(r, `${MODS[r.modifier].name}: ${MODS[r.modifier].text}.`); beat(r, 'board', `This round · ${MODS[r.modifier].name}`, `${MODS[r.modifier].text}.`) }
-  if (r.modifier === 'scandal') expose(r, 1, 'Scandal')
-  if (r.modifier === 'earthDay') heat(r, CONFIG.earthDayHeat, 'Earth Day')
   if (r.items.includes('pressOffice')) expose(r, -1, 'Press Office')
   // opening moves
   for (const t of r.threats) {
@@ -792,7 +780,7 @@ function beginTurn(r: Run) {
   if (r.current.shutdown) beat(r, 'oil', 'Shut down', `${r.current.shutdown > 1 ? `${r.current.shutdown} Rigs` : 'A Rig'} pumped nothing this turn.`)
   if (claims) beat(r, 'cards', 'New Patent Claim', 'A New Patent Claim is clogging your hand.')
   if (ceases) beat(r, 'cards', 'Cease and Desist', `${ceases > 1 ? `${ceases} Cease and Desist letters` : 'A Cease and Desist letter'} in your hand.`)
-  const n = handSize(r) - (r.modifier === 'badWeather' ? 1 : 0)
+  const n = handSize(r)
   drawUpTo(r, n)
   const loyal = r.round === bossRound(r.stage) && r.items.includes('loyalDirectors') ? 1 : 0
   r.ap = Math.max(0, CONFIG.baseAP + (steamPumpTurn(r) ? 1 : 0) + (r.items.includes('lobbyist') ? CONFIG.lobbyistAP : 0) + loyal - apPenalty)
@@ -1605,7 +1593,6 @@ export function incorporate(r: Run) {
   r.exposure = Math.min(CONFIG.exposureStartCap, Math.floor(r.stats.skims / CONFIG.exposureStartPer))
   r.shop = { cards: [], item: null, loanTaken: false, prospectSold: true, bucketSold: true, boon: null, dividendPaid: true }
   r.threats = []
-  r.modifier = null
   r.short = 0; r.freight = 0; r.fire = 0; r.marked = null; r.cover = 0
   r.hand = []; r.draw = []; r.discard = []
   r.ledger = []; r.events = []
@@ -1640,7 +1627,6 @@ export function goMultinational(r: Run) {
   r.skimBase = r.stats.skims
   r.shop = { cards: [], item: null, loanTaken: false, prospectSold: true, bucketSold: true, boon: null, dividendPaid: true }
   r.threats = []
-  r.modifier = null
   r.short = 0; r.freight = 0; r.fire = 0; r.marked = null; r.cover = 0; r.roundBoost = 0
   r.hand = []; r.draw = []; r.discard = []
   r.ledger = []; r.events = []
@@ -1670,7 +1656,6 @@ export function goBigOil(r: Run) {
   r.skimBase = r.stats.skims
   r.shop = { cards: [], item: null, loanTaken: false, prospectSold: true, bucketSold: true, boon: null, dividendPaid: true }
   r.threats = []
-  r.modifier = null
   r.short = 0; r.freight = 0; r.fire = 0; r.marked = null; r.cover = 0; r.roundBoost = 0; r.amplify = false
   r.hand = []; r.draw = []; r.discard = []
   r.ledger = []; r.events = []

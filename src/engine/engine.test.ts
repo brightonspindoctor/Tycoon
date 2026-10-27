@@ -283,7 +283,7 @@ describe('card and enemy changes', () => {
 
   it('fires add up', () => {
     let r = lone(begin(), 'baron')
-    r.modifier = null; r.oil = 5; r.storage = 9; r.fire = 1 // one fire burning, oil to keep it fed
+    r.oil = 5; r.storage = 9; r.fire = 1 // one fire burning, oil to keep it fed
     r.threats[0].step = 2 // the Baron's next move is Arson: 2 more fires
     r = act(r, { type: 'endTurn' })
     expect(r.fire).toBe(Math.min(CONFIG.fireMax, 1 + 2))
@@ -524,11 +524,11 @@ describe('Firebreak', () => {
 
 describe('oil price', () => {
   it('starts at $3 and never drops below $1 a barrel, freight included', () => {
-    const r = newRun(10, 'threeOil'); r.modifier = null; r.short = 0; r.freight = 0
+    const r = newRun(10, 'threeOil'); r.short = 0; r.freight = 0
     expect(netPrice(r)).toBe(3)
-    r.short = 5; r.modifier = 'glut'
+    r.short = 5
     expect(netPrice(r)).toBe(1)
-    r.short = 0; r.modifier = null; r.freight = 4
+    r.short = 0; r.freight = 4
     expect(netPrice(r)).toBe(1)
   })
 })
@@ -686,13 +686,13 @@ describe('the Strike', () => {
     for (let seed = 1; seed < 200; seed++) { // find a round 2 that draws the Strike
       r = newRun(seed, 'threeOil'); r.phase = 'shop'; r.round = 1
       r = act(r, { type: 'leaveShop' })
-      if (r.threats[0].kind === 'strike' && r.modifier !== 'bankSqueeze' && r.modifier !== 'boomtown') break
+      if (r.threats[0].kind === 'strike') break
     }
     const strike = r.threats.find(t => t.kind === 'strike')!
     expect(r.ap).toBe(CONFIG.baseAP - 1) // Walkout
     expect(intent(r, strike)).toBe('Picket')
     expect(intentText(r, strike)).toBe('Lose $2.')
-    r.capital = 30; r.cover = 0; r.modifier = null
+    r.capital = 30; r.cover = 0
     const cash = r.capital
     r = act(r, { type: 'endTurn' })
     expect(r.ap).toBe(CONFIG.baseAP) // no AP lost

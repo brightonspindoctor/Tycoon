@@ -27,7 +27,6 @@ img { display: block; max-width: 100%; }
 .round-pip.is-done { background: var(--ink); border-color: var(--ink); }
 .round-pip.is-now { background: var(--accent); border-color: var(--accent); }
 .round-pip.is-boss:not(.is-now):not(.is-done) { border-color: var(--loss); }
-.modifier { border: 1.5px solid var(--ink); background: var(--paper-raised); padding: 6px 12px; font-size: 14px; border-radius: var(--radius-1860); display: flex; flex-direction: column; }
 
 /* ---------- main grid ---------- */
 .game__grid { display: grid; grid-template-columns: 300px minmax(0, 1fr) 290px; gap: 20px; flex: 1; min-height: 0; }
@@ -988,13 +987,6 @@ button.m-threat { cursor: pointer; }
 .term-toast--fire { top: 22%; bottom: auto; background: #6b1a0a; border: 2px solid #f2a073; max-width: min(460px, calc(100% - 32px)); }
 .term-toast--fire .cl-label { color: #ffd0a8; font-size: 14px; }
 .term-toast--fire b { font-size: 17px; line-height: 23px; }
-/* the round's modifier: a banner at the top of the opposition */
-.round-mod { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 2px solid var(--accent); border-left-width: 6px; border-radius: var(--radius-1860);
-  background: color-mix(in srgb, var(--accent) 10%, var(--paper-raised)); animation: rise .4s ease-out both; }
-.round-mod .cl-label { color: var(--accent); }
-.round-mod .cl-display { font-size: 20px; line-height: 24px; }
-.m .round-mod { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
-.m .round-mod .cl-label { flex-basis: 100%; }
 .term-toast--feat.is-raised { bottom: 112px; }
 @media (max-width: 760px) {
   .cabinet__shelves { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 14px 10px 0; }

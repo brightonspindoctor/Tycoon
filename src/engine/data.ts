@@ -1,4 +1,4 @@
-// Card, enemy, item and modifier definitions for Oil, stages 1 to 4.
+// Card, enemy and item definitions for Oil, stages 1 to 4.
 import { CONFIG } from './config'
 
 export type Family = 'Legal' | 'Dirty' | 'Bury' | 'Lobby' | 'Water' | 'Production' | 'Defence' | 'Tempo' | 'Skim' | 'Fortune' | 'Board' | 'Scrap' | 'Junk'
@@ -434,18 +434,6 @@ export const TRUTH_PHASES: { name: string; weak: Family }[] = [
 export const bossRound = (stage: number) => (stage >= 4 ? CONFIG.stage4Fights : 4)
 export const ROLE_LABEL: Record<ThreatRole, string> = { cash: 'Takes your cash', engine: 'Breaks your engine', boss: 'Boss' }
 
-export type ModKey = 'drySeason' | 'glut' | 'hardRock' | 'bankSqueeze' | 'badWeather' | 'boomtown' | 'scandal' | 'embargo' | 'earthDay'
-export const MODS: Record<ModKey, { name: string; text: string; stages?: number[] }> = {
-  drySeason: { name: 'Dry Season', text: 'Every outbreak starts 1 extra fire', stages: [1] },
-  scandal: { name: 'Scandal', text: '+1 Board Exposure as the round begins', stages: [2] },
-  glut: { name: 'Glut', text: 'Oil sells −$1' },
-  hardRock: { name: 'Hard Rock', text: 'Prospect costs +1 AP', stages: [1, 2] },
-  bankSqueeze: { name: 'Bank Squeeze', text: 'Debt +$1 a turn', stages: [1, 2] },
-  badWeather: { name: 'Bad Weather', text: 'Draw 1 fewer card' },
-  boomtown: { name: 'Boomtown', text: 'Oil +$1, debt +$1', stages: [1, 2] },
-  embargo: { name: 'OPEC Embargo', text: 'Oil sells +$2', stages: [3] },
-  earthDay: { name: 'Earth Day', text: `+${CONFIG.earthDayHeat} Heat as the round begins`, stages: [3] },
-}
 
 export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'accountant' | 'refinery' | 'offshore' | 'boardGrudge' | 'loyalDirectors'
   | 'pressOffice' | 'fillingStations' | 'auditingFirm'

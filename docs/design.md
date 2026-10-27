@@ -8,7 +8,7 @@ Unlocked one after another: **Oil → Pharmaceutical → Fishing → Tech** (Pha
 
 ## Structure
 - 4 stages × 4 rounds. Round 4 of each stage is a boss. A shop follows every round (there is none before round 1: picking a starting bonus goes straight into the first fight); the shop after a boss has a new card pool.
-- Rounds get harder: round 1 one threat (weaker pool); round 2 one threat and a modifier; round 3 two threats; round 4 the boss.
+- Rounds get harder: round 1 one threat (weaker pool); round 2 one threat (an engine breaker); round 3 two threats; round 4 the boss.
 - Stages are eras, and the whole look changes: Victorian (1860s–90s), Art Deco (1900s–30s), 1970s flower power (1970–79), 2010s flat-design greenwash (2010–19). Cards keep the look of the era they came from.
 - Money gets a unit per stage but keeps its value: $15 → $15K → $15M → $15B.
 - Unlocks for every later run on the device (never from admin playtests): beat the Rival Baron once and runs start with 4 storage instead of 3 (silently); beat the Geneva Climate Summit once and **Slush Fund** joins the starting bonuses (an item for the whole run: +2 Cover every turn, stacking with other Cover items); beat the Proxy Fight once and **Old Faithful** joins the starting bonuses: a Well that pumps 1, never runs dry, and nothing can target (fires, enemies, Firebreak, selling). It stops pumping in a fire, and becomes a Field and a Rig with the rest.
@@ -83,7 +83,7 @@ Only a few enemies resist a kind of card (the Railroad Agent and the Baron); the
 | Speculator | Cash | 7 | Legal | — | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |
 | **Rival Baron** (boss) | Boss | 20 | Dirty | Legal | Sabotage (a random Well) → Lease → Arson | Moves first: Arson (1). Arson grows each cycle |
 
-Round modifiers: Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown. The modifier is a "This round" banner at the top of the opposition, and the round's opening tape stamps it like a headline.
+Round modifiers (Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown and the later stages' ones) were removed in October 2026: they didn't add much.
 
 No Bank Debt is taken on the very first turn of the game (the loan has only just been made); it starts on turn 2.
 
@@ -159,7 +159,6 @@ Destroy cards can be played even with a Must play card in hand (so they can dest
 | The Saboteur | Engine | 10 | Dirty | — | Wreck (destroys the marked Field or Well) → Lit Fuse (Bad Blood in your next hand) → Infiltrate (marks your best Field) | Moves first: Infiltrate. Beaten: starts a fire |
 | The Railroad Commission | Engine | 8 (a weak enemy) | Dirty | — | Proration (next turn pump 2 at most) → Inspection (−2 AP next turn) → Leaky Tanks (lose all stored oil and 25% of Capital) | |
 | **The Proxy Fight** (boss) | Boss | 52 | Legal | — | Hostile Bid (−$6, +$2 each cycle) → Proxy Meeting (does nothing) → The Vote (+1 Exposure, +1 each cycle) | Moves first: Canvass (+1 Exposure) |
-Round 2 modifiers in stage 2: Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown, Scandal (+1 Exposure). Dry Season is stage 1 only.
 
 ## Stage 3 rules (as built) · 1970–1979 · Diversifying · 1970s flower power
 Money is in millions ($M). Rounds are 1970, 1973, 1976 and 1979. The shop is **the Trading Floor**. The look is 1970s flower power: oatmeal paper, espresso ink, burnt orange, mustard and avocado, a rounded brown–orange–mustard stripe under the header (and filling the Heat meter), and Fraunces at 900 with its Soft axis for a Cooper Black feel.
@@ -177,7 +176,7 @@ Winning the Proxy Fight pays 3 gold, then a page-turn to 1970 stamped MULTINATIO
 - Oil sells at **$5M**. **Selling oil takes 2 AP.** Storage carries over; Supertankers raise it to 12 at most, so a sale pays about $60M at most before boosts.
 - The Trading Floor always offers an **Offshore Rig**, built at once (from $30M, rising $10M each time, one per visit, 5 at most), and a **lobbying firm** ($25M: Heat −10, once per visit). No Silo, no dividends. Upgrade, duplicate and destroy as above. Cards cost $12–22M, items $15–20M.
 - Skimming is still the Expense Account: $20M a gold, rising $20M, $20M, $24M, $28M, $32M by round.
-- No fires, no Board Exposure. Round 2 modifiers: Glut (oil −$1M), Bad Weather, **OPEC Embargo** (oil +$2M), **Earth Day** (+8 Heat as the round begins).
+- No fires, no Board Exposure.
 
 ### Heat (0 to 100)
 - **Every AP you spend adds 2 Heat**: cards, selling oil (2 AP, so 4 Heat), selling a Rig. 0 AP cards add none.
@@ -354,7 +353,6 @@ Money moves as built: Moratorium and Undercut −$10B, Blowout, Clean-up Bill an
   4. **Breakthrough** · Lobby
 - **Its attacks are the consequences:** Sea Level Rise (−$14B), Childhood Asthma (−2 gold), Water Pollution (a Compensation Claim in your hand), Suppressed Development (−1 AP next turn), Wildfire Season (lose your stored oil), Crop Failure (−$12B). Every 5th move moves the clock forward 1 hour.
 - **The later the hour you arrive, the harder it is:** every cash attack does +$2B for each hour past 1, Childhood Asthma takes 1 more gold for every 4 hours past 1, and it has Cover equal to the hour every turn.
-- No modifiers in stage 4.
 
 ### Balance (bot, 600 runs per bonus)
 Stage 4 is won by about 2 in 3 bots that reach it, close to stage 3. Bots meet the Truth at about 5 o'clock; most losses are to the Truth itself (ruined or bankrupt), a few at midnight.

@@ -4,7 +4,7 @@
 // played by accident on a small screen.
 import { useState } from 'react'
 import { CONFIG } from '../engine/config'
-import { ITEMS, MODS, ROLE_LABEL, THREATS, bossRound } from '../engine/data'
+import { ITEMS, ROLE_LABEL, THREATS, bossRound } from '../engine/data'
 import {
   apCost, attackPower, phaseName, reserves, weakOf, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, infiltrated, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run, type Threat,
@@ -84,7 +84,6 @@ export function MobileGame({ run, dispatch, acting }: Props) {
       </header>
 
       <main className="m-main" onClick={e => { if (e.target === e.currentTarget) { setSelected(null); setPlotMenu(null) } }}>
-        {run.modifier && <div className="round-mod" role="note"><span className="cl-label">This round</span><b className="cl-display">{MODS[run.modifier].name}</b><span>{units(MODS[run.modifier].text, st)}</span></div>}
 
         <section className="m-threats" aria-label="Opposition">
           {run.fire > 0 && !run.threats.some(t => !t.beaten) && <span className="cl-label m-prompt">Every enemy is beaten. Put the fire out to end the round.</span>}

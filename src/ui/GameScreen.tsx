@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { CONFIG } from '../engine/config'
-import { ITEMS, MODS, THREATS, bossRound } from '../engine/data'
+import { ITEMS, THREATS, bossRound } from '../engine/data'
 import {
   apCost, atWar, attackPower, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run,
@@ -73,7 +73,6 @@ export function GameScreen({ run, dispatch, acting }: Props) {
       <div className="game__grid">
         <section className="col-threats" aria-label="Opposition">
           <span className="cl-label">Opposition{targeting ? (stopping ? ' · Choose a move to stop' : ' · Choose a target') : ''}</span>
-          {run.modifier && <div className="round-mod" role="note"><span className="cl-label">This round</span><b className="cl-display">{MODS[run.modifier].name}</b><span>{units(MODS[run.modifier].text, st)}</span></div>}
           {run.threats.map(t => (
             <ThreatPanel key={t.id} run={run} threat={t} acting={acting?.who === t.id}
               targeting={targeting && targets.some(x => x.id === t.id)}
