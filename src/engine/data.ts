@@ -432,7 +432,9 @@ export const TRUTH_PHASES: { name: string; weak: Family }[] = [
 ]
 /** The round the boss arrives: round 4, or round 5 in stage 4. */
 export const bossRound = (stage: number) => (stage >= 4 ? CONFIG.stage4Fights : 4)
-export const ROLE_LABEL: Record<ThreatRole, string> = { cash: 'Takes your cash', engine: 'Breaks your engine', boss: 'Boss' }
+/** The label over an enemy's name: only bosses get one ("takes your cash" and "breaks your engine" were dropped). */
+export const ROLE_LABEL: Record<ThreatRole, string> = { cash: '', engine: '', boss: 'Boss' }
+export const roleLabel = (d: { role: ThreatRole; movesFirst?: string }) => [ROLE_LABEL[d.role], d.movesFirst && 'Moves first'].filter(Boolean).join(' · ')
 
 
 export type ItemKey = 'storageTank' | 'silo' | 'steamPump' | 'accountant' | 'refinery' | 'offshore' | 'boardGrudge' | 'loyalDirectors'

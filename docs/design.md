@@ -83,6 +83,8 @@ Only a few enemies resist a kind of card (the Railroad Agent and the Baron); the
 | Speculator | Cash | 7 | Legal | — | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |
 | **Rival Baron** (boss) | Boss | 20 | Dirty | Legal | Sabotage (a random Well) → Lease → Arson | Moves first: Arson (1). Arson grows each cycle |
 
+Enemy panels carry no "Takes your cash" / "Breaks your engine" label any more; only "Boss" and "Moves first" show above a name.
+
 Round modifiers (Dry Season, Glut, Hard Rock, Bank Squeeze, Bad Weather, Boomtown and the later stages' ones) were removed in October 2026: they didn't add much.
 
 No Bank Debt is taken on the very first turn of the game (the loan has only just been made); it starts on turn 2.

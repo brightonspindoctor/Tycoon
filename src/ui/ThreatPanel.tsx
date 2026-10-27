@@ -1,4 +1,4 @@
-import { ROLE_LABEL, THREATS } from '../engine/data'
+import { THREATS, roleLabel } from '../engine/data'
 import { infiltrated, intent, intentText, phaseName, reserves, weakOf, type Run, type Threat } from '../engine/engine'
 import { TRUTH_PHASES } from '../engine/data'
 import { units } from '../engine/format'
@@ -24,7 +24,7 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget,
       <div className="threat__head">
         <Portrait className="threat__portrait" name={d.name} portrait={d.portrait} />
         <div className="threat__title">
-          <span className="cl-label">{ROLE_LABEL[d.role]}{d.movesFirst ? ' · Moves first' : ''}</span>
+          {roleLabel(d) && <span className="cl-label">{roleLabel(d)}</span>}
           <h2 className="threat__name">{d.name}</h2>
           {threat.kind === 'truth' && <span className="truth-phase cl-label" aria-label={`Phase ${(threat.phase ?? 0) + 1} of 4: ${phaseName(threat)}`}>
             {TRUTH_PHASES.map((_, i) => <i key={i} className={i < (threat.phase ?? 0) ? 'is-done' : i === (threat.phase ?? 0) ? 'is-now' : ''} />)} {phaseName(threat)}

@@ -4,7 +4,7 @@
 // played by accident on a small screen.
 import { useState } from 'react'
 import { CONFIG } from '../engine/config'
-import { ITEMS, ROLE_LABEL, THREATS, bossRound } from '../engine/data'
+import { ITEMS, THREATS, bossRound, roleLabel } from '../engine/data'
 import {
   apCost, attackPower, phaseName, reserves, weakOf, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, infiltrated, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run, type Threat,
@@ -98,7 +98,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
                 aria-label={`${d.name}, Hold ${Math.max(0, t.hold)} of ${t.maxHold}`}>
                 <Portrait className="m-threat__portrait" name={d.name} portrait={d.portrait} />
                 <div className="m-threat__body">
-                  <span className="cl-label m-threat__role">{ROLE_LABEL[d.role]}{d.movesFirst ? ' · Moves first' : ''}</span>
+                  {roleLabel(d) && <span className="cl-label m-threat__role">{roleLabel(d)}</span>}
                   <div className="m-threat__top">
                     <h2 className="m-threat__name">{d.name}{t.kind === 'truth' ? ` · ${phaseName(t)}` : ''}</h2>
                     <span className="cl-num m-threat__hold">{t.cover && !t.beaten ? <span className="enemy-cover">Cover {t.cover} · </span> : null}{Math.max(0, t.hold)}/{t.maxHold}</span>
