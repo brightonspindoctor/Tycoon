@@ -27,6 +27,23 @@ export function isIOS(): boolean {
   return /iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1)
 }
 
+/**
+ * How this browser downloads the game when it can't show its own install dialog.
+ * Chrome and Edge only fire `beforeinstallprompt` once the service worker is ready, so
+ * they can briefly land on 'chromium' before the one-tap install becomes available.
+ */
+export type InstallRoute = 'ios' | 'macSafari' | 'android' | 'firefox' | 'chromium' | 'other'
+export function installRoute(): InstallRoute {
+  if (typeof navigator === 'undefined') return 'other'
+  if (isIOS()) return 'ios'
+  const ua = navigator.userAgent
+  if (/Android/.test(ua)) return 'android'
+  if (/Firefox\//.test(ua)) return 'firefox'
+  if (/Edg\/|Chrome\/|Chromium\//.test(ua)) return 'chromium'
+  if (/Macintosh/.test(ua) && /Safari\//.test(ua)) return 'macSafari'
+  return 'other'
+}
+
 export async function install(): Promise<boolean> {
   if (!deferred) return false
   const e = deferred

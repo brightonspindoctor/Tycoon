@@ -9,7 +9,8 @@ import { Glossary } from './Glossary'
 import { setSharing, sharing } from '../telemetry'
 
 const ADMIN_PIN = '3333'
-import { install } from '../install'
+import { install, installRoute } from '../install'
+import { InstallSteps } from './InstallPrompt'
 import { OPEN_SETTINGS, openSettings, useInstallable } from './settingsBus'
 
 
@@ -34,7 +35,7 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
   const [glossary, setGlossary] = useState(false)
   const [share, setShare] = useState(sharing())
   const [pin, setPin] = useState<string | null>(null) // admin mode needs its PIN to switch on
-  const { installable, installed, ios } = useInstallable()
+  const { installable, installed } = useInstallable()
   useEffect(() => {
     const show = () => { setVol(getVolume()); setM(isMuted()); setConfirmQuit(false); setGlossary(false); setPin(null); setOpen(true) }
     window.addEventListener(OPEN_SETTINGS, show)
@@ -104,11 +105,10 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
         </div>
 
         <div className="settings__row">
-          <span className="cl-label">Home screen</span>
+          <span className="cl-label">Download</span>
           {installed ? <p className="res-note">Installed. Open Tycoon from your home screen.</p>
-            : installable ? <button type="button" className="cl-btn cl-btn--primary" onClick={() => void install()}>Install Tycoon</button>
-            : ios ? <p className="res-note">In Safari, tap Share <ShareIcon />, then <b>Add to Home Screen</b>.</p>
-            : <p className="res-note">Use your browser's menu to install or add it to your home screen.</p>}
+            : installable ? <button type="button" className="cl-btn cl-btn--primary" onClick={() => void install()}>Download Tycoon</button>
+            : <p className="res-note"><InstallSteps route={installRoute()} /></p>}
         </div>
         <div className="settings__row settings__row--inline">
           <span className="cl-label">Admin mode</span>
@@ -155,6 +155,3 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
   )
 }
 
-export function ShareIcon() {
-  return <svg className="share-icon" viewBox="0 0 24 24" width="16" height="16" aria-label="Share"><path fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" d="M12 15V3m0 0L8 7m4-4 4 4M7 11H5v10h14V11h-2" /></svg>
-}
