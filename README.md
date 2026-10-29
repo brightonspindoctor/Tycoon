@@ -6,6 +6,8 @@
 
 <p align="center"><a href="https://brightonspindoctor.github.io/Tycoon/"><b>▶ Play in your browser</b></a></p>
 
+<p align="center"><a href="https://brightonspindoctor.github.io/Tycoon/"><img src="docs/gameplay.gif" width="800" alt="A turn of stage 1: playing Hard Graft and Prospect, building a well, the liabilities' turn, then selling oil and playing Lawyer Up against the Railroad Agent" /></a></p>
+
 ---
 
 A satirical solo roguelike deckbuilder by Jonny Sadler, in the spirit of Slay the Spire. You run a harmful industry from the 1860s to today. Get rich, stay Chairman, and skim as much as you dare into your own fortune. The game is built so that corruption wins and doing the right thing is hard.
