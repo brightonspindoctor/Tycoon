@@ -382,7 +382,21 @@ The look is a cheerful corporate sustainability report made by a tech start-up: 
 Synthesised in the browser (src/sound.ts); hear them all at `?preview=sounds`. Each era arrives with its own sound: a steam whistle (1860s), a muted brass fanfare (1900s), a wobbling organ chord (1970s), a start-up chime (2010s). The enemy turn arrives the way news did in each era: ticker tape (stage 1), silent-film intertitles in a gold Deco frame with a projector clatter (stage 2), a telex printing on green-bar paper (stage 3), and phone notifications stacking from the top, with clock moves as black Breaking alerts (stage 4). Events: a tick, tock and chime when the Truth clock moves on (a ratchet when it goes back), three deep bell strokes at midnight, a dissonant swell when the Truth changes phase, a rising shimmer when an enemy regains Hold, coins slipping away when gold is taken, paper slapped down for junk, and a fanfare with the cash register for the win.
 
 ## Glossary
-Settings → Glossary: five key words (Hold, Cover, Gold, Capital, AP), then **The business**: terms that unlock, for good on that device, the first time you get the card that uses them (Greenwashing, Astroturfing, Carbon offsets and so on, 17 in all, in src/terms.ts). Each says what it means and gives a real case. A toast announces a new one. Admin playtests unlock nothing.
+Opened from Settings, or from the book button next to the gear on the board and in the shop. Three tabs:
+- **Words:** Hold, Cover, Gold, Capital, AP.
+- **Terms:** the business terms that unlock, for good on that device, the first time you get the card that uses them (Greenwashing, Astroturfing, Carbon offsets and so on, 17 in all, in src/terms.ts). Each says what it means and gives a real case. A toast announces a new one.
+- **Cards:** every card you have played, grouped by era, with a count of how many there are in all. Tap one to see it full size with its type, cost, how long it lasts, its shop price and rarity, what upgrading it does, its flavour line and how many times you have played it (src/cardbook.ts).
+
+Admin playtests unlock nothing.
+
+## Tutorial
+A new player's first run (no run played to its end yet, or asked for again in Settings → Tutorial) opens with a scripted fight against **the Squatter** (7 Hold, no weakness; Shakedown −$3, Shakedown, Torch: starts a fire). He is met nowhere else. The engine deals four set hands (`TUTORIAL_HANDS`) and the coach (src/ui/tutorial.ts, src/ui/Coach.tsx) explains each step and blocks everything but the card or button it asks for:
+1. The liability, Hold, his next move, AP. Hard Graft (+1 AP), Prospect, a Well. End turn: the Shakedown hits.
+2. Capital and Bank Debt. Improve Gear for Cover, Hired Hand for Hold. End turn: Cover blocks the Shakedown.
+3. The stockpile; sell the oil; Lawyer Up. Shore Up could stop the Torch, but not this time. End turn: fire.
+4. Fire stops the pumps and burns oil or a Well. Bucket of Water, then Hired Hand wins it.
+
+Then the Land Office suggests a second Prospect and points at the glossary; leaving the shop ends the tutorial, and the second fight is a normal one. Skip tutorial stops the script and the fight goes on as normal. The 3 Oil bonus is held back until the tutorial fight ends, so the script's numbers hold. The Squatter borrows the Claim Jumper's portrait until his own is drawn.
 
 ## Play data and the global scoreboard
 Supabase project **tycoon** (London, eu-west-2), separate from brighton-weekend in the same organisation. The game talks only to `tycoon_*` functions; the tables are closed to the public.

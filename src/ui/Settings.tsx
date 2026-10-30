@@ -1,7 +1,7 @@
 // The settings panel (volume, sound on/off, install) and the gear button that opens it.
 import { useEffect, useState } from 'react'
 import { getVolume, isMuted, play, setMuted, setVolume } from '../sound'
-import { loadAdmin, loadReplay, saveAdmin, saveReplay, type Replay } from '../storage'
+import { askTutorialAgain, loadAdmin, loadReplay, saveAdmin, saveReplay, tutorialAsked, type Replay } from '../storage'
 import type { AdminOp } from '../engine/engine'
 import type { CardKey } from '../engine/data'
 import { AdminTools } from './AdminPanel'
@@ -11,13 +11,22 @@ import { setSharing, sharing } from '../telemetry'
 const ADMIN_PIN = '3333'
 import { install, installRoute } from '../install'
 import { InstallSteps } from './InstallPrompt'
-import { OPEN_SETTINGS, openSettings, useInstallable } from './settingsBus'
+import { OPEN_GLOSSARY, OPEN_SETTINGS, openGlossary, openSettings, useInstallable } from './settingsBus'
 
 
 export function SettingsButton({ className = '' }: { className?: string }) {
   return (
     <button type="button" className={`cl-btn settings-btn ${className}`} onClick={() => { play('click'); openSettings() }} aria-label="Settings" title="Settings">
       <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.4 7.4 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 1.7-1l2.4 1 2-3.4zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)" /></svg>
+    </button>
+  )
+}
+
+/** Opens the glossary from the board or the shop. */
+export function GlossaryButton({ className = '' }: { className?: string }) {
+  return (
+    <button type="button" className={`cl-btn settings-btn glossary-btn ${className}`} onClick={() => { play('click'); openGlossary() }} aria-label="Glossary" title="Glossary">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 6.2C10.3 4.9 7.9 4.3 4 4.3v13.4c3.9 0 6.3.6 8 1.9 1.7-1.3 4.1-1.9 8-1.9V4.3c-3.9 0-6.3.6-8 1.9zm-1 10.9c-1.5-.7-3.4-1.1-5.5-1.2V6.3c2.4.1 4.2.6 5.5 1.5zm7.5-1.2c-2.1.1-4 .5-5.5 1.2V7.8c1.3-.9 3.1-1.4 5.5-1.5z" /></svg>
     </button>
   )
 }
@@ -33,13 +42,17 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
   const [replay, setReplay] = useState<Replay>(loadReplay())
   const [confirmQuit, setConfirmQuit] = useState(false)
   const [glossary, setGlossary] = useState(false)
+  const [direct, setDirect] = useState(false) // opened straight from the board or shop: closing it closes everything
   const [share, setShare] = useState(sharing())
+  const [again, setAgain] = useState(tutorialAsked())
   const [pin, setPin] = useState<string | null>(null) // admin mode needs its PIN to switch on
   const { installable, installed } = useInstallable()
   useEffect(() => {
-    const show = () => { setVol(getVolume()); setM(isMuted()); setConfirmQuit(false); setGlossary(false); setPin(null); setOpen(true) }
+    const show = () => { setVol(getVolume()); setM(isMuted()); setConfirmQuit(false); setGlossary(false); setDirect(false); setPin(null); setAgain(tutorialAsked()); setOpen(true) }
+    const words = () => { setGlossary(true); setDirect(true); setOpen(true) }
     window.addEventListener(OPEN_SETTINGS, show)
-    return () => window.removeEventListener(OPEN_SETTINGS, show)
+    window.addEventListener(OPEN_GLOSSARY, words)
+    return () => { window.removeEventListener(OPEN_SETTINGS, show); window.removeEventListener(OPEN_GLOSSARY, words) }
   }, [])
   useEffect(() => {
     if (!open) return
@@ -48,7 +61,7 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
     return () => window.removeEventListener('keydown', esc)
   }, [open])
   if (!open) return null
-  if (glossary) return <Glossary onClose={() => setGlossary(false)} />
+  if (glossary) return <Glossary onClose={() => { setGlossary(false); if (direct) setOpen(false) }} />
 
   const pct = Math.round(vol * 100)
   return (
@@ -91,6 +104,12 @@ export function SettingsPanel({ onQuit, admin }: { onQuit?: () => void; admin?: 
         <div className="settings__row settings__row--inline">
           <span className="cl-label">Glossary</span>
           <button type="button" className="cl-btn cl-btn--small" onClick={() => { play('click'); setGlossary(true) }}>What the words mean</button>
+        </div>
+
+        <div className="settings__row settings__row--inline">
+          <span className="cl-label">Tutorial</span>
+          {again ? <span className="res-note">Your next run starts with it.</span>
+            : <button type="button" className="cl-btn cl-btn--small" onClick={() => { play('click'); askTutorialAgain(); setAgain(true) }}>Play it next run</button>}
         </div>
 
         <div className="settings__row">

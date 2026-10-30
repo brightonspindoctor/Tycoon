@@ -135,3 +135,16 @@ export function badgeCounts(): Record<string, number> {
   }
   return m
 }
+
+// The tutorial: a new player's first fight is played to a script. It runs once, unless asked for again in Settings.
+const TUTORIAL = 'tycoon.tutorial'
+export function wantTutorial(): boolean {
+  try {
+    const t = localStorage.getItem(TUTORIAL)
+    if (t === 'again') return true
+    return t !== 'done' && !loadRuns().some(r => r.outcome !== 'Quit') // someone who has played a run to its end has no need of it
+  } catch { return false }
+}
+export function markTutorialDone() { try { localStorage.setItem(TUTORIAL, 'done') } catch { /* not kept */ } }
+export function askTutorialAgain() { try { localStorage.setItem(TUTORIAL, 'again') } catch { /* not kept */ } }
+export function tutorialAsked(): boolean { try { return localStorage.getItem(TUTORIAL) === 'again' } catch { return false } }

@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { act, newRun, roundsReached, type Action, type AdminOp, type Beat, type Run } from './engine/engine'
 import { bossRound, type BonusKey, type CardKey } from './engine/data'
-import { badgeCounts, loadAdmin, loadReplay, loadUnlocks, saveAchieved, markWelcomed, saveAdmin, saveRun, saveUnlock, trustFundOffered, welcomeSeen } from './storage'
+import { badgeCounts, loadAdmin, loadReplay, loadUnlocks, saveAchieved, markWelcomed, saveAdmin, saveRun, saveUnlock, trustFundOffered, welcomeSeen, wantTutorial, markTutorialDone } from './storage'
 import { adminStart, type AdminStart } from './engine/admin'
 import { Welcome } from './ui/Welcome'
 import { TickerTape } from './ui/TickerTape'
@@ -27,6 +27,8 @@ import { About, BonusPick, History, Intro, Scoreboard } from './ui/MenuScreens'
 import { Achievements, TrophyCabinet } from './ui/Achievements'
 import { hello, roundEnded, runEnded, runStarted } from './telemetry'
 import { findTerms, loadFound, TERMS } from './terms'
+import { notePlayed } from './cardbook'
+import { coachFor, stepDone, STEPS } from './ui/tutorial'
 import { ACHIEVEMENTS, achievedBy, type AchievementKey } from './engine/achievements'
 import { THREATS } from './engine/data'
 
@@ -67,6 +69,8 @@ export default function App() {
   }
   const saved = useRef<number | null>(null)
   const { scale, mobile } = useLayout()
+  const [coach, setCoach] = useState<number | null>(null) // the tutorial step showing, while it runs
+  const endCoach = () => { setCoach(null); markTutorialDone() }
 
   function dispatch(a: Action) {
     if (!run) return
@@ -76,6 +80,7 @@ export default function App() {
       const key = run.hand.find(c => c.id === a.cardId)?.key
       const changed = nextRun.ap !== run.ap || nextRun.hand.length !== run.hand.length
       if (changed) play(key === 'prospect' ? 'prospect' : key === 'well' || key === 'wildcat' ? 'well' : 'card')
+      if (changed && key && !run.admin) notePlayed(key) // the glossary's Cards tab
     }
     if (a.type === 'sellOil' && nextRun.capital > run.capital) play('sell')
     if (a.type === 'sellWell') play('coin')
@@ -93,6 +98,7 @@ export default function App() {
     if (nextRun.capital < run.capital - 1 && a.type === 'endTurn' && !replaying) { play('hit'); setShake(true); setTimeout(() => setShake(false), 350) }
     if (replaying) replay(nextRun, a.type === 'endTurn' ? run : nextRun)
     if (nextRun.stage > run.stage) setEraTo(nextRun.stage) // a new era: turn the page
+    if (coach !== null && stepDone(coach, a, run, nextRun)) { if (coach + 1 >= STEPS.length) endCoach(); else setCoach(coach + 1) }
     if (a.type === 'buyCard' || a.type === 'buyProspect' || a.type === 'buyBucket' || a.type === 'buyItem' || a.type === 'skim' || a.type === 'payDividends' || (a.type === 'upgradeCard' && nextRun.upgradeCost > run.upgradeCost)) play('coin')
     setRun(nextRun)
   }
@@ -223,7 +229,9 @@ export default function App() {
   const [pendingBonus, setPendingBonus] = useState<BonusKey | null>(null)
   function start(bonus: BonusKey) {
     if (!welcomeSeen()) { setPendingBonus(bonus); setScreen('welcome'); return }
-    const r = newRun(Math.floor(Math.random() * 2 ** 31), bonus, loadUnlocks())
+    const tutorial = wantTutorial()
+    const r = newRun(Math.floor(Math.random() * 2 ** 31), bonus, loadUnlocks(), { tutorial })
+    setCoach(tutorial ? 0 : null)
     runStarted(r.seed, bonus)
     setRun(r)
     setScreen('run')
@@ -232,6 +240,7 @@ export default function App() {
   }
 
   const previewPage = new URLSearchParams(location.search).get('preview')
+  const coachView = tape ? undefined : coachFor(coach, run, () => { dispatch({ type: 'skipTutorial' }); endCoach() }, () => setCoach(c => (c === null ? c : c + 1)))
   let body: JSX.Element
   if (previewPage === 'cards') body = <CardGallery />
   else if (previewPage === 'sounds') body = <SoundBoard />
@@ -243,7 +252,7 @@ export default function App() {
   else if (screen === 'bonus') body = <BonusPick onPick={start} onBack={() => setScreen('intro')} />
   else if (screen === 'welcome') body = <Welcome onBegin={() => { markWelcomed(); start(pendingBonus ?? 'threeOil') }} />
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />
-  else if (run.phase === 'shop' && !tape) body = <ShopScreen run={run} dispatch={dispatch} />
+  else if (run.phase === 'shop' && !tape) body = <ShopScreen run={run} dispatch={dispatch} coach={coachView} />
   else if (run.phase === 'lost' && !tape) body = <CrashOut run={run} bailout={bailout} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
   else if (run.phase === 'stageComplete' && !tape) body = <StageComplete run={run} runId={wonRunId} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} onScoreboard={() => setScreen('scoreboard')} onContinue={() => dispatch({ type: 'continue' })} />
   else if (run.phase === 'incorporate') body = <>{run.stage >= 4 ? <BigOilScreen run={run} dispatch={dispatch} /> : run.stage >= 3 ? <MultinationalScreen run={run} dispatch={dispatch} /> : <IncorporateScreen run={run} dispatch={dispatch} />}{eraTo && <EraTransition to={eraTo} onDone={() => setEraTo(null)} />}</>
@@ -255,7 +264,7 @@ export default function App() {
   )
   else body = (
     <>
-      {mobile ? <MobileGame run={run} dispatch={dispatch} /> : <GameScreen run={run} dispatch={dispatch} />}
+      {mobile ? <MobileGame run={run} dispatch={dispatch} coach={coachView} /> : <GameScreen run={run} dispatch={dispatch} coach={coachView} />}
       {run.phase === 'roundWon' && !tape && <RoundSummary key={run.round} run={run} dispatch={dispatch} onContinue={() => dispatch({ type: 'continue' })} />}
     </>
   )
@@ -269,7 +278,7 @@ export default function App() {
       saveRun({ id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run), outcome: 'Quit', gold: null, completed: false, stageGold: run.gold })
       runEnded(run.seed, { outcome: 'quit', stage: run.stage, round: run.round, roundsReached: roundsReached(run) })
     }
-    setTape(null); setActing(null); setRun(null); setScreen('intro')
+    setTape(null); setActing(null); setRun(null); setScreen('intro'); setCoach(null)
   }
   const adminProps = {
     onToggle: setAdmin,
@@ -277,7 +286,7 @@ export default function App() {
     inTurn: run?.phase === 'turn', stage: run?.stage ?? 1,
   }
   const badge = run?.admin && screen === 'run' ? <span className="admin-badge cl-label">Admin playtest</span> : null
-  const termToast = newTerm ? <div className="term-toast" role="status"><span className="cl-label">New in the glossary</span><b>{newTerm}</b><span className="res-note">Settings › Glossary</span></div> : null
+  const termToast = newTerm ? <div className="term-toast" role="status"><span className="cl-label">New in the glossary</span><b>{newTerm}</b><span className="res-note">Glossary › The business</span></div> : null
   const featToast = newFeat ? <div className={`term-toast term-toast--feat ${termToast ? 'is-raised' : ''}`} role="status"><span className="cl-label">Achievement</span><b>{newFeat}</b><span className="res-note">Front page › Achievements</span></div> : null
   const fireToast = fireNote && screen === 'run' ? <div className="term-toast term-toast--fire" role="alert"><span className="cl-label">Fire!</span><b>{fireNote}</b></div> : null
   const overlays = <>{fireToast}<SettingsPanel onQuit={inRun ? quitRun : undefined} admin={adminProps} /><InstallPrompt />{badge}{termToast}{featToast}</>

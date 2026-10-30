@@ -2,7 +2,7 @@
 // enemies and field in a scrolling middle, and the hand and actions in a dock
 // within thumb reach. Cards take two taps (read, then play) so nothing is
 // played by accident on a small screen.
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, THREATS, bossRound, roleLabel } from '../engine/data'
 import {
@@ -16,13 +16,23 @@ import { TruthClock } from './TruthClock'
 import { Portrait } from './Portrait'
 import { CardView } from './CardView'
 import { iconUrl } from './icons'
-import { SettingsButton } from './Settings'
+import { GlossaryButton, SettingsButton } from './Settings'
 import { PileView } from './PileView'
+import { Coach } from './Coach'
+import { lets, lit as coachLit, type CoachView } from './tutorial'
 
-interface Props { run: Run; dispatch: (a: Action) => void; acting?: Beat | null }
+interface Props { run: Run; dispatch: (a: Action) => void; acting?: Beat | null; coach?: CoachView }
 const art = (path: string) => `${import.meta.env.BASE_URL}art/${path}`
 
-export function MobileGame({ run, dispatch, acting }: Props) {
+export function MobileGame({ run, dispatch, acting, coach }: Props) {
+  const cl = (f: Parameters<typeof coachLit>[1]) => coachLit(coach, f)
+  // the tutorial: bring what it's talking about into view (a new Well card lands at the far end of the hand)
+  const root = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!coach) return
+    const t = setTimeout(() => root.current?.querySelectorAll('.is-coached').forEach(el => el.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })), 400)
+    return () => clearTimeout(t)
+  }, [coach?.no, run.hand.length]) // eslint-disable-line react-hooks/exhaustive-deps
   const lit = (k: Beat['kind']) => (acting?.kind === k ? 'is-acting' : '')
   const [selected, setSelected] = useState<number | null>(null)
   const [plotMenu, setPlotMenu] = useState<number | null>(null)
@@ -51,6 +61,8 @@ export function MobileGame({ run, dispatch, acting }: Props) {
   function tapCard(id: number) {
     setPlotMenu(null)
     if (shredding) { dispatch({ type: 'shred', cardId: id }); setShredding(false); return }
+    const key = run.hand.find(c => c.id === id)?.key
+    if (key && !lets.card(coach, key)) return
     if (scrapping && sel && id !== sel.id) { dispatch({ type: 'play', cardId: sel.id, target: id }); setSelected(null); return }
     if (selected === id) { if (selCheck?.ok && !needsTarget && !scrapping) playSelected(); else setSelected(null); return }
     setSelected(id)
@@ -62,15 +74,15 @@ export function MobileGame({ run, dispatch, acting }: Props) {
   }
 
   return (
-    <div className="m-game">
+    <div className="m-game" ref={root}>
       <header className="m-hud">
         <div className="m-hud__when">
           <span className="cl-label">{st >= 4 && run.round >= bossRound(4) ? 'The Truth' : `Round ${run.round}/4`} · Turn {run.turn}</span>
           {st === 2 && run.turn <= CONFIG.quickWinTurns && <span className="cl-label m-hud__hint">Exposure −{CONFIG.quickWinDrop} if won by turn {CONFIG.quickWinTurns}</span>}
-          <div className="m-hud__year"><b className="cl-display">{year(st, run.round)}</b><SettingsButton /></div>
+          <div className="m-hud__year"><b className="cl-display">{year(st, run.round)}</b><GlossaryButton /><SettingsButton /></div>
           <div className="m-pips">{(st >= 4 && run.round >= bossRound(4) ? [1, 2, 3, 4, 5] : [1, 2, 3, 4]).map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 && st < 4 ? 'is-boss' : ''} ${i === 5 ? 'is-truth' : ''}`} />)}</div>
         </div>
-        <button type="button" className={`m-hud__money ${lit('money')}`} onClick={() => setSheet(true)} aria-label="Open the ledger">
+        <button type="button" className={`m-hud__money ${lit('money')} ${cl('capital')}`} onClick={() => setSheet(true)} aria-label="Open the ledger">
           <span className="m-hud__cap">
             <span className="cl-label">Capital</span>
             <b className={`cl-num ${run.capital <= debtPerTurn(run) * 2 ? 'cl-minus' : ''}`}>{money(run.capital, st)}</b>
@@ -86,7 +98,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
 
       <main className="m-main" onClick={e => { if (e.target === e.currentTarget) { setSelected(null); setPlotMenu(null) } }}>
 
-        <section className="m-threats" aria-label="Liabilities">
+        <section className={`m-threats ${cl('threat')}`} aria-label="Liabilities">
           {run.fire > 0 && !run.threats.some(t => !t.beaten) && <span className="cl-label m-prompt">Every liability is beaten. Put the fire out to end the round.</span>}
           {needsTarget && <span className="cl-label m-prompt">{stopping ? 'Tap the move to stop' : 'Tap a liability to hit'}</span>}
           {run.threats.map(t => {
@@ -131,7 +143,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
         </section>
 
         {run.fire > 0 && (
-          <section className={`m-fire ${lit('fire')}`} aria-label={`${fires(run.fire)} burning`}>
+          <section className={`m-fire ${lit('fire')} ${cl('fire')}`} aria-label={`${fires(run.fire)} burning`}>
             <img src={art('icons/fire.png')} alt="" />
             <div><b className="cl-label">{fires(run.fire)} burning{run.fireBy ? ` · started by ${run.fireBy}` : ''} · pumps stopped</b><span>End of turn: {fireTarget(run)}</span></div>
           </section>
@@ -143,7 +155,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
 
         <section aria-label="Your field">
           <div className="m-label"><span className="cl-label">Your {st >= 3 ? 'rigs' : st >= 2 ? 'fields' : 'field'} · {FIELD_PLACE[st] ?? FIELD_PLACE[1]}</span>{run.current.prorate && <span className="cl-label cl-minus">Prorated</span>}{run.fire > 0 && <span className="cl-label field__fireway">Fire burns ←</span>}</div>
-          <div className="m-field">
+          <div className={`m-field ${cl('field')}`}>
             {run.plots.length === 0 && <div className="m-plot m-plot--none">{st >= 3 ? `No Rigs. Build one at ${st >= 4 ? 'the Investor Portal' : 'the Trading Floor'}.` : st >= 2 ? 'No Wells. Play a Steel Derrick to build one.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
             {run.plots.map((w, i) => {
               const marked = run.marked === i && !!w
@@ -168,14 +180,14 @@ export function MobileGame({ run, dispatch, acting }: Props) {
           {plotMenu !== null && run.plots[plotMenu] && (
             <div className="m-plotmenu">
               <span>{plotName(run, plotMenu)}</span>
-              <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < 1 || !!run.plots[plotMenu]?.faithful} onClick={() => { dispatch({ type: 'sellWell', plot: plotMenu }); setPlotMenu(null) }}>Sell · 1 AP · {money(wellValue(run.plots[plotMenu]!), st, true)}</button>
+              <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < 1 || !!run.plots[plotMenu]?.faithful || !lets.other(coach)} onClick={() => { dispatch({ type: 'sellWell', plot: plotMenu }); setPlotMenu(null) }}>Sell · 1 AP · {money(wellValue(run.plots[plotMenu]!), st, true)}</button>
               <button type="button" className="cl-btn cl-btn--small" onClick={() => setPlotMenu(null)}>Keep</button>
             </div>
           )}
         </section>
 
         <section className={`m-stats ${lit('oil')}`}>
-          <div className={run.fire && run.oil > 0 ? 'is-burning' : ''}>
+          <div className={`${run.fire && run.oil > 0 ? 'is-burning' : ''} ${cl('stock')}`}>
             <span className="cl-label">Stockpile</span>
             <b className="cl-num">{run.oil}/{run.storage}</b>
             <span className="m-barrels">{Array.from({ length: run.storage }, (_, i) => <i key={i} className={i < run.oil ? 'is-full' : ''} />)}</span>
@@ -196,6 +208,7 @@ export function MobileGame({ run, dispatch, acting }: Props) {
       </main>
 
       <footer className="m-dock">
+        {coach && <Coach view={coach} mobile />}
         {sel && selDef ? (
           <div className="m-detail">
             <div className="m-detail__text">
@@ -207,14 +220,14 @@ export function MobileGame({ run, dispatch, acting }: Props) {
               ? <span className="cl-label m-detail__hint">Tap a card to destroy ↓</span>
               : needsTarget
               ? <span className="cl-label m-detail__hint">{stopping ? 'Tap a move ↑' : 'Tap a liability ↑'}</span>
-              : <button type="button" className="cl-btn cl-btn--primary" onClick={playSelected}>Play · {apCost(run, sel)} AP</button>)}
+              : <button type="button" className={`cl-btn cl-btn--primary ${coach?.play === sel.key ? 'is-coached' : ''}`} onClick={playSelected}>Play · {apCost(run, sel)} AP</button>)}
           </div>
         ) : (
           <div className="m-actions">
             <button type="button" className={`cl-btn cl-btn--small m-pilebtn ${lit('shuffle')}`} onClick={() => setPile('draw')}>Draw {run.draw.length}</button>
             <button type="button" className="cl-btn cl-btn--small m-pilebtn" onClick={() => setPile('discard')}>Discard {run.discard.length}</button>
-            {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose No. {weakestWell(run) + 1}</button>}
-            {run.items.includes('paperShredder') && <button type="button" className="cl-btn cl-btn--small" disabled={run.shredded || !run.hand.length} onClick={() => setShredding(!shredding)}>{run.shredded ? 'Shredded' : shredding ? 'Cancel shred' : 'Shred a card'}</button>}
+            {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < CONFIG.firebreakAP || !lets.other(coach)} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose No. {weakestWell(run) + 1}</button>}
+            {run.items.includes('paperShredder') && <button type="button" className="cl-btn cl-btn--small" disabled={run.shredded || !run.hand.length || !lets.other(coach)} onClick={() => setShredding(!shredding)}>{run.shredded ? 'Shredded' : shredding ? 'Cancel shred' : 'Shred a card'}</button>}
             {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
           </div>
         )}
@@ -223,21 +236,22 @@ export function MobileGame({ run, dispatch, acting }: Props) {
           {run.hand.length === 0 && <span className="res-note m-hand__empty">No cards in hand.</span>}
           {run.hand.map((c, i) => {
             const chk = canPlay(run, c)
-            return <div key={c.id} className="hand__slot" style={{ animationDelay: `${i * 50}ms` }}>
-              <CardView card={c} stage={st} apCost={apCost(run, c)} playable={chk.ok || shredding || (scrapping && c.id !== selected)} why={chk.why} selected={selected === c.id} marked={shredding || (scrapping && c.id !== selected) ? 'destroy' : undefined} onClick={() => tapCard(c.id)} />
+            const ok = lets.card(coach, c.key)
+            return <div key={c.id} className={`hand__slot ${coach?.play === c.key && selected !== c.id ? 'is-coached' : ''}`} style={{ animationDelay: `${i * 50}ms` }}>
+              <CardView card={c} stage={st} apCost={apCost(run, c)} playable={ok && (chk.ok || shredding || (scrapping && c.id !== selected))} why={chk.why} selected={selected === c.id} marked={shredding || (scrapping && c.id !== selected) ? 'destroy' : undefined} onClick={() => tapCard(c.id)} />
             </div>
           })}
         </div>
 
         <div className="m-bar">
-          <div className="ap" aria-label={`${run.ap} action points left`}>
+          <div className={`ap ${cl('ap')}`} aria-label={`${run.ap} action points left`}>
             <span className="cl-label">AP</span>
             {Array.from({ length: Math.max(run.ap, CONFIG.baseAP) }, (_, i) => <span key={i} className={`ap-coin ${i < run.ap ? 'is-on' : ''}`} />)}
           </div>
-          <button type="button" className="cl-btn cl-btn--small m-sell" disabled={run.ap < sellAP(run) || run.oil < 1 || run.current.refuse} onClick={() => dispatch({ type: 'sellOil' })}>
+          <button type="button" className={`cl-btn cl-btn--small m-sell ${cl('sell')}`} disabled={run.ap < sellAP(run) || run.oil < 1 || run.current.refuse || !lets.sell(coach)} onClick={() => dispatch({ type: 'sellOil' })}>
             {run.current.refuse ? 'Refused' : <>Sell {run.oil} oil<b className="cl-num"> {money(run.oil * netPrice(run) * (run.doubleSale ? 2 : 1), st, true)}</b>{st >= 3 && ` · ${sellAP(run)} AP`}</>}
           </button>
-          <button type="button" className={`cl-btn end-turn ${run.ap === 0 ? 'cl-btn--primary' : ''}`} onClick={() => { setSelected(null); setPlotMenu(null); dispatch({ type: 'endTurn' }) }}>End turn</button>
+          <button type="button" className={`cl-btn end-turn ${run.ap === 0 ? 'cl-btn--primary' : ''} ${cl('endTurn')}`} disabled={!lets.endTurn(coach)} onClick={() => { setSelected(null); setPlotMenu(null); dispatch({ type: 'endTurn' }) }}>End turn</button>
         </div>
       </footer>
 

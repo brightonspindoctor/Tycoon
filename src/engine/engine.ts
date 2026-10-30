@@ -2,7 +2,7 @@
 // drives the game screens, the tests and the balance simulator.
 import { CONFIG } from './config'
 import {
-  ATTACK_CARDS, BOSS, CARDS, INCORPORATE_OFFER_2, CASH_POOLS, ENGINE_POOLS, ITEMS, PROSPECTS, PROSPECT_FOR, WATER_FOR, STARTER, THREATS, UPGRADES, shopPool,
+  ATTACK_CARDS, BOSS, TUTORIAL_HANDS, CARDS, INCORPORATE_OFFER_2, CASH_POOLS, ENGINE_POOLS, ITEMS, PROSPECTS, PROSPECT_FOR, WATER_FOR, STARTER, THREATS, UPGRADES, shopPool,
   BOONS, REWARDS, BRIBES, INCORPORATE_OFFER_3, INCORPORATE_OFFER_4, STAGE4_POOL, badBloodFor, TRUTH_PHASES, bossRound, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, boonInfo, landCardFor, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ThreatKind,
 } from './data'
 import { next, pick, shuffle } from './rng'
@@ -113,6 +113,8 @@ export interface Run {
   fireBy?: string // who started the latest fire, for the fire panel
   leftBehind?: { by: string; cards: CardKey[] } // cards a beaten enemy put in your deck this round (the Bank Inspector's report)
   feats?: Feats // for achievements: things the run state alone doesn't show
+  tutorial?: boolean // a new player's first fight, played to a script: the Squatter, and the hands dealt in TUTORIAL_HANDS
+  tutorialOil?: number // the 3 Oil bonus, held back until the tutorial fight is over (the script counts barrels)
 }
 
 /** Kept for achievements. pumped: oil pumped this run; bestHit: most Hold one card removed; scratched: an enemy took Capital this fight; cleanFight: won a stage 3 or 4 fight untouched; quickBoss: beat a boss on turn 1. */
@@ -150,6 +152,7 @@ export type Action =
   | { type: 'pickCard'; key: CardKey }
   | { type: 'leaveShop' }
   | { type: 'continue' }
+  | { type: 'skipTutorial' } // the script stops; the fight goes on as a normal one
 
 // ------------------------------------------------------------------ helpers
 const clone = <T,>(x: T): T => structuredClone(x)
@@ -211,7 +214,7 @@ export function skimRate(r: Run): number {
 export const itemPrice = (r: Run, it: ItemKey) => ITEMS[it].price + (r.items.includes('boardGrudge') ? CONFIG.grudgeMarkup : 0)
 export function price(r: Run): number {
   const base = atWar(r) ? CONFIG.warPrice : r.stage >= 4 ? CONFIG.oilPrice4 : r.stage >= 3 ? CONFIG.oilPrice3 : r.stage >= 2 ? CONFIG.oilPrice2 : CONFIG.oilPrice
-  let p = base - r.short + r.boost + (r.roundBoost ?? 0) + (r.items.includes('refinery') ? 1 : 0)
+  const p = base - r.short + r.boost + (r.roundBoost ?? 0) + (r.items.includes('refinery') ? 1 : 0)
     - r.items.filter(i => i === 'supertanker').length * CONFIG.supertankerCut
   return Math.max(CONFIG.oilFloor, p)
 }
@@ -419,7 +422,7 @@ function loseWell(r: Run, i: number, how: 'burnt' | 'stolen' | 'lost' | 'dry') {
 // ---------------------------------------------------------------- new run
 /** What earlier runs have unlocked: kept by the app, passed in so the engine stays pure. */
 export interface Unlocks { baron?: boolean; proxy?: boolean; geneva?: boolean }
-export function newRun(seed: number, bonus: BonusKey, unlocks: Unlocks = {}): Run {
+export function newRun(seed: number, bonus: BonusKey, unlocks: Unlocks = {}, opts: { tutorial?: boolean } = {}): Run {
   const r: Run = {
     seed, rng: seed, bonus, phase: 'shop', stage: 1, round: 0, turn: 0,
     capital: CONFIG.startCapital, gold: 0, debt: bonus === 'trustFund' ? CONFIG.trustFundDebt : CONFIG.startDebt, ap: 0, cover: 0, nextId: 1,
@@ -441,6 +444,7 @@ export function newRun(seed: number, bonus: BonusKey, unlocks: Unlocks = {}): Ru
   if (bonus === 'gearGraft') r.deck.push(card(r, 'improveGear'), card(r, 'hardGraft'))
   if (bonus === 'oldFaithful') r.plots = [{ output: 1, reserve: 0, faithful: true }]
   if (bonus === 'slushFund') r.items.push('slushFund')
+  if (opts.tutorial) { r.tutorial = true; r.tutorialOil = r.oil; r.oil = 0 }
   startRound(r, 1) // straight into the first fight; the Land Office opens after it
   return r
 }
@@ -652,6 +656,7 @@ function startRound(r: Run, round: number) {
     else { const fresh = STAGE4_POOL.filter(k => !(r.met ?? []).includes(k)); kinds = [pick(r, fresh.length ? fresh : STAGE4_POOL)] }
     r.met = [...(r.met ?? []), ...kinds.filter(k => k !== 'truth')]
   }
+  else if (round === 1 && r.tutorial) kinds = ['squatter']
   else if (round === 1) kinds = [pick(r, cash)]
   else if (round === 2) kinds = [pick(r, engine)]
   else if (round === 3) kinds = [pick(r, cash), pick(r, engine)]
@@ -783,11 +788,32 @@ function beginTurn(r: Run) {
   if (r.current.shutdown) beat(r, 'oil', 'Shut down', `${r.current.shutdown > 1 ? `${r.current.shutdown} Rigs` : 'A Rig'} pumped nothing this turn.`)
   if (claims) beat(r, 'cards', 'New Patent Claim', 'A New Patent Claim is clogging your hand.')
   if (ceases) beat(r, 'cards', 'Cease and Desist', `${ceases > 1 ? `${ceases} Cease and Desist letters` : 'A Cease and Desist letter'} in your hand.`)
+  if (r.tutorial && r.round === 1) dealTutorial(r)
   const n = handSize(r)
   drawUpTo(r, n)
   const loyal = r.round === bossRound(r.stage) && r.items.includes('loyalDirectors') ? 1 : 0
   r.ap = Math.max(0, CONFIG.baseAP + (steamPumpTurn(r) ? 1 : 0) + (r.items.includes('lobbyist') ? CONFIG.lobbyistAP : 0) + loyal - apPenalty)
   if (r.current.apTo1) { r.ap = Math.min(r.ap, 1); beat(r, 'info', 'Tremors', 'You have 1 AP this turn.') }
+}
+
+/** The tutorial: puts this turn's scripted hand on top of the draw pile, taken from the draw or discard pile. */
+function dealTutorial(r: Run) {
+  const want = TUTORIAL_HANDS[r.turn]
+  if (!want) return
+  const top: Card[] = []
+  for (const k of want) {
+    const from = r.draw.some(c => c.key === k) ? r.draw : r.discard
+    const i = from.findIndex(c => c.key === k)
+    if (i >= 0) top.push(from.splice(i, 1)[0])
+  }
+  r.draw.push(...top.reverse()) // cards are drawn from the end
+}
+/** The tutorial is over or skipped: the 3 Oil bonus arrives. */
+function endTutorial(r: Run) {
+  r.tutorial = false
+  const oil = r.tutorialOil ?? 0
+  r.tutorialOil = 0
+  if (oil) { r.oil = Math.min(r.storage, r.oil + oil); say(r, `Your ${oil} barrels have arrived.`) }
 }
 
 function drawOne(r: Run): boolean {
@@ -857,6 +883,7 @@ function threatBeaten(r: Run, t: Threat) {
 function fireOut(r: Run) { if (r.phase === 'turn' && !r.fire && !liveThreats(r).length) endRound(r) }
 /** Every enemy beaten and no fire burning: the round is over. */
 function endRound(r: Run) {
+  if (r.tutorial) endTutorial(r)
   {
     // a quick win impresses the board, the boss included
     if (r.stage === 2 && r.turn <= CONFIG.quickWinTurns) expose(r, -CONFIG.quickWinDrop, `Won in ${r.turn} turn${r.turn === 1 ? '' : 's'}`)
@@ -1246,6 +1273,7 @@ function moveText(r: Run, t: Threat): string {
     case 'Spray': return 'Lose $2 and 1 oil.'
     case 'Blow': { const u = blowTarget(r); return u >= 0 ? `Well No. ${u + 1} is destroyed.${t.hold < t.maxHold ? ` +${Math.min(2, t.maxHold - t.hold)} Hold.` : ''}` : 'Pressure builds. Nothing is shaking, so nothing happens.' }
     case 'Picket': return 'Lose $2.'
+    case 'Shakedown': return `Lose $${CONFIG.shakedown}.`
     case 'Sabotage': return wellCount(r) ? 'Destroys a random Well.' : 'Looks for a Well to wreck.'
     case 'Torch': return 'Starts a fire.'
     case 'Audit': return 'Your debt doubles next turn.'
@@ -1435,6 +1463,7 @@ function endTurn(r: Run) {
         break
       }
       case 'Picket': dmg += 2; break
+      case 'Shakedown': dmg += CONFIG.shakedown; break
       case 'Sabotage':
       { // one random Well
         const standing = r.plots.map((w, i) => (exposed(w) ? i : -1)).filter(i => i >= 0)
@@ -1691,6 +1720,7 @@ function adminAction(r: Run, op: AdminOp, key?: CardKey, target?: number) {
 
 export function act(prev: Run, a: Action): Run {
   const r = clone(prev)
+  if (a.type === 'skipTutorial') { if (r.tutorial) endTutorial(r); return r }
   if (a.type === 'admin') { if (r.admin && r.phase !== 'lost') adminAction(r, a.op, a.card, a.target); return r }
   if (r.phase === 'shop') { shopAction(r, a); return r }
   if (r.phase === 'incorporate') { if (INCORPORATE_ACTIONS.includes(a.type)) shopAction(r, a); return r }

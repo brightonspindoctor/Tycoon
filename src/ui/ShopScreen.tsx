@@ -8,12 +8,14 @@ import { TruthClock } from './TruthClock'
 import { CONFIG } from '../engine/config'
 import { CardView } from './CardView'
 import { iconUrl } from './icons'
-import { SettingsButton } from './Settings'
+import { GlossaryButton, SettingsButton } from './Settings'
+import { Coach } from './Coach'
+import { lit as coachLit, type CoachView } from './tutorial'
 
-interface Props { run: Run; dispatch: (a: Action) => void }
+interface Props { run: Run; dispatch: (a: Action) => void; coach?: CoachView }
 type Mode = null | 'destroy' | 'upgrade' | 'duplicate'
 
-export function ShopScreen({ run, dispatch }: Props) {
+export function ShopScreen({ run, dispatch, coach }: Props) {
   const [mode, setMode] = useState<Mode>(null)
   const st = run.stage
   const rate = skimRate(run)
@@ -36,9 +38,10 @@ export function ShopScreen({ run, dispatch }: Props) {
           <span className="cl-label">Stage {st} · {run.round === 0 ? 'Before you start' : `After round ${run.round}`}</span>
           <h1 className="cl-display game__title">{SHOP_NAME[st] ?? SHOP_NAME[2]}</h1>
         </div>
-        <div className="shop__head-right"><SettingsButton /><div className="shop__next"><span className="cl-label">{nextLabel}</span></div></div>
+        <div className="shop__head-right"><GlossaryButton /><SettingsButton /><div className="shop__next"><span className="cl-label">{nextLabel}</span></div></div>
       </header>
 
+      {coach && <Coach view={coach} />}
       <div className="shop__grid">
         <div className="shop__main">
           <section>
@@ -63,7 +66,7 @@ export function ShopScreen({ run, dispatch }: Props) {
                   </button>
                 )}
                 <span className="res-note">One per visit. {rigCount(run)} of {CONFIG.maxPlots} Rigs. The price climbs {money(CONFIG.rigStep, st)} each time.</span>
-              </div> : <div className="prospect-slot">
+              </div> : <div className={`prospect-slot ${run.shop.prospectSold ? '' : coachLit(coach, 'prospect')}`}>
                 {run.shop.prospectSold ? <div className="sold">Sold out</div> : <CardView card={{ id: -9, key: prospectKey, uses: CARDS[prospectKey].uses }} stage={st} price={money(run.prospectPrice, st)} playable={can(run.prospectPrice)} onClick={() => dispatch({ type: 'buyProspect' })} />}
                 <span className="res-note">{stage2
                   ? `One per visit. The price climbs ${money(CONFIG.derrickStep, st)} each time. ${run.plots.length >= CONFIG.maxPlots && !run.plots.some(p => !p) ? 'All 5 plots are working.' : 'Claims its own plot.'}`

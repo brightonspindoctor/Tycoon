@@ -506,6 +506,7 @@ button.m-threat { cursor: pointer; }
 .switch.is-on .switch__knob { background: var(--on-accent); }
 .share-icon { display: inline-block; vertical-align: -3px; }
 .game__meta .settings-btn { align-self: center; }
+.game__meta .glossary-btn { margin-right: -12px; }
 .shop__head-right { display: flex; gap: 16px; align-items: flex-end; }
 .m-hud__year { display: flex; align-items: center; gap: 8px; }
 .m-hud .settings-btn { width: 30px; height: 30px; min-height: 0; }
@@ -1008,3 +1009,43 @@ button.m-threat { cursor: pointer; }
 .card:has(> .card-price) .cl-card__art { height: 58px; }
 /* notifications carry their own timestamps: no "2 / 5" counter sitting on the board */
 .tape-wrap--feed .tape__foot { display: none; }
+
+/* the glossary's tabs and its Cards tab: every card you have played, each one opening full size */
+.glossary__tabs { flex: none; }
+.glossary__tabs button { padding: 8px 4px; }
+.glossary__era { display: flex; flex-direction: column; gap: 6px; }
+.glossary__cards { display: flex; flex-wrap: wrap; gap: 8px; }
+.glossary__card { display: flex; flex-direction: column; gap: 12px; }
+.glossary__back { align-self: flex-start; }
+.glossary__card-row { display: flex; gap: 16px; align-items: flex-start; }
+.glossary__card-face { flex: none; }
+.glossary__card-face .card { cursor: default; }
+.glossary__facts { flex: 1; min-width: 0; }
+.glossary__flavour { margin: 0; font-style: italic; color: var(--ink-muted); }
+.glossary-btn svg { width: 18px; height: 18px; }
+.m-hud .glossary-btn svg { width: 16px; height: 16px; }
+@media (max-width: 460px) { .glossary__card-row { flex-direction: column; align-items: center; } .glossary__facts { width: 100%; } }
+
+/* the tutorial's coach: what to do and why, with the thing it means lit up */
+.coach { display: flex; flex-direction: column; gap: 6px; background: #1e1610; color: #f6efdc; padding: 12px 16px 14px; border-radius: 14px;
+  box-shadow: 0 10px 30px -8px rgba(0,0,0,.5); font-family: var(--font-body); animation: rise .3s ease-out; }
+.coach__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.coach .cl-label { color: #c9b991; }
+.coach__skip { background: none; border: 0; padding: 2px 0; color: #c9b991; font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer; }
+.coach__text { margin: 0; font-size: 17px; line-height: 24px; }
+.coach__next { align-self: flex-end; }
+.game > .coach { position: absolute; top: 412px; left: 352px; width: 746px; z-index: 12; } /* over the events log, between the field and your hand */
+.shop > .coach { margin: 0 0 14px; }
+.coach--m { padding: 10px 12px 12px; border-radius: 12px; margin-bottom: 6px; }
+.coach--m .coach__text { font-size: 15px; line-height: 21px; }
+.is-coached { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: var(--cl-radius); animation: coach-pulse 1.4s ease-in-out infinite; position: relative; z-index: 2; }
+@keyframes coach-pulse { 0%, 100% { outline-color: var(--accent); } 50% { outline-color: color-mix(in srgb, var(--accent) 25%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .is-coached { animation: none; } }
+/* a card to play: the card itself is lit, and its slot keeps its deal-in animation */
+.hand__slot.is-coached { outline: none; animation: deal .35s ease-out both; position: static; z-index: auto; }
+.m-hand .hand__slot.is-coached { animation-name: deal-up; }
+.hand__slot.is-coached > .card { outline: 3px solid var(--accent); outline-offset: 3px; animation: coach-pulse 1.4s ease-in-out infinite; }
+.m-hand .hand__slot.is-coached > .card { outline-offset: -4px; }
+.m .coach--m { padding: 8px 12px 10px; gap: 4px; }
+.m .coach--m .coach__text { font-size: 14px; line-height: 19px; }
+.m .coach--m .coach__next { padding: 4px 14px; }

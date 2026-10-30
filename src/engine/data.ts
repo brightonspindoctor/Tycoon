@@ -363,6 +363,7 @@ export type ThreatKind = 'blowout' | 'strike' | 'inspector' | 'railroad' | 'clai
   | 'muckraker' | 'combine' | 'clawback' | 'patentHolder' | 'saboteur' | 'commission' | 'proxyFight'
   | 'spill' | 'rivals' | 'climateScience' | 'diversified' | 'briberyScandal' | 'geneva'
   | 'fracking' | 'greenAlternatives' | 'deepwaterDisaster' | 'spilledTanker' | 'greenPoliticians' | 'war' | 'truth'
+  | 'squatter' // the tutorial's first fight only
 
 export type ThreatRole = 'cash' | 'engine' | 'boss'
 
@@ -415,6 +416,8 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   greenPoliticians: { role: 'cash', name: 'Green Politicians', hold: 56, weak: 'Dirty', resist: 'Lobby', chip: CONFIG.chip4, ticks: [1, 4], cycle: ['Windfall Tax', 'Hearings', 'Subpoena', 'Asset Freeze', 'Climate Bill'], portrait: 'greenPoliticians' },
   war: { role: 'engine', name: 'War', hold: 54, weak: 'Legal', resist: 'Bury', chip: 5, ticks: [1, 4], cycle: ['Requisition', 'Refugee Crisis', 'Pipeline Strike', 'Profiteering Probe', 'Ceasefire Talks'], whenBeaten: 'Prices and output recover', portrait: 'war' },
   truth: { role: 'boss', name: 'The Truth', hold: CONFIG.truthPhaseHold, cycle: ['Sea Level Rise', 'Childhood Asthma', 'Water Pollution', 'Suppressed Development', 'Wildfire Season', 'Crop Failure'], portrait: 'theTruth' },
+  // the tutorial: only ever met in a new player's first fight. Borrows the Claim Jumper's portrait until his own is drawn
+  squatter: { role: 'cash', name: 'The Squatter', hold: CONFIG.squatterHold, cycle: ['Shakedown', 'Shakedown', 'Torch'], portrait: 'claimJumper' },
   geneva: { role: 'boss', name: 'The Geneva Climate Summit', hold: 47, resist: 'Dirty', chip: 3, cycle: ['Expert Testimony', 'Draft Declaration', 'Resolution'], movesFirst: 'Opening Session', portrait: 'geneva' },
 }
 
@@ -423,6 +426,13 @@ export const CASH_POOL: ThreatKind[] = ['inspector', 'railroad', 'speculator']
 export const ENGINE_POOL: ThreatKind[] = ['blowout', 'strike', 'claimJumper']
 export const CASH_POOLS: Record<number, ThreatKind[]> = { 1: CASH_POOL, 2: ['muckraker', 'combine', 'clawback'], 3: ['rivals', 'diversified', 'briberyScandal'] }
 export const ENGINE_POOLS: Record<number, ThreatKind[]> = { 1: ENGINE_POOL, 2: ['patentHolder', 'saboteur', 'commission'], 3: ['spill', 'climateScience'] }
+/** The tutorial's four turns: the hand dealt each turn, in order (Prospect adds its two Wells on turn 1). */
+export const TUTORIAL_HANDS: Record<number, CardKey[]> = {
+  1: ['prospect', 'hardGraft', 'hiredHand', 'improveGear', 'lawyerUp'],
+  2: ['improveGear', 'hiredHand', 'bucket', 'shoreUp', 'lawyerUp'],
+  3: ['lawyerUp', 'hiredHand', 'shoreUp', 'bucket', 'improveGear'],
+  4: ['bucket', 'hiredHand', 'lawyerUp', 'improveGear', 'shoreUp'],
+}
 export const BOSS: Record<number, ThreatKind> = { 1: 'baron', 2: 'proxyFight', 3: 'geneva', 4: 'truth' }
 /** Stage 4's enemies: four are met, one per round, never the same one twice in a run. */
 export const STAGE4_POOL: ThreatKind[] = ['fracking', 'greenAlternatives', 'deepwaterDisaster', 'spilledTanker', 'greenPoliticians', 'war']

@@ -176,6 +176,9 @@ export const CONFIG = {
   railroadHoldUp: 2, // the Railroad Agent's Raise Rates once oil already sells for $1: she gains this much Hold instead
   claimJumperFires: 1, // fires the Claim Jumper starts as he's beaten
   oilCarriesOver: true,
+  // the tutorial: a first fight against the Squatter, played to a script
+  squatterHold: 7,
+  shakedown: 3, // the Squatter's Shakedown
   // achievements: the bar each one has to clear
   achievements: { gusher: 100, cashRich: 100, bulletproof: 25, mercyRule: 30, coolCustomer: 20, leanMachine: 12, paperTrail: 15, dynasty: 20, richCompany: 50 },
   // hidden tactics: the bar each one has to clear to earn its badge at the end of a won game

@@ -12,12 +12,15 @@ import { TruthClock } from './TruthClock'
 import { CardView } from './CardView'
 import { iconUrl } from './icons'
 import { ThreatPanel } from './ThreatPanel'
-import { SettingsButton } from './Settings'
+import { GlossaryButton, SettingsButton } from './Settings'
 import { PileView } from './PileView'
+import { Coach } from './Coach'
+import { lets, lit as coachLit, type CoachView } from './tutorial'
 
-interface Props { run: Run; dispatch: (a: Action) => void; acting?: Beat | null }
+interface Props { run: Run; dispatch: (a: Action) => void; acting?: Beat | null; coach?: CoachView }
 
-export function GameScreen({ run, dispatch, acting }: Props) {
+export function GameScreen({ run, dispatch, acting, coach }: Props) {
+  const cl = (f: Parameters<typeof coachLit>[1]) => coachLit(coach, f)
   const lit = (k: Beat['kind']) => (acting?.kind === k ? 'is-acting' : '')
   const [selected, setSelected] = useState<number | null>(null)
   const [plotMenu, setPlotMenu] = useState<number | null>(null)
@@ -36,6 +39,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
     // a destroy card is waiting for its victim
     if (sel && scrapping && id !== sel.id) { dispatch({ type: 'play', cardId: sel.id, target: id }); setSelected(null); return }
     const c = run.hand.find(x => x.id === id)!
+    if (!lets.card(coach, c.key)) return
     if (!canPlay(run, c).ok) return
     // only ask for a target when the card could go to more than one enemy, or a card in hand
     if (targetsFor(run, c).length > 1 || handTargetsFor(run, c).length > 0) { setSelected(selected === id ? null : id); return }
@@ -66,12 +70,13 @@ export function GameScreen({ run, dispatch, acting }: Props) {
               </div>
             )
           })()}
+          <GlossaryButton />
           <SettingsButton />
         </div>
       </header>
 
       <div className="game__grid">
-        <section className="col-threats" aria-label="Liabilities">
+        <section className={`col-threats ${cl('threat')}`} aria-label="Liabilities">
           <span className="cl-label">Liabilities{targeting ? (stopping ? ' · Choose a move to stop' : ' · Choose a target') : ''}</span>
           {run.threats.map(t => (
             <ThreatPanel key={t.id} run={run} threat={t} acting={acting?.who === t.id}
@@ -81,7 +86,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
               onAdminHit={run.admin && run.phase === 'turn' ? () => dispatch({ type: 'admin', op: 'hold20', target: t.id }) : undefined} />
           ))}
           {run.fire > 0 && (
-            <section className={`hazard ${lit('fire')}`} aria-label={`${fires(run.fire)} burning`}>
+            <section className={`hazard ${lit('fire')} ${cl('fire')}`} aria-label={`${fires(run.fire)} burning`}>
               <div className="hazard__head"><img src={`${import.meta.env.BASE_URL}art/icons/fire.png`} alt="" /><span className="cl-label">{fires(run.fire)} burning{run.fireBy ? ` · started by ${run.fireBy}` : ''}</span><span className="cl-num hazard__level">max {CONFIG.fireMax}</span></div>
               <div className="warn warn--heat"><b>End of turn</b><span>{fireNext}</span></div>
               <span className="hazard__note">{live.length ? 'Pumps stopped.' : 'Every liability is beaten. Put the fire out to end the round.'}</span>
@@ -91,7 +96,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
 
         <section className="col-field" aria-label="Your field">
           <div className="field__label"><span className="cl-label">Your {st >= 3 ? 'rigs' : st >= 2 ? 'fields' : 'field'} · {FIELD_PLACE[st] ?? FIELD_PLACE[1]}</span>{run.current.prorate && <span className="cl-label cl-minus">Prorated: {CONFIG.prorationCap} oil a turn at most</span>}{run.fire > 0 && <span className="cl-label field__fireway">Fire burns ←</span>}</div>
-          <div className="field">
+          <div className={`field ${cl('field')}`}>
             {run.plots.length === 0 && <div className="plot plot--empty-field">{st >= 3 ? `No Rigs. Build one at ${st >= 4 ? 'the Investor Portal' : 'the Trading Floor'}.` : st >= 2 ? 'No Wells. Play a Steel Derrick to build one.' : 'No land yet. Play Prospect to claim 2 plots.'}</div>}
             {run.plots.map((w, i) => {
               const marked = run.marked === i && !!w
@@ -110,13 +115,13 @@ export function GameScreen({ run, dispatch, acting }: Props) {
                   {burning && <span className="plot__flag plot__flag--fire">Burns next</span>}
                   {plotMenu === i && w && (
                     <div className="plot__menu">
-                      <button type="button" className="cl-btn" disabled={run.ap < 1 || !!w.faithful} onClick={() => { dispatch({ type: 'sellWell', plot: i }); setPlotMenu(null) }}>Sell {w.rig ? 'Rig' : w.field ? 'Field' : 'Well'} · 1 AP · {money(wellValue(w), st, true)}</button>
+                      <button type="button" className="cl-btn" disabled={run.ap < 1 || !!w.faithful || !lets.other(coach)} onClick={() => { dispatch({ type: 'sellWell', plot: i }); setPlotMenu(null) }}>Sell {w.rig ? 'Rig' : w.field ? 'Field' : 'Well'} · 1 AP · {money(wellValue(w), st, true)}</button>
                     </div>
                   )}
                 </div>
               )
             })}
-            <div className={`plot plot--stock ${run.fire && run.oil > 0 ? 'plot--burning' : ''} ${lit('oil')}`}>
+            <div className={`plot plot--stock ${run.fire && run.oil > 0 ? 'plot--burning' : ''} ${lit('oil')} ${cl('stock')}`}>
               <span className="cl-label">Stockpile</span>
               <div className="barrels">{Array.from({ length: run.storage }, (_, i) => <span key={i} className={`barrel ${i < run.oil ? 'is-full' : ''}`} />)}</div>
               <span className="plot__name cl-num">{run.oil} / {run.storage} oil</span>
@@ -134,7 +139,7 @@ export function GameScreen({ run, dispatch, acting }: Props) {
         </section>
 
         <aside className="col-money">
-          <section className={`cl-ledger ledger ${lit('money')}`} aria-label="Company ledger">
+          <section className={`cl-ledger ledger ${lit('money')} ${cl('capital')}`} aria-label="Company ledger">
             <div className="cl-ledger__head"><span className="cl-label">Capital</span><span className={`cl-ledger__total ${run.capital <= debtPerTurn(run) * 2 ? 'cl-minus' : ''}`}>{money(run.capital, st)}</span></div>
             <ul className="cl-ledger__rows">
               {run.ledger.slice(-6).map((l, i) => <li key={`${run.turn}-${i}`} className="ink-in"><span>{units(l.label, st)}</span><span className={l.label === 'Brought forward' ? '' : l.amount < 0 ? 'cl-minus' : 'cl-plus'}>{l.label === 'Brought forward' ? money(l.amount, st) : money(l.amount, st, true)}</span></li>)}
@@ -160,12 +165,12 @@ export function GameScreen({ run, dispatch, acting }: Props) {
 
       <footer className="game__foot">
         <div className="action-strip">
-          <div className="ap" aria-label={`${run.ap} action points left`}>
+          <div className={`ap ${cl('ap')}`} aria-label={`${run.ap} action points left`}>
             <span className="cl-label">AP</span>
             {Array.from({ length: Math.max(run.ap, CONFIG.baseAP) }, (_, i) => <span key={i} className={`ap-coin ${i < run.ap ? 'is-on' : ''}`} />)}
             <span className="cl-num">{run.ap}</span>
           </div>
-          <button type="button" className="cl-btn sell-btn" disabled={run.ap < sellAP(run) || run.oil < 1 || run.current.refuse}
+          <button type="button" className={`cl-btn sell-btn ${cl('sell')}`} disabled={run.ap < sellAP(run) || run.oil < 1 || run.current.refuse || !lets.sell(coach)}
             onClick={() => dispatch({ type: 'sellOil' })}>
             {run.current.refuse ? 'Shipment refused' : `Sell ${run.oil} oil · ${sellAP(run)} AP · ${money(run.oil * netPrice(run) * (run.doubleSale ? 2 : 1), st, true)}`}
             {run.fire > 0 && run.oil > 0 && st < 2 && <em> · fire hits Wells next</em>}
@@ -174,8 +179,8 @@ export function GameScreen({ run, dispatch, acting }: Props) {
           {run.amplify && <span className="amplify-badge">Influencers: next card doubled</span>}
           {!!run.current.cardCap && <span className="cap-badge">Subpoena: {run.played ?? 0} of {run.current.cardCap} cards</span>}
           <div className="action-strip__actions">
-            {run.items.includes('paperShredder') && <button type="button" className="cl-btn" disabled={run.shredded || !run.hand.length} onClick={() => { setSelected(null); setShredding(!shredding) }}>{run.shredded ? 'Shredder used this fight' : shredding ? 'Cancel' : 'Paper Shredder · free · once a fight'}</button>}
-            {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn" disabled={run.ap < CONFIG.firebreakAP} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose Well No. {weakestWell(run) + 1}, put out every fire</button>}
+            {run.items.includes('paperShredder') && <button type="button" className="cl-btn" disabled={run.shredded || !run.hand.length || !lets.other(coach)} onClick={() => { setSelected(null); setShredding(!shredding) }}>{run.shredded ? 'Shredder used this fight' : shredding ? 'Cancel' : 'Paper Shredder · free · once a fight'}</button>}
+            {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn" disabled={run.ap < CONFIG.firebreakAP || !lets.other(coach)} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose Well No. {weakestWell(run) + 1}, put out every fire</button>}
           </div>
         </div>
         {(scrapping || shredding) && <div className="hand-prompt cl-label">Choose a card in your hand to destroy</div>}
@@ -184,17 +189,19 @@ export function GameScreen({ run, dispatch, acting }: Props) {
           <div className={`hand ${lit('cards')}`}>
             {run.hand.map((c, i) => {
               const chk = canPlay(run, c)
-              return <div key={c.id} className="hand__slot" style={{ animationDelay: `${i * 60}ms` }}>
-                <CardView card={c} stage={st} apCost={apCost(run, c)} playable={chk.ok || shredding || (scrapping && c.id !== selected)} why={chk.why} selected={selected === c.id} marked={shredding || (scrapping && c.id !== selected) ? 'destroy' : undefined} onClick={() => clickCard(c.id)} />
+              const ok = lets.card(coach, c.key)
+              return <div key={c.id} className={`hand__slot ${coach?.play === c.key ? 'is-coached' : ''}`} style={{ animationDelay: `${i * 60}ms` }}>
+                <CardView card={c} stage={st} apCost={apCost(run, c)} playable={ok && (chk.ok || shredding || (scrapping && c.id !== selected))} why={chk.why} selected={selected === c.id} marked={shredding || (scrapping && c.id !== selected) ? 'destroy' : undefined} onClick={() => clickCard(c.id)} />
               </div>
             })}
           </div>
           <div className="pile-col">
             <button type="button" className="pile pile--btn" title="See the discard pile" onClick={() => setPile('discard')}><span className="pile__card pile__card--discard cl-num">{run.discard.length}</span><span className="cl-label">Discard</span></button>
-            <button type="button" className={`cl-btn end-turn ${endReady ? 'cl-btn--primary' : ''}`} onClick={() => { setSelected(null); setShredding(false); dispatch({ type: 'endTurn' }) }}>End turn</button>
+            <button type="button" className={`cl-btn end-turn ${endReady ? 'cl-btn--primary' : ''} ${cl('endTurn')}`} disabled={!lets.endTurn(coach)} onClick={() => { setSelected(null); setShredding(false); dispatch({ type: 'endTurn' }) }}>End turn</button>
           </div>
         </div>
       </footer>
+      {coach && <Coach view={coach} />}
       {pile && <PileView title={pile === 'draw' ? 'Draw pile' : 'Discard pile'} cards={pile === 'draw' ? run.draw : run.discard} stage={st} onClose={() => setPile(null)} />}
       <span className="sr-only">{live.map(t => THREATS[t.kind].name).join(', ')}</span>
     </div>
