@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { act, apCost, canPlay, damageFor, debtPerTurn, intentText, price, production, type Card, type Run, type Threat } from './engine'
+import { act, apCost, canPlay, damageFor, debtPerTurn, intentText, price, production, type Card, type Run } from './engine'
 import { adminStart, ADMIN_DEFAULTS } from './admin'
 import { CONFIG } from './config'
-import { CARDS, INCORPORATE_OFFER_4, STAGE4_POOL, type CardKey, type ThreatKind } from './data'
+import { CARDS, INCORPORATE_OFFER_4, STAGE4_POOL, THREATS, type CardKey, type ThreatKind } from './data'
 
 /** On the first Big Oil screen: the pick, then the clear-out, still to do. */
 const bigOil = (seed = 7, extra: Partial<typeof ADMIN_DEFAULTS> = {}) => adminStart(seed, { ...ADMIN_DEFAULTS, stage: 4, start: 'incorporate', wells: 2, capital: 60, gold: 6, deck: 'starter', ...extra })
@@ -120,7 +120,7 @@ describe('the Truth clock', () => {
   })
 
   it('a stopped move does not move it', () => {
-    let r = inStage4(['shoreUp'], 'greenPoliticians')
+    let r = inStage4(['shoreUp'], 'fracking')
     r = moves(r, 1)
     r.hand.push({ id: 7777, key: 'shoreUp', uses: null }); r.deck.push(r.hand[r.hand.length - 1]); r.ap = 2
     r = act(r, { type: 'play', cardId: 7777, target: 900 })
@@ -172,9 +172,17 @@ describe('stage 4 enemies', () => {
 
   it('Green Alternatives heals itself', () => {
     let r = inStage4([], 'greenAlternatives')
-    r.threats[0].hold = 20
+    r.threats[0].hold = 10
     r = moves(r, 1)
-    expect(r.threats[0].hold).toBe(20 + CONFIG.subsidies)
+    expect(r.threats[0].hold).toBe(10 + CONFIG.subsidies)
+    expect(r.threats[0].cover).toBe(CONFIG.greenAltCover)
+  })
+
+  it("Green Politicians' moves can't be blocked", () => {
+    const r = inStage4(['shoreUp'], 'greenPoliticians')
+    const c = r.hand[0]
+    expect(canPlay(r, c).ok).toBe(false)
+    expect(canPlay(r, c).why).toBe("Can't be blocked")
   })
 
   it('Deepwater Disaster has Cover, and more after Containment Fails', () => {
@@ -216,15 +224,27 @@ describe('stage 4 enemies', () => {
 })
 
 describe('the Truth', () => {
-  it('fights in four 25-Hold phases, each weak to one type, taking every other type normally', () => {
+  it('fights in four 35-Hold phases, each weak to one type and resisting another', () => {
     const r = inStage4(['propaganda'], 'truth', 5)
-    const t: Threat = { ...r.threats[0], hold: 25, maxHold: 25 }
+    expect(r.threats[0].phase).toBe(0)
+    expect(CONFIG.truthPhaseHold).toBe(35)
     expect(damageFor('Dirty', 10, 'truth', 0)).toBe(20)
-    expect(damageFor('Lobby', 10, 'truth', 0)).toBe(10)
+    expect(damageFor('Lobby', 10, 'truth', 0)).toBe(5)
+    expect(damageFor('Legal', 10, 'truth', 0)).toBe(10)
     expect(damageFor('Legal', 10, 'truth', 1)).toBe(20)
+    expect(damageFor('Dirty', 10, 'truth', 1)).toBe(5)
     expect(damageFor('Bury', 10, 'truth', 2)).toBe(20)
+    expect(damageFor('Legal', 10, 'truth', 2)).toBe(5)
     expect(damageFor('Lobby', 10, 'truth', 3)).toBe(20)
-    expect(t.phase).toBe(0)
+    expect(damageFor('Bury', 10, 'truth', 3)).toBe(5)
+  })
+
+  it('Tax the Rich: $1 for every gold in your fortune', () => {
+    let r = inStage4([], 'truth', 5)
+    r.threats[0].step = THREATS.truth.cycle.indexOf('Tax the Rich')
+    r.gold = 9; r.capital = 100; r.cover = 0
+    r = act(r, { type: 'endTurn' })
+    expect(r.capital).toBe(100 - 9 - debtPerTurn(r))
   })
 
   it('moves to its next phase instead of falling, and only falls in the last', () => {

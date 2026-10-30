@@ -384,9 +384,10 @@ button.m-threat { cursor: pointer; }
 .m-hand .card { width: 112px; height: 164px; padding: 7px; gap: 3px; overflow: hidden; }
 .m-hand .card .cl-card__cost { width: 22px; height: 22px; font-size: 13px; }
 .m-hand .card .cl-card__name { font-size: 13px; line-height: 15px; }
-.m-hand .card .cl-card__art { flex: 1; height: auto; min-height: 24px; }
+.m-hand .card .cl-card__art { flex: 1; height: auto; min-height: 30px; container-type: size; }
 .m-hand .card .cl-card__effect { flex: none; overflow: visible; }
-.m-hand .card .cl-card__art img { width: auto; height: auto; max-width: 44px; max-height: 100%; aspect-ratio: 1; }
+/* sized from the art box itself (container units): Safari can resolve a % max-height here to nothing, and the picture vanishes */
+.m-hand .card .cl-card__art img { width: min(44px, 100cqh); height: min(44px, 100cqh); max-width: none; max-height: none; flex: none; }
 .m-hand .card .cl-card__era { display: none; }
 .m-hand .card .cl-card__band { font-size: 8px; padding: 2px 0; }
 .m-hand .card .cl-card__effect { font-size: 11px; line-height: 14px; }

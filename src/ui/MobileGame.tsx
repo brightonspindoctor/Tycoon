@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, THREATS, bossRound, roleLabel } from '../engine/data'
 import {
-  apCost, attackPower, phaseName, reserves, weakOf, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, infiltrated, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, turnsLeft, resistOf, attackPower, phaseName, reserves, weakOf, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, infiltrated, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run, type Threat,
 } from '../engine/engine'
 import { FIELD_PLACE, money, units, year } from '../engine/format'
@@ -78,6 +78,7 @@ export function MobileGame({ run, dispatch, acting, coach }: Props) {
       <header className="m-hud">
         <div className="m-hud__when">
           <span className="cl-label">{st >= 4 && run.round >= bossRound(4) ? 'The Truth' : `Round ${run.round}/4`} · Turn {run.turn}</span>
+          {turnsLeft(run) <= CONFIG.stalemateWarn && <span className="cl-label cl-minus m-hud__hint">{turnsLeft(run)} turn{turnsLeft(run) === 1 ? '' : 's'} left to win</span>}
           {st === 2 && run.turn <= CONFIG.quickWinTurns && <span className="cl-label m-hud__hint">Exposure −{CONFIG.quickWinDrop} if won by turn {CONFIG.quickWinTurns}</span>}
           <div className="m-hud__year"><b className="cl-display">{year(st, run.round)}</b><GlossaryButton /><SettingsButton /></div>
           <div className="m-pips">{(st >= 4 && run.round >= bossRound(4) ? [1, 2, 3, 4, 5] : [1, 2, 3, 4]).map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 && st < 4 ? 'is-boss' : ''} ${i === 5 ? 'is-truth' : ''}`} />)}</div>
@@ -125,14 +126,14 @@ export function MobileGame({ run, dispatch, acting, coach }: Props) {
         </div>
       ))(reserves(run)) : <div className="opened threat__rule"><b>Rule</b> {units(d.rule, st)}</div>)}
                   {t.opened && run.turn === 1 && !t.beaten && <div className="opened"><b>Opened with</b> {units(t.opened, st)}</div>}
-                  {!t.beaten && (n => n.length ? <div className="opened infiltrated"><b>Infiltrated</b> −{n.join(', then −')} Hold as your turns end</div> : null)(infiltrated(run, t))}
+                  {!t.beaten && (n => n.length ? <div className="opened infiltrated"><b>Still to come</b> −{n.join(', then −')} Hold as your turns end</div> : null)(infiltrated(run, t))}
                   {t.beaten ? <div className="m-intent m-intent--done">Beaten</div> : t.stopped ? (
                     <div className="m-intent m-intent--stopped"><b>Stopped · {intent(run, t)}</b> <s>{units(intentText(run, t), st)}</s></div>
                   ) : (
                     <div className="m-intent"><b>Next · {intent(run, t)}</b> {units(intentText(run, t), st)}</div>
                   )}
                   <div className="m-traits">
-                    {[weakOf(t.kind, t.phase) && `Weak: ${weakOf(t.kind, t.phase)}`, d.resist && `Resists: ${d.resist}`, d.immune && `Immune: ${d.immune}`].filter(Boolean).join(' · ')}
+                    {[weakOf(t.kind, t.phase) && `Weak: ${weakOf(t.kind, t.phase)}`, resistOf(t.kind, t.phase) && `Resists: ${resistOf(t.kind, t.phase)}`, d.unblockable && 'Unblockable', d.immune && `Immune: ${d.immune}`].filter(Boolean).join(' · ')}
                   </div>
                 </div>
                 {run.admin && run.phase === 'turn' && !t.beaten && !needsTarget && <button type="button" className="cl-btn cl-btn--small admin-hit" onClick={e => { e.stopPropagation(); dispatch({ type: 'admin', op: 'hold20', target: t.id }) }}>−20</button>}

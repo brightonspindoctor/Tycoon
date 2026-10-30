@@ -148,7 +148,14 @@ export const CONFIG = {
   warOutput: 1, // ...but only this much is pumped a turn
   cheapGas: 2, // Fracking: oil −$2 for the round
   moratorium: 10,
-  subsidies: 6, // Green Alternatives: Hold it regains
+  subsidies: 12, // Green Alternatives' Subsidies: Hold it regains
+  gridDeal: 6, // ...and its Grid Deal
+  greenAltCover: 6, // Green Alternatives: Cover every turn
+  propaganda: 5, // Propaganda: Hold now, and again as each of your next 2 turns ends
+  propagandaUp: 7,
+  skimHeat3: 5, // stage 3: every skim adds this much Heat
+  skimClock4: 1, // stage 4: every skim moves the clock on this many hours
+  stalemateWarn: 5, // turns left to win a fight when you're warned
   undercut4: 10,
   blowout4: 12, // Deepwater Disaster
   containment: 8, // its Cover the turn after Containment Fails
@@ -156,15 +163,15 @@ export const CONFIG = {
   claimCost: 5, // a Compensation Claim: must play, pay this
   windfallGold: 2, // Green Politicians
   freezeGold: 3,
-  subpoenaCards: 3, // most cards you can play the turn after a Subpoena
+  subpoenaCards: 2, // most cards you can play the turn after a Subpoena
   requisition: 2, // War: oil lost
   pipelineStrike: 12,
   profiteering: 10,
-  truthPhaseHold: 25, // each of the Truth's four phases
-  seaLevel: 14, // the Truth's attacks, plus truthPerHour for each hour past 1 on the clock as you arrive
-  cropFailure: 12,
+  truthPhaseHold: 35, // each of the Truth's four phases
+  seaLevel: 50, // the Truth's attacks, plus truthPerHour for each hour past 1 on the clock as you arrive
+  cropFailure: 50,
   asthmaGold: 2, // plus 1 for every truthGoldHours past 1
-  truthPerHour: 2,
+  truthPerHour: 0,
   truthGoldHours: 4,
   truthTickEvery: 5, // the Truth moves the clock on with every 5th move it makes
   lobbyistAP: 1,

@@ -359,12 +359,14 @@ function takeGold(r: Run, n: number, who: string) {
 /** What an enemy is weak to now: the Truth's weakness changes with each phase. */
 export const weakOf = (kind: ThreatKind, phase = 0): Family | undefined => (kind === 'truth' ? TRUTH_PHASES[Math.min(phase, TRUTH_PHASES.length - 1)].weak : THREATS[kind].weak)
 /** The Truth's current phase, by name. */
+/** What an enemy resists now: each of the Truth's phases resists one damage type. */
+export const resistOf = (kind: ThreatKind, phase = 0): Family | undefined => (kind === 'truth' ? TRUTH_PHASES[Math.min(phase, TRUTH_PHASES.length - 1)].resist : THREATS[kind].resist)
 export const phaseName = (t: Threat) => (t.kind === 'truth' ? TRUTH_PHASES[Math.min(t.phase ?? 0, TRUTH_PHASES.length - 1)].name : '')
 export function damageFor(family: Family, power: number, kind: ThreatKind, phase = 0): number {
   const t = THREATS[kind]
   if (t.immune === family) return 0
   if (weakOf(kind, phase) === family) return power * 2
-  if (t.resist === family) return Math.floor(power / 2)
+  if (resistOf(kind, phase) === family) return Math.floor(power / 2)
   return power
 }
 /** Hold an attack would actually remove from this enemy now, after its Cover. */
@@ -884,6 +886,7 @@ function fireOut(r: Run) { if (r.phase === 'turn' && !r.fire && !liveThreats(r).
 /** Every enemy beaten and no fire burning: the round is over. */
 function endRound(r: Run) {
   if (r.tutorial) endTutorial(r)
+  if (r.items.includes('lobbyist')) { r.items = r.items.filter(i => i !== 'lobbyist'); say(r, 'The lobbyist has been let go.') } // retained for one fight
   {
     // a quick win impresses the board, the boss included
     if (r.stage === 2 && r.turn <= CONFIG.quickWinTurns) expose(r, -CONFIG.quickWinDrop, `Won in ${r.turn} turn${r.turn === 1 ? '' : 's'}`)
@@ -938,7 +941,7 @@ function hit(r: Run, t: Threat, dmg: number, badBlood = false, ignoreCover = fal
   if (badBlood) { addJunk(r, badBloodFor(r.stage), 'discard'); say(r, 'Bad Blood added to your discard pile.') }
   if (t.hold <= 0 && t.kind === 'truth' && (t.phase ?? 0) < TRUTH_PHASES.length - 1) { // the Truth is only beaten in its last phase
     t.phase = (t.phase ?? 0) + 1; t.hold = CONFIG.truthPhaseHold; t.maxHold = CONFIG.truthPhaseHold; t.poison = []
-    say(r, `The Truth: ${phaseName(t)}. Weak to ${weakOf(t.kind, t.phase)}.`)
+    say(r, `The Truth: ${phaseName(t)}. Weak to ${weakOf(t.kind, t.phase)}, resists ${resistOf(t.kind, t.phase)}.`)
     return
   }
   if (t.hold <= 0) threatBeaten(r, t)
@@ -948,7 +951,7 @@ function hit(r: Run, t: Threat, dmg: number, badBlood = false, ignoreCover = fal
 /** The enemies a card can be aimed at: ones an attack can hurt, or ones not yet stopped. */
 export function targetsFor(r: Run, c: Card): Threat[] {
   const d = cardDef(c)
-  if (d.stop) return liveThreats(r).filter(t => !t.stopped)
+  if (d.stop) return liveThreats(r).filter(t => !t.stopped && !THREATS[t.kind].unblockable)
   if (isAttack(c.key)) return liveThreats(r).filter(t => damageFor(d.family, attackPower(r, d), t.kind, t.phase) > 0)
   return []
 }
@@ -980,7 +983,7 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   if ((c.key === 'bucket' || c.key === 'fireBrigade' ) && !r.fire) return { ok: false, why: 'No fire' }
   if (d.family === 'Skim' && r.capital - Math.max(1, skimRate(r) - (d.skimOff ?? 0)) < 1) return { ok: false, why: 'Not enough Capital' }
   if (d.stop && !liveThreats(r).length) return { ok: false, why: 'No liabilities left' }
-  if (d.stop && !targetsFor(r, c).length) return { ok: false, why: 'Every move is already stopped' }
+  if (d.stop && !targetsFor(r, c).length) return { ok: false, why: liveThreats(r).every(t => THREATS[t.kind].unblockable) ? "Can't be blocked" : 'Every move is already stopped' }
   if (c.key === 'pettyCash' && r.capital - skimRate(r) < 1) return { ok: false, why: 'Not enough Capital' }
   if (isAttack(c.key) && !liveThreats(r).length) return { ok: false, why: 'No liabilities left' }
   if (d.spendCover && attackPower(r, d) <= 0) return { ok: false, why: 'No Cover to spend' }
@@ -1130,7 +1133,13 @@ function playCard(r: Run, c: Card, target?: number) {
       case 'hardGraft': case 'bridgeFuel': r.ap += d.power; break
       case 'pettyCash': case 'expenseAccount': {
         const rate = Math.max(1, skimRate(r) - (d.skimOff ?? 0))
-        if (r.capital - rate >= 1) { money(r, `${d.name} (skim)`, -rate); r.gold += 1; r.stats.skims++; expose(r, d.exposure ?? 1, d.name) }
+        if (r.capital - rate >= 1) {
+          money(r, `${d.name} (skim)`, -rate); r.gold += 1; r.stats.skims++
+          // every skim costs the stage's meter: Exposure in stage 2, Heat in stage 3, an hour on the clock in stage 4
+          if (r.stage >= 4) moveClock(r, CONFIG.skimClock4, d.name)
+          else if (r.stage >= 3) heat(r, CONFIG.skimHeat3, d.name)
+          else expose(r, d.exposure ?? 1, d.name)
+        }
         break
       }
       case 'inheritance': money(r, 'Inheritance', CONFIG.inheritance); break
@@ -1193,6 +1202,8 @@ function shred(r: Run, cardId: number) {
 }
 
 /** AP to sell your oil: 1, or 2 in stage 3. */
+/** Turns left to win this fight, this one included: at the end of the last one, it's lost. */
+export const turnsLeft = (r: Run) => CONFIG.turnLimit - r.turn + 1
 export const sellAP = (r: Run) => (r.stage >= 3 ? CONFIG.sellAP3 : 1)
 function sellOil(r: Run) {
   const ap = sellAP(r)
@@ -1344,7 +1355,7 @@ function moveText(r: Run, t: Threat): string {
     case 'Cheap Gas': return `Oil price −$${CONFIG.cheapGas} for the round.`
     case 'Tremors': return 'Next turn you have 1 AP.'
     case 'Moratorium': return `Lose $${CONFIG.moratorium}.`
-    case 'Subsidies': case 'Grid Deal': return t.hold < t.maxHold ? `Regains ${Math.min(CONFIG.subsidies, t.maxHold - t.hold)} Hold.` : 'Already at full strength. Nothing happens.'
+    case 'Subsidies': case 'Grid Deal': { const n = a === 'Subsidies' ? CONFIG.subsidies : CONFIG.gridDeal; return t.hold < t.maxHold ? `Regains ${Math.min(n, t.maxHold - t.hold)} Hold.` : 'Already at full strength. Nothing happens.' }
     case 'Blowout': return `Lose $${CONFIG.blowout4}.`
     case 'Containment Fails': return `${CONFIG.containment} Cover next turn.`
     case 'Oiled Seabirds': case 'Water Pollution': return `A Compensation Claim in your next hand: must play, −$${CONFIG.claimCost}.`
@@ -1358,6 +1369,7 @@ function moveText(r: Run, t: Threat): string {
     case 'Profiteering Probe': return `Lose $${CONFIG.profiteering}.`
     case 'Sea Level Rise': return `Lose $${truthCash(t, CONFIG.seaLevel)}.`
     case 'Crop Failure': return `Lose $${truthCash(t, CONFIG.cropFailure)}.`
+    case 'Tax the Rich': return `Lose $1 for every gold in your fortune ($${Math.max(0, r.gold)}).`
     case 'Childhood Asthma': return `Takes ${truthGold(t)} gold from your fortune.`
     case 'Suppressed Development': return '−1 AP next turn.'
   }
@@ -1548,7 +1560,7 @@ function endTurn(r: Run) {
       case 'Cheap Gas': r.short += CONFIG.cheapGas; break
       case 'Tremors': r.pending.apTo1 = true; break
       case 'Moratorium': dmg += CONFIG.moratorium; break
-      case 'Subsidies': case 'Grid Deal': { const before = t.hold; t.hold = Math.min(t.maxHold, t.hold + CONFIG.subsidies); if (t.hold > before) say(r, `${a}: +${t.hold - before} Hold.`); break }
+      case 'Subsidies': case 'Grid Deal': { const before = t.hold; t.hold = Math.min(t.maxHold, t.hold + (a === 'Subsidies' ? CONFIG.subsidies : CONFIG.gridDeal)); if (t.hold > before) say(r, `${a}: +${t.hold - before} Hold.`); break }
       case 'Blowout': dmg += CONFIG.blowout4; break
       case 'Containment Fails': t.coverNext = CONFIG.containment; break
       case 'Oiled Seabirds': case 'Water Pollution': r.pending.compensation = (r.pending.compensation ?? 0) + 1; break
@@ -1562,6 +1574,7 @@ function endTurn(r: Run) {
       case 'Profiteering Probe': dmg += CONFIG.profiteering; break
       case 'Sea Level Rise': dmg += truthCash(t, CONFIG.seaLevel); break
       case 'Crop Failure': dmg += truthCash(t, CONFIG.cropFailure); break
+      case 'Tax the Rich': dmg += Math.max(0, r.gold); break
       case 'Childhood Asthma': takeGold(r, truthGold(t), name); break
       case 'Suppressed Development': r.pending.ap += 1; break
     }
@@ -1599,6 +1612,8 @@ function endTurn(r: Run) {
   if (r.phase === 'turn') {
     if (r.cover) beat(r, 'info', 'Accountant', `${r.cover} Cover carried over.`)
     beat(r, 'info', `Turn ${r.turn}`, `Your move. ${r.ap} AP, ${r.hand.length} cards.`)
+    const left = turnsLeft(r)
+    if (left === CONFIG.stalemateWarn) { say(r, `${left} turns left to win this fight.`); beat(r, 'info', `${left} turns left`, `Win this fight in ${left} turns, or it's lost.`) }
   }
 }
 
@@ -1622,7 +1637,7 @@ export function incorporate(r: Run) {
   r.debt = 0 // incorporation wipes the slate: no Bank Debt unless you sign for the new loan
   r.duplicateCost = CONFIG.duplicateCost
   say(r, 'Bank Debt cleared.')
-  r.exposure = Math.min(CONFIG.exposureStartCap, Math.floor(r.stats.skims / CONFIG.exposureStartPer))
+  r.exposure = 0 // the board starts with a clean slate
   r.shop = { cards: [], item: null, loanTaken: false, prospectSold: true, bucketSold: true, boon: null, dividendPaid: true }
   r.threats = []
   r.short = 0; r.freight = 0; r.fire = 0; r.marked = null; r.cover = 0

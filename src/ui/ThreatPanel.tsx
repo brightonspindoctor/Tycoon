@@ -1,5 +1,5 @@
 import { THREATS, roleLabel } from '../engine/data'
-import { infiltrated, intent, intentText, phaseName, reserves, weakOf, type Run, type Threat } from '../engine/engine'
+import { infiltrated, intent, intentText, phaseName, reserves, weakOf, resistOf, type Run, type Threat } from '../engine/engine'
 import { TRUTH_PHASES } from '../engine/data'
 import { units } from '../engine/format'
 import { Portrait } from './Portrait'
@@ -45,7 +45,7 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget,
         </div>
       ))(reserves(run)) : <div className="opened threat__rule"><b>Rule</b> {units(d.rule, run.stage)}</div>)}
       {threat.opened && run.turn === 1 && !threat.beaten && <div className="opened"><b>Opened with</b> {units(threat.opened, run.stage)}</div>}
-      {!threat.beaten && (n => n.length ? <div className="opened infiltrated"><b>Infiltrated</b> −{n.join(', then −')} Hold as your turns end</div> : null)(infiltrated(run, threat))}
+      {!threat.beaten && (n => n.length ? <div className="opened infiltrated"><b>Still to come</b> −{n.join(', then −')} Hold as your turns end</div> : null)(infiltrated(run, threat))}
       {threat.beaten ? <div className="warn warn--done">Beaten</div> : threat.stopped ? (
         <div className="warn warn--stopped">
           <b>Stopped this turn · {intent(run, threat)}</b>
@@ -60,7 +60,8 @@ export function ThreatPanel({ run, threat, targeting, acting, preview, onTarget,
       {onAdminHit && !threat.beaten && <button type="button" className="cl-btn cl-btn--small admin-hit" onClick={e => { e.stopPropagation(); onAdminHit() }}>Admin · −20 Hold</button>}
       <dl className="threat__traits">
         {weakOf(threat.kind, threat.phase) && <div><dt>Weak to:</dt><dd>{weakOf(threat.kind, threat.phase)}</dd></div>}
-        {d.resist && <div><dt>Resists:</dt><dd>{d.resist}</dd></div>}
+        {resistOf(threat.kind, threat.phase) && <div><dt>Resists:</dt><dd>{resistOf(threat.kind, threat.phase)}</dd></div>}
+        {d.unblockable && <div><dt>Moves:</dt><dd>Can't be blocked</dd></div>}
         {d.immune && <div><dt>Immune to:</dt><dd>{d.immune}</dd></div>}
       </dl>
     </Tag>

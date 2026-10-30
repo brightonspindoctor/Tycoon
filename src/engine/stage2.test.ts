@@ -104,11 +104,11 @@ describe('incorporation (stage 1 → 2)', () => {
     expect(r.round).toBe(1)
   })
 
-  it('starts Board Exposure from what you skimmed in stage 1, capped', () => {
+  it('starts Board Exposure at 0, however much you skimmed in stage 1', () => {
     const a = afterBaron(); a.stats.skims = 7
-    expect(act(a, { type: 'continue' }).exposure).toBe(2)
+    expect(act(a, { type: 'continue' }).exposure).toBe(0)
     const b = afterBaron(); b.stats.skims = 40
-    expect(act(b, { type: 'continue' }).exposure).toBe(CONFIG.exposureStartCap)
+    expect(act(b, { type: 'continue' }).exposure).toBe(0)
   })
 
   it('pays 3 gold for beating the Baron', () => {

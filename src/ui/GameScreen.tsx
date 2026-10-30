@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, THREATS, bossRound } from '../engine/data'
 import {
-  apCost, atWar, attackPower, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, turnsLeft, atWar, attackPower, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run,
 } from '../engine/engine'
 import { ERA_THEME, FIELD_PLACE, STAGE_TITLE, money, units, year } from '../engine/format'
@@ -65,7 +65,7 @@ export function GameScreen({ run, dispatch, acting, coach }: Props) {
             const pips = truth ? [1, 2, 3, 4, 5] : [1, 2, 3, 4]
             return (
               <div className="round-track" aria-label={truth ? 'The final round' : `Round ${run.round} of 4`}>
-                <span className="cl-label">{truth ? 'Round 5 · The Truth' : `Round ${run.round} of 4`} · Turn {run.turn}{st === 2 && run.turn <= CONFIG.quickWinTurns ? ` · Win by turn ${CONFIG.quickWinTurns}: Exposure −${CONFIG.quickWinDrop}` : ''}</span>
+                <span className="cl-label">{truth ? 'Round 5 · The Truth' : `Round ${run.round} of 4`} · Turn {run.turn}{turnsLeft(run) <= CONFIG.stalemateWarn && <b className="cl-minus"> · {turnsLeft(run)} turn{turnsLeft(run) === 1 ? '' : 's'} left to win</b>}{st === 2 && run.turn <= CONFIG.quickWinTurns ? ` · Win by turn ${CONFIG.quickWinTurns}: Exposure −${CONFIG.quickWinDrop}` : ''}</span>
                 <div>{pips.map(i => <span key={i} className={`round-pip ${i < run.round ? 'is-done' : ''} ${i === run.round ? 'is-now' : ''} ${i === 4 && st < 4 ? 'is-boss' : ''} ${i === 5 ? 'is-truth' : ''}`} />)}</div>
               </div>
             )

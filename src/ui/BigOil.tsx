@@ -64,7 +64,7 @@ function Pick({ run, dispatch }: { run: Run; dispatch: (a: Action) => void }) {
           </section>
           <section className="incorporate__board">
             <TruthClock run={run} />
-            <p className="res-note">No Heat any more: old Heat cards keep only their other effects. Every liability's 2nd and 5th moves move the clock on an hour. At midnight, the Truth is out and the run is over.</p>
+            <p className="res-note">No Heat any more: old Heat cards keep only their other effects. At midnight, the Truth is out and the run is over.</p>
           </section>
           <section className="incorporate__pick" aria-label="New cards">
             <span className="cl-label">Pick {CONFIG.incorporatePicks} new cards · {picked.length} of {CONFIG.incorporatePicks}</span>

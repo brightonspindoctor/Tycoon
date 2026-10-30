@@ -212,12 +212,12 @@ export const CARDS: Record<CardKey, CardDef> = {
   // ---------------------------------------------------------------- stage 4 (2010s)
   recycling: { name: 'Recycling', era: 4, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 0, recycle: true, draw: 2, icon: 'recycling', price: 25, rarity: 'Common',
     text: 'Shuffle your discard pile into your draw pile. Draw 2 cards.', flavour: 'It goes somewhere.' },
-  propaganda: { name: 'Propaganda', era: 4, ap: 1, cost: 0, uses: null, family: 'Lobby', power: 10, draw: 1, icon: 'propaganda', price: 28, rarity: 'Common',
-    text: 'Remove 10 Hold. Draw 1 card.', flavour: 'Sponsored content.' },
+  propaganda: { name: 'Propaganda', era: 4, ap: 1, cost: 0, uses: null, family: 'Lobby', power: CONFIG.propaganda, poison: [CONFIG.propaganda, CONFIG.propaganda], icon: 'propaganda', price: 28, rarity: 'Common',
+    text: `Remove ${CONFIG.propaganda} Hold. ${CONFIG.propaganda} more as each of your next 2 turns ends.`, flavour: 'Sponsored content.' },
   onThePayroll: { name: 'On the Payroll', era: 4, ap: 1, cost: 4, uses: 3, family: 'Legal', power: 10, apBack: 1, icon: 'onThePayroll', price: 20, rarity: 'Common',
     text: 'Pay $4. Remove 10 Hold. +1 AP. Three uses.', flavour: 'A friend in committee.' },
-  climateBreakdown: { name: 'Climate Breakdown', era: 4, ap: 2, cost: 0, uses: null, family: 'Dirty', power: 12, roundBoost: 2, icon: 'climateBreakdown', price: 30, rarity: 'Uncommon',
-    text: 'Remove 12 Hold. Oil sells +$2 for the rest of the round.', flavour: 'Scarcity is a market opportunity.' },
+  climateBreakdown: { name: 'Climate Breakdown', era: 4, ap: 2, cost: 0, uses: null, oncePerRound: true, family: 'Dirty', power: 12, roundBoost: 2, icon: 'climateBreakdown', price: 30, rarity: 'Uncommon',
+    text: 'Remove 12 Hold. Oil sells +$2 for the rest of the round. Once per fight.', flavour: 'Scarcity is a market opportunity.' },
   astroturfing: { name: 'Astroturfing', era: 4, ap: 1, cost: 0, uses: null, family: 'Dirty', power: 7, cover: 4, icon: 'astroturfing', price: 25, rarity: 'Common',
     text: 'Remove 7 Hold. +4 Cover.', flavour: 'Concerned Citizens for Energy Freedom.' },
   sustainabilityReport: { name: 'Sustainability Report', era: 4, ap: 1, cost: 0, uses: null, family: 'Bury', power: 9, draw: 1, icon: 'sustainabilityReport', price: 25, rarity: 'Common',
@@ -228,11 +228,11 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $4. The clock goes back 1 hour. 1 in 4: the forest burns down, and it goes on 1 instead. Two uses.', flavour: 'A tree for every tanker.' },
   bridgeFuel: { name: 'Bridge Fuel', era: 4, ap: 0, cost: 0, uses: null, oncePerRound: true, family: 'Tempo', power: 2, icon: 'bridgeFuel', price: 30, rarity: 'Common',
     text: '+2 AP. Once per fight.', flavour: 'A bridge to a cleaner future. Toll applies.' },
-  influencers: { name: 'Influencers', era: 4, ap: 0, cost: 3, uses: null, unique: true, amplify: true, family: 'Tempo', power: 0, icon: 'influencers', price: 35, rarity: 'Rare',
-    text: "Pay $3. Your next card's Hold damage or Cover is doubled. Only one in the game.", flavour: '#ad #sponsored #blessed' },
+  influencers: { name: 'Influencers', era: 4, ap: 1, cost: 3, uses: null, oncePerRound: true, unique: true, amplify: true, family: 'Tempo', power: 0, icon: 'influencers', price: 35, rarity: 'Rare',
+    text: "Pay $3. Your next card's Hold damage or Cover is doubled. Once per fight.", flavour: '#ad #sponsored #blessed' },
   greenProject: { name: 'Green Project', era: 4, ap: 1, cost: 0, uses: 1, sticky: true, family: 'Junk', power: 0, junk: true, icon: 'greenProject',
     text: "Does nothing. Stays in your hand until you play it. Then it's gone.", flavour: 'Coming soon.' },
-  compensationClaim: { name: 'Compensation Claim', era: 4, ap: 0, cost: CONFIG.claimCost, uses: 1, family: 'Junk', power: 0, forced: true, junk: true, icon: 'compensationClaim',
+  compensationClaim: { name: 'Compensation Claim', era: 4, ap: 1, cost: CONFIG.claimCost, uses: 1, family: 'Junk', power: 0, forced: true, junk: true, icon: 'compensationClaim',
     text: `Must play. Pay $${CONFIG.claimCost}.`, flavour: 'Class action.' },
   deadWeight: { name: 'Dead Weight', era: 3, ap: null, cost: 0, uses: null, family: 'Junk', power: 0, junk: true, icon: 'deadWeight',
     text: "Can't be played. Does nothing.", flavour: 'It worked in its day.' },
@@ -305,9 +305,9 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   retainCounsel: { power: 3, text: 'Use your Cover for Hold damage, +3.' },
   // stage 4
   recycling: { ap: 0, text: 'Shuffle your discard pile into your draw pile. Draw 2 cards.' },
-  propaganda: { power: 13, text: 'Remove 13 Hold. Draw 1 card.' },
+  propaganda: { power: CONFIG.propagandaUp, poison: [CONFIG.propagandaUp, CONFIG.propagandaUp], text: `Remove ${CONFIG.propagandaUp} Hold. ${CONFIG.propagandaUp} more as each of your next 2 turns ends.` },
   onThePayroll: { power: 13, text: 'Pay $4. Remove 13 Hold. +1 AP. Three uses.' },
-  climateBreakdown: { power: 15, text: 'Remove 15 Hold. Oil sells +$2 for the rest of the round.' },
+  climateBreakdown: { power: 15, text: 'Remove 15 Hold. Oil sells +$2 for the rest of the round. Once per fight.' },
   astroturfing: { power: 9, cover: 6, text: 'Remove 9 Hold. +6 Cover.' },
   sustainabilityReport: { power: 12, text: 'Remove 12 Hold. Draw 1 card.' },
   carbonCapture: { cost: 2, text: "Pay $2. The next move that would move the clock on doesn't. Three uses." },
@@ -383,6 +383,7 @@ export interface ThreatDef {
   chip?: number // stage 3: $ every move also takes, on top of what the move does (Cover blocks it)
   ticks?: number[] // stage 4: the moves in its cycle (0-based) that move the Truth clock on an hour
   portrait: string
+  unblockable?: boolean // its moves can't be stopped (Shore Up, Security Detail and the like)
 }
 
 export const THREATS: Record<ThreatKind, ThreatDef> = {
@@ -409,13 +410,13 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   diversified: { role: 'cash', name: 'Diversified Assets', hold: 27, weak: 'Legal', chip: 3, cycle: ['Running Costs', 'Bad Quarter', 'Write-down'], portrait: 'diversified' },
   briberyScandal: { role: 'cash', name: 'The Bribery Scandal', hold: 28, weak: 'Legal', resist: 'Lobby', chip: 2, cycle: ['Leak', 'Hearing', 'Exposé'], round3: 'Indictment', portrait: 'briberyScandal' },
   // stage 4: four of these, one at a time, never the same one twice; each one's 2nd and 5th moves move the clock on
-  fracking: { role: 'engine', name: 'Fracking', hold: 58, weak: 'Legal', resist: 'Dirty', chip: CONFIG.chip4, ticks: [1, 4], cycle: ['Cheap Gas', 'Earthquake Swarm', 'Tremors', 'Moratorium', 'Flaming Taps'], portrait: 'fracking' },
-  greenAlternatives: { role: 'cash', name: 'Green Alternatives', hold: 60, weak: 'Lobby', resist: 'Legal', chip: 5, ticks: [1, 4], cycle: ['Subsidies', 'Price Parity', 'Undercut', 'Grid Deal', 'Cheaper Every Year'], portrait: 'greenAlternatives' },
+  fracking: { role: 'engine', name: 'Fracking', hold: 58, weak: 'Legal', resist: 'Dirty', chip: CONFIG.chip4, ticks: [1, 4], cycle: ['Cheap Gas', 'Earthquake', 'Tremors', 'Moratorium', 'Flaming Taps'], portrait: 'fracking' },
+  greenAlternatives: { role: 'cash', name: 'Green Alternatives', hold: 60, weak: 'Lobby', resist: 'Legal', cover: CONFIG.greenAltCover, chip: 5, ticks: [1, 4], cycle: ['Subsidies', 'Price Parity', 'Undercut', 'Grid Deal', 'Cheaper Every Year'], portrait: 'greenAlternatives' },
   deepwaterDisaster: { role: 'cash', name: 'Deepwater Disaster', hold: 62, weak: 'Bury', resist: 'Lobby', cover: 4, chip: 5, ticks: [1, 4], cycle: ['Blowout', 'Live Footage', 'Containment Fails', 'Clean-up Bill', 'Inquiry'], portrait: 'deepwaterDisaster' },
   spilledTanker: { role: 'engine', name: 'Spilled Tanker', hold: 56, weak: 'Bury', resist: 'Dirty', chip: CONFIG.chip4, ticks: [1, 4], cycle: ['Oiled Seabirds', 'Beach Closures', 'Claims Pile Up', 'Lost Cargo', 'Documentary'], portrait: 'spilledTanker' },
-  greenPoliticians: { role: 'cash', name: 'Green Politicians', hold: 56, weak: 'Dirty', resist: 'Lobby', chip: CONFIG.chip4, ticks: [1, 4], cycle: ['Windfall Tax', 'Hearings', 'Subpoena', 'Asset Freeze', 'Climate Bill'], portrait: 'greenPoliticians' },
+  greenPoliticians: { role: 'cash', unblockable: true, name: 'Green Politicians', hold: 56, weak: 'Dirty', resist: 'Lobby', chip: CONFIG.chip4, ticks: [1, 4], cycle: ['Windfall Tax', 'Hearings', 'Subpoena', 'Asset Freeze', 'Climate Bill'], portrait: 'greenPoliticians' },
   war: { role: 'engine', name: 'War', hold: 54, weak: 'Legal', resist: 'Bury', chip: 5, ticks: [1, 4], cycle: ['Requisition', 'Refugee Crisis', 'Pipeline Strike', 'Profiteering Probe', 'Ceasefire Talks'], whenBeaten: 'Prices and output recover', portrait: 'war' },
-  truth: { role: 'boss', name: 'The Truth', hold: CONFIG.truthPhaseHold, cycle: ['Sea Level Rise', 'Childhood Asthma', 'Water Pollution', 'Suppressed Development', 'Wildfire Season', 'Crop Failure'], portrait: 'theTruth' },
+  truth: { role: 'boss', name: 'The Truth', hold: CONFIG.truthPhaseHold, cycle: ['Sea Level Rise', 'Childhood Asthma', 'Water Pollution', 'Suppressed Development', 'Wildfire Season', 'Crop Failure', 'Tax the Rich'], portrait: 'theTruth' },
   // the tutorial: only ever met in a new player's first fight. Borrows the Claim Jumper's portrait until his own is drawn
   squatter: { role: 'cash', name: 'The Squatter', hold: CONFIG.squatterHold, cycle: ['Shakedown', 'Shakedown', 'Torch'], portrait: 'claimJumper' },
   geneva: { role: 'boss', name: 'The Geneva Climate Summit', hold: 47, resist: 'Dirty', chip: 3, cycle: ['Expert Testimony', 'Draft Declaration', 'Resolution'], movesFirst: 'Opening Session', portrait: 'geneva' },
@@ -436,9 +437,10 @@ export const TUTORIAL_HANDS: Record<number, CardKey[]> = {
 export const BOSS: Record<number, ThreatKind> = { 1: 'baron', 2: 'proxyFight', 3: 'geneva', 4: 'truth' }
 /** Stage 4's enemies: four are met, one per round, never the same one twice in a run. */
 export const STAGE4_POOL: ThreatKind[] = ['fracking', 'greenAlternatives', 'deepwaterDisaster', 'spilledTanker', 'greenPoliticians', 'war']
-/** The Truth fights in four phases, one after another, each weak to one damage type. Nothing resists. */
-export const TRUTH_PHASES: { name: string; weak: Family }[] = [
-  { name: 'Consensus Report', weak: 'Dirty' }, { name: 'Lawsuits', weak: 'Legal' }, { name: 'Whistleblower', weak: 'Bury' }, { name: 'Breakthrough', weak: 'Lobby' },
+/** The Truth fights in four phases, one after another, each weak to one damage type and resisting another. */
+export const TRUTH_PHASES: { name: string; weak: Family; resist: Family }[] = [
+  { name: 'Consensus Report', weak: 'Dirty', resist: 'Lobby' }, { name: 'Lawsuits', weak: 'Legal', resist: 'Dirty' },
+  { name: 'Whistleblower', weak: 'Bury', resist: 'Legal' }, { name: 'Breakthrough', weak: 'Lobby', resist: 'Bury' },
 ]
 /** The round the boss arrives: round 4, or round 5 in stage 4. */
 export const bossRound = (stage: number) => (stage >= 4 ? CONFIG.stage4Fights : 4)
@@ -473,7 +475,7 @@ export const ITEMS: Record<ItemKey, { name: string; text: string; price: number;
   slushFund: { name: 'Slush Fund', text: `+${CONFIG.slushFundCover} Cover every turn`, price: 0, icon: 'slushFund', never: true },
   regulators: { name: 'On File', text: 'Stage 4: the Truth clock starts an hour later', price: 0, icon: 'onFile', never: true, negative: true },
   // stage 4
-  lobbyist: { name: 'Lobbyist on Retainer', text: `+${CONFIG.lobbyistAP} AP every turn`, price: 40, icon: 'lobbyist', stages: [4] },
+  lobbyist: { name: 'Lobbyist on Retainer', text: `+${CONFIG.lobbyistAP} AP every turn, for one fight`, price: 40, icon: 'lobbyist', stages: [4] },
   strategicReserve: { name: 'Strategic Reserve', text: `+${CONFIG.strategicReserve} oil storage (up to ${CONFIG.maxStorage4})`, price: 30, repeatable: true, icon: 'strategicReserve', stages: [4] },
   prAgency: { name: 'PR Agency', text: `+${CONFIG.prAgencyCover} Cover every turn`, price: 30, icon: 'prAgency', stages: [4] },
   fossilSubsidy: { name: 'Fossil Fuel Subsidy', text: 'Your starting cards cost 0 AP (copies and upgrades too)', price: 30, icon: 'fossilSubsidy', stages: [4] },

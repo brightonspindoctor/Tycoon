@@ -182,7 +182,7 @@ export function ShopScreen({ run, dispatch, coach }: Props) {
           <TruthClock run={run} />
           <section className="fortune fortune--skim">
             <div><span className="cl-label">Your fortune</span><b className="cl-num">{run.gold} gold</b></div>
-            <p>{stage3 ? 'Skim with an Expense Account card during a round. Personal Guarantee and Dip into the Trust turn gold back into Capital.' : stage2 ? 'Skimming is done with an Expense Account card during a round: one gold at a time, +1 Board Exposure each.' : "Gold can't buy anything here. Every dollar you skim comes off the company's health."}</p>
+            <p>{st >= 4 ? `Skim with an Expense Account card during a round. Each skim moves the clock on ${CONFIG.skimClock4} hour. Personal Guarantee and Dip into the Trust turn gold back into Capital.` : stage3 ? `Skim with an Expense Account card during a round. Each skim adds ${CONFIG.skimHeat3} Heat. Personal Guarantee and Dip into the Trust turn gold back into Capital.` : stage2 ? 'Skimming is done with an Expense Account card during a round: one gold at a time, +1 Board Exposure each.' : "Gold can't buy anything here. Every dollar you skim comes off the company's health."}</p>
             <span className="res-note">Rate now: <b>{money(rate, st)} → 1 gold</b>{nextRate !== rate ? ` · Round ${run.round + 1}: ${money(nextRate, st)}` : ''}</span>
             {!stage2 && <div className="skim-buttons">
               {[1, 2, 3].map(g => <button key={g} type="button" className="cl-btn cl-btn--skim" disabled={!can(g * rate)} onClick={() => dispatch({ type: 'skim', gold: g })}>{g} gold · {money(g * rate, st)}</button>)}

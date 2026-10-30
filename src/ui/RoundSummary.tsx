@@ -50,7 +50,7 @@ export function RoundSummary({ run, onContinue, dispatch }: { run: Run; onContin
   useEffect(() => { play('register') }, [])
   const m = (n: number) => money(n, st)
   // what each beaten enemy did on its way out (the Bank Inspector's report has its own box below)
-  const after = run.threats.filter(t => THREATS[t.kind].whenBeaten && t.kind !== 'inspector')
+  const after = run.threats.filter(t => THREATS[t.kind].whenBeaten && t.kind !== 'inspector' && !/fire/i.test(THREATS[t.kind].whenBeaten!)) // a fire on the way out is put out before the fight ends
   return (
     <div className="overlay" role="dialog" aria-label={`Round ${run.round} complete`}>
       <div className="summary" data-theme={ERA_THEME[st] ?? 'victorian'}>
