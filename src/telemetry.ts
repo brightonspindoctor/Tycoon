@@ -65,13 +65,26 @@ if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => { if (!current) return; if (document.visibilityState === 'visible') current.since ??= Date.now(); else tick() })
 }
 
+const CURRENT = 'tycoon.telemetryRun' // kept so a run picked up after closing the app is still the same run
+const keep = () => { if (current) store.set(CURRENT, JSON.stringify({ ...current, activeMs: current.activeMs + (current.since != null ? Date.now() - current.since : 0), since: null })) }
+if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') keep() })
+
 export function runStarted(seed: number, bonus: string) {
   current = { id: uuid(), seed, bonus, activeMs: 0, since: Date.now() }
+  keep()
   void call('tycoon_run_start', { p_run: current.id, p_player: playerId(), p_bonus: bonus })
+}
+/** Picks a saved run back up after the app was closed: same run ID, time played carried on. */
+export function runResumed(seed: number) {
+  try {
+    const saved = JSON.parse(store.get(CURRENT) ?? 'null') as Current | null
+    if (saved?.seed === seed) current = { ...saved, since: Date.now() }
+  } catch { /* a fresh run ID is no great loss */ }
 }
 
 export function roundEnded(seed: number, stage: number, round: number, enemies: string[], won: boolean, turns: number, oil?: number) {
   if (current?.seed !== seed) return
+  keep()
   if (oil) void call('tycoon_oil', { p_run: current.id, p_player: playerId(), p_oil: oil }) // for the total on the front page
   void call('tycoon_round', { p_run: current.id, p_player: playerId(), p_stage: stage, p_round: round, p_enemies: enemies, p_won: won, p_turns: turns })
 }
@@ -90,6 +103,7 @@ export function runEnded(seed: number, e: RunEnd): string | null {
   if (e.oil) void call('tycoon_oil', { p_run: id, p_player: playerId(), p_oil: e.oil }, { keepalive: true })
   last = { id, bonus: current.bonus, args }
   current = null
+  store.set(CURRENT, 'null')
   return id
 }
 

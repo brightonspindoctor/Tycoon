@@ -384,6 +384,9 @@ The look is a cheerful corporate sustainability report made by a tech start-up: 
 ## Sound
 Synthesised in the browser (src/sound.ts); hear them all at `?preview=sounds`. Each era arrives with its own sound: a steam whistle (1860s), a muted brass fanfare (1900s), a wobbling organ chord (1970s), a start-up chime (2010s). The enemy turn arrives the way news did in each era: ticker tape (stage 1), silent-film intertitles in a gold Deco frame with a projector clatter (stage 2), a telex printing on green-bar paper (stage 3), and phone notifications stacking from the top, with clock moves as black Breaking alerts (stage 4). Events: a tick, tock and chime when the Truth clock moves on (a ratchet when it goes back), three deep bell strokes at midnight, a dissonant swell when the Truth changes phase, a rising shimmer when an enemy regains Hold, coins slipping away when gold is taken, paper slapped down for junk, and a fanfare with the cash register for the win.
 
+## Saving a run
+The run in progress is saved on the device every time it changes (`tycoon.liveRun`, with the tutorial step), so closing the app, a refresh or a crash doesn't end it. Only losing, winning the game, or Quit run in Settings does. The front page then shows **Your run in progress** (stage, round, gold, when it was saved) with **Continue**. Pressing Begin with a run open asks first; starting a new one records the old one as a quit. Play data keeps the same run ID across the gap (src/telemetry.ts), so a resumed run is still one run. Previews never save.
+
 ## Glossary
 Opened from Settings, or from the book button next to the gear on the board and in the shop. Four tabs:
 - **Words:** Hold, Cover, Gold, Capital, AP.

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { loadGlobalScores, loadOilTotal, type GlobalScore } from '../telemetry'
 import { BONUSES, type BonusKey } from '../engine/data'
 import { ACHIEVEMENTS, ACHIEVEMENT_KEYS } from '../engine/achievements'
@@ -47,12 +47,16 @@ const ANNOUNCED = ['Pharmaceutical'] // shown as Coming soon before Oil is finis
 // a run that died, rather than one that finished a stage or the game
 const ended = (r: RunRecord) => ['Bankrupt', 'Out of time', 'Quit', 'Ousted', 'Ruined'].includes(r.outcome)
 
-export function Intro({ onBegin, onHistory, onAbout, onScoreboard, onAchievements, admin, onAdminStart }: { onBegin: () => void; onHistory: () => void; onAbout: () => void; onScoreboard: () => void; onAchievements: () => void; admin?: boolean; onAdminStart?: (o: AdminStart) => void }) {
+export interface LiveSummary { stage: number; round: number; gold: number; saved: string }
+export function Intro({ live, onContinue, onBegin, onHistory, onAbout, onScoreboard, onAchievements, admin, onAdminStart }: { live?: LiveSummary | null; onContinue?: () => void; onBegin: () => void; onHistory: () => void; onAbout: () => void; onScoreboard: () => void; onAchievements: () => void; admin?: boolean; onAdminStart?: (o: AdminStart) => void }) {
   const done = completedIndustries()
   const got = loadAchieved()
   const feats = ACHIEVEMENT_KEYS.filter(k => got[k]).length
   const best = bestScore('Oil')
   const won = done.length > 0 // the scoreboard unlocks the first time you win the game
+  const [confirmNew, setConfirmNew] = useState(false) // a run is open: starting another ends it
+  const liveBox = useRef<HTMLElement>(null)
+  useEffect(() => { if (live && window.innerWidth <= 760) liveBox.current?.scrollIntoView({ block: 'center' }) }, []) // eslint-disable-line react-hooks/exhaustive-deps -- on a phone the cover fills the screen: bring the run into view
   const [oil, setOil] = useState<number | null>(null) // every barrel every player has pumped
   useEffect(() => { let on = true; void loadOilTotal().then(n => { if (on && typeof n === 'number') setOil(n) }); return () => { on = false } }, [])
   // each industry is revealed when the one before it is finished; three tiles on the page
@@ -64,9 +68,28 @@ export function Intro({ onBegin, onHistory, onAbout, onScoreboard, onAchievement
       <div className="intro__side">
         <span className="cl-label">{TAGLINE}</span>
         <h1 className="cl-display intro__title">Choose your industry</h1>
+        {live && onContinue && (
+          <section className="live-run" aria-label="Your run in progress" ref={liveBox}>
+            <div className="live-run__text">
+              <span className="cl-label">Your run in progress</span>
+              <b className="cl-display">Oil · Stage {live.stage}{live.round ? ` · ${live.stage >= 4 && live.round >= 5 ? 'The Truth' : `Round ${live.round}`}` : ''}</b>
+              <span className="res-note">{live.gold} gold · saved {new Date(live.saved).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+            <button type="button" className="cl-btn cl-btn--primary" onClick={onContinue}>Continue</button>
+          </section>
+        )}
+        {confirmNew && (
+          <section className="live-run live-run--confirm" role="alertdialog" aria-label="Start a new run?">
+            <p>Start a new run? Your run in progress ends here and is recorded as a quit.</p>
+            <div className="live-run__buttons">
+              <button type="button" className="cl-btn" onClick={() => setConfirmNew(false)}>Keep it</button>
+              <button type="button" className="cl-btn cl-btn--danger" onClick={() => { setConfirmNew(false); onBegin() }}>Start a new run</button>
+            </div>
+          </section>
+        )}
         <div className="industries">
           {shown.map(name => open.includes(name) ? (
-            <button key={name} type="button" className="industry" disabled={name !== 'Oil'} onClick={() => { play('click'); onBegin() }}>
+            <button key={name} type="button" className="industry" disabled={name !== 'Oil'} onClick={() => { play('click'); if (live && name === 'Oil') setConfirmNew(true); else onBegin() }}>
               <span className="cl-display industry__name">{name}</span>
               {name === 'Oil' ? best !== null && <span className="res-note">Best: {best} gold</span> : <span className="res-note">Coming soon</span>}
               <span className="cl-btn cl-btn--primary">Begin</span>

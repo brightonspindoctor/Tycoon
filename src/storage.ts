@@ -153,3 +153,18 @@ export function tutorialAsked(): boolean { try { return localStorage.getItem(TUT
 const OIL = 'tycoon.oilPumped'
 export function loadOil(): number { try { return Number(localStorage.getItem(OIL) ?? 0) || 0 } catch { return 0 } }
 export function addOil(n: number) { if (n > 0) try { localStorage.setItem(OIL, String(loadOil() + n)) } catch { /* not kept */ } }
+
+// the run in progress, saved as you play: closing the app doesn't end it. Only dying, winning or quitting does.
+const LIVE = 'tycoon.liveRun'
+const LIVE_VERSION = 1
+export interface LiveRun<R> { v: number; run: R; coach: number | null; saved: string }
+export function saveLive<R>(run: R, coach: number | null) {
+  try { localStorage.setItem(LIVE, JSON.stringify({ v: LIVE_VERSION, run, coach, saved: new Date().toISOString() })) } catch { /* not kept: the run just won't survive a close */ }
+}
+export function loadLive<R>(): LiveRun<R> | null {
+  try {
+    const x = JSON.parse(localStorage.getItem(LIVE) ?? 'null') as LiveRun<R> | null
+    return x && x.v === LIVE_VERSION && x.run ? x : null
+  } catch { return null }
+}
+export function clearLive() { try { localStorage.removeItem(LIVE) } catch { /* ignore */ } }

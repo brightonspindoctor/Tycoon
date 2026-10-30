@@ -1088,3 +1088,12 @@ button.m-threat { cursor: pointer; }
 .glossary__foe { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
 .glossary__foe-pic { width: 96px; height: 128px; object-fit: cover; border: 1.5px solid var(--ink); }
 .glossary__foe b { font-size: 14px; line-height: 17px; }
+
+/* the front page: a run in progress, saved as you play */
+.live-run { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border: 2px solid var(--accent); border-radius: var(--cl-radius); background: var(--paper-raised); }
+.live-run__text { display: flex; flex-direction: column; gap: 2px; }
+.live-run__text .cl-label { color: var(--accent); }
+.live-run__text b { font-size: 24px; line-height: 28px; }
+.live-run--confirm { flex-direction: column; align-items: stretch; border-color: var(--loss); }
+.live-run--confirm p { margin: 0; }
+.live-run__buttons { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }

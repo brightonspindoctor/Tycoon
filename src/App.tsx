@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { act, newRun, roundsReached, type Action, type AdminOp, type Beat, type Run } from './engine/engine'
 import { bossRound, type BonusKey, type CardKey } from './engine/data'
-import { badgeCounts, loadAdmin, loadReplay, loadUnlocks, saveAchieved, markWelcomed, saveAdmin, saveRun, saveUnlock, trustFundOffered, welcomeSeen, wantTutorial, markTutorialDone, addOil, loadOil } from './storage'
+import { badgeCounts, loadAdmin, loadReplay, loadUnlocks, saveAchieved, markWelcomed, saveAdmin, saveRun, saveUnlock, trustFundOffered, welcomeSeen, wantTutorial, markTutorialDone, addOil, loadOil, saveLive, loadLive, clearLive } from './storage'
 import { adminStart, type AdminStart } from './engine/admin'
 import { Welcome } from './ui/Welcome'
 import { TickerTape } from './ui/TickerTape'
@@ -25,7 +25,7 @@ import { EraTransition } from './ui/EraTransition'
 import { units } from './engine/format'
 import { About, BonusPick, History, Intro, Motto, Scoreboard } from './ui/MenuScreens'
 import { Achievements, TrophyCabinet } from './ui/Achievements'
-import { hello, roundEnded, runEnded, runStarted } from './telemetry'
+import { hello, roundEnded, runEnded, runResumed, runStarted } from './telemetry'
 import { findTerms, loadFound, TERMS } from './terms'
 import { notePlayed } from './cardbook'
 import { noteBeaten } from './beaten'
@@ -241,7 +241,41 @@ export default function App() {
     return () => clearTimeout(t)
   }, [run])
 
+  // the run in progress is saved as it changes, so closing the app doesn't end it; dying, winning or quitting does
+  const previewing = !!new URLSearchParams(location.search).get('preview')
+  useEffect(() => {
+    if (!run || previewing) return
+    if (run.phase === 'lost' || (run.phase === 'stageComplete' && run.stage >= 4)) clearLive()
+    else saveLive(run, coach)
+  }, [run, coach]) // eslint-disable-line react-hooks/exhaustive-deps
+  const [live, setLive] = useState(() => (previewing ? null : loadLive<Run>()))
+  useEffect(() => { if (screen === 'intro' && !previewing) setLive(loadLive<Run>()) }, [screen]) // eslint-disable-line react-hooks/exhaustive-deps
+  /** Picks up where you left off. */
+  function resume() {
+    const l = loadLive<Run>()
+    if (!l) { setLive(null); return }
+    pumpedSeen.current = { seed: l.run.seed, n: l.run.feats?.pumped ?? 0 } // its oil is already counted
+    saved.current = null
+    runResumed(l.run.seed)
+    setCoach(l.coach)
+    setRun(l.run)
+    setScreen('run')
+    setLive(null)
+    play('click')
+  }
+  /** Starting afresh with a run still open: the old one is recorded as quit. */
+  function abandonLive() {
+    const l = loadLive<Run>()
+    clearLive(); setLive(null)
+    if (!l || l.run.admin) return
+    const r = l.run
+    saveRun({ id: String(r.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(r), outcome: 'Quit', gold: null, completed: false, stageGold: r.gold })
+    runResumed(r.seed)
+    runEnded(r.seed, { outcome: 'quit', stage: r.stage, round: r.round, roundsReached: roundsReached(r), oil: r.feats?.pumped })
+  }
+
   function startAdmin(o: AdminStart) {
+    abandonLive()
     const r = adminStart(Math.floor(Math.random() * 2 ** 31), o)
     saved.current = null
     setRun(r)
@@ -252,6 +286,7 @@ export default function App() {
   const [pendingBonus, setPendingBonus] = useState<BonusKey | null>(null)
   function start(bonus: BonusKey) {
     if (!welcomeSeen()) { setPendingBonus(bonus); setScreen('welcome'); return }
+    abandonLive()
     const tutorial = wantTutorial()
     const r = newRun(Math.floor(Math.random() * 2 ** 31), bonus, loadUnlocks(), { tutorial })
     setCoach(tutorial ? 0 : null)
@@ -267,7 +302,7 @@ export default function App() {
   let body: JSX.Element
   if (previewPage === 'cards') body = <CardGallery />
   else if (previewPage === 'sounds') body = <SoundBoard />
-  else if (screen === 'intro') body = <Intro onBegin={() => setScreen('motto')} onHistory={() => setScreen('history')} onAbout={() => setScreen('about')} onScoreboard={() => setScreen('scoreboard')} onAchievements={() => setScreen('achievements')} admin={admin} onAdminStart={startAdmin} />
+  else if (screen === 'intro') body = <Intro live={live ? { stage: live.run.stage, round: live.run.round, gold: live.run.gold, saved: live.saved } : null} onContinue={resume} onBegin={() => setScreen('motto')} onHistory={() => setScreen('history')} onAbout={() => setScreen('about')} onScoreboard={() => setScreen('scoreboard')} onAchievements={() => setScreen('achievements')} admin={admin} onAdminStart={startAdmin} />
   else if (screen === 'motto') body = <Motto onDone={() => setScreen(s => (s === 'motto' ? 'bonus' : s))} />
   else if (screen === 'achievements') body = <Achievements onBack={() => setScreen('intro')} />
   else if (screen === 'cabinet') body = <TrophyCabinet onBack={() => setScreen('scoreboard')} />
@@ -302,6 +337,7 @@ export default function App() {
       saveRun({ id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run), outcome: 'Quit', gold: null, completed: false, stageGold: run.gold })
       runEnded(run.seed, { outcome: 'quit', stage: run.stage, round: run.round, roundsReached: roundsReached(run), oil: run.feats?.pumped })
     }
+    clearLive(); setLive(null)
     setTape(null); setActing(null); setRun(null); setScreen('intro'); setCoach(null)
   }
   const adminProps = {
