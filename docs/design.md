@@ -171,7 +171,7 @@ Money is in millions ($M). Rounds are 1970, 1973, 1976 and 1979. The shop is **t
 
 ### Going multinational (between stages)
 Winning the Proxy Fight pays 3 gold, then a page-turn to 1970 stamped MULTINATIONAL, then the Multinational screen:
-- Every Field and Well becomes an **offshore Rig**: 2 oil a turn, never runs dry, sells for $10M. Empty plots go. At most 5 Rigs.
+- Every Field and Well becomes an **offshore Rig**: 2 oil a turn, never runs dry, sells for $10M. Empty plots go. At most 5 Rigs. The Multinational screen leads with it: your Rigs drawn out of 5 slots, "Your Wells and Fields are now Rigs", and the 5 cap (first on phones too).
 - **Some old cards turn to junk.** Land cards (Prospects, Steel Derricks, Well cards) become **Dry Leases** (1 AP, do nothing, destroyed once played). Fire and board cards (Bucket, Fire Brigade, Pay a Dividend) become **Dead Weight** (unplayable). Shore Up carries over, like Security Detail: both still block a move once per fight. Every other old card works exactly as before, upgrades included; stage 3 enemies are simply far tougher. There are no fires from stage 3, so **Bad Blood** becomes a must-play card that costs $5 (2 uses). Dynamite, Bribe the Sheriff and a refused Bribe still add it.
 - **Pick 2 new cards** from 4: Bury Evidence, Lobby Congress, Buy Out and Advertorial. The 2 you leave are on sale at the first Trading Floor visit.
 - **No Bank Debt** in stage 3, and no loans. Heat is the only clock.

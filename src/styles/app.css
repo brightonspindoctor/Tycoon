@@ -1066,3 +1066,16 @@ button.m-threat { cursor: pointer; }
 .m .motto__text { font-size: 40px; line-height: 46px; }
 @keyframes motto-in { from { opacity: 0; transform: translateY(12px) scale(1.06); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .motto__text { animation: none; } }
+
+/* stage 2 → 3: your Wells and Fields, now Rigs, out of the 5 you can have */
+.rigs-now { display: flex; gap: 18px; align-items: center; padding: 14px 16px; border: 2px solid var(--accent); border-radius: var(--cl-radius); background: var(--paper-raised); }
+.rigs-now__row { display: flex; gap: 6px; flex: none; }
+.rigs-now__slot { width: 52px; height: 52px; border-radius: 50%; border: 2px dashed var(--rule); display: grid; place-items: center; }
+.rigs-now__slot.is-built { border: 0; }
+.rigs-now__slot img { width: 52px; height: 52px; }
+.rigs-now__text { display: flex; flex-direction: column; gap: 2px; }
+.rigs-now__text .cl-label { color: var(--accent); }
+.rigs-now__text b { font-size: 26px; line-height: 30px; }
+.m .rigs-now { flex-direction: column; align-items: flex-start; }
+.m .rigs-now__slot, .m .rigs-now__slot img { width: 44px; height: 44px; }
+.m .multinational .shop__main > section.rigs-now { order: -1; } /* the news first, above Capital */

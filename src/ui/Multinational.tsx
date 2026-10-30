@@ -7,6 +7,7 @@ import { canUpgrade, rigCount, type Action, type Run } from '../engine/engine'
 import { money, units, year } from '../engine/format'
 import { play } from '../sound'
 import { CardView } from './CardView'
+import { iconUrl } from './icons'
 import { HeatMeter } from './Heat'
 import { SettingsButton } from './Settings'
 
@@ -36,8 +37,17 @@ export function MultinationalScreen({ run, dispatch }: { run: Run; dispatch: (a:
 
       <div className="shop__grid">
         <div className="shop__main">
+          <section className="rigs-now" aria-label={`Your Wells and Fields are now ${rigs} offshore Rigs, ${CONFIG.maxPlots} at most`}>
+            <div className="rigs-now__row" aria-hidden="true">
+              {Array.from({ length: CONFIG.maxPlots }, (_, i) => <span key={i} className={`rigs-now__slot ${i < rigs ? 'is-built' : ''}`}>{i < rigs && <img src={iconUrl('rig')} alt="" />}</span>)}
+            </div>
+            <div className="rigs-now__text">
+              <span className="cl-label">Your Wells and Fields are now Rigs</span>
+              <b className="cl-display">{rigs} of {CONFIG.maxPlots} Rigs</b>
+              <span>Every Well and Field became an offshore Rig: {CONFIG.rigOutput} oil a turn, never dry. You can have {CONFIG.maxPlots} at most; the Trading Floor builds more, one per visit.</span>
+            </div>
+          </section>
           <section className="end__tiles incorporate__tiles" aria-label="What carried over">
-            <div className="tile"><span className="cl-label">Rigs</span><b className="cl-num">{rigs} / {CONFIG.maxPlots}</b></div>
             <div className="tile"><span className="cl-label">Dead Weight and Dry Leases</span><b className="cl-num">{dead} cards</b></div>
           </section>
 
