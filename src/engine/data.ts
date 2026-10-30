@@ -398,7 +398,7 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   // stage 2
   muckraker: { role: 'cash', name: 'The Muckraker', hold: 11, weak: 'Legal', cycle: ['Dig', 'Expose', 'Headline'], round3: 'Front Page', whenBeaten: 'Retraction: −1 Board Exposure', portrait: 'muckraker' },
   combine: { role: 'cash', name: 'The Combine', hold: 11, resist: 'Legal', cycle: ['Price War', 'Rail Deal', 'Squeeze', 'Hired Muscle'], whenBeaten: 'Prices and freight recover', portrait: 'combine' },
-  clawback: { role: 'cash', name: 'The Clawback Committee', hold: 10, weak: 'Dirty', cover: 2, cycle: ['Clawback', 'Clawback', 'Minutes'], whenBeaten: '−1 Board Exposure', portrait: 'clawback' },
+  clawback: { role: 'cash', name: 'The Clawback Committee', hold: 10, weak: 'Dirty', cover: 2, cycle: ['Clawback', 'Clawback', 'Minutes'], portrait: 'clawback' },
   patentHolder: { role: 'engine', name: 'The Patent Holder', hold: 12, weak: 'Legal', cycle: ['Cease and Desist', 'New Patent Claim', 'Royalty'], portrait: 'patentHolder' },
   saboteur: { role: 'engine', name: 'The Saboteur', hold: 10, weak: 'Dirty', cycle: ['Wreck', 'Lit Fuse', 'Infiltrate'], movesFirst: 'Infiltrate', whenBeaten: 'Starts a fire', portrait: 'saboteur' },
   commission: { role: 'engine', name: 'The Railroad Commission', hold: 8, weak: 'Dirty', cycle: ['Proration', 'Inspection', 'Leaky Tanks'], portrait: 'commission' },

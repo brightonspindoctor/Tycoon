@@ -868,7 +868,6 @@ function threatBeaten(r: Run, t: Threat) {
     case 'speculator': r.short = 0; break
     case 'railroad': r.freight = 0; break
     case 'muckraker': expose(r, -1, 'Retraction'); break
-    case 'clawback': expose(r, -1, 'The committee is satisfied'); break
     case 'combine': r.short = 0; r.freight = 0; say(r, 'The Combine folds. Prices and freight recover.'); break
     case 'saboteur': startFire(r, 1, 'the Saboteur'); say(r, 'The Saboteur left a parting gift.'); break
     case 'rivals': r.short = 0; say(r, 'The rivals fold. Prices recover.'); break
