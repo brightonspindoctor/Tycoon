@@ -400,7 +400,7 @@ A new player's first run (no run played to its end yet, or asked for again in Se
 3. The stockpile; sell the oil; Lawyer Up. Shore Up could stop the Torch, but not this time. End turn: fire.
 4. Fire stops the pumps and burns oil or a Well. Bucket of Water, then Hired Hand wins it.
 
-Then the Land Office suggests a second Prospect and points at the glossary; leaving the shop ends the tutorial, and the second fight is a normal one. Skip tutorial stops the script and the fight goes on as normal. The 3 Oil bonus is held back until the tutorial fight ends, so the script's numbers hold. The Squatter borrows the Claim Jumper's portrait until his own is drawn.
+Then the Land Office suggests a second Prospect and points at the glossary; leaving the shop ends the tutorial, and the second fight is a normal one. Skip tutorial stops the script and the fight goes on as normal. The 3 Oil bonus is held back until the tutorial fight ends, so the script's numbers hold.
 
 ## Play data and the global scoreboard
 Supabase project **tycoon** (London, eu-west-2), separate from brighton-weekend in the same organisation. The game talks only to `tycoon_*` functions; the tables are closed to the public.

@@ -4,7 +4,7 @@
 const CACHE = 'tycoon-v2'
 const PORTRAITS = ['baron', 'blowout', 'briberyScandal', 'claimJumper', 'clawback', 'climateScience', 'combine', 'commission', 'deepwaterDisaster', 'diversified',
   'fracking', 'geneva', 'greenAlternatives', 'greenPoliticians', 'inspector', 'muckraker', 'patentHolder', 'proxyFight', 'railroad', 'rivals', 'saboteur',
-  'speculator', 'spill', 'spilledTanker', 'strike', 'theTruth', 'war'].map(p => `./art/enemies/${p}.jpg`)
+  'speculator', 'spill', 'spilledTanker', 'squatter', 'strike', 'theTruth', 'war'].map(p => `./art/enemies/${p}.jpg`)
 self.addEventListener('install', e => {
   self.skipWaiting()
   // best effort: one portrait failing doesn't stop the rest

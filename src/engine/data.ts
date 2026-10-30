@@ -417,8 +417,8 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   greenPoliticians: { role: 'cash', unblockable: true, name: 'Green Politicians', hold: 56, weak: 'Dirty', resist: 'Lobby', chip: CONFIG.chip4, ticks: [1, 4], cycle: ['Windfall Tax', 'Hearings', 'Subpoena', 'Asset Freeze', 'Climate Bill'], portrait: 'greenPoliticians' },
   war: { role: 'engine', name: 'War', hold: 54, weak: 'Legal', resist: 'Bury', chip: 5, ticks: [1, 4], cycle: ['Requisition', 'Refugee Crisis', 'Pipeline Strike', 'Profiteering Probe', 'Ceasefire Talks'], whenBeaten: 'Prices and output recover', portrait: 'war' },
   truth: { role: 'boss', name: 'The Truth', hold: CONFIG.truthPhaseHold, cycle: ['Sea Level Rise', 'Childhood Asthma', 'Water Pollution', 'Suppressed Development', 'Wildfire Season', 'Crop Failure', 'Tax the Rich'], portrait: 'theTruth' },
-  // the tutorial: only ever met in a new player's first fight. Borrows the Claim Jumper's portrait until his own is drawn
-  squatter: { role: 'cash', name: 'The Squatter', hold: CONFIG.squatterHold, cycle: ['Shakedown', 'Shakedown', 'Torch'], portrait: 'claimJumper' },
+  // the tutorial: only ever met in a new player's first fight
+  squatter: { role: 'cash', name: 'The Squatter', hold: CONFIG.squatterHold, cycle: ['Shakedown', 'Shakedown', 'Torch'], portrait: 'squatter' },
   geneva: { role: 'boss', name: 'The Geneva Climate Summit', hold: 47, resist: 'Dirty', chip: 3, cycle: ['Expert Testimony', 'Draft Declaration', 'Resolution'], movesFirst: 'Opening Session', portrait: 'geneva' },
 }
 
