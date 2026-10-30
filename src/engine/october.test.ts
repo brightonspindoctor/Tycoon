@@ -73,3 +73,30 @@ describe('stage 4 tweaks', () => {
     expect(canPlay(r, r.hand[0]).ok).toBe(r.threats[0].kind !== 'greenPoliticians')
   })
 })
+
+describe('reward cards belong to the stage', () => {
+  it('a later-stage reward card takes that stage\'s look', async () => {
+    const { cardDef } = await import('./engine')
+    expect(cardDef({ key: 'dividends', era: 3 }).era).toBe(3)
+    expect(cardDef({ key: 'inheritance', era: 3 }).icon).toBe('inheritance3')
+    expect(cardDef({ key: 'dividends' }).era ?? 1).toBe(1)
+  })
+  it('the Trading Floor no longer offers the 1900s Ticker Tape', async () => {
+    const { shopPool } = await import('./data')
+    for (const st of [1, 2, 3, 4]) for (const k of shopPool(st)) expect(CARDS[k].era ?? 1).toBe(st)
+  })
+})
+
+describe('must play cards come first', () => {
+  it("can't be dodged by selling oil down to 0 AP", () => {
+    let r = start(2, ['ceaseDesist', 'telegraphLine'])
+    r.ap = 1; r.oil = 3; r.current.refuse = false
+    const before = r.oil
+    r = act(r, { type: 'sellOil' })
+    expect(r.oil).toBe(before) // blocked: the Cease and Desist comes first
+    expect(canPlay(r, r.hand.find(c => c.key === 'telegraphLine')!).ok).toBe(false)
+    r = act(r, { type: 'play', cardId: r.hand.find(c => c.key === 'ceaseDesist')!.id })
+    expect(r.ap).toBe(0)
+    expect(canPlay(r, r.hand.find(c => c.key === 'telegraphLine')!).ok).toBe(true) // now the free card is fine
+  })
+})

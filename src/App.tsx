@@ -28,6 +28,7 @@ import { Achievements, TrophyCabinet } from './ui/Achievements'
 import { hello, roundEnded, runEnded, runStarted } from './telemetry'
 import { findTerms, loadFound, TERMS } from './terms'
 import { notePlayed } from './cardbook'
+import { noteBeaten } from './beaten'
 import { coachFor, stepDone, STEPS } from './ui/tutorial'
 import { ACHIEVEMENTS, achievedBy, type AchievementKey } from './engine/achievements'
 import { THREATS } from './engine/data'
@@ -174,6 +175,13 @@ export default function App() {
 
   // oil across all runs, checked on opening too, so the achievement is never left waiting for a run
   useEffect(() => { saveAchieved([...(loadOil() >= CONFIG.achievements.liquidAssets ? ['liquidAssets'] : []), ...(loadOil() >= CONFIG.achievements.peakOil ? ['peakOil'] : [])]) }, [])
+
+  // every liability beaten, for the glossary (never from an admin playtest)
+  useEffect(() => {
+    if (!run || run.admin) return
+    const beaten = run.threats.filter(t => t.beaten).map(t => t.kind)
+    if (beaten.length) noteBeaten(beaten)
+  }, [run])
 
   // anonymous play data: say hello once the game is open
   useEffect(() => { void hello() }, [])

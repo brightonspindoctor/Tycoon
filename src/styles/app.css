@@ -1079,3 +1079,12 @@ button.m-threat { cursor: pointer; }
 .m .rigs-now { flex-direction: column; align-items: flex-start; }
 .m .rigs-now__slot, .m .rigs-now__slot img { width: 44px; height: 44px; }
 .m .multinational .shop__main > section.rigs-now { order: -1; } /* the news first, above Capital */
+
+/* the glossary's Liabilities tab: every liability beaten, with its portrait and stage */
+.glossary__tabs { flex-wrap: wrap; }
+.glossary__tabs button { flex: 1 1 22%; min-width: 0; }
+.m .glossary__tabs button { flex-basis: 45%; border-top: 1.5px solid var(--ink); margin-top: -1.5px; }
+.glossary__foes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; }
+.glossary__foe { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.glossary__foe-pic { width: 96px; height: 128px; object-fit: cover; border: 1.5px solid var(--ink); }
+.glossary__foe b { font-size: 14px; line-height: 17px; }

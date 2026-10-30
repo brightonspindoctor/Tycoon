@@ -397,7 +397,7 @@ describe('reworked stage 2 enemies', () => {
     expect(THREATS.clawback.cycle).toEqual(['Clawback', 'Clawback', 'Minutes'])
   })
 
-  it("the Patent Holder's New Patent Claim clogs your next hand and can't be played", () => {
+  it("the Patent Holder's New Patent Claim can't be played and stays in your hand until the shop destroys it", () => {
     let r = inStage2([], 'patentHolder')
     r.threats[0].step = 1
     r = act(r, { type: 'endTurn' })
@@ -405,7 +405,12 @@ describe('reworked stage 2 enemies', () => {
     expect(claim).toBeTruthy()
     expect(canPlay(r, claim).ok).toBe(false)
     r = act(r, { type: 'endTurn' })
-    expect(r.deck.some(c => c.key === 'patentClaim')).toBe(false)
+    expect(r.hand.some(c => c.id === claim.id)).toBe(true)
+    expect(r.deck.some(c => c.id === claim.id)).toBe(true)
+    // in the shop, Destroy a card gets rid of it
+    r.phase = 'shop'; r.capital = 50
+    r = act(r, { type: 'destroyCard', cardId: claim.id })
+    expect(r.deck.some(c => c.id === claim.id)).toBe(false)
   })
 
   it("the Railroad Commission is weak: Inspection takes 2 AP, Leaky Tanks takes the oil and a quarter of Capital", () => {

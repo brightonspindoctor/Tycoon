@@ -882,7 +882,7 @@ describe("the Bank Inspector's report", () => {
     r.threats = [{ id: 900, kind: 'inspector', hold: 2, maxHold: 6, step: 0, cycle: 0, round3: false, beaten: false }]
     r.capital = 40
     r = act(r, { type: 'endTurn' })
-    expect(r.leftBehind?.cards).toEqual(['looseThread', 'looseThread'])
+    expect(r.leftBehind?.cards).toEqual(['looseThread', 'looseThread', 'looseThread'])
     expect(r.report.some(b => b.title.endsWith('· His report'))).toBe(true)
   })
 })

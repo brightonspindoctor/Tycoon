@@ -325,12 +325,20 @@ describe('stage 3 items and the shop', () => {
   })
 })
 
+describe('stage 3 move text', () => {
+  it('folds the extra loss into the move: one number, no "Plus"', () => {
+    const r = inStage3([], 'diversified')
+    expect(intentText(r, r.threats[0])).toBe(`Lose $${CONFIG.runningCosts + THREATS.diversified.chip!}.`)
+    expect(intentText(r, r.threats[0])).not.toMatch(/Plus/)
+  })
+})
+
 describe('the Geneva Climate Summit', () => {
   it('opens with Heat, then testimony grows each cycle', () => {
     const r = inStage3([], 'geneva')
-    const plus = ` Plus −$${THREATS.geneva.chip}${CONFIG.moveHeat3 ? `, +${CONFIG.moveHeat3} Heat` : ''}.` // what every stage 3 move also does
-    expect(intentText(r, r.threats[0])).toBe(`+${CONFIG.testimonyHeat} Heat.${plus}`)
-    expect(intentText(r, { ...r.threats[0], cycle: 2 })).toBe(`+${CONFIG.testimonyHeat + 2 * CONFIG.testimonyStep} Heat.${plus}`)
+    const plus = `, and also costs you $${THREATS.geneva.chip}.${CONFIG.moveHeat3 ? ` +${CONFIG.moveHeat3} Heat.` : ''}` // what every stage 3 move also does
+    expect(intentText(r, r.threats[0])).toBe(`+${CONFIG.testimonyHeat} Heat${plus}`)
+    expect(intentText(r, { ...r.threats[0], cycle: 2 })).toBe(`+${CONFIG.testimonyHeat + 2 * CONFIG.testimonyStep} Heat${plus}`)
   })
 
   it('puts a Draft Declaration in your next hand', () => {

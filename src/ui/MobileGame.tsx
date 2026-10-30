@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, THREATS, bossRound, roleLabel } from '../engine/data'
 import {
-  apCost, turnsLeft, resistOf, attackPower, phaseName, reserves, weakOf, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, infiltrated, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, turnsLeft, mustPlayFirst, resistOf, attackPower, phaseName, reserves, weakOf, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, infiltrated, intent, intentText, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run, type Threat,
 } from '../engine/engine'
 import { FIELD_PLACE, money, units, year } from '../engine/format'
@@ -181,7 +181,7 @@ export function MobileGame({ run, dispatch, acting, coach }: Props) {
           {plotMenu !== null && run.plots[plotMenu] && (
             <div className="m-plotmenu">
               <span>{plotName(run, plotMenu)}</span>
-              <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < 1 || !!run.plots[plotMenu]?.faithful || !lets.other(coach)} onClick={() => { dispatch({ type: 'sellWell', plot: plotMenu }); setPlotMenu(null) }}>Sell · 1 AP · {money(wellValue(run.plots[plotMenu]!), st, true)}</button>
+              <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < 1 || !!run.plots[plotMenu]?.faithful || mustPlayFirst(run) || !lets.other(coach)} onClick={() => { dispatch({ type: 'sellWell', plot: plotMenu }); setPlotMenu(null) }}>Sell · 1 AP · {money(wellValue(run.plots[plotMenu]!), st, true)}</button>
               <button type="button" className="cl-btn cl-btn--small" onClick={() => setPlotMenu(null)}>Keep</button>
             </div>
           )}
@@ -227,7 +227,7 @@ export function MobileGame({ run, dispatch, acting, coach }: Props) {
           <div className="m-actions">
             <button type="button" className={`cl-btn cl-btn--small m-pilebtn ${lit('shuffle')}`} onClick={() => setPile('draw')}>Draw {run.draw.length}</button>
             <button type="button" className="cl-btn cl-btn--small m-pilebtn" onClick={() => setPile('discard')}>Discard {run.discard.length}</button>
-            {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < CONFIG.firebreakAP || !lets.other(coach)} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose No. {weakestWell(run) + 1}</button>}
+            {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn cl-btn--small" disabled={run.ap < CONFIG.firebreakAP || mustPlayFirst(run) || !lets.other(coach)} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose No. {weakestWell(run) + 1}</button>}
             {run.items.includes('paperShredder') && <button type="button" className="cl-btn cl-btn--small" disabled={run.shredded || !run.hand.length || !lets.other(coach)} onClick={() => setShredding(!shredding)}>{run.shredded ? 'Shredded' : shredding ? 'Cancel shred' : 'Shred a card'}</button>}
             {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
           </div>
@@ -249,8 +249,8 @@ export function MobileGame({ run, dispatch, acting, coach }: Props) {
             <span className="cl-label">AP</span>
             {Array.from({ length: Math.max(run.ap, CONFIG.baseAP) }, (_, i) => <span key={i} className={`ap-coin ${i < run.ap ? 'is-on' : ''}`} />)}
           </div>
-          <button type="button" className={`cl-btn cl-btn--small m-sell ${cl('sell')}`} disabled={run.ap < sellAP(run) || run.oil < 1 || run.current.refuse || !lets.sell(coach)} onClick={() => dispatch({ type: 'sellOil' })}>
-            {run.current.refuse ? 'Refused' : <>Sell {run.oil} oil<b className="cl-num"> {money(run.oil * netPrice(run) * (run.doubleSale ? 2 : 1), st, true)}</b>{st >= 3 && ` · ${sellAP(run)} AP`}</>}
+          <button type="button" className={`cl-btn cl-btn--small m-sell ${cl('sell')}`} disabled={run.ap < sellAP(run) || run.oil < 1 || run.current.refuse || mustPlayFirst(run) || !lets.sell(coach)} onClick={() => dispatch({ type: 'sellOil' })}>
+            {run.current.refuse ? 'Refused' : mustPlayFirst(run) && run.oil > 0 ? 'Must play first' : <>Sell {run.oil} oil<b className="cl-num"> {money(run.oil * netPrice(run) * (run.doubleSale ? 2 : 1), st, true)}</b>{st >= 3 && ` · ${sellAP(run)} AP`}</>}
           </button>
           <button type="button" className={`cl-btn end-turn ${run.ap === 0 ? 'cl-btn--primary' : ''} ${cl('endTurn')}`} disabled={!lets.endTurn(coach)} onClick={() => { setSelected(null); setPlotMenu(null); dispatch({ type: 'endTurn' }) }}>End turn</button>
         </div>

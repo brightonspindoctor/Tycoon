@@ -20,7 +20,7 @@ export type Icon = 'derrick' | 'plot' | 'barrels' | 'fire' | 'bucket' | 'cudgels
 export type CardKey =
   | 'prospect' | 'well' | 'wildcat' | 'hiredHand' | 'lawyerUp' | 'shoreUp' | 'bucket' | 'fireBrigade'
   | 'improveGear' | 'hardGraft' | 'pettyCash' | 'payWages' | 'dynamite' | 'bribe' | 'telegram'
-  | 'looseThread' | 'badBlood' | 'badBloodLate' | 'marginCall' | 'iou' | 'payOff' | 'infiltrate' | 'inheritance' | 'dividends'
+  | 'looseThread' | 'badBlood' | 'badBloodLate' | 'badBlood4' | 'marginCall' | 'iou' | 'payOff' | 'infiltrate' | 'inheritance' | 'dividends'
   // stage 2
   | 'oldProspect' | 'telegraphLine' | 'tickerTape' | 'nightShift' | 'efficiencyExpert'
   | 'streamline' | 'shredFiles' | 'scrapParts' | 'cleanHouse' | 'patentThicket' | 'espionage' | 'poachEngineer'
@@ -120,9 +120,11 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $3. A random attack card, free to play.', flavour: 'STOP. SEND HELP. STOP.' },
   looseThread: { name: 'Loose Thread', ap: 0, cost: 1, uses: null, family: 'Junk', power: 0, icon: 'redtape', forced: true, junk: true,
     text: 'Must play. Lose $1.', flavour: 'Someone kept a copy.' },
-  // from stage 3 there are no fires: Bad Blood costs you money instead
-  badBloodLate: { name: 'Bad Blood', ap: 0, cost: CONFIG.badBloodCost, uses: 2, family: 'Junk', power: 0, icon: 'redtape', forced: true, junk: true,
-    text: `Must play. Pay $${CONFIG.badBloodCost}. Gone after two.`, flavour: 'They remember. They send invoices.' },
+  // from stage 3 there are no fires: Bad Blood brings Heat instead, and in stage 4 an hour on the clock
+  badBloodLate: { name: 'Bad Blood', ap: 0, cost: 0, heat: CONFIG.badBloodHeat, uses: 2, family: 'Junk', power: 0, icon: 'redtape', forced: true, junk: true,
+    text: `Must play. +${CONFIG.badBloodHeat} Heat. Gone after two.`, flavour: 'They remember. They send invoices.' },
+  badBlood4: { name: 'Bad Blood', ap: 0, cost: 0, clock: CONFIG.badBloodClock, uses: 2, family: 'Junk', power: 0, icon: 'redtape', forced: true, junk: true,
+    text: `Must play. The clock moves on ${CONFIG.badBloodClock} hour. Gone after two.`, flavour: 'They remember. They post about it.' },
   badBlood: { name: 'Bad Blood', ap: 0, cost: 0, uses: 2, family: 'Junk', power: 0, icon: 'fire', forced: true, junk: true,
     text: 'Must play. 1 in 3 chance of a fire. Gone after two.', flavour: 'They remember. For a while.' },
   marginCall: { name: 'Margin Call', ap: 1, cost: 2, uses: 1, family: 'Junk', power: 0, icon: 'phone', forced: true, junk: true,
@@ -135,8 +137,8 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: '1 Well card to your hand. No new land.', flavour: 'Every inch of it already drilled.' },
   telegraphLine: { name: 'Telegraph Line', era: 2, ap: 0, cost: 0, uses: null, family: 'Tempo', power: 0, draw: 1, icon: 'telegraphLine', price: 5, rarity: 'Common',
     text: 'Draw 1 card.', flavour: 'Word travels. Yours first.' },
-  tickerTape: { name: 'Ticker Tape', era: 2, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 1, draw: 2, icon: 'tickerTape', price: 6, rarity: 'Uncommon',
-    text: 'Draw 2 cards. Oil sells +$1 this turn.', flavour: 'Buy on the rumour.' },
+  tickerTape: { name: 'Ticker Tape', era: 2, ap: 1, cost: 0, uses: null, family: 'Tempo', power: 1, draw: 1, icon: 'tickerTape', price: 6, rarity: 'Uncommon',
+    text: 'Draw 1 card. Oil sells +$1 this turn.', flavour: 'Buy on the rumour.' },
   nightShift: { name: 'Night Shift', era: 2, ap: 0, cost: 0, uses: null, family: 'Tempo', power: 2, apNext: 1, icon: 'nightShift', price: 5, rarity: 'Common',
     text: '+2 AP now. −1 AP next turn.', flavour: 'The lamps never go out.' },
   efficiencyExpert: { name: 'Efficiency Expert', era: 2, ap: 1, cost: 2, uses: null, family: 'Tempo', power: 0, draw: 3, icon: 'efficiencyExpert', price: 6, rarity: 'Common',
@@ -165,8 +167,8 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Must play. Does nothing.', flavour: 'Pursuant to patent No. 1,042,117.' },
   proxyBallot: { name: 'Proxy Ballot', era: 2, ap: 0, cost: 0, uses: 1, family: 'Junk', power: 0, exposure: 1, icon: 'proxyBallot', forced: true, junk: true,
     text: 'Must play. +1 Board Exposure. Then it\'s gone.', flavour: 'Signed on behalf of a widow in Ohio.' },
-  patentClaim: { name: 'New Patent Claim', era: 2, ap: null, cost: 0, uses: 1, family: 'Junk', power: 0, icon: 'patentClaim', junk: true,
-    text: "Can't be played. Gone at the end of the turn.", flavour: 'Patent pending. Everything pending.' },
+  patentClaim: { name: 'New Patent Claim', era: 2, ap: null, cost: 0, uses: null, sticky: true, family: 'Junk', power: 0, icon: 'patentClaim', junk: true,
+    text: "Can't be played. Stays in your hand. Only the shop can destroy it.", flavour: 'Patent pending. Everything pending.' },
   derrick: { name: 'Steel Derrick', era: 2, ap: 1, cost: 0, uses: 1, family: 'Production', power: 1, icon: 'steelDerrick', price: CONFIG.derrickPrice,
     text: 'Build a Well: 1 oil a turn, never dry.', flavour: 'Riveted, not nailed.' },
   securityDetail: { name: 'Security Detail', era: 2, ap: 1, cost: 0, uses: null, family: 'Defence', power: 0, stop: true, oncePerRound: true, cover: 2, icon: 'securityDetail', price: 6, rarity: 'Common',
@@ -272,7 +274,6 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
   dividends: { power: 5, text: '+$5.' },
   telegram: { cost: 1, text: 'Pay $1. A random attack card, free to play.' },
   telegraphLine: { draw: 2, text: 'Draw 2 cards.' },
-  tickerTape: { draw: 3, text: 'Draw 3 cards. Oil sells +$1 this turn.' },
   nightShift: { power: 3, text: '+3 AP now. −1 AP next turn.' },
   efficiencyExpert: { cost: 0, text: 'Draw 3 cards.' },
   streamline: { ap: 0, text: 'Destroy a card in hand.' },
@@ -321,19 +322,24 @@ export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBr
 export const SHOP_POOL_2: CardKey[] = ['telegraphLine', 'tickerTape', 'nightShift', 'efficiencyExpert', 'streamline', 'shredFiles', 'scrapParts', 'cleanHouse',
   'patentThicket', 'espionage', 'poachEngineer', 'rdSprint', 'payDividend', 'personalLawyer', 'securityDetail', 'insurance', 'expenseAccount']
 // stage 3: oil price boosts, faster cycling, destroying cards, gold into Capital, and the new defences
-export const SHOP_POOL_3: CardKey[] = ['embargoRumours', 'queuesAtPump', 'telex', 'memo', 'tickerTape', 'restructure', 'personalGuarantee', 'dipTrust',
+export const SHOP_POOL_3: CardKey[] = ['embargoRumours', 'queuesAtPump', 'telex', 'memo', 'restructure', 'personalGuarantee', 'dipTrust',
   'buryEvidence', 'lobbyCongress', 'thinkTank', 'bribeOfficial', 'retainCounsel', 'advertorial', 'buyOut', 'oilShock']
 /** Stage 2 incorporation: pick incorporatePicks of these; the rest go on sale at the first Exchange visit. */
 export const INCORPORATE_OFFER_2: CardKey[] = ['derrick', 'payDividend', 'patentThicket', 'tickerTape']
 // stage 4: Big Oil's own stock, heavy on AP and draw
 export const SHOP_POOL_4: CardKey[] = ['recycling', 'propaganda', 'onThePayroll', 'climateBreakdown', 'astroturfing', 'sustainabilityReport', 'carbonCapture',
   'bridgeFuel', 'carbonOffsets', 'influencers']
+/** Art for a stage 1 reward card handed out in a later stage (the rest keep their own until drawn). */
+export const ERA_ICON: Partial<Record<CardKey, Partial<Record<number, Icon>>>> = {
+  inheritance: { 3: 'inheritance3', 4: 'inheritance3' },
+  dividends: { 2: 'payDividend' },
+}
 export const shopPool = (stage: number): CardKey[] => (stage >= 4 ? SHOP_POOL_4 : stage >= 3 ? SHOP_POOL_3 : stage >= 2 ? SHOP_POOL_2 : SHOP_POOL)
 /** Going multinational: pick incorporatePicks of these; the rest go on sale at the first Trading Floor visit. */
 export const INCORPORATE_OFFER_3: CardKey[] = ['buryEvidence', 'lobbyCongress', 'buyOut', 'advertorial']
 /** Becoming Big Oil: pick incorporatePicks of these, one of each damage type; the rest go on sale at the first Investor Portal visit. */
 /** Bad Blood: a fire risk in stages 1 and 2, a $5 bill from stage 3 (no fires). */
-export const badBloodFor = (stage: number): CardKey => (stage >= 3 ? 'badBloodLate' : 'badBlood')
+export const badBloodFor = (stage: number): CardKey => (stage >= 4 ? 'badBlood4' : stage >= 3 ? 'badBloodLate' : 'badBlood')
 export const INCORPORATE_OFFER_4: CardKey[] = ['propaganda', 'onThePayroll', 'sustainabilityReport', 'astroturfing']
 /** Old cards that are useless in stage 3: land cards become Dry Leases; fire and board cards, Dead Weight. Shore Up carries over, like Security Detail. */
 export const TO_DRY_LEASE: CardKey[] = ['prospect', 'oldProspect', 'derrick', 'well', 'wildcat']
@@ -389,7 +395,7 @@ export interface ThreatDef {
 export const THREATS: Record<ThreatKind, ThreatDef> = {
   blowout: { role: 'engine', name: 'The Blowout', hold: 5, immune: 'Legal', cycle: ['Rumble', 'Spray', 'Blow'], whenBeaten: 'Gusher: +3 oil', portrait: 'blowout' },
   strike: { role: 'engine', name: 'The Strike', hold: 8, weak: 'Dirty', cycle: ['Picket', 'Sabotage'], round3: 'Torch', movesFirst: 'Walkout', portrait: 'strike' },
-  inspector: { role: 'cash', name: 'The Bank Inspector', hold: 6, weak: 'Legal', immune: 'Dirty', cycle: ['Audit', 'Fine'], whenBeaten: '2 Loose Threads in your deck (must play, −$1 each)', portrait: 'inspector',
+  inspector: { role: 'cash', name: 'The Bank Inspector', hold: 6, weak: 'Legal', immune: 'Dirty', cycle: ['Audit', 'Fine'], whenBeaten: `${CONFIG.looseThreads} Loose Threads in your deck (must play, −$1 each)`, portrait: 'inspector',
     rule: `End a turn with $${CONFIG.inspectorReserve} or more and he loses ${CONFIG.inspectorReserveDamage} Hold.` },
   railroad: { role: 'cash', name: 'The Railroad Agent', hold: 7, resist: 'Legal', cycle: ['Raise Rates', 'Refuse'], portrait: 'railroad' },
   claimJumper: { role: 'engine', name: 'The Claim Jumper', hold: 6, weak: 'Dirty', cycle: ['Jump', 'Scout'], movesFirst: 'Scout', whenBeaten: 'Starts a fire', portrait: 'claimJumper' },
@@ -435,6 +441,12 @@ export const TUTORIAL_HANDS: Record<number, CardKey[]> = {
   4: ['bucket', 'hiredHand', 'lawyerUp', 'improveGear', 'shoreUp'],
 }
 export const BOSS: Record<number, ThreatKind> = { 1: 'baron', 2: 'proxyFight', 3: 'geneva', 4: 'truth' }
+/** The stage each enemy belongs to (the Squatter is the tutorial's, in stage 1). */
+export function threatStage(k: ThreatKind): number {
+  if (k === 'squatter') return 1
+  for (const st of [1, 2, 3]) if (CASH_POOLS[st].includes(k) || ENGINE_POOLS[st].includes(k) || BOSS[st] === k) return st
+  return 4
+}
 /** Stage 4's enemies: four are met, one per round, never the same one twice in a run. */
 export const STAGE4_POOL: ThreatKind[] = ['fracking', 'greenAlternatives', 'deepwaterDisaster', 'spilledTanker', 'greenPoliticians', 'war']
 /** The Truth fights in four phases, one after another, each weak to one damage type and resisting another. */

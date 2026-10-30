@@ -77,7 +77,7 @@ Only a few enemies resist a kind of card (the Railroad Agent and the Baron); the
 |---|---|---|---|---|---|---|
 | Blowout | Engine | 5 | — | Legal (immune) | Rumble → Spray → Blow | Beaten = +3 oil |
 | Strike | Engine | 8 | Dirty | — | Picket (lose $2) → Sabotage (a random Well) (+ Torch in R3) | Moves first: Walkout (−1 AP) |
-| Bank Inspector | Cash | 6 | Legal | Dirty (immune) | Audit → Fine | Ending a turn with $12+ removes 2 of his Hold: his panel shows your reserves live (green when met), and the turn report says so (and when it finishes him); beaten = 2 Loose Threads, shown on his panel beforehand and on the round summary as "Left in your deck" |
+| Bank Inspector | Cash | 6 | Legal | Dirty (immune) | Audit → Fine | Ending a turn with $12+ removes 2 of his Hold: his panel shows your reserves live (green when met), and the turn report says so (and when it finishes him); beaten = 3 Loose Threads, shown on his panel beforehand and on the round summary as "Left in your deck" |
 | Railroad Agent | Cash | 7 | — | Legal | Raise Rates → Refuse | Owns the railway: freight is her toll per barrel sold, and Raise Rates adds $1 to it |
 | Claim Jumper | Engine | 6 | Dirty | — | Jump → Scout | Moves first: Scout. Beaten = 1 fire |
 | Speculator | Cash | 7 | Legal | — | Short → Margin Call → Rumours (+ IOU in R3) | Beaten = price recovers |
@@ -137,7 +137,7 @@ Each card can be upgraded once (shown with a +). Attacks hit harder (Hired Hand 
 | Card | Cost | Effect |
 |---|---|---|
 | Telegraph Line | 0 AP | Draw 1 |
-| Ticker Tape | 1 AP | Draw 2. Oil +$1 this turn |
+| Ticker Tape | 1 AP | Draw 1. Oil +$1 this turn. Can't be upgraded |
 | Night Shift | 0 AP | +2 AP now, −1 AP next turn |
 | Efficiency Expert | 1 AP, $2 | Draw 3 |
 | Streamline | 1 AP | Destroy a card in hand (you choose) |
@@ -161,7 +161,7 @@ Destroy cards can be played even with a Must play card in hand (so they can dest
 | The Muckraker | Cash | 11 | Legal | — | Dig (+1 Exposure) → Expose (−1 gold) → Headline (−$4; −$8 from round 2) (+ Front Page: +2 Exposure in R3) | Beaten: −1 Exposure |
 | The Combine | Cash | 11 | — | Legal | Price War (oil −$1) → Rail Deal (freight +$1: you get $1 less a barrel sold) → Squeeze (−$3; −$6 from round 2) → Hired Muscle (Bad Blood in your next hand) | Beaten: prices and freight recover |
 | The Clawback Committee | Cash | 10 | Dirty | — | Clawback → Clawback (each −$4, −$8 from round 2; or −2 gold at 5+ Exposure) → Minutes (+1 Exposure) | 2 Cover every turn (blocks 2 of your damage; never stacks). Beaten: nothing |
-| The Patent Holder | Engine | 12 | Legal | — | Cease and Desist (must-play card in your next hand: 1 AP, does nothing) → New Patent Claim (an unplayable card takes a slot in your next hand) → Royalty (−$1 per Well/Field; −$2 from round 2) | |
+| The Patent Holder | Engine | 12 | Legal | — | Cease and Desist (must-play card in your next hand: 1 AP, does nothing) → New Patent Claim (an unplayable card that stays in your hand, and your deck, until a shop destroys it) → Royalty (−$1 per Well/Field; −$2 from round 2) | |
 | The Saboteur | Engine | 10 | Dirty | — | Wreck (destroys the marked Field or Well) → Lit Fuse (Bad Blood in your next hand) → Infiltrate (marks your best Field) | Moves first: Infiltrate. Beaten: starts a fire |
 | The Railroad Commission | Engine | 8 (a weak enemy) | Dirty | — | Proration (next turn pump 2 at most) → Inspection (−2 AP next turn) → Leaky Tanks (lose all stored oil and 25% of Capital) | |
 | **The Proxy Fight** (boss) | Boss | 52 | Legal | — | Hostile Bid (−$6, +$2 each cycle) → Proxy Meeting (does nothing) → The Vote (+1 Exposure, +1 each cycle) | Moves first: Canvass (+1 Exposure) |
@@ -172,7 +172,7 @@ Money is in millions ($M). Rounds are 1970, 1973, 1976 and 1979. The shop is **t
 ### Going multinational (between stages)
 Winning the Proxy Fight pays 3 gold, then a page-turn to 1970 stamped MULTINATIONAL, then the Multinational screen:
 - Every Field and Well becomes an **offshore Rig**: 2 oil a turn, never runs dry, sells for $10M. Empty plots go. At most 5 Rigs. The Multinational screen leads with it: your Rigs drawn out of 5 slots, "Your Wells and Fields are now Rigs", and the 5 cap (first on phones too).
-- **Some old cards turn to junk.** Land cards (Prospects, Steel Derricks, Well cards) become **Dry Leases** (1 AP, do nothing, destroyed once played). Fire and board cards (Bucket, Fire Brigade, Pay a Dividend) become **Dead Weight** (unplayable). Shore Up carries over, like Security Detail: both still block a move once per fight. Every other old card works exactly as before, upgrades included; stage 3 enemies are simply far tougher. There are no fires from stage 3, so **Bad Blood** becomes a must-play card that costs $5 (2 uses). Dynamite, Bribe the Sheriff and a refused Bribe still add it.
+- **Some old cards turn to junk.** Land cards (Prospects, Steel Derricks, Well cards) become **Dry Leases** (1 AP, do nothing, destroyed once played). Fire and board cards (Bucket, Fire Brigade, Pay a Dividend) become **Dead Weight** (unplayable). Shore Up carries over, like Security Detail: both still block a move once per fight. Every other old card works exactly as before, upgrades included; stage 3 enemies are simply far tougher. There are no fires from stage 3, so **Bad Blood** becomes a must-play card that adds 10 Heat (2 uses); in stage 4 it moves the clock on an hour instead (2 uses). Dynamite, Bribe the Sheriff and a refused Bribe still add it.
 - **Pick 2 new cards** from 4: Bury Evidence, Lobby Congress, Buy Out and Advertorial. The 2 you leave are on sale at the first Trading Floor visit.
 - **No Bank Debt** in stage 3, and no loans. Heat is the only clock.
 - Heat starts at 0, +5 for every 3 gold skimmed in stage 2 (15 at most).
@@ -202,7 +202,6 @@ Four damage types: Legal, Dirty, **Bury** (hiding evidence) and **Lobby** (Washi
 | Queues at the Pump | 2 AP | Oil +$2M for the rest of the round | 1 AP (++: 0 AP) |
 | Telex | 1 AP | Draw 3 | Draw 4 (++: 5) |
 | Memo | 1 AP | Discard the rest of your hand, draw that many +1 | 0 AP |
-| Ticker Tape | 1 AP | (from stage 2) Draw 2, oil +$1M this turn | Draw 3 |
 | Restructure | 1 AP | Destroy a card in hand, draw 1 | **Write It Off**: also +$2M |
 | Personal Guarantee | 1 AP | Pay 1 gold: +$6M | +$8M |
 | Dip into the Trust | 0 AP, one use | Pay 3 gold: +$20M | — |
@@ -353,7 +352,7 @@ Oil across all runs is added up on the device (`tycoon.oilPumped`, counted from 
 | Green Politicians | 56 | Dirty · Lobby | Personal attacks and limits; its moves can't be blocked (Shore Up and the like) | Windfall Tax (−2 gold) → ⏰ Hearings → Subpoena (play at most 2 cards next turn) → Asset Freeze (−3 gold) → ⏰ Climate Bill |
 | War | 54 | Legal · Bury | While it lasts you produce only 1 barrel a turn, but oil sells for $10B | Requisition (lose 2 oil) → ⏰ Refugee Crisis → Pipeline Strike (−$8B) → Profiteering Probe (−$6B) → ⏰ Ceasefire Talks |
 
-Money moves as built: Moratorium and Undercut −$10B, Blowout, Clean-up Bill and Pipeline Strike −$12B, Profiteering Probe −$10B. Compensation Claim (junk): must play, 1 AP, pay $5B. Every skim moves the clock on 1 hour. Every enemy move also takes $4B ($5B for Green Alternatives, Deepwater Disaster and War; Cover blocks it).
+Stage 3 moves show their extra loss folded in ("Lose $9M.", or "+5 Heat, and also costs you $1M."). Reward cards handed out in a later stage (Dividends, Inheritance, Fire Brigade) take that stage's look. Money moves as built: Moratorium and Undercut −$10B, Blowout, Clean-up Bill and Pipeline Strike −$12B, Profiteering Probe −$10B. Compensation Claim (junk): must play, 1 AP, pay $5B. Every skim moves the clock on 1 hour. Every enemy move also takes $4B ($5B for Green Alternatives, Deepwater Disaster and War; Cover blocks it).
 
 ### The Truth (boss)
 - **Four phases of 35 Hold, one after another.** Each phase is weak to one damage type (double) and resists another (half); the other two do normal damage. Each type is resisted once:
@@ -386,10 +385,12 @@ The look is a cheerful corporate sustainability report made by a tech start-up: 
 Synthesised in the browser (src/sound.ts); hear them all at `?preview=sounds`. Each era arrives with its own sound: a steam whistle (1860s), a muted brass fanfare (1900s), a wobbling organ chord (1970s), a start-up chime (2010s). The enemy turn arrives the way news did in each era: ticker tape (stage 1), silent-film intertitles in a gold Deco frame with a projector clatter (stage 2), a telex printing on green-bar paper (stage 3), and phone notifications stacking from the top, with clock moves as black Breaking alerts (stage 4). Events: a tick, tock and chime when the Truth clock moves on (a ratchet when it goes back), three deep bell strokes at midnight, a dissonant swell when the Truth changes phase, a rising shimmer when an enemy regains Hold, coins slipping away when gold is taken, paper slapped down for junk, and a fanfare with the cash register for the win.
 
 ## Glossary
-Opened from Settings, or from the book button next to the gear on the board and in the shop. Three tabs:
+Opened from Settings, or from the book button next to the gear on the board and in the shop. Four tabs:
 - **Words:** Hold, Cover, Gold, Capital, AP.
 - **Terms:** the business terms that unlock, for good on that device, the first time you get the card that uses them (Greenwashing, Astroturfing, Carbon offsets and so on, 17 in all, in src/terms.ts). Each says what it means and gives a real case. A toast announces a new one.
 - **Cards:** every card you have played, grouped by era, with a count of how many there are in all. Tap one to see it full size with its type, cost, how long it lasts, its shop price and rarity, what upgrading it does, its flavour line and how many times you have played it (src/cardbook.ts).
+
+- **Liabilities:** every liability you have beaten (src/beaten.ts), by stage, with its portrait, name and stage; nothing else.
 
 Admin playtests unlock nothing.
 

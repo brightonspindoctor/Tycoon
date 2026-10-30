@@ -385,24 +385,29 @@ describe('fixes after the first full games', () => {
 })
 
 describe('Bad Blood from stage 3', () => {
-  it('no fires from stage 3: Bad Blood is a must-play $5 card', () => {
+  it('stage 3 Bad Blood: must play, +10 Heat, two plays to go', () => {
     const d = CARDS.badBloodLate
     expect(d.forced).toBe(true)
-    expect(d.cost).toBe(CONFIG.badBloodCost)
-    let r = inStage4(['badBloodLate'], 'greenPoliticians')
-    expect(canPlay(r, r.hand.find(c => c.key !== 'badBloodLate') ?? r.hand[0]).ok).toBe(true)
-    r.hand.push({ id: 7100, key: 'propaganda', uses: null }); r.deck.push(r.hand[r.hand.length - 1])
-    expect(canPlay(r, r.hand.find(c => c.key === 'propaganda')!).ok).toBe(false) // must play first
-    const cash = r.capital
-    r = playIt(r, 'badBloodLate')
-    expect(r.capital).toBe(cash - CONFIG.badBloodCost)
-    expect(r.fire).toBe(0)
+    expect(d.heat).toBe(CONFIG.badBloodHeat)
+    expect(d.uses).toBe(2)
+    expect(CONFIG.badBloodHeat).toBe(10)
   })
 
-  it('Dynamite still adds Bad Blood from stage 3, the $5 kind', () => {
+  it('stage 4 Bad Blood: must play, the clock moves on an hour, two plays to go', () => {
+    let r = inStage4(['badBlood4'], 'fracking')
+    r.hand.push({ id: 7100, key: 'propaganda', uses: null }); r.deck.push(r.hand[r.hand.length - 1])
+    expect(canPlay(r, r.hand.find(c => c.key === 'propaganda')!).ok).toBe(false) // must play first
+    const hour = r.clock!, cash = r.capital
+    r = playIt(r, 'badBlood4')
+    expect(r.clock).toBe(hour + CONFIG.badBloodClock)
+    expect(r.capital).toBe(cash)
+    expect(r.deck.find(c => c.key === 'badBlood4')?.uses).toBe(1)
+  })
+
+  it('Dynamite adds the stage 4 Bad Blood in stage 4', () => {
     let r = inStage4(['dynamite'], 'greenPoliticians')
     r = playIt(r, 'dynamite')
-    expect(r.discard.some(c => c.key === 'badBloodLate')).toBe(true)
-    expect(r.deck.some(c => c.key === 'badBlood')).toBe(false)
+    expect(r.discard.some(c => c.key === 'badBlood4')).toBe(true)
+    expect(r.deck.some(c => c.key === 'badBlood' || c.key === 'badBloodLate')).toBe(false)
   })
 })

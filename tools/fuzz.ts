@@ -136,7 +136,9 @@ function check(r: Run, prev: Run, a: Action): string | null {
   if (r.marked !== null && (r.marked < 0 || r.marked >= r.plots.length)) return `marked plot ${r.marked}`
   if (a.type === 'endTurn' && r.phase === 'turn' && prev.phase === 'turn') {
     const extra = r.round === bossRound(r.stage) && r.turn === 1 && r.boon === 'spareRigs' ? 2 : 0
-    if (r.hand.length > handSize(r) + extra) return `hand of ${r.hand.length} after drawing`
+    // cards that stay in your hand (New Patent Claims, Green Projects) and cards pushed in by enemies can go over; what you draw can't
+    const drawn = r.hand.filter(c => !c.temp && !CARDS[c.key].sticky).length
+    if (drawn > handSize(r) + extra) return `drew a hand of ${drawn}`
   }
   if (JSON.stringify(r).includes('null,"amount"') || /NaN|Infinity/.test(JSON.stringify({ c: r.capital, g: r.gold, o: r.oil, f: r.fire, ap: r.ap }))) return 'NaN somewhere'
   if (!Number.isFinite(r.capital) || !Number.isFinite(r.ap)) return 'non-finite number'

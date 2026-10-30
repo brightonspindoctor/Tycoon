@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { ITEMS, THREATS, bossRound } from '../engine/data'
 import {
-  apCost, turnsLeft, atWar, attackPower, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, neverDry, plotName, price, production, skimRate,
+  apCost, turnsLeft, mustPlayFirst, atWar, attackPower, sellAP, canPlay, cardDef, damageOn, fires, freight, handTargetsFor, targetsFor, weakestWell, wellValue, debtPerTurn, fireTarget, liveThreats, netPrice, neverDry, plotName, price, production, skimRate,
   type Action, type Beat, type Run,
 } from '../engine/engine'
 import { ERA_THEME, FIELD_PLACE, STAGE_TITLE, money, units, year } from '../engine/format'
@@ -115,7 +115,7 @@ export function GameScreen({ run, dispatch, acting, coach }: Props) {
                   {burning && <span className="plot__flag plot__flag--fire">Burns next</span>}
                   {plotMenu === i && w && (
                     <div className="plot__menu">
-                      <button type="button" className="cl-btn" disabled={run.ap < 1 || !!w.faithful || !lets.other(coach)} onClick={() => { dispatch({ type: 'sellWell', plot: i }); setPlotMenu(null) }}>Sell {w.rig ? 'Rig' : w.field ? 'Field' : 'Well'} · 1 AP · {money(wellValue(w), st, true)}</button>
+                      <button type="button" className="cl-btn" disabled={run.ap < 1 || !!w.faithful || mustPlayFirst(run) || !lets.other(coach)} onClick={() => { dispatch({ type: 'sellWell', plot: i }); setPlotMenu(null) }}>Sell {w.rig ? 'Rig' : w.field ? 'Field' : 'Well'} · 1 AP · {money(wellValue(w), st, true)}</button>
                     </div>
                   )}
                 </div>
@@ -170,9 +170,9 @@ export function GameScreen({ run, dispatch, acting, coach }: Props) {
             {Array.from({ length: Math.max(run.ap, CONFIG.baseAP) }, (_, i) => <span key={i} className={`ap-coin ${i < run.ap ? 'is-on' : ''}`} />)}
             <span className="cl-num">{run.ap}</span>
           </div>
-          <button type="button" className={`cl-btn sell-btn ${cl('sell')}`} disabled={run.ap < sellAP(run) || run.oil < 1 || run.current.refuse || !lets.sell(coach)}
+          <button type="button" className={`cl-btn sell-btn ${cl('sell')}`} disabled={run.ap < sellAP(run) || run.oil < 1 || run.current.refuse || mustPlayFirst(run) || !lets.sell(coach)}
             onClick={() => dispatch({ type: 'sellOil' })}>
-            {run.current.refuse ? 'Shipment refused' : `Sell ${run.oil} oil · ${sellAP(run)} AP · ${money(run.oil * netPrice(run) * (run.doubleSale ? 2 : 1), st, true)}`}
+            {run.current.refuse ? 'Shipment refused' : mustPlayFirst(run) && run.oil > 0 ? 'Play your Must play cards first' : `Sell ${run.oil} oil · ${sellAP(run)} AP · ${money(run.oil * netPrice(run) * (run.doubleSale ? 2 : 1), st, true)}`}
             {run.fire > 0 && run.oil > 0 && st < 2 && <em> · fire hits Wells next</em>}
           </button>
           {run.cover > 0 && <span className="cover-badge">Cover {run.cover}</span>}
@@ -180,7 +180,7 @@ export function GameScreen({ run, dispatch, acting, coach }: Props) {
           {!!run.current.cardCap && <span className="cap-badge">Subpoena: {run.played ?? 0} of {run.current.cardCap} cards</span>}
           <div className="action-strip__actions">
             {run.items.includes('paperShredder') && <button type="button" className="cl-btn" disabled={run.shredded || !run.hand.length || !lets.other(coach)} onClick={() => { setSelected(null); setShredding(!shredding) }}>{run.shredded ? 'Shredder used this fight' : shredding ? 'Cancel' : 'Paper Shredder · free · once a fight'}</button>}
-            {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn" disabled={run.ap < CONFIG.firebreakAP || !lets.other(coach)} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose Well No. {weakestWell(run) + 1}, put out every fire</button>}
+            {run.fire > 0 && weakestWell(run) >= 0 && <button type="button" className="cl-btn" disabled={run.ap < CONFIG.firebreakAP || mustPlayFirst(run) || !lets.other(coach)} onClick={() => dispatch({ type: 'firebreak' })}>Firebreak · {CONFIG.firebreakAP} AP · lose Well No. {weakestWell(run) + 1}, put out every fire</button>}
           </div>
         </div>
         {(scrapping || shredding) && <div className="hand-prompt cl-label">Choose a card in your hand to destroy</div>}

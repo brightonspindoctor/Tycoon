@@ -8,6 +8,9 @@ import { TERMS, loadFound } from '../terms'
 import { loadPlayed } from '../cardbook'
 import { play } from '../sound'
 import { CardView } from './CardView'
+import { Portrait } from './Portrait'
+import { loadBeaten } from '../beaten'
+import { THREATS, threatStage } from '../engine/data'
 
 const WORDS: [string, string][] = [
   ['Hold', "A liability's strength. Bring it to 0 to beat it."],
@@ -17,8 +20,9 @@ const WORDS: [string, string][] = [
   ['AP', `Action points. Most cards cost 1 AP to play. You get ${CONFIG.baseAP} a turn, more with some items.`],
 ]
 
-type Tab = 'words' | 'business' | 'cards'
+type Tab = 'words' | 'business' | 'cards' | 'liabilities'
 const ALL_CARDS = Object.keys(CARDS).length
+const ALL_THREATS = Object.keys(THREATS).length
 
 export function Glossary({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('words')
@@ -27,6 +31,8 @@ export function Glossary({ onClose }: { onClose: () => void }) {
   const played = loadPlayed()
   const keys = (Object.keys(played) as CardKey[]).sort((a, b) => (CARDS[a].era ?? 1) - (CARDS[b].era ?? 1) || CARDS[a].name.localeCompare(CARDS[b].name))
   const eras = [...new Set(keys.map(k => CARDS[k].era ?? 1))]
+  const beaten = loadBeaten().sort((a, b) => threatStage(a) - threatStage(b) || THREATS[a].name.localeCompare(THREATS[b].name))
+  const beatenStages = [...new Set(beaten.map(threatStage))]
   const pick = (t: Tab) => { play('click'); setTab(t); setOpen(null) }
 
   return (
@@ -40,6 +46,7 @@ export function Glossary({ onClose }: { onClose: () => void }) {
           <button type="button" role="tab" aria-selected={tab === 'words'} className={tab === 'words' ? 'is-on' : ''} onClick={() => pick('words')}>Words</button>
           <button type="button" role="tab" aria-selected={tab === 'business'} className={tab === 'business' ? 'is-on' : ''} onClick={() => pick('business')}>Terms · {found.length}</button>
           <button type="button" role="tab" aria-selected={tab === 'cards'} className={tab === 'cards' ? 'is-on' : ''} onClick={() => pick('cards')}>Cards · {keys.length}</button>
+          <button type="button" role="tab" aria-selected={tab === 'liabilities'} className={tab === 'liabilities' ? 'is-on' : ''} onClick={() => pick('liabilities')}>Liabilities · {beaten.length}</button>
         </div>
         <div className="glossary__body">
           {tab === 'words' && <dl>{WORDS.map(([t, d]) => <div key={t} className="glossary__term"><dt>{t}</dt><dd>{d}</dd></div>)}</dl>}
@@ -64,6 +71,24 @@ export function Glossary({ onClose }: { onClose: () => void }) {
               </section>
             ))}
           </> : <p className="res-note">Cards appear here once you have played them.</p>)}
+
+          {tab === 'liabilities' && (beaten.length ? <>
+            <p className="res-note">Every liability you have beaten: {beaten.length} of {ALL_THREATS}.</p>
+            {beatenStages.map(st => (
+              <section key={st} className="glossary__era" aria-label={`Stage ${st}`}>
+                <span className="cl-label">Stage {st} · {ERA_LABEL[st]}</span>
+                <ul className="glossary__foes">
+                  {beaten.filter(k => threatStage(k) === st).map(k => (
+                    <li key={k} className="glossary__foe">
+                      <Portrait className="glossary__foe-pic" name={THREATS[k].name} portrait={THREATS[k].portrait} />
+                      <b>{THREATS[k].name}</b>
+                      <span className="res-note">Stage {st}{THREATS[k].role === 'boss' ? ' · Boss' : ''}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </> : <p className="res-note">Liabilities appear here once you have beaten them.</p>)}
 
           {tab === 'cards' && open && <CardPage k={open} times={played[open] ?? 0} onBack={() => { play('click'); setOpen(null) }} />}
         </div>

@@ -3,12 +3,12 @@
 import { CONFIG } from './config'
 import {
   ATTACK_CARDS, BOSS, TUTORIAL_HANDS, CARDS, INCORPORATE_OFFER_2, CASH_POOLS, ENGINE_POOLS, ITEMS, PROSPECTS, PROSPECT_FOR, WATER_FOR, STARTER, THREATS, UPGRADES, shopPool,
-  BOONS, REWARDS, BRIBES, INCORPORATE_OFFER_3, INCORPORATE_OFFER_4, STAGE4_POOL, badBloodFor, TRUTH_PHASES, bossRound, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, boonInfo, landCardFor, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ThreatKind,
+  BOONS, REWARDS, ERA_ICON, BRIBES, INCORPORATE_OFFER_3, INCORPORATE_OFFER_4, STAGE4_POOL, badBloodFor, TRUTH_PHASES, bossRound, TO_DEAD_WEIGHT, TO_DRY_LEASE, fadedDef, boonInfo, landCardFor, type BoonKey, type RewardKey, type BonusKey, type CardDef, type CardKey, type Family, type ItemKey, type ThreatKind,
 } from './data'
 import { next, pick, shuffle } from './rng'
 import { newTally, type Tally } from './tactics'
 
-export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean; free?: boolean; up?: boolean; up2?: boolean; faded?: boolean } // free: costs no AP · up: upgraded · up2: upgraded twice (stage 3) · faded: unused
+export interface Card { id: number; key: CardKey; uses: number | null; temp?: boolean; free?: boolean; up?: boolean; up2?: boolean; faded?: boolean; era?: number } // era: a reward card made in a later stage takes that stage's look // free: costs no AP · up: upgraded · up2: upgraded twice (stage 3) · faded: unused
 export interface Well { output: number; reserve: number; unstable?: boolean; field?: boolean; lasting?: boolean; rig?: boolean; faithful?: boolean } // faithful: Old Faithful, which nothing can touch // a Field (an old Well), a stage 2 Well (lasting) and a stage 3 Rig never run dry
 export const neverDry = (w: Well) => !!(w.field || w.lasting || w.rig || w.faithful)
 /** Wells enemies, fires and Firebreaks can go for: every one but Old Faithful. */
@@ -160,8 +160,9 @@ const clone = <T,>(x: T): T => structuredClone(x)
 const card = (r: Run, key: CardKey, temp = false): Card => ({ id: r.nextId++, key, uses: CARDS[key].uses, temp })
 
 /** What a card does, upgrades included. */
-export function cardDef(c: { key: CardKey; up?: boolean; up2?: boolean; faded?: boolean }): CardDef {
+export function cardDef(c: { key: CardKey; up?: boolean; up2?: boolean; faded?: boolean; era?: number }): CardDef {
   let d = CARDS[c.key]
+  if (c.era && c.era !== (d.era ?? 1)) d = { ...d, era: c.era, icon: ERA_ICON[c.key]?.[c.era] ?? d.icon }
   if (c.up) d = { ...d, ...UPGRADES[c.key], name: UPGRADES[c.key]?.name ?? `${d.name}+` }
   if (c.up && c.up2) d = secondUpgrade(CARDS[c.key], d)
   return c.faded ? fadedDef(d) : d
@@ -521,8 +522,8 @@ function shopAction(r: Run, a: Action) {
       const b = r.shop.boon
       if (!b || r.gold < CONFIG.boonGold) return
       r.gold -= CONFIG.boonGold; r.boon = b; r.shop.boon = null
-      if (b === 'fireBrigade') r.deck.push(card(r, 'fireBrigade'))
-      if (b === 'inheritance') r.deck.push(card(r, 'inheritance'))
+      if (b === 'fireBrigade') r.deck.push({ ...card(r, 'fireBrigade'), era: r.stage })
+      if (b === 'inheritance') r.deck.push({ ...card(r, 'inheritance'), era: r.stage })
       say(r, `${boonInfo(b, r.stage).name}: yours for ${CONFIG.boonGold} gold.`)
       return
     }
@@ -784,7 +785,7 @@ function beginTurn(r: Run) {
   for (let i = 0; i < ceases; i++) r.hand.push(card(r, 'ceaseDesist', true))
   for (let i = 0; i < fuses; i++) { const b = card(r, badBloodFor(r.stage)); r.deck.push(b); r.hand.push(b) } // lasts until it decays
   if (fuses) beat(r, 'cards', 'Bad Blood', `${fuses > 1 ? `${fuses} Bad Blood cards` : 'A Bad Blood card'} in your hand: 1 in 3 chance of a fire.`)
-  for (let i = 0; i < claims; i++) r.hand.push(card(r, 'patentClaim', true))
+  for (let i = 0; i < claims; i++) { const c = card(r, 'patentClaim'); r.deck.push(c); r.hand.push(c) } // stays in your hand, and your deck, until the shop destroys it
   for (let i = 0; i < declarations; i++) r.hand.push(card(r, 'draftDeclaration', true))
   if (declarations) beat(r, 'cards', 'Draft Declaration', 'A Draft Declaration in your hand: must play, 1 AP, does nothing.')
   for (let i = 0; i < compensation; i++) r.hand.push(card(r, 'compensationClaim', true))
@@ -859,10 +860,10 @@ function threatBeaten(r: Run, t: Threat) {
   say(r, `${THREATS[t.kind].name} is beaten.`)
   switch (t.kind) {
     case 'inspector': {
-      addJunk(r, 'looseThread'); addJunk(r, 'looseThread')
-      r.leftBehind = { by: THREATS[t.kind].name, cards: ['looseThread', 'looseThread'] }
-      say(r, 'He filed his report: 2 Loose Threads added to your deck.')
-      beat(r, 'cards', `${THREATS[t.kind].name} · His report`, 'He filed his report: 2 Loose Threads in your deck. Must play, −$1 each.', t.id)
+      for (let i = 0; i < CONFIG.looseThreads; i++) addJunk(r, 'looseThread')
+      r.leftBehind = { by: THREATS[t.kind].name, cards: Array(CONFIG.looseThreads).fill('looseThread') }
+      say(r, `He filed his report: ${CONFIG.looseThreads} Loose Threads added to your deck.`)
+      beat(r, 'cards', `${THREATS[t.kind].name} · His report`, `He filed his report: ${CONFIG.looseThreads} Loose Threads in your deck. Must play, −$1 each.`, t.id)
       break
     }
     case 'claimJumper': say(r, 'The Claim Jumper set a fire on his way out.'); startFire(r, CONFIG.claimJumperFires, 'the Claim Jumper'); break
@@ -928,7 +929,7 @@ function grantReward(r: Run) {
   r.reward = k
   if (k === 'steamPump') r.items.push('steamPump')
   if (k === 'silo') { r.items.push('silo'); r.storage = r.stage >= 3 ? Math.min(CONFIG.maxStorage, r.storage + 4) : r.storage + 4 }
-  if (k === 'dividends') r.deck.push(card(r, 'dividends'))
+  if (k === 'dividends') r.deck.push({ ...card(r, 'dividends'), era: Math.min(4, r.stage + 1) }) // for the stage ahead, in its look
   if (k === 'drillingRights') { const land = landCardFor(r.stage + 1); r.deck.push(card(r, land), card(r, land)) } // for the stage ahead: Rigs from stage 3
 }
 
@@ -964,7 +965,7 @@ export function canPlay(r: Run, c: Card): { ok: boolean; why?: string } {
   const d = cardDef(c)
   if (r.phase !== 'turn') return { ok: false }
   if (d.ap === null) return { ok: false, why: "Can't be played" }
-  const forced = r.hand.some(x => x.id !== c.id && CARDS[x.key].forced && apCost(r, x) <= r.ap)
+  const forced = r.hand.some(x => x.id !== c.id && CARDS[x.key].forced && apCost(r, x) <= r.ap) // one you can't afford doesn't hold up your free cards; selling can't be used to get there (mustPlayFirst)
   // destroy cards can be used on a Must play card, so they skip the queue
   if (forced && !d.forced && !d.scrap) return { ok: false, why: 'Play your Must play cards first' }
   if (r.current.cardCap && (r.played ?? 0) >= r.current.cardCap && !d.forced) return { ok: false, why: `Subpoena: ${r.current.cardCap} cards this turn` }
@@ -1147,7 +1148,7 @@ function playCard(r: Run, c: Card, target?: number) {
       case 'telegram': { const help = card(r, pick(r, ATTACK_CARDS), true); help.free = true; r.hand.push(help); say(r, `Help is on its way: ${CARDS[help.key].name}, free to play.`); break }
       case 'telegraphLine': case 'efficiencyExpert': break
       case 'badBlood': badBloodRoll(r); break
-      case 'looseThread': case 'marginCall': case 'iou': case 'badBloodLate': break
+      case 'looseThread': case 'marginCall': case 'iou': case 'badBloodLate': case 'badBlood4': break
     }
   }
   // a card's own Heat and the Heat of the AP it cost land together, so cooling isn't lost at 0 and can save you at the top
@@ -1204,10 +1205,12 @@ function shred(r: Run, cardId: number) {
 /** AP to sell your oil: 1, or 2 in stage 3. */
 /** Turns left to win this fight, this one included: at the end of the last one, it's lost. */
 export const turnsLeft = (r: Run) => CONFIG.turnLimit - r.turn + 1
+/** A Must play card you can afford: no selling oil or a Well and no Firebreak until it's played (so AP can't be spent around it). Destroy cards and the Shredder can still get rid of it. */
+export const mustPlayFirst = (r: Run) => r.hand.some(c => CARDS[c.key].forced && apCost(r, c) <= r.ap)
 export const sellAP = (r: Run) => (r.stage >= 3 ? CONFIG.sellAP3 : 1)
 function sellOil(r: Run) {
   const ap = sellAP(r)
-  if (r.ap < ap || r.oil < 1 || r.current.refuse) return
+  if (r.ap < ap || r.oil < 1 || r.current.refuse || mustPlayFirst(r)) return
   r.ap -= ap
   const n = r.oil
   const each = netPrice(r)
@@ -1224,7 +1227,7 @@ export const wellValue = (w: Well) => (w.rig ? CONFIG.rigValue : neverDry(w) ? C
 
 function sellWell(r: Run, plot: number) {
   const w = r.plots[plot]
-  if (r.ap < 1 || !w || w.faithful) return // Old Faithful isn't for sale
+  if (r.ap < 1 || !w || w.faithful || mustPlayFirst(r)) return // Old Faithful isn't for sale
   r.ap -= 1
   const value = wellValue(w)
   loseWell(r, plot, 'lost')
@@ -1244,7 +1247,7 @@ export function weakestWell(r: Run): number {
 
 function firebreak(r: Run) {
   const i = weakestWell(r)
-  if (!r.fire || r.ap < CONFIG.firebreakAP || i < 0) return
+  if (!r.fire || r.ap < CONFIG.firebreakAP || i < 0 || mustPlayFirst(r)) return
   r.ap -= CONFIG.firebreakAP
   loseWell(r, i, 'lost')
   r.fire = 0
@@ -1271,7 +1274,13 @@ export function intentText(r: Run, t: Threat): string {
   let text = moveText(r, t)
   // stage 3: every move also costs Capital and adds Heat; say so
   if (t.kind === 'spill') text += ` −${CONFIG.spillAP} AP next turn.`
-  if (r.stage === 3 && THREATS[t.kind].chip) text += ` Plus −$${THREATS[t.kind].chip}${CONFIG.moveHeat3 ? `, +${CONFIG.moveHeat3} Heat` : ''}.`
+  // stage 3: every move also costs a little money; it's added into the move's own loss, so it reads as one number
+  const chip = r.stage === 3 ? THREATS[t.kind].chip ?? 0 : 0
+  if (chip) {
+    const m = /Lose \$(\d+)\./.exec(text)
+    text = m ? text.replace(m[0], `Lose $${Number(m[1]) + chip}.`) : `${text.replace(/\.$/, '')}, and also costs you $${chip}.`
+    if (CONFIG.moveHeat3) text += ` +${CONFIG.moveHeat3} Heat.`
+  }
   // the Truth moves the clock on with every 5th move it makes
   return t.kind === 'truth' && (t.step + 1) % CONFIG.truthTickEvery === 0 ? `${text} The clock moves on an hour.` : text
 }
@@ -1411,6 +1420,8 @@ function endTurn(r: Run) {
     const d = CARDS[c.key]
     if (c.key === 'badBlood') beat(r, 'cards', 'Bad Blood', badBloodRoll(r) ? 'Someone set a fire.' : 'Nothing happened. This time.')
     else if (d.exposure) { beat(r, 'board', d.name, `Unplayed: +${d.exposure} Board Exposure.`); captured = []; expose(r, d.exposure, d.name); captured = null }
+    else if (d.heat && r.stage === 3) { beat(r, 'board', d.name, `Unplayed: +${d.heat} Heat.`); captured = []; heat(r, d.heat, d.name); captured = null }
+    else if (d.clock && r.stage >= 4) { beat(r, 'board', d.name, 'Unplayed: the clock moves on.'); captured = []; moveClock(r, d.clock, d.name); captured = null }
     else if (d.cost) { money(r, d.name, -d.cost); beat(r, 'money', d.name, `Unplayed: −$${d.cost}.`) }
     spendCard(r, c)
     if (r.phase === 'lost') return
@@ -1657,7 +1668,7 @@ export function goMultinational(r: Run) {
   r.stageGold = r.gold
   r.plots = r.plots.filter(Boolean).slice(0, CONFIG.maxPlots).map(w => ({ output: CONFIG.rigOutput, reserve: 0, rig: true, faithful: w!.faithful }))
   r.deck = r.deck.filter(c => !c.temp)
-  for (const c of r.deck) if (c.key === 'badBlood') c.key = 'badBloodLate' // no fires in stage 3: Bad Blood becomes a $5 bill
+  for (const c of r.deck) if (c.key === 'badBlood') c.key = 'badBloodLate' // no fires in stage 3: Bad Blood brings Heat
   for (const c of r.deck) {
     if (TO_DRY_LEASE.includes(c.key)) { c.key = 'dryLease'; c.uses = CARDS.dryLease.uses; c.up = false }
     else if (TO_DEAD_WEIGHT.includes(c.key)) { c.key = 'deadWeight'; c.uses = null; c.up = false }
@@ -1690,6 +1701,7 @@ export function goBigOil(r: Run) {
   r.phase = 'incorporate'
   r.stageGold = r.gold
   r.deck = r.deck.filter(c => !c.temp)
+  for (const c of r.deck) if (c.key === 'badBlood' || c.key === 'badBloodLate') c.key = 'badBlood4' // no Heat now: Bad Blood moves the clock
   r.offer = [...INCORPORATE_OFFER_4]; r.picked = []
   r.prospectPrice = CONFIG.rigPrice4
   r.debt = 0 // every old loan is paid off
