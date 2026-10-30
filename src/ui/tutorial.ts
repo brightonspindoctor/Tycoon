@@ -20,7 +20,7 @@ export const STEPS: Step[] = [
   { phase: 'turn', turn: 1, focus: 'endTurn', wait: { endTurn: true }, text: () => 'No AP left. Cards you didn\'t play go to the discard pile. End your turn.' },
   // turn 2
   { phase: 'turn', turn: 2, focus: 'capital', wait: { next: true }, text: r => `The Shakedown took $${CONFIG.shakedown}${r.debt ? `, and Bank Debt takes $${r.debt} a turn` : ''}. Capital is the company's money. At $0 you are bankrupt.` },
-  { phase: 'turn', turn: 2, focus: 'card', wait: { play: 'improveGear' }, text: () => 'Another Shakedown is coming. Improve Gear costs $1 and gives 4 Cover. Cover blocks money you would lose this turn. Play it.' },
+  { phase: 'turn', turn: 2, focus: 'card', wait: { play: 'improveGear' }, text: () => 'Another Shakedown is coming. Improve Gear gives 4 Cover. Cover blocks money you would lose this turn. Play it.' },
   { phase: 'turn', turn: 2, focus: 'card', wait: { play: 'hiredHand' }, text: () => 'Now hit back. Hired Hand removes 2 Hold. Play it.' },
   { phase: 'turn', turn: 2, focus: 'endTurn', wait: { endTurn: true }, text: () => 'End your turn. Your Cover takes the Shakedown.' },
   // turn 3
