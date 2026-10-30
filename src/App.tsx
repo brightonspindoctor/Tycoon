@@ -23,7 +23,7 @@ import { MultinationalScreen } from './ui/Multinational'
 import { BigOilScreen } from './ui/BigOil'
 import { EraTransition } from './ui/EraTransition'
 import { units } from './engine/format'
-import { About, BonusPick, History, Intro, Scoreboard } from './ui/MenuScreens'
+import { About, BonusPick, History, Intro, Motto, Scoreboard } from './ui/MenuScreens'
 import { Achievements, TrophyCabinet } from './ui/Achievements'
 import { hello, roundEnded, runEnded, runStarted } from './telemetry'
 import { findTerms, loadFound, TERMS } from './terms'
@@ -32,7 +32,7 @@ import { coachFor, stepDone, STEPS } from './ui/tutorial'
 import { ACHIEVEMENTS, achievedBy, type AchievementKey } from './engine/achievements'
 import { THREATS } from './engine/data'
 
-type Screen = 'intro' | 'bonus' | 'welcome' | 'run' | 'history' | 'about' | 'scoreboard' | 'achievements' | 'cabinet'
+type Screen = 'intro' | 'motto' | 'bonus' | 'welcome' | 'run' | 'history' | 'about' | 'scoreboard' | 'achievements' | 'cabinet'
 
 // Phones held upright get their own layout; anything wider gets the 1440×900 board scaled to fit.
 const MOBILE_MAX = 760
@@ -259,7 +259,8 @@ export default function App() {
   let body: JSX.Element
   if (previewPage === 'cards') body = <CardGallery />
   else if (previewPage === 'sounds') body = <SoundBoard />
-  else if (screen === 'intro') body = <Intro onBegin={() => setScreen('bonus')} onHistory={() => setScreen('history')} onAbout={() => setScreen('about')} onScoreboard={() => setScreen('scoreboard')} onAchievements={() => setScreen('achievements')} admin={admin} onAdminStart={startAdmin} />
+  else if (screen === 'intro') body = <Intro onBegin={() => setScreen('motto')} onHistory={() => setScreen('history')} onAbout={() => setScreen('about')} onScoreboard={() => setScreen('scoreboard')} onAchievements={() => setScreen('achievements')} admin={admin} onAdminStart={startAdmin} />
+  else if (screen === 'motto') body = <Motto onDone={() => setScreen(s => (s === 'motto' ? 'bonus' : s))} />
   else if (screen === 'achievements') body = <Achievements onBack={() => setScreen('intro')} />
   else if (screen === 'cabinet') body = <TrophyCabinet onBack={() => setScreen('scoreboard')} />
   else if (screen === 'about') body = <About onBack={() => setScreen('intro')} />

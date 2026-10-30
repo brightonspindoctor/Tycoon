@@ -11,8 +11,8 @@ import { AdminStartPanel } from './AdminPanel'
 import type { AdminStart } from '../engine/admin'
 
 const INDUSTRIES = ['Oil', 'Pharmaceutical', 'Fishing', 'Tech']
-// the front page motto: the first one until you've played a run, then a different one each visit
-const FIRST_MOTTO = 'Industry. Influence. Plausible deniability.'
+// the tagline sits on the front page; a motto gets a screen of its own after Begin, a different one each time
+const TAGLINE = 'Industry. Influence. Plausible deniability.'
 const MOTTOS = [
   'Drill. Drill. Drill.', 'Profits now. Apologies later.', 'Today\'s oil. Tomorrow\'s problem.', 'Keep calm and keep pumping.',
   'Externalities are someone else\'s department.', 'The ground has plenty more.', 'Growth is the only weather that matters.',
@@ -20,7 +20,6 @@ const MOTTOS = [
   'Doubt is our product.', 'Nobody remembers the regulators.', 'Plausible deniability is a renewable resource.', 'The science can wait.',
 ]
 function pickMotto(): string {
-  if (!loadRuns().length) return FIRST_MOTTO
   let last = ''
   try { last = sessionStorage.getItem('tycoon.motto') ?? '' } catch { /* ignore */ }
   const options = MOTTOS.filter(m => m !== last)
@@ -28,13 +27,28 @@ function pickMotto(): string {
   try { sessionStorage.setItem('tycoon.motto', m) } catch { /* ignore */ }
   return m
 }
+/** After Begin: the motto, on its own, then on to the starting bonus. Tap to skip. */
+export function Motto({ onDone }: { onDone: () => void }) {
+  const [motto] = useState(pickMotto)
+  useEffect(() => {
+    const t = setTimeout(() => play('stamp'), 250)
+    const go = setTimeout(onDone, 2800)
+    return () => { clearTimeout(t); clearTimeout(go) }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <div className="screen motto" data-theme="victorian" onClick={onDone} role="button" tabIndex={0} aria-label={`${motto} Tap to continue`} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onDone() }}>
+      <span className="cl-label">Oil · Pennsylvania · 1863</span>
+      <p className="cl-display motto__text">{motto}</p>
+    </div>
+  )
+}
+
 const ANNOUNCED = ['Pharmaceutical'] // shown as Coming soon before Oil is finished
 // a run that died, rather than one that finished a stage or the game
 const ended = (r: RunRecord) => ['Bankrupt', 'Out of time', 'Quit', 'Ousted', 'Ruined'].includes(r.outcome)
 
 export function Intro({ onBegin, onHistory, onAbout, onScoreboard, onAchievements, admin, onAdminStart }: { onBegin: () => void; onHistory: () => void; onAbout: () => void; onScoreboard: () => void; onAchievements: () => void; admin?: boolean; onAdminStart?: (o: AdminStart) => void }) {
   const done = completedIndustries()
-  const [motto] = useState(pickMotto)
   const got = loadAchieved()
   const feats = ACHIEVEMENT_KEYS.filter(k => got[k]).length
   const best = bestScore('Oil')
@@ -48,7 +62,7 @@ export function Intro({ onBegin, onHistory, onAbout, onScoreboard, onAchievement
     <div className="screen intro" data-theme="victorian">
       <img className="intro__art" src={`${import.meta.env.BASE_URL}art/title.jpg`} alt="Tycoon: a share certificate with the industries arranged around a globe" />
       <div className="intro__side">
-        <span className="cl-label">{motto}</span>
+        <span className="cl-label">{TAGLINE}</span>
         <h1 className="cl-display intro__title">Choose your industry</h1>
         <div className="industries">
           {shown.map(name => open.includes(name) ? (
@@ -61,7 +75,7 @@ export function Intro({ onBegin, onHistory, onAbout, onScoreboard, onAchievement
             <div key={name} className="industry industry--sealed"><span className="cl-display industry__name">? ? ?</span><span className="cl-label">Sealed</span></div>
           ))}
         </div>
-        {oil !== null && oil > 0 && (
+        {oil !== null && (
           <div className="oil-total" aria-label={`${oil} barrels pumped by every player so far`}>
             <span className="cl-label">Pumped by every tycoon so far</span>
             <b className="cl-num">{oil.toLocaleString('en-GB')}</b><span className="res-note">barrels</span>
