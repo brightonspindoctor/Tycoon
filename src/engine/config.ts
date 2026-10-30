@@ -54,7 +54,7 @@ export const CONFIG = {
   exposureStartPer: 3,
   quickWinTurns: 3, // win a fight within this many turns (stage 2 on)...
   quickWinDrop: 2, // ...and Board Exposure falls by this much
-  dividendCost: 4, // the shop's dividend: $ for −dividendDrop Exposure, once per visit
+  dividendCost: 10, // the shop's dividend: $ for −dividendDrop Exposure, once per visit
   dividendDrop: 2,
   upgradeCost: 3, // rises by $1 each time
   muckrakerGold: 1, // the Muckraker's Expose

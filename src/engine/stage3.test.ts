@@ -284,12 +284,14 @@ describe('Buy Out, Advertorial, the Oil Shock and Cover', () => {
     r.phase = 'shop'; r.capital = 200
     const c = r.hand[0]
     const once = act(r, { type: 'upgradeCard', cardId: c.id })
+    expect(act(once, { type: 'upgradeCard', cardId: c.id }).deck.find(x => x.id === c.id)!.up2).toBeFalsy() // one upgrade per visit
+    once.shop = { ...once.shop, upgraded: false } // the next visit
     const twice = act(once, { type: 'upgradeCard', cardId: c.id })
     const card = twice.deck.find(x => x.id === c.id)!
     expect(card.up && card.up2).toBe(true)
     expect(cardDef(card).power).toBe(12)
     expect(cardDef(card).text).toBe('Remove 12 Hold.')
-    expect(act(twice, { type: 'upgradeCard', cardId: c.id }).capital).toBe(twice.capital) // not a third time
+    expect(act({ ...twice, shop: { ...twice.shop, upgraded: false } }, { type: 'upgradeCard', cardId: c.id }).capital).toBe(twice.capital) // not a third time
   })
 })
 

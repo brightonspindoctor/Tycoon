@@ -223,7 +223,7 @@ describe('Board Exposure', () => {
     r.roundStart.capital = 10 // the company ends the round with more
     r = act(r, { type: 'play', cardId: inHand(r, 'lawyerUp').id })
     expect(r.phase).toBe('roundWon')
-    expect(r.exposure).toBe(1) // Retraction −1, good quarter −1
+    expect(r.exposure).toBe(2) // a good quarter −1; beating the Muckraker no longer lowers it
   })
 
   it('winning a fight within 3 turns lowers it by 2, the boss included', () => {

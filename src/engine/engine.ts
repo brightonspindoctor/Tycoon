@@ -38,6 +38,7 @@ export interface ShopOffer {
   dividendPaid: boolean // the shop's dividend, once per visit (stage 2 on)
   siloSold?: boolean // the Exchange's Silo, once per visit
   duplicated?: boolean // the Exchange's duplicate, once per visit
+  upgraded?: boolean // one upgrade per visit (the screens between stages count as a visit)
 }
 
 export interface Run {
@@ -554,8 +555,9 @@ function shopAction(r: Run, a: Action) {
       return
     case 'upgradeCard': {
       const c = r.deck.find(x => x.id === a.cardId)
-      if (!c || !canUpgrade(c, r.stage) || r.stage < 2 || (r.phase === 'incorporate' && r.stage >= 4) || !pay(r, r.upgradeCost, `Upgrade ${cardDef(c).name}`)) return
+      if (!c || r.shop.upgraded || !canUpgrade(c, r.stage) || r.stage < 2 || (r.phase === 'incorporate' && r.stage >= 4) || !pay(r, r.upgradeCost, `Upgrade ${cardDef(c).name}`)) return
       if (c.up) c.up2 = true; else c.up = true
+      r.shop.upgraded = true
       r.upgradeCost += r.stage >= 3 ? CONFIG.cost3Step : 1
       say(r, `${cardDef(c).name}: upgraded.`)
       return
@@ -867,7 +869,6 @@ function threatBeaten(r: Run, t: Threat) {
     case 'blowout': r.oil = Math.min(r.storage, r.oil + 3); say(r, 'Gusher! +3 oil.'); break
     case 'speculator': r.short = 0; break
     case 'railroad': r.freight = 0; break
-    case 'muckraker': expose(r, -1, 'Retraction'); break
     case 'combine': r.short = 0; r.freight = 0; say(r, 'The Combine folds. Prices and freight recover.'); break
     case 'saboteur': startFire(r, 1, 'the Saboteur'); say(r, 'The Saboteur left a parting gift.'); break
     case 'rivals': r.short = 0; say(r, 'The rivals fold. Prices recover.'); break

@@ -107,7 +107,7 @@ Beating the Baron pays **3 gold** (every boss does). Then the company incorporat
 - **Pick 2 new cards** from 4 on offer: Steel Derrick, Pay a Dividend, Patent Thicket and Ticker Tape. The ones you leave go on sale at the first Exchange visit (not said on screen; the Derrick is on sale every visit anyway).
 - The **Expense Account** is the card offered after the first stage 2 fight (take it, or turn it down for $3K). It's how you skim from here on.
 - **Bank Debt is wiped clean**: everyone starts stage 2 owing nothing a turn. The bank offers a **10K loan**: +$10K now, Bank Debt +$1K a turn for good. Take it or leave it.
-- You can **upgrade** cards (from $3, rising $1 each time; once per card), **destroy** cards (the usual rising price) and **duplicate** cards (a second copy, upgrade and all; from $5K, rising $1K each time, as many as you can pay for).
+- You can **upgrade** cards (from $3, rising $1 each time; once per card; one upgrade per visit, here and in every shop), **destroy** cards (the usual rising price) and **duplicate** cards (a second copy, upgrade and all; from $5K, rising $1K each time, as many as you can pay for).
 - Board Exposure always starts at 0.
 - The screen keeps only the Fields tile, the Exposure meter, the card pick, the loan, upgrade, duplicate and destroy. It no longer explains Wells vs Prospects, gold being at risk or the Expense Account; those show up in play.
 
@@ -122,7 +122,7 @@ Beating the Baron pays **3 gold** (every boss does). Then the company incorporat
 
 ### Board Exposure (0 to 8)
 - **Rises:** +1 per Expense Account or Petty Cash skim, Shred the Files and Industrial Espionage, +1 when a round ends with less Capital than it started (a bad quarter), and from enemies.
-- **Falls:** winning a fight within 3 turns (−2, the boss included), Pay a Dividend card (−1; upgraded −2), the Exchange's dividends (−2), +Capital over a round (a good quarter, −1), beating the Muckraker (−1). The quarter check doesn't apply after the boss.
+- **Falls:** winning a fight within 3 turns (−2, the boss included), Pay a Dividend card (−1; upgraded −2), the Exchange's dividends ($10K for −2, once per visit), +Capital over a round (a good quarter, −1). Beating a stage 2 liability doesn't lower it. The quarter check doesn't apply after the boss.
 - **High at 5+:** the Clawback Committee takes gold instead of cash.
 - **At 8: ousted.**
 - **Residue** at the end of stage 2: 5+ leaves **Board Grudge** (every shop item costs $2 more); 2 or less leaves **Loyal Directors** (+1 AP in boss fights). Both apply from stage 3.

@@ -396,7 +396,7 @@ export const THREATS: Record<ThreatKind, ThreatDef> = {
   speculator: { role: 'cash', name: 'The Speculator', hold: 7, weak: 'Legal', cycle: ['Short', 'Margin Call', 'Rumours'], round3: 'Paper Promise', whenBeaten: 'Price recovers', portrait: 'speculator' },
   baron: { role: 'boss', name: 'The Rival Baron', hold: 20, weak: 'Dirty', resist: 'Legal', cycle: ['Sabotage', 'Lease', 'Arson'], movesFirst: 'Arson', portrait: 'baron' },
   // stage 2
-  muckraker: { role: 'cash', name: 'The Muckraker', hold: 11, weak: 'Legal', cycle: ['Dig', 'Expose', 'Headline'], round3: 'Front Page', whenBeaten: 'Retraction: −1 Board Exposure', portrait: 'muckraker' },
+  muckraker: { role: 'cash', name: 'The Muckraker', hold: 11, weak: 'Legal', cycle: ['Dig', 'Expose', 'Headline'], round3: 'Front Page', portrait: 'muckraker' },
   combine: { role: 'cash', name: 'The Combine', hold: 11, resist: 'Legal', cycle: ['Price War', 'Rail Deal', 'Squeeze', 'Hired Muscle'], whenBeaten: 'Prices and freight recover', portrait: 'combine' },
   clawback: { role: 'cash', name: 'The Clawback Committee', hold: 10, weak: 'Dirty', cover: 2, cycle: ['Clawback', 'Clawback', 'Minutes'], portrait: 'clawback' },
   patentHolder: { role: 'engine', name: 'The Patent Holder', hold: 12, weak: 'Legal', cycle: ['Cease and Desist', 'New Patent Claim', 'Royalty'], portrait: 'patentHolder' },

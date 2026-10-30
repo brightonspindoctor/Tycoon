@@ -65,8 +65,8 @@ export function IncorporateScreen({ run, dispatch }: { run: Run; dispatch: (a: A
             <div className="cl-slot slot">
               <span className="cl-tag">{m(run.upgradeCost)}</span>
               <div className="cl-slot__name">Upgrade a card</div>
-              <div className="cl-slot__desc">Once per card. The price rises each time.</div>
-              <button type="button" className="cl-btn" disabled={!can(run.upgradeCost) || !run.deck.some(canUpgrade)} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
+              <div className="cl-slot__desc">One upgrade here. Once per card. The price rises each time.</div>
+              <button type="button" className="cl-btn" disabled={!!run.shop.upgraded || !can(run.upgradeCost) || !run.deck.some(canUpgrade)} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{run.shop.upgraded ? 'Done' : mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
             </div>
             <div className="cl-slot slot">
               <span className="cl-tag">{m(dupCost)}</span>

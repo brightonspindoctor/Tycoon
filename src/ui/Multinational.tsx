@@ -62,8 +62,8 @@ export function MultinationalScreen({ run, dispatch }: { run: Run; dispatch: (a:
             <div className="cl-slot slot">
               <span className="cl-tag">{m(run.upgradeCost)}</span>
               <div className="cl-slot__name">Upgrade a card</div>
-              <div className="cl-slot__desc">Twice per card in this stage. The price rises each time.</div>
-              <button type="button" className="cl-btn" disabled={!can(run.upgradeCost) || !run.deck.some(c => canUpgrade(c, st))} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
+              <div className="cl-slot__desc">One upgrade here. Twice per card in this stage. The price rises each time.</div>
+              <button type="button" className="cl-btn" disabled={!!run.shop.upgraded || !can(run.upgradeCost) || !run.deck.some(c => canUpgrade(c, st))} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{run.shop.upgraded ? 'Done' : mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
             </div>
             <div className="cl-slot slot">
               <span className="cl-tag">{m(run.destroyCost)}</span>

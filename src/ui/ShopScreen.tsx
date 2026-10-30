@@ -114,8 +114,8 @@ export function ShopScreen({ run, dispatch, coach }: Props) {
               <div className="cl-slot slot">
                 <span className="cl-tag">{money(run.upgradeCost, st)}</span>
                 <div className="cl-slot__name">Upgrade a card</div>
-                <div className="cl-slot__desc">{stage3 ? 'Twice per card in this stage.' : 'Once per card.'} The price rises each time.</div>
-                <button type="button" className="cl-btn" disabled={!can(run.upgradeCost) || !run.deck.some(c => canUpgrade(c, st))} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
+                <div className="cl-slot__desc">One per visit. {stage3 ? 'Twice per card in this stage.' : 'Once per card.'} The price rises each time.</div>
+                <button type="button" className="cl-btn" disabled={!!run.shop.upgraded || !can(run.upgradeCost) || !run.deck.some(c => canUpgrade(c, st))} onClick={() => setMode(mode === 'upgrade' ? null : 'upgrade')}>{run.shop.upgraded ? 'Done' : mode === 'upgrade' ? 'Cancel' : 'Choose'}</button>
               </div>
             )}
             {only2 && (
