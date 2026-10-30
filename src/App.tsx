@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { act, newRun, roundsReached, type Action, type AdminOp, type Beat, type Run } from './engine/engine'
 import { bossRound, type BonusKey, type CardKey } from './engine/data'
-import { badgeCounts, loadAdmin, loadReplay, loadUnlocks, saveAchieved, markWelcomed, saveAdmin, saveRun, saveUnlock, trustFundOffered, welcomeSeen, wantTutorial, markTutorialDone } from './storage'
+import { badgeCounts, loadAdmin, loadReplay, loadUnlocks, saveAchieved, markWelcomed, saveAdmin, saveRun, saveUnlock, trustFundOffered, welcomeSeen, wantTutorial, markTutorialDone, addOil, loadOil } from './storage'
 import { adminStart, type AdminStart } from './engine/admin'
 import { Welcome } from './ui/Welcome'
 import { TickerTape } from './ui/TickerTape'
@@ -162,6 +162,19 @@ export default function App() {
     return () => clearTimeout(t)
   }, [run?.deck.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // oil pumped on this device: add each run's new barrels as they come (never in an admin playtest)
+  const pumpedSeen = useRef<{ seed: number; n: number }>({ seed: -1, n: 0 })
+  useEffect(() => {
+    if (!run || run.admin) return
+    const n = run.feats?.pumped ?? 0
+    const seen = pumpedSeen.current
+    if (seen.seed !== run.seed) { pumpedSeen.current = { seed: run.seed, n }; addOil(n); return }
+    if (n > seen.n) { addOil(n - seen.n); seen.n = n }
+  }, [run])
+
+  // oil across all runs, checked on opening too, so the achievement is never left waiting for a run
+  useEffect(() => { saveAchieved([...(loadOil() >= CONFIG.achievements.liquidAssets ? ['liquidAssets'] : []), ...(loadOil() >= CONFIG.achievements.peakOil ? ['peakOil'] : [])]) }, [])
+
   // anonymous play data: say hello once the game is open
   useEffect(() => { void hello() }, [])
   const [wonRunId, setWonRunId] = useState<string | null>(null)
@@ -172,7 +185,7 @@ export default function App() {
     lastRun.current = run
     if (!run || run.admin || !prev || prev.seed !== run.seed || prev.phase !== 'turn') return
     if (run.phase !== 'roundWon' && run.phase !== 'stageComplete' && run.phase !== 'lost') return
-    roundEnded(run.seed, run.stage, run.round, run.threats.map(t => THREATS[t.kind].name), run.phase !== 'lost', run.turn)
+    roundEnded(run.seed, run.stage, run.round, run.threats.map(t => THREATS[t.kind].name), run.phase !== 'lost', run.turn, run.feats?.pumped)
   }, [run])
 
   // record finished runs once
@@ -196,7 +209,7 @@ export default function App() {
       const t = won ? tacticFor(run.tally, run.deck.length, run.stats.oilSold, run.clock) : null
       const id = runEnded(run.seed, {
         outcome: won ? 'won' : run.loss?.reason ?? 'bankrupt', stage: run.stage, round: run.round, roundsReached: won ? 17 : roundsReached(run),
-        killedBy: run.loss?.by[0], gold: won ? run.gold : undefined, tactic: t ? TACTICS[t].name : undefined, clock: run.stage >= 4 ? run.clock : undefined,
+        killedBy: run.loss?.by[0], gold: won ? run.gold : undefined, tactic: t ? TACTICS[t].name : undefined, clock: run.stage >= 4 ? run.clock : undefined, oil: run.feats?.pumped,
       })
       setWonRunId(won ? id : null)
     }
@@ -208,6 +221,8 @@ export default function App() {
     if (!run || run.admin) return
     const keys: AchievementKey[] = achievedBy(run)
     if (loadFound().length >= Object.keys(TERMS).length) keys.push('fluentInSpin')
+    if (loadOil() >= CONFIG.achievements.liquidAssets) keys.push('liquidAssets')
+    if (loadOil() >= CONFIG.achievements.peakOil) keys.push('peakOil')
     const badges = badgeCounts()
     if ([...Object.values(TACTICS), SELF_MADE].every(t => badges[t.name])) keys.push('fullCabinet')
     const fresh = saveAchieved(keys) as AchievementKey[]
@@ -276,7 +291,7 @@ export default function App() {
     saved.current = run.seed
     if (!run.admin) {
       saveRun({ id: String(run.seed), date: new Date().toISOString(), industry: 'Oil', rounds: roundsReached(run), outcome: 'Quit', gold: null, completed: false, stageGold: run.gold })
-      runEnded(run.seed, { outcome: 'quit', stage: run.stage, round: run.round, roundsReached: roundsReached(run) })
+      runEnded(run.seed, { outcome: 'quit', stage: run.stage, round: run.round, roundsReached: roundsReached(run), oil: run.feats?.pumped })
     }
     setTape(null); setActing(null); setRun(null); setScreen('intro'); setCoach(null)
   }

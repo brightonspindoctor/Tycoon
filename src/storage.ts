@@ -148,3 +148,8 @@ export function wantTutorial(): boolean {
 export function markTutorialDone() { try { localStorage.setItem(TUTORIAL, 'done') } catch { /* not kept */ } }
 export function askTutorialAgain() { try { localStorage.setItem(TUTORIAL, 'again') } catch { /* not kept */ } }
 export function tutorialAsked(): boolean { try { return localStorage.getItem(TUTORIAL) === 'again' } catch { return false } }
+
+// oil pumped on this device, every run added up (admin playtests left out)
+const OIL = 'tycoon.oilPumped'
+export function loadOil(): number { try { return Number(localStorage.getItem(OIL) ?? 0) || 0 } catch { return 0 } }
+export function addOil(n: number) { if (n > 0) try { localStorage.setItem(OIL, String(loadOil() + n)) } catch { /* not kept */ } }

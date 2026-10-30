@@ -1050,3 +1050,11 @@ button.m-threat { cursor: pointer; }
 .m .coach--m { padding: 8px 12px 10px; gap: 4px; }
 .m .coach--m .coach__text { font-size: 14px; line-height: 19px; }
 .m .coach--m .coach__next { padding: 4px 14px; }
+
+/* the front page: every barrel every player has pumped */
+.oil-total { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.oil-total .cl-label { flex-basis: 100%; }
+.oil-total b { font-size: 34px; line-height: 36px; color: var(--ink); }
+
+/* Settings scrolls when it's taller than the screen */
+.settings { max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain; }

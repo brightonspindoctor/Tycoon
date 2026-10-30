@@ -15,13 +15,19 @@ function inStage(stage: 1 | 2 | 3 | 4, hand: CardKey[] = [], hold = 30): Run {
 }
 
 describe('achievements', () => {
-  it('every achievement has a name, a goal and an icon; all but the two device ones check the run', () => {
+  it('every achievement has a name, a goal and an icon; all but the device ones check the run', () => {
     for (const k of ACHIEVEMENT_KEYS) {
       const a = ACHIEVEMENTS[k]
       expect(a.name && a.goal && a.icon).toBeTruthy()
-      expect(!!a.check).toBe(k !== 'fluentInSpin' && k !== 'fullCabinet')
+      expect(!!a.check).toBe(!['fluentInSpin', 'fullCabinet', 'liquidAssets', 'peakOil'].includes(k))
     }
-    expect(ACHIEVEMENT_KEYS).toHaveLength(18)
+    expect(ACHIEVEMENT_KEYS).toHaveLength(21)
+  })
+
+  it('Black Gold: 500 oil pumped in one run', () => {
+    const r = { feats: { pumped: CONFIG.achievements.blackGold } } as Parameters<NonNullable<typeof ACHIEVEMENTS.blackGold.check>>[0]
+    expect(ACHIEVEMENTS.blackGold.check!(r)).toBe(true)
+    expect(ACHIEVEMENTS.blackGold.check!({ ...r, feats: { ...r.feats!, pumped: CONFIG.achievements.blackGold - 1 } })).toBe(false)
   })
 
   it('a new run has earned nothing', () => {

@@ -270,11 +270,12 @@ Reached from the Scoreboard. Self-Made (hard mode) has the top shelf, then the n
 
 ## Achievements
 
-A panel on the front page from the very first visit: all 18 icons (earned in colour), "X of 18", and the latest one earned. Tapping it opens the full list, grouped, with each goal and the date it was earned. Earning one during a run shows a toast. Kept on the device (`tycoon.achievements`); admin playtests never earn them. Definitions and checks are in `src/engine/achievements.ts`; the numbers in `CONFIG.achievements`. `npx vite-node tools/achievements.ts` reports how often the bot earns each one.
+A panel on the front page from the very first visit: all 21 icons (earned in colour), "X of 21", and the latest one earned. Tapping it opens the full list, grouped, with each goal and the date it was earned. Earning one during a run shows a toast. Kept on the device (`tycoon.achievements`); admin playtests never earn them. Definitions and checks are in `src/engine/achievements.ts`; the numbers in `CONFIG.achievements`. `npx vite-node tools/achievements.ts` reports how often the bot earns each one.
 
 | Group | Achievement | Goal |
 |---|---|---|
 | In a run | Gusher | Pump 100 oil in one run |
+| | Black Gold | Pump 500 oil in one run (the bot manages it in most won games) |
 | | Cash Rich | Have $100 at once in stage 1 |
 | | Bulletproof | 25+ Cover in one turn |
 | | Skeleton Crew | Beat the Truth with only 1 Rig |
@@ -287,13 +288,15 @@ A panel on the front page from the very first visit: all 18 icons (earned in col
 | The deck | Lean Machine | Win with 12 cards or fewer |
 | | Paper Trail | Destroy 15 cards in one run |
 | Collecting | Dynasty | Win with 20+ gold |
+| | Liquid Assets | Pump 1,000 oil across all your runs |
+| | Peak Oil | Pump 10,000 oil across all your runs |
 | | Fluent in Spin | Unlock every glossary term |
 | | Full Cabinet | Earn all nine badges |
 | Failures | Short Career | Go bankrupt in the first round |
 | | Rich Company, Poor Chairman | Be ruined with $50+ in the company |
 | | Stopped Clock | Lose at midnight |
 
-The run keeps a few extra counts for these (`Run.feats`): oil pumped, the most Hold one card removed, whether an enemy has taken Capital this fight, a clean stage 3–4 fight won, a boss beaten on turn 1.
+Oil across all runs is added up on the device (`tycoon.oilPumped`, counted from November 2026; earlier runs aren't in it) and the list shows how far along you are. The run keeps a few extra counts for these (`Run.feats`): oil pumped, the most Hold one card removed, whether an enemy has taken Capital this fight, a clean stage 3–4 fight won, a boss beaten on turn 1.
 
 ## Stage 4 rules (as built) · 2010–2019 · Battling the Truth
 
@@ -403,7 +406,8 @@ Then the Land Office suggests a second Prospect and points at the glossary; leav
 Supabase project **tycoon** (London, eu-west-2), separate from brighton-weekend in the same organisation. The game talks only to `tycoon_*` functions; the tables are closed to the public.
 - **Players:** a random ID made on the device (no name, email or IP), platform, first and last seen, when it was added to the home screen.
 - **Sessions:** start and a ping every minute while the game is on screen: time played.
-- **Runs:** bonus, how it ended, stage and round reached, who finished it, gold and badge for a win, time spent.
+- **Runs:** bonus, how it ended, stage and round reached, who finished it, gold and badge for a win, time spent, oil pumped (sent with every round and at the end, through `tycoon_oil`).
+- **Oil total:** `tycoon_oil_total()` adds up every run's oil (the test player left out). The front page shows it as "Pumped by every tycoon so far" once it's above 0; it counts from the day it was added, and only players sharing play data.
 - **Rounds:** every round won or lost, with its enemies and turns: where people get stuck.
 - **Scores:** a won game goes on the global scoreboard only if the player asks, under a name they type (20 characters, letters and numbers; blank is "Anonymous tycoon").
 - Reports in the `reports` schema (dashboard only): `daily`, `totals`, `funnel`, `killers`, `bonuses`.

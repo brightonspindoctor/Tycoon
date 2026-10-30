@@ -1,5 +1,5 @@
 // Achievements: goals shown on the home screen from the start. Each one is checked against the
-// run as it changes (see App); the last two are checked against what's kept on the device.
+// run as it changes (see App); those without a check (oil across all runs, the glossary, the cabinet) against what's kept on the device.
 import { CONFIG } from './config'
 import { wellCount, type Run } from './engine'
 
@@ -7,6 +7,7 @@ export type AchievementKey =
   | 'gusher' | 'cashRich' | 'bulletproof' | 'skeletonCrew' | 'hostileTakeover' | 'notAScratch' | 'mercyRule'
   | 'squeakyClean' | 'coolCustomer' | 'aboveBoard' | 'leanMachine' | 'paperTrail' | 'dynasty'
   | 'fluentInSpin' | 'fullCabinet' | 'shortCareer' | 'richCompany' | 'stoppedClock'
+  | 'blackGold' | 'liquidAssets' | 'peakOil'
 
 export interface Achievement { name: string; goal: string; icon: string; group: string; check?: (r: Run) => boolean }
 
@@ -16,6 +17,7 @@ const lostTo = (r: Run, why: string) => r.phase === 'lost' && r.loss?.reason ===
 
 export const ACHIEVEMENTS: Record<AchievementKey, Achievement> = {
   gusher: { name: 'Gusher', goal: `Pump ${A.gusher} oil in one run.`, icon: 'derrick', group: 'In a run', check: r => (r.feats?.pumped ?? 0) >= A.gusher },
+  blackGold: { name: 'Black Gold', goal: `Pump ${A.blackGold} oil in one run.`, icon: 'barrels', group: 'In a run', check: r => (r.feats?.pumped ?? 0) >= A.blackGold },
   cashRich: { name: 'Cash Rich', goal: `Have $${A.cashRich} at once in stage 1.`, icon: 'cashbox', group: 'In a run', check: r => r.stage === 1 && r.capital >= A.cashRich },
   bulletproof: { name: 'Bulletproof', goal: `Have ${A.bulletproof} Cover or more in one turn.`, icon: 'insurance', group: 'In a run', check: r => r.phase === 'turn' && r.cover >= A.bulletproof },
   skeletonCrew: { name: 'Skeleton Crew', goal: 'Beat the Truth with only 1 Rig.', icon: 'rig', group: 'In a run', check: r => won(r) && wellCount(r) === 1 },
@@ -31,6 +33,8 @@ export const ACHIEVEMENTS: Record<AchievementKey, Achievement> = {
   paperTrail: { name: 'Paper Trail', goal: `Destroy ${A.paperTrail} cards in one run.`, icon: 'paperShredder', group: 'The deck', check: r => (r.tally?.destroyed ?? 0) >= A.paperTrail },
 
   dynasty: { name: 'Dynasty', goal: `Win the game with ${A.dynasty} gold or more.`, icon: 'inheritance3', group: 'Collecting', check: r => won(r) && r.gold >= A.dynasty },
+  liquidAssets: { name: 'Liquid Assets', goal: `Pump ${A.liquidAssets.toLocaleString('en-GB')} oil across all your runs.`, icon: 'storageTank', group: 'Collecting' },
+  peakOil: { name: 'Peak Oil', goal: `Pump ${A.peakOil.toLocaleString('en-GB')} oil across all your runs.`, icon: 'strategicReserve', group: 'Collecting' },
   fluentInSpin: { name: 'Fluent in Spin', goal: 'Unlock every term in the glossary.', icon: 'pressOffice', group: 'Collecting' },
   fullCabinet: { name: 'Full Cabinet', goal: 'Earn every badge in the trophy cabinet.', icon: 'payDividend', group: 'Collecting' },
 

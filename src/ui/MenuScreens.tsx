@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { loadGlobalScores, type GlobalScore } from '../telemetry'
+import { loadGlobalScores, loadOilTotal, type GlobalScore } from '../telemetry'
 import { BONUSES, type BonusKey } from '../engine/data'
 import { ACHIEVEMENTS, ACHIEVEMENT_KEYS } from '../engine/achievements'
 import { bestScore, completedIndustries, loadAchieved, loadRuns, loadUnlocks, trustFundOffered, type RunRecord } from '../storage'
@@ -39,6 +39,8 @@ export function Intro({ onBegin, onHistory, onAbout, onScoreboard, onAchievement
   const feats = ACHIEVEMENT_KEYS.filter(k => got[k]).length
   const best = bestScore('Oil')
   const won = done.length > 0 // the scoreboard unlocks the first time you win the game
+  const [oil, setOil] = useState<number | null>(null) // every barrel every player has pumped
+  useEffect(() => { let on = true; void loadOilTotal().then(n => { if (on && typeof n === 'number') setOil(n) }); return () => { on = false } }, [])
   // each industry is revealed when the one before it is finished; three tiles on the page
   const shown = INDUSTRIES.slice(0, 3)
   const open = shown.filter((name, i) => i === 0 || ANNOUNCED.includes(name) || done.includes(shown[i - 1]))
@@ -59,6 +61,12 @@ export function Intro({ onBegin, onHistory, onAbout, onScoreboard, onAchievement
             <div key={name} className="industry industry--sealed"><span className="cl-display industry__name">? ? ?</span><span className="cl-label">Sealed</span></div>
           ))}
         </div>
+        {oil !== null && oil > 0 && (
+          <div className="oil-total" aria-label={`${oil} barrels pumped by every player so far`}>
+            <span className="cl-label">Pumped by every tycoon so far</span>
+            <b className="cl-num">{oil.toLocaleString('en-GB')}</b><span className="res-note">barrels</span>
+          </div>
+        )}
         <button type="button" className="intro-feats" onClick={() => { play('click'); onAchievements() }} aria-label={`Achievements: ${feats} of ${ACHIEVEMENT_KEYS.length}. See them all`}>
           <span className="intro-feats__head"><span className="cl-label">Achievements</span><span className="cl-num">{feats} of {ACHIEVEMENT_KEYS.length}</span></span>
           <span className="intro-feats__row" aria-hidden="true">

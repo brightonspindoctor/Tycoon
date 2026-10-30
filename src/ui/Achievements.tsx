@@ -1,7 +1,8 @@
 // The Achievements page (from the front page) and the Trophy Cabinet (from the Scoreboard).
 import { ACHIEVEMENTS, ACHIEVEMENT_KEYS } from '../engine/achievements'
 import { SELF_MADE, TACTICS } from '../engine/tactics'
-import { badgeCounts, loadAchieved } from '../storage'
+import { badgeCounts, loadAchieved, loadOil } from '../storage'
+import { CONFIG } from '../engine/config'
 import { iconUrl } from './icons'
 
 const date = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -30,6 +31,7 @@ export function Achievements({ onBack }: { onBack: () => void }) {
                       <b className="cl-display">{a.name}</b>
                       <span>{a.goal}</span>
                       {when && <span className="res-note feat__date">{date(when)}</span>}
+                      {!when && (k === 'liquidAssets' || k === 'peakOil') && <span className="res-note feat__date">{loadOil().toLocaleString('en-GB')} of {CONFIG.achievements[k].toLocaleString('en-GB')} so far</span>}
                     </div>
                   </li>
                 )

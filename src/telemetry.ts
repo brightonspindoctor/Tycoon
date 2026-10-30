@@ -70,12 +70,13 @@ export function runStarted(seed: number, bonus: string) {
   void call('tycoon_run_start', { p_run: current.id, p_player: playerId(), p_bonus: bonus })
 }
 
-export function roundEnded(seed: number, stage: number, round: number, enemies: string[], won: boolean, turns: number) {
+export function roundEnded(seed: number, stage: number, round: number, enemies: string[], won: boolean, turns: number, oil?: number) {
   if (current?.seed !== seed) return
+  if (oil) void call('tycoon_oil', { p_run: current.id, p_player: playerId(), p_oil: oil }) // for the total on the front page
   void call('tycoon_round', { p_run: current.id, p_player: playerId(), p_stage: stage, p_round: round, p_enemies: enemies, p_won: won, p_turns: turns })
 }
 
-export interface RunEnd { outcome: string; stage: number; round: number; roundsReached: number; killedBy?: string; gold?: number; tactic?: string; clock?: number }
+export interface RunEnd { outcome: string; stage: number; round: number; roundsReached: number; killedBy?: string; gold?: number; tactic?: string; clock?: number; oil?: number }
 /** Returns the run's ID, for putting a won game on the scoreboard. */
 export function runEnded(seed: number, e: RunEnd): string | null {
   if (current?.seed !== seed) return null
@@ -86,6 +87,7 @@ export function runEnded(seed: number, e: RunEnd): string | null {
     p_killed_by: e.killedBy ?? null, p_gold: e.gold ?? null, p_tactic: e.tactic ?? null, p_clock: e.clock ?? null, p_seconds: Math.round(current.activeMs / 1000),
   }
   void call('tycoon_run_end', args, { keepalive: true })
+  if (e.oil) void call('tycoon_oil', { p_run: id, p_player: playerId(), p_oil: e.oil }, { keepalive: true })
   last = { id, bonus: current.bonus, args }
   current = null
   return id
@@ -107,4 +109,6 @@ export async function submitScore(runId: string, name: string): Promise<boolean>
     return res.ok
   } catch { return false }
 }
+/** Every barrel pumped by every player who shares play data. */
+export const loadOilTotal = () => call<number>('tycoon_oil_total', {}, { always: true })
 export const loadGlobalScores = (limit = 50) => call<GlobalScore[]>('tycoon_scoreboard', { p_limit: limit }, { always: true })
