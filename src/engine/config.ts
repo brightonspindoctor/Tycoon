@@ -168,8 +168,8 @@ export const CONFIG = {
   pipelineStrike: 12,
   profiteering: 10,
   truthPhaseHold: 35, // each of the Truth's four phases
-  seaLevel: 50, // the Truth's attacks, plus truthPerHour for each hour past 1 on the clock as you arrive
-  cropFailure: 50,
+  seaLevel: 35, // the Truth's attacks, plus truthPerHour for each hour past 1 on the clock as you arrive
+  cropFailure: 35,
   asthmaGold: 2, // plus 1 for every truthGoldHours past 1
   truthPerHour: 0,
   truthGoldHours: 4,

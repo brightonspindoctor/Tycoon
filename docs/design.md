@@ -358,7 +358,7 @@ Money moves as built: Moratorium and Undercut −$10B, Blowout, Clean-up Bill an
   2. **Lawsuits** · weak Legal, resists Dirty
   3. **Whistleblower** · weak Bury, resists Legal
   4. **Breakthrough** · weak Lobby, resists Bury
-- **Its attacks are the consequences:** Sea Level Rise (−$50B), Childhood Asthma (−2 gold), Water Pollution (a Compensation Claim in your hand), Suppressed Development (−1 AP next turn), Wildfire Season (lose your stored oil), Crop Failure (−$50B), Tax the Rich (−$1B for every gold in your fortune). Every 5th move moves the clock forward 1 hour.
+- **Its attacks are the consequences:** Sea Level Rise (−$35B), Childhood Asthma (−2 gold), Water Pollution (a Compensation Claim in your hand), Suppressed Development (−1 AP next turn), Wildfire Season (lose your stored oil), Crop Failure (−$35B), Tax the Rich (−$1B for every gold in your fortune). Every 5th move moves the clock forward 1 hour.
 - **The later the hour you arrive, the harder it is:** Childhood Asthma takes 1 more gold for every 4 hours past 1, and it has Cover equal to the hour every turn.
 
 ### Balance (bot, 600 runs per bonus)
