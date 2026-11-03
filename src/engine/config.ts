@@ -6,6 +6,7 @@ export const CONFIG = {
   trustFundDebt: 0, // the Trust Fund bonus pays no Bank Debt in stage 1; normal debt from stage 2
   trustFundStreak: 3, // stage 1 losses in a row before the Trust Fund is offered
   baseAP: 2,
+  accountantCap: 10, // the Accountant carries over at most this much unused Cover
   handSize: 5,
   oilPrice: 3, // starting price per barrel
   oilPrice2: 4, // stage 2: the motor car arrives

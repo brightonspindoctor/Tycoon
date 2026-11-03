@@ -432,6 +432,13 @@ describe('Retain Counsel spends your Cover', () => {
     expect(s.threats[0].hold).toBe(30 - 10)
   })
 
+  it('is once per fight: once played it sits out until the next fight', () => {
+    const r = inStage3(['retainCounsel'], 'diversified')
+    r.cover = 5; r.threats[0].hold = 60
+    const s = act(r, { type: 'play', cardId: inHand(r, 'retainCounsel').id, target: 900 })
+    expect([...s.hand, ...s.draw, ...s.discard].some(c => c.key === 'retainCounsel')).toBe(false)
+  })
+
   it("can't be played with no Cover; upgraded it adds 3, and 6 when upgraded twice", () => {
     const r = inStage3(['retainCounsel'])
     r.cover = 0

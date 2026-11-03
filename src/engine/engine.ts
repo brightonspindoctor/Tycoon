@@ -743,7 +743,7 @@ export const steamPumpTurn = (r: Run) => r.items.includes('steamPump') && r.turn
 function beginTurn(r: Run) {
   r.turn += 1
   r.ledger = [{ label: 'Brought forward', amount: r.capital }]
-  if (!r.items.includes('accountant')) r.cover = 0
+  r.cover = r.items.includes('accountant') ? Math.min(r.cover, CONFIG.accountantCap) : 0
   r.cover += itemCover(r)
   r.doubleSale = false
   r.current = { audit: r.pending.audit, refuse: r.pending.refuse, prorate: r.pending.prorate, shutdown: r.pending.shutdown ?? 0, apTo1: r.pending.apTo1, cardCap: r.pending.cardCap }

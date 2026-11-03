@@ -689,6 +689,13 @@ describe('turn report, Shore Up once per round, Accountant', () => {
       if (accountant) { expect(r.cover).toBe(2); expect(cash - r.capital).toBe(debtPerTurn(r)) } // the $3 Fine is blocked; only debt is paid
     }
   })
+
+  it('the Accountant carries over at most 10 Cover', () => {
+    let r = one(newRun(21, 'threeOil'), 'inspector', 0) // Audit first: nothing to block
+    r.items.push('accountant'); r.cover = 25
+    r = act(r, { type: 'endTurn' })
+    expect(r.cover).toBe(10)
+  })
 })
 
 describe('Cover between rounds', () => {
