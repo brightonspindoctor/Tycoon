@@ -201,7 +201,7 @@ export const CARDS: Record<CardKey, CardDef> = {
     text: 'Pay $5. −10 Heat. Two uses.', flavour: 'Independent research, independently funded by us.' },
   bribeOfficial: { name: 'Bribe an Official', era: 3, ap: 2, cost: 3, uses: null, family: 'Dirty', power: 8, icon: 'bribeOfficial', price: 18, rarity: 'Common',
     text: `Pay $3. Remove 8 Hold. The Bribery Scandal gains ${CONFIG.bribeFeedsScandal} Hold.`, flavour: 'A consultancy fee.' },
-  retainCounsel: { name: 'Retain Counsel', era: 3, ap: 1, cost: 0, uses: null, family: 'Legal', power: 0, spendCover: true, icon: 'retainCounsel', price: 18, rarity: 'Common',
+  retainCounsel: { name: 'Retain Counsel', ap: 1, cost: 0, uses: null, family: 'Legal', power: 0, spendCover: true, icon: 'retainCounsel', price: 4, rarity: 'Common',
     text: 'Use your Cover for Hold damage.', flavour: 'Billed in six-minute units.' },
   advertorial: { name: 'Advertorial', era: 3, ap: 1, cost: 4, uses: null, family: 'Defence', power: 0, cover: 6, icon: 'advertorial', price: 15, rarity: 'Common',
     text: 'Pay $4. +6 Cover this turn. Blocks Heat too.', flavour: 'Paid opinion, opposite the editorial page.' },
@@ -317,13 +317,13 @@ export const UPGRADES: Partial<Record<CardKey, Partial<CardDef>>> = {
 }
 
 export const STARTER: CardKey[] = ['prospect', 'hiredHand', 'hiredHand', 'lawyerUp', 'shoreUp', 'bucket', 'bucket', 'improveGear', 'hardGraft']
-export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBrigade', 'payWages', 'dynamite', 'bribe', 'wildcat', 'telegram', 'hardGraft', 'payOff', 'infiltrate']
+export const SHOP_POOL: CardKey[] = ['hiredHand', 'lawyerUp', 'shoreUp', 'fireBrigade', 'payWages', 'dynamite', 'bribe', 'wildcat', 'telegram', 'hardGraft', 'payOff', 'infiltrate', 'retainCounsel']
 // stage 2 sells only stage 2 cards: better than stage 1's, and dearer
 export const SHOP_POOL_2: CardKey[] = ['telegraphLine', 'tickerTape', 'nightShift', 'efficiencyExpert', 'streamline', 'shredFiles', 'scrapParts', 'cleanHouse',
   'patentThicket', 'espionage', 'poachEngineer', 'rdSprint', 'payDividend', 'personalLawyer', 'securityDetail', 'insurance', 'expenseAccount']
 // stage 3: oil price boosts, faster cycling, destroying cards, gold into Capital, and the new defences
 export const SHOP_POOL_3: CardKey[] = ['embargoRumours', 'queuesAtPump', 'telex', 'memo', 'restructure', 'personalGuarantee', 'dipTrust',
-  'buryEvidence', 'lobbyCongress', 'thinkTank', 'bribeOfficial', 'retainCounsel', 'advertorial', 'buyOut', 'oilShock']
+  'buryEvidence', 'lobbyCongress', 'thinkTank', 'bribeOfficial', 'advertorial', 'buyOut', 'oilShock']
 /** Stage 2 incorporation: pick incorporatePicks of these; the rest go on sale at the first Exchange visit. */
 export const INCORPORATE_OFFER_2: CardKey[] = ['derrick', 'payDividend', 'patentThicket', 'tickerTape']
 // stage 4: Big Oil's own stock, heavy on AP and draw

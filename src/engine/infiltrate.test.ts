@@ -68,3 +68,12 @@ describe('Infiltrate', () => {
     expect(infiltrated(r, r.threats[0])).toEqual([3, 2])
   })
 })
+
+describe('Retain Counsel in stage 1', () => {
+  it('is a stage 1 card sold in the stage 1 shop, not the stage 3 one', async () => {
+    const { CARDS, SHOP_POOL, SHOP_POOL_3 } = await import('./data')
+    expect(CARDS.retainCounsel.era ?? 1).toBe(1)
+    expect(SHOP_POOL).toContain('retainCounsel')
+    expect(SHOP_POOL_3).not.toContain('retainCounsel')
+  })
+})
