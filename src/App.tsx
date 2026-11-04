@@ -312,7 +312,7 @@ export default function App() {
   else if (screen === 'welcome') body = <Welcome onBegin={() => { markWelcomed(); start(pendingBonus ?? 'threeOil') }} />
   else if (screen === 'history' || !run) body = <History onBack={() => setScreen('intro')} />
   else if (run.phase === 'shop' && !tape) body = <ShopScreen run={run} dispatch={dispatch} coach={coachView} />
-  else if (run.phase === 'lost' && !tape) body = <CrashOut run={run} bailout={bailout} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} />
+  else if (run.phase === 'lost' && !tape) body = <CrashOut run={run} bailout={bailout} onAgain={() => setScreen('bonus')} onHistory={() => setScreen('history')} onMenu={() => setScreen('intro')} />
   else if (run.phase === 'stageComplete' && !tape) body = <StageComplete run={run} runId={wonRunId} onMenu={() => setScreen('intro')} onHistory={() => setScreen('history')} onScoreboard={() => setScreen('scoreboard')} onContinue={() => dispatch({ type: 'continue' })} />
   else if (run.phase === 'incorporate') body = <>{run.stage >= 4 ? <BigOilScreen run={run} dispatch={dispatch} /> : run.stage >= 3 ? <MultinationalScreen run={run} dispatch={dispatch} /> : <IncorporateScreen run={run} dispatch={dispatch} />}{eraTo && <EraTransition to={eraTo} onDone={() => setEraTo(null)} />}</>
   else if (tape) body = (

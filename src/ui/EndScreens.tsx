@@ -26,7 +26,7 @@ function Progress({ reached, dead }: { reached: number; dead: boolean }) {
   )
 }
 
-export function CrashOut({ run, bailout, onAgain, onHistory }: { run: Run; bailout?: boolean; onAgain: () => void; onHistory: () => void }) {
+export function CrashOut({ run, bailout, onAgain, onHistory, onMenu }: { run: Run; bailout?: boolean; onAgain: () => void; onHistory: () => void; onMenu: () => void }) {
   useEffect(() => { play('stamp'); const t = setTimeout(() => play(run.loss?.reason === 'midnight' ? 'midnight' : 'straw'), 500); return () => clearTimeout(t) }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const st = run.stage
   const reached = roundsReached(run)
@@ -67,7 +67,7 @@ export function CrashOut({ run, bailout, onAgain, onHistory }: { run: Run; bailo
               <span>{BONUSES.trustFund.text} A starting bonus from now on.</span>
             </div>
           )}
-          <div className="end__buttons"><button type="button" className="cl-btn cl-btn--primary" onClick={onAgain}>Try again</button><button type="button" className="cl-btn" onClick={onHistory}>Run history</button></div>
+          <div className="end__buttons"><button type="button" className="cl-btn cl-btn--primary" onClick={onAgain}>Try again</button><button type="button" className="cl-btn" onClick={onHistory}>Run history</button><button type="button" className="cl-btn" onClick={onMenu}>Back to the start</button></div>
         </div>
         <section className="cl-ledger ledger">
           <div className="cl-ledger__head"><span className="cl-label">Final turn</span><span className="cl-ledger__total cl-minus">{money(Math.max(0, run.capital), st)}</span></div>

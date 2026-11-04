@@ -214,7 +214,7 @@ button.threat { cursor: crosshair; }
 .tile b.cl-display { font-size: 20px; }
 .tile--gold { border-color: var(--personal); border-width: 2px; }
 .tile--gold b, .tile--gold .cl-label { color: var(--personal); }
-.end__buttons { display: flex; gap: 12px; margin-top: auto; }
+.end__buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: auto; }
 .end__buttons .cl-btn { padding: 14px 26px; }
 
 /* intro */
