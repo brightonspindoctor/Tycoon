@@ -43,7 +43,9 @@ export function Motto({ onDone }: { onDone: () => void }) {
   )
 }
 
-const ANNOUNCED = ['Pharmaceutical'] // shown as Coming soon before Oil is finished
+// Pharmaceutical stays sealed for players until it's released; admins always see it.
+// Once released, it opens when you beat the Oil stage 3 boss (the Geneva unlock).
+const PHARMA_READY = false
 // a run that died, rather than one that finished a stage or the game
 const ended = (r: RunRecord) => ['Bankrupt', 'Out of time', 'Quit', 'Ousted', 'Ruined'].includes(r.outcome)
 
@@ -61,7 +63,9 @@ export function Intro({ live, onContinue, onBegin, onHistory, onAbout, onScorebo
   useEffect(() => { let on = true; void loadOilTotal().then(n => { if (on && typeof n === 'number') setOil(n) }); return () => { on = false } }, [])
   // each industry is revealed when the one before it is finished; three tiles on the page
   const shown = INDUSTRIES.slice(0, 3)
-  const open = shown.filter((name, i) => i === 0 || ANNOUNCED.includes(name) || done.includes(shown[i - 1]))
+  const unlocks = loadUnlocks()
+  const open = shown.filter((name, i) => i === 0
+    || (name === 'Pharmaceutical' ? !!admin || (PHARMA_READY && !!unlocks.geneva) : done.includes(shown[i - 1])))
   return (
     <div className="screen intro" data-theme="victorian">
       <img className="intro__art" src={`${import.meta.env.BASE_URL}art/title.jpg`} alt="Tycoon: a share certificate with the industries arranged around a globe" />
