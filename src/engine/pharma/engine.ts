@@ -102,6 +102,7 @@ function startRound(r: PRun, round: number) {
   r.phase = 'turn'
   r.draw = shuffle(r, [...r.draw, ...r.hand, ...r.discard, ...r.benched])
   r.hand = []; r.discard = []; r.benched = []
+  for (const p of r.factories) if (p) p.blocked = false // a block from the last fight doesn't carry over
   r.threats = threatsFor(r, round).map(k => ({ id: r.nextId++, kind: k, hold: PTHREATS[k].hold, maxHold: PTHREATS[k].hold, step: 0, beaten: false }))
   for (const t of r.threats) say(r, `${PTHREATS[t.kind].name} arrives.`)
   startTurn(r)

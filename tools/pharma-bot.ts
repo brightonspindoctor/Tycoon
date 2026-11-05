@@ -33,7 +33,7 @@ export function pharmaBot(start: PRun, onStep?: (r: PRun) => void): PRun {
       const best = remedies.reduce((a, b) => (turnsLeft(b.key as never, b.age ?? 0) > turnsLeft(a.key as never, a.age ?? 0) ? b : a))
       r = pact(r, { type: 'play', cardId: produce.id, target: best.id }); continue
     }
-    if (r.trust <= -3) { const t = has('charityGala') ?? has('testimonials') ?? has('freeSamples') ?? has('medicineShow'); if (t) { r = pact(r, { type: 'play', cardId: t.id }); continue } }
+    if (r.trust <= -3) { const t = has('charityGala') ?? has('testimonials') ?? has('freeSamples') ?? has('medicineShow'); if (t) { r = pact(r, { type: 'play', cardId: t.id, target: targetsFor(r, t).ids[0] }); continue } }
     const nda = has('nda')
     if (nda) {
       const t = liveThreats(r).filter(x => !x.nda).sort((a, b) => PTHREATS[b.kind].moves.length - PTHREATS[a.kind].moves.length)[0]
