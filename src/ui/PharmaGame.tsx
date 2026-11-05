@@ -15,7 +15,7 @@ import { GlossaryButton, SettingsButton } from './Settings'
 
 const YEARS = [1880, 1888, 1896, 1905]
 // art not drawn yet borrows an existing icon (drop the line once the real file is in public/art/icons)
-const STAND_IN: Record<string, string> = { smearCampaign: 'advertorial' }
+const STAND_IN: Record<string, string> = {}
 const iconUrl = (i: string) => baseIconUrl(STAND_IN[i] ?? i)
 const money = (n: number, sign = false) => `${n < 0 ? '−' : sign ? '+' : ''}$${Math.abs(n)}`
 

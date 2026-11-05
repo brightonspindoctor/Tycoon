@@ -88,23 +88,23 @@ export interface PThreatDef { name: string; hold: number; weak?: Family; resist?
 
 export const PTHREATS: Record<PThreatKind, PThreatDef> = {
   // the big ones: several hits a move
-  temperance: { name: 'The Temperance League', hold: 10, weak: 'Legal', resist: 'Dirty', portrait: 'muckraker',
+  temperance: { name: 'The Temperance League', hold: 10, weak: 'Legal', resist: 'Dirty', portrait: 'ph-temperance',
     moves: [{ name: 'Sermon', hits: [{ k: 'trust', n: 1 }, { k: 'trust', n: 1 }] }, { name: 'Petition', hits: [{ k: 'trust', n: 1 }, { k: 'cash', n: 3 }] }] },
-  localDoctor: { name: 'The Local Doctor', hold: 10, weak: 'Dirty', portrait: 'inspector',
+  localDoctor: { name: 'The Local Doctor', hold: 10, weak: 'Dirty', portrait: 'ph-localDoctor',
     moves: [{ name: 'Diagnosis', hits: [{ k: 'trust', n: 1 }, { k: 'case' }] }, { name: 'Second Opinion', hits: [{ k: 'trust', n: 1 }, { k: 'trust', n: 1 }] }] },
-  widow: { name: 'The Grieving Widow', hold: 9, weak: 'Bury', portrait: 'squatter',
+  widow: { name: 'The Grieving Widow', hold: 9, weak: 'Bury', portrait: 'ph-widow',
     moves: [{ name: 'Lawsuit', hits: [{ k: 'cash', n: 2 }, { k: 'widow', n: 2 }] }, { name: 'Tells the Papers', hits: [{ k: 'trust', n: 1 }, { k: 'cash', n: 2 }] }] },
-  rivalQuack: { name: 'The Rival Quack', hold: 14, weak: 'Legal', portrait: 'claimJumper',
+  rivalQuack: { name: 'The Rival Quack', hold: 14, weak: 'Legal', portrait: 'ph-rivalQuack',
     moves: [{ name: 'Knock-off', hits: [{ k: 'copy' }, { k: 'cash', n: 2 }] }, { name: 'Undercut', hits: [{ k: 'cash', n: 2 }, { k: 'cash', n: 2 }] }] },
   // the weak ones: they come in packs, one hit a move
-  reporter: { name: 'The Penny Paper Reporter', hold: 5, weak: 'Legal', portrait: 'muckraker', moves: [{ name: 'Column', hits: [{ k: 'trust', n: 1 }] }] },
-  customer: { name: 'The Disgruntled Customer', hold: 5, weak: 'Legal', portrait: 'squatter', moves: [{ name: 'Refund', hits: [{ k: 'cash', n: 2 }] }] },
-  preacher: { name: 'The Town Preacher', hold: 6, weak: 'Bury', resist: 'Dirty', portrait: 'strike', moves: [{ name: 'Fire and Brimstone', hits: [{ k: 'trust', n: 1 }] }] },
-  copycat: { name: 'The Copycat Peddler', hold: 5, weak: 'Dirty', portrait: 'saboteur', moves: [{ name: 'Illegal Copy', hits: [{ k: 'copy' }] }] },
-  pharmacist: { name: 'The Suspicious Pharmacist', hold: 6, weak: 'Dirty', portrait: 'railroad', moves: [{ name: 'Off the Shelf', hits: [{ k: 'block' }] }] },
-  coroner: { name: 'The Coroner', hold: 5, weak: 'Bury', portrait: 'inspector', moves: [{ name: 'Inquest', hits: [{ k: 'worsen' }] }] },
+  reporter: { name: 'The Penny Paper Reporter', hold: 5, weak: 'Legal', portrait: 'ph-reporter', moves: [{ name: 'Column', hits: [{ k: 'trust', n: 1 }] }] },
+  customer: { name: 'The Disgruntled Customer', hold: 5, weak: 'Legal', portrait: 'ph-customer', moves: [{ name: 'Refund', hits: [{ k: 'cash', n: 2 }] }] },
+  preacher: { name: 'The Town Preacher', hold: 6, weak: 'Bury', resist: 'Dirty', portrait: 'ph-preacher', moves: [{ name: 'Fire and Brimstone', hits: [{ k: 'trust', n: 1 }] }] },
+  copycat: { name: 'The Copycat Peddler', hold: 5, weak: 'Dirty', portrait: 'ph-copycat', moves: [{ name: 'Illegal Copy', hits: [{ k: 'copy' }] }] },
+  pharmacist: { name: 'The Suspicious Pharmacist', hold: 6, weak: 'Dirty', portrait: 'ph-pharmacist', moves: [{ name: 'Off the Shelf', hits: [{ k: 'block' }] }] },
+  coroner: { name: 'The Coroner', hold: 5, weak: 'Bury', portrait: 'ph-coroner', moves: [{ name: 'Inquest', hits: [{ k: 'worsen' }] }] },
   // the boss
-  fraud: { name: 'The Great American Fraud', hold: 20, weak: 'Bury', resist: 'Legal', portrait: 'muckraker', boss: true,
+  fraud: { name: 'The Great American Fraud', hold: 20, weak: 'Bury', resist: 'Legal', portrait: 'ph-fraud', boss: true,
     moves: [
       { name: 'Investigation', hits: [{ k: 'trust', n: 1 }, { k: 'trust', n: 1 }] },
       { name: 'Lab Results', hits: [{ k: 'cash', n: 4 }, { k: 'block' }, { k: 'trust', n: 1 }] },
