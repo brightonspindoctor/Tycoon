@@ -104,3 +104,68 @@ export function findTerms(keys: CardKey[]): Term[] {
   try { localStorage.setItem(KEY, JSON.stringify([...found, ...fresh])) } catch { /* not kept */ }
   return fresh.map(k => TERMS[k]!)
 }
+
+// Pharmaceutical terms: found the first time the card is in your deck. Kept apart from the Oil
+// terms so the Oil achievement for finding every term isn't moved.
+export const PHARMA_TERMS: Record<string, Term> = {
+  snakeOil: {
+    term: 'Patent medicine',
+    means: 'A patent medicine was a branded remedy sold straight to the public, with no proof that it worked and often no list of what was in it. Many were mostly alcohol, opium or cocaine.',
+    real: "Lydia E. Pinkham's Vegetable Compound, sold from the 1870s for women's complaints, was around 20% alcohol.",
+  },
+  biopiracy: {
+    term: 'Biopiracy',
+    means: 'Biopiracy is patenting a medicine or plant that comes from traditional knowledge, without the permission of the people it came from or paying them.',
+    real: 'In 1995 the US granted a patent on using turmeric to heal wounds, a remedy long used in India. It was revoked in 1997 after an Indian research council challenged it.',
+  },
+  inventAilment: {
+    term: 'Disease mongering',
+    means: 'Disease mongering is widening the definition of a condition, or inventing one, so more people believe they need a treatment for it.',
+    real: 'In the 1920s Listerine adverts made "halitosis", an obscure medical word for bad breath, into a social disaster that only mouthwash could fix. Sales rose sharply.',
+  },
+  kickback: {
+    term: 'Kickback',
+    means: 'A kickback is a hidden payment to a doctor, buyer or official in return for their business, such as prescribing your drug.',
+    real: 'In 2012 GlaxoSmithKline pleaded guilty and agreed to pay $3 billion in the US, partly over paying doctors through trips and speaking fees to promote its drugs.',
+  },
+  testimonials: {
+    term: 'Testimonials',
+    means: 'A testimonial is a customer saying a product worked for them. Patent-medicine makers printed thousands, many bought, edited or made up.',
+    real: "Samuel Hopkins Adams's 1905 series The Great American Fraud showed testimonials being bought, and some from people who had since died of the illness they claimed was cured.",
+  },
+  nda: {
+    term: 'Non-disclosure agreement',
+    means: 'A non-disclosure agreement (NDA) is a contract that pays someone, or binds them, to keep quiet. In drug-harm cases it is often part of a settlement.',
+    real: 'Confidential settlements in drug-injury lawsuits can keep what a company knew out of public view. Several US states have passed laws limiting secrecy in settlements that involve public safety.',
+  },
+  medicineShow: {
+    term: 'Medicine show',
+    means: 'A medicine show was a travelling act of music, comedy and spectacle put on to draw a crowd for a sales pitch for remedies.',
+    real: 'The Kickapoo Indian Medicine Company toured America from the 1880s with shows built around invented "Indian" remedies, none of them made by the Kickapoo people.',
+  },
+  freeSamples: {
+    term: 'Free samples',
+    means: 'Drug companies give doctors free samples to hand out. Patients start on the branded drug, and tend to stay on it.',
+    real: 'US studies have found doctors who accept free samples are more likely to prescribe the more expensive branded drugs.',
+  },
+  charityGala: {
+    term: 'Reputation laundering',
+    means: 'Reputation laundering is giving to charities, museums and the arts so a company or family is known for its generosity rather than how it made its money.',
+    real: 'The Sackler family, owners of OxyContin maker Purdue Pharma, gave their name to galleries at the Louvre, the Met and Tate. From 2019 those museums began taking the name down.',
+  },
+}
+
+const PHARMA_KEY = 'tycoon.pharmaTerms'
+export function loadPharmaFound(): string[] {
+  try { return JSON.parse(localStorage.getItem(PHARMA_KEY) ?? '[]') as string[] } catch { return [] }
+}
+/** Marks the Pharmaceutical terms for these cards as found; returns the ones that are new. */
+export function findPharmaTerms(keys: string[]): Term[] {
+  const found = new Set(loadPharmaFound())
+  // any remedy counts as finding "Patent medicine"
+  const norm = keys.map(k => (['snakeOil', 'vegetableCompound', 'cocaineTonic', 'soothingSyrup', 'heroinSyrup'].includes(k) ? 'snakeOil' : k))
+  const fresh = [...new Set(norm)].filter(k => PHARMA_TERMS[k] && !found.has(k))
+  if (!fresh.length) return []
+  try { localStorage.setItem(PHARMA_KEY, JSON.stringify([...found, ...fresh])) } catch { /* not kept */ }
+  return fresh.map(k => PHARMA_TERMS[k])
+}

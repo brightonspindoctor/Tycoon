@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { CONFIG } from '../engine/config'
 import { CARDS, UPGRADES, type CardKey } from '../engine/data'
 import { ERA_LABEL, units } from '../engine/format'
-import { TERMS, loadFound } from '../terms'
+import { PHARMA_TERMS, TERMS, loadFound, loadPharmaFound } from '../terms'
 import { loadPlayed } from '../cardbook'
 import { play } from '../sound'
 import { CardView } from './CardView'
@@ -27,7 +27,7 @@ const ALL_THREATS = Object.keys(THREATS).length
 export function Glossary({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('words')
   const [open, setOpen] = useState<CardKey | null>(null)
-  const found = loadFound().map(k => TERMS[k]).filter(Boolean) as NonNullable<(typeof TERMS)[keyof typeof TERMS]>[]
+  const found = [...loadFound().map(k => TERMS[k]), ...loadPharmaFound().map(k => PHARMA_TERMS[k])].filter(Boolean) as NonNullable<(typeof TERMS)[keyof typeof TERMS]>[]
   const played = loadPlayed()
   const keys = (Object.keys(played) as CardKey[]).sort((a, b) => (CARDS[a].era ?? 1) - (CARDS[b].era ?? 1) || CARDS[a].name.localeCompare(CARDS[b].name))
   const eras = [...new Set(keys.map(k => CARDS[k].era ?? 1))]

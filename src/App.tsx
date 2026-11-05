@@ -12,6 +12,7 @@ import { GameScreen } from './ui/GameScreen'
 import { CardGallery } from './ui/CardGallery'
 import { SoundBoard } from './ui/SoundBoard'
 import { MobileGame } from './ui/MobileGame'
+import { PharmaGame } from './ui/PharmaGame'
 import { SettingsPanel } from './ui/Settings'
 import { InstallPrompt } from './ui/InstallPrompt'
 import { ShopScreen } from './ui/ShopScreen'
@@ -33,7 +34,7 @@ import { coachFor, stepDone, STEPS } from './ui/tutorial'
 import { ACHIEVEMENTS, achievedBy, type AchievementKey } from './engine/achievements'
 import { THREATS } from './engine/data'
 
-type Screen = 'intro' | 'motto' | 'bonus' | 'welcome' | 'run' | 'history' | 'about' | 'scoreboard' | 'achievements' | 'cabinet'
+type Screen = 'pharma' | 'intro' | 'motto' | 'bonus' | 'welcome' | 'run' | 'history' | 'about' | 'scoreboard' | 'achievements' | 'cabinet'
 
 // Phones held upright get their own layout; anything wider gets the 1440×900 board scaled to fit.
 const MOBILE_MAX = 760
@@ -302,7 +303,8 @@ export default function App() {
   let body: JSX.Element
   if (previewPage === 'cards') body = <CardGallery />
   else if (previewPage === 'sounds') body = <SoundBoard />
-  else if (screen === 'intro') body = <Intro live={live ? { stage: live.run.stage, round: live.run.round, gold: live.run.gold, saved: live.saved } : null} onContinue={resume} onBegin={() => setScreen('motto')} onHistory={() => setScreen('history')} onAbout={() => setScreen('about')} onScoreboard={() => setScreen('scoreboard')} onAchievements={() => setScreen('achievements')} admin={admin} onAdminStart={startAdmin} />
+  else if (screen === 'intro') body = <Intro live={live ? { stage: live.run.stage, round: live.run.round, gold: live.run.gold, saved: live.saved } : null} onContinue={resume} onBegin={() => setScreen('motto')} onHistory={() => setScreen('history')} onAbout={() => setScreen('about')} onScoreboard={() => setScreen('scoreboard')} onAchievements={() => setScreen('achievements')} admin={admin} onAdminStart={startAdmin} onPharma={admin ? () => setScreen('pharma') : undefined} />
+  else if (screen === 'pharma') body = <PharmaGame onMenu={() => setScreen('intro')} />
   else if (screen === 'motto') body = <Motto onDone={() => setScreen(s => (s === 'motto' ? 'bonus' : s))} />
   else if (screen === 'achievements') body = <Achievements onBack={() => setScreen('intro')} />
   else if (screen === 'cabinet') body = <TrophyCabinet onBack={() => setScreen('scoreboard')} />
@@ -329,8 +331,9 @@ export default function App() {
   )
 
   const fade = <div key={`${screen}-${run?.phase}-${run?.round}`} className="screen-fade">{body}</div>
-  const inRun = screen === 'run' && !!run && (run.phase === 'turn' || run.phase === 'shop' || run.phase === 'roundWon' || run.phase === 'incorporate' || (run.phase === 'stageComplete' && run.stage < 4))
+  const inRun = screen === 'pharma' || (screen === 'run' && !!run && (run.phase === 'turn' || run.phase === 'shop' || run.phase === 'roundWon' || run.phase === 'incorporate' || (run.phase === 'stageComplete' && run.stage < 4)))
   function quitRun() {
+    if (screen === 'pharma') { setScreen('intro'); return } // an admin playtest: nothing to record
     if (!run) return
     saved.current = run.seed
     if (!run.admin) {

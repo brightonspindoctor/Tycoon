@@ -50,7 +50,7 @@ const PHARMA_READY = false
 const ended = (r: RunRecord) => ['Bankrupt', 'Out of time', 'Quit', 'Ousted', 'Ruined'].includes(r.outcome)
 
 export interface LiveSummary { stage: number; round: number; gold: number; saved: string }
-export function Intro({ live, onContinue, onBegin, onHistory, onAbout, onScoreboard, onAchievements, admin, onAdminStart }: { live?: LiveSummary | null; onContinue?: () => void; onBegin: () => void; onHistory: () => void; onAbout: () => void; onScoreboard: () => void; onAchievements: () => void; admin?: boolean; onAdminStart?: (o: AdminStart) => void }) {
+export function Intro({ live, onContinue, onBegin, onHistory, onAbout, onScoreboard, onAchievements, admin, onAdminStart, onPharma }: { live?: LiveSummary | null; onContinue?: () => void; onBegin: () => void; onPharma?: () => void; onHistory: () => void; onAbout: () => void; onScoreboard: () => void; onAchievements: () => void; admin?: boolean; onAdminStart?: (o: AdminStart) => void }) {
   const done = completedIndustries()
   const got = loadAchieved()
   const feats = ACHIEVEMENT_KEYS.filter(k => got[k]).length
@@ -93,9 +93,9 @@ export function Intro({ live, onContinue, onBegin, onHistory, onAbout, onScorebo
         )}
         <div className="industries">
           {shown.map(name => open.includes(name) ? (
-            <button key={name} type="button" className="industry" disabled={name !== 'Oil'} onClick={() => { play('click'); if (live && name === 'Oil') setConfirmNew(true); else onBegin() }}>
+            <button key={name} type="button" className="industry" disabled={name !== 'Oil' && !(name === 'Pharmaceutical' && onPharma)} onClick={() => { play('click'); if (name === 'Pharmaceutical') onPharma?.(); else if (live && name === 'Oil') setConfirmNew(true); else onBegin() }}>
               <span className="cl-display industry__name">{name}</span>
-              {name === 'Oil' ? best !== null && <span className="res-note">Best: {best} gold</span> : <span className="res-note">Coming soon</span>}
+              {name === 'Oil' ? best !== null && <span className="res-note">Best: {best} gold</span> : <span className="res-note">{name === 'Pharmaceutical' && onPharma ? 'Admin playtest · stage 1' : 'Coming soon'}</span>}
               <span className="cl-btn cl-btn--primary">Begin</span>
             </button>
           ) : (

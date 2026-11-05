@@ -11,7 +11,8 @@
     "sim": "vite-node tools/sim.ts",
     "fuzz": "vite-node tools/fuzz.ts",
     "audit": "vite-node tools/audit-enemies.ts",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "sim:pharma": "vite-node tools/pharma-sim.ts"
   },
   "dependencies": {
     "react": "^18.3.1",

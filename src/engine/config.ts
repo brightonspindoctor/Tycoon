@@ -202,3 +202,33 @@ export const CONFIG = {
     bar: { leanOperation: 10, fortress: 75, oilBaron: 232, spinDoctor: 50, lawyeredUp: 0.61, blitz: 0.24, capturedState: 0.25, oneMinute: 0.5, businessAsUsual: 0.6 },
   },
 } as const
+
+// Pharmaceutical, stage 1 (Patent Medicines). Admin-only while it's being built.
+export const PHARMA = {
+  startCapital: 15,
+  baseAP: 2,
+  handSize: 5,
+  turnLimit: 25,
+  // Trust runs from trustMin to trustMax; at disgraceAt you're Disgraced and the run ends
+  trustMin: -5,
+  trustMax: 5,
+  disgraceAt: -6,
+  // Research: once a turn, no AP; the price depends on Trust
+  research: { low: 4, mid: 3, high: 2 }, // Trust −5 to −3 · −2 to +2 · +3 to +5
+  researchLowBelow: -2, // Trust under this: the low-Trust price
+  researchHighFrom: 3, // Trust at this or more: the high-Trust price
+  beatTrust: 1, // Trust back for each liability you beat
+  startFactories: 1,
+  maxFactories: 6,
+  factoryPrices: [10, 12, 14, 15], // each extra factory; the last price repeats
+  // Patient Cases: Complaint → Hospitalised → Critical → Death
+  settle: [1, 2, 4], // $ to settle a case at each step before Death
+  criticalTrust: 1, // Trust lost when a case turns Critical
+  deathCapital: 6,
+  deathTrust: 2,
+  // the shop
+  destroyCost: 3, // destroy a card; +1 each time
+  genericDestroy: 1, // a Generic is cheaper to get rid of
+  spoilsCash: 3, // turning down the card offered after a round
+  shopCards: 4,
+} as const

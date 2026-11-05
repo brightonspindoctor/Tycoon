@@ -416,3 +416,30 @@ Supabase project **tycoon** (London, eu-west-2), separate from brighton-weekend 
 - **Scores:** a won game goes on the global scoreboard only if the player asks, under a name they type (20 characters, letters and numbers; blank is "Anonymous tycoon").
 - Reports in the `reports` schema (dashboard only): `daily`, `totals`, `funnel`, `killers`, `bonuses`.
 - Settings → Share anonymous play data (on by default; the About page explains it). Admin playtests are never sent.
+
+## Pharmaceutical (admin playtest, stage 1 built)
+Sealed for players (`PHARMA_READY` in `src/ui/MenuScreens.tsx`); admins can play stage 1 from the front page. Once released it opens when you beat the Oil stage 3 boss. Rules in `src/engine/pharma/`, numbers in `PHARMA` in `src/engine/config.ts`, screens in `src/ui/PharmaGame.tsx`. Nothing is saved or recorded yet. Balance: `npm run sim:pharma`.
+
+The four stages (only 1 built): **Patent Medicines** (1880s–1900s, boss The Great American Fraud) · **Wonder Drugs** (1930s–50s, boss Thalidomide / the Kefauver Hearings) · **Blockbusters** (1970s–90s, boss The Patent Cliff; items unlock Evergreening and OTC Switch) · **Big Pharma** (2000s–20s, the Truth clock comes back). Each stage is 4 rounds; round 4 is the boss.
+
+**The engine**
+- **Research**: a button, once a turn, no AP, costs Capital: $4 at Trust −3 or less, $3 from −2 to +2, $2 at +3 or more. Gives a random remedy card for the era.
+- **Remedies go stale from the moment they're researched**, played or not: each has a pay track (Snake Oil $1, 2, 2, 3) and moves one step along it every turn. Run out on the shelf and it becomes a **Generic**.
+- **Produce** (1 AP): put a remedy from your hand into an empty factory. It's live: it pays the current step of its track every turn, free, until the track runs out. Then the factory empties and a **Generic** goes in your discard.
+- **Generic**: junk that just takes up space. Destroy it in the shop for $1, as many as you like.
+- **Factories**: start with 1, up to 6. Each extra costs $10, $12, $14, then $15.
+- Stage 1 remedies: Snake Oil Liniment ($1 2 2 3, safe) · Vegetable Compound ($1 1 2 2 3, safe) · Cocaine Tonic ($2 3 5, 25% Patient Case a turn) · Soothing Syrup ($2 4 6, 40%) · Heroin Cough Syrup ($1 3 5 7, 30%, −1 Trust when produced).
+
+**Trust** runs −5 to +5 for the whole run (no reset between rounds). At −6 you're **Disgraced** and the run ends. Negative Trust is allowed: it makes Research dearer. Beating a liability gives +1 Trust. Later: the stage 3 boss can raise the Disgraced line (e.g. to −4); items can raise the top above +5.
+
+**Patient Cases**: a risky live remedy can cause one as your turn ends; some liabilities add them. Each turn a case climbs Complaint → Hospitalised → Critical (−1 Trust) → Death (−$6, −2 Trust). Settle any time for $1 / $2 / $4.
+
+**Liabilities**: big ones have moves of 2–3 hits; weak ones come in packs of 2–3 with one single-hit move each. An **NDA** cancels only the first hit of a liability's next move (once a fight). Rounds: 1 a big liability · 2 a pair of weak ones · 3 a trio of weak ones or the Rival Quack · 4 the boss. Big: Temperance League, Local Doctor, Grieving Widow, Rival Quack. Weak: Penny Paper Reporter, Disgruntled Customer, Town Preacher, Copycat Peddler (Illegal Copy: half pay for the rest of a remedy's life), Suspicious Pharmacist (a remedy pays nothing next turn), Coroner (cases worsen). Boss: The Great American Fraud, 20 Hold, weak to Bury, resists Legal; Investigation (2× −1 Trust), Lab Results (−$4, a remedy pays nothing, −1 Trust), Exposé (cases worsen, −1 Trust).
+
+**Cards**: starting deck of 8 — Produce, Travelling Salesman ×2 (3 Dirty, 3 uses then gone), Kickback (5 Dirty, −1 Trust), Expert Witness ($1, 4 Legal), NDA, Free Samples (+1 Trust, live remedies +$1 this turn), Charity Gala ($2, +2 Trust). Shop and after-round picks add Hire Salesmen, Medicine Show, Biopiracy, Invent an Ailment, Testimonials, Smear Campaign (2 Bury to every liability). After each round: pick 1 of 3 cards or take $3.
+
+**Glossary terms** (real-world practices only): patent medicine, biopiracy, disease mongering, kickback, testimonials, NDA, medicine show, free samples, reputation laundering. Kept apart from the Oil terms so the Oil achievement isn't moved.
+
+**Tactics still to place**: Sponsored Education, Seeding Trial (stage 2) · Offshore Trials, Citizen Petition, Formulary Rebate, Patent Box (stage 3) · Buy and Hike, Drop the Antibiotic, Pay-for-Delay (stage 4). Marketing (attack cards that earn Capital) to be worked out.
+
+**Art still needed**: Smear Campaign (borrows Advertorial), and portraits for every Pharmaceutical liability (they borrow Oil portraits for now).
