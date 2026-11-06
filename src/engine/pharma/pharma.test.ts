@@ -120,6 +120,24 @@ describe('Pharmaceutical stage 1', () => {
     expect(r.capital).toBe(15 - C.settle[0])
   })
 
+  it('the Class Action opens a Patient Case and brings a Claimant every 3rd turn', () => {
+    let r = setUp(['produce', 'snakeOil'])
+    r = pact(r, { type: 'play', cardId: r.hand[0].id, target: r.hand[1].id })
+    r.threats = []
+    r.events = []
+    // bring it in the way a round does
+    r = pact({ ...r, phase: 'shop', round: 2 }, { type: 'leaveShop' })
+    while (!r.threats.some(t => t.kind === 'classAction')) {
+      r = pact({ ...r, phase: 'shop', round: 2, cases: [] }, { type: 'leaveShop' })
+    }
+    expect(r.cases.length).toBe(1)
+    const claimants = () => r.threats.filter(t => t.kind === 'claimant').length
+    for (let i = 0; i < 2; i++) { r.trust = 0; r.capital = 50; r = pact(r, { type: 'endTurn' }) }
+    expect(claimants()).toBe(0)
+    r.trust = 0; r.capital = 50; r = pact(r, { type: 'endTurn' })
+    expect(claimants()).toBe(1)
+  })
+
   it('Patient Cases worsen each turn and a death costs Capital and Trust', () => {
     let r = setUp([], 'customer')
     r.cases = [{ id: 999, remedy: 'soothingSyrup', step: 1 }]

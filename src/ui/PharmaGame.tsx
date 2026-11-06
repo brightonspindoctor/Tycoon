@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { PHARMA as C } from '../engine/config'
 import { CASE_STEPS, PCARDS, PTHREATS, REMEDIES, isRemedy, moveText, type PCardKey, type RemedyKey } from '../engine/pharma/data'
 import {
-  allCards, canPlay, canResearch, currentMove, damageFor, newPharmaRun, nextFactoryPrice, pact, patentPays, researchCost, settleCost, targetsFor, trustBand,
+  allCards, canPlay, canResearch, currentMove, damageFor, newPharmaRun, nextFactoryPrice, pact, patentPays, researchCost, settleCost, spawnIn, targetsFor, trustBand,
   type PAction, type PCard, type PRun,
 } from '../engine/pharma/engine'
 import { findPharmaTerms } from '../terms'
@@ -116,6 +116,7 @@ function Fight({ run, dispatch }: { run: PRun; dispatch: (a: PAction) => void })
                     <b>Next · {m.name}{m.hits.length > 1 ? ` · ${m.hits.length} hits` : ''}</b>
                     <span>{moveText(m)}</span>
                     {t.nda && <span className="ph-nda">NDA: the first hit is cancelled</span>}
+                    {spawnIn(run, t) !== null && <span className="ph-nda">{PTHREATS[PTHREATS[t.kind].spawn!.kind].name} joins {spawnIn(run, t) === 1 ? 'as this turn ends' : `in ${spawnIn(run, t)} turns`}</span>}
                   </div>
                 )}
                 <dl className="threat__traits">

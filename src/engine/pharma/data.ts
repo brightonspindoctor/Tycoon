@@ -81,10 +81,14 @@ export type Hit =
 
 export interface PMove { name: string; hits: Hit[] }
 export type PThreatKind =
-  | 'temperance' | 'localDoctor' | 'widow' | 'rivalQuack'
+  | 'temperance' | 'localDoctor' | 'widow' | 'rivalQuack' | 'classAction' | 'claimant'
   | 'reporter' | 'customer' | 'preacher' | 'copycat' | 'pharmacist' | 'coroner'
   | 'fraud'
-export interface PThreatDef { name: string; hold: number; weak?: Family; resist?: Family; moves: PMove[]; portrait: string; boss?: boolean }
+export interface PThreatDef {
+  name: string; hold: number; weak?: Family; resist?: Family; moves: PMove[]; portrait: string; boss?: boolean
+  arrives?: Hit[] // what happens when it turns up
+  spawn?: { every: number; kind: PThreatKind; max: number } // every Nth turn another liability joins, up to max at once
+}
 
 export const PTHREATS: Record<PThreatKind, PThreatDef> = {
   // the big ones: several hits a move
@@ -96,6 +100,12 @@ export const PTHREATS: Record<PThreatKind, PThreatDef> = {
     moves: [{ name: 'Lawsuit', hits: [{ k: 'cash', n: 2 }, { k: 'widow', n: 2 }] }, { name: 'Tells the Papers', hits: [{ k: 'trust', n: 1 }, { k: 'cash', n: 2 }] }] },
   rivalQuack: { name: 'The Rival Quack', hold: 14, weak: 'Legal', portrait: 'ph-rivalQuack',
     moves: [{ name: 'Knock-off', hits: [{ k: 'copy' }, { k: 'cash', n: 2 }] }, { name: 'Undercut', hits: [{ k: 'cash', n: 2 }, { k: 'cash', n: 2 }] }] },
+  classAction: { name: 'The Class Action', hold: 10, weak: 'Legal', resist: 'Dirty', portrait: 'ph-widow',
+    arrives: [{ k: 'case' }],
+    spawn: { every: 3, kind: 'claimant', max: 3 },
+    moves: [{ name: 'Discovery', hits: [{ k: 'trust', n: 1 }, { k: 'cash', n: 2 }] }, { name: 'Depositions', hits: [{ k: 'cash', n: 1 }, { k: 'cash', n: 1 }] }] },
+  // joins the Class Action every 3rd turn
+  claimant: { name: 'A Claimant', hold: 4, weak: 'Legal', portrait: 'ph-customer', moves: [{ name: 'Damages', hits: [{ k: 'cash', n: 1 }] }] },
   // the weak ones: they come in packs, one hit a move
   reporter: { name: 'The Penny Paper Reporter', hold: 5, weak: 'Legal', portrait: 'ph-reporter', moves: [{ name: 'Column', hits: [{ k: 'trust', n: 1 }] }] },
   customer: { name: 'The Disgruntled Customer', hold: 5, weak: 'Legal', portrait: 'ph-customer', moves: [{ name: 'Refund', hits: [{ k: 'cash', n: 2 }] }] },

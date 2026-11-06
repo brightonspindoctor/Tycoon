@@ -93,7 +93,8 @@ function threatsFor(r: PRun, round: number): PThreatKind[] {
   if (round === 1) return [pick(r, BIG_ONES)]
   const weak = shuffle(r, [...WEAK_ONES])
   if (round === 2) return weak.slice(0, 2)
-  return next(r) < 0.5 ? weak.slice(0, 3) : ['rivalQuack']
+  const x = next(r)
+  return x < 0.4 ? weak.slice(0, 3) : x < 0.7 ? ['rivalQuack'] : ['classAction']
 }
 
 function startRound(r: PRun, round: number) {
@@ -103,9 +104,23 @@ function startRound(r: PRun, round: number) {
   r.draw = shuffle(r, [...r.draw, ...r.hand, ...r.discard, ...r.benched])
   r.hand = []; r.discard = []; r.benched = []
   for (const p of r.factories) if (p) p.blocked = false // a block from the last fight doesn't carry over
-  r.threats = threatsFor(r, round).map(k => ({ id: r.nextId++, kind: k, hold: PTHREATS[k].hold, maxHold: PTHREATS[k].hold, step: 0, beaten: false }))
-  for (const t of r.threats) say(r, `${PTHREATS[t.kind].name} arrives.`)
+  r.threats = []
+  for (const k of threatsFor(r, round)) arrive(r, k)
   startTurn(r)
+}
+
+function arrive(r: PRun, k: PThreatKind) {
+  const d = PTHREATS[k]
+  r.threats.push({ id: r.nextId++, kind: k, hold: d.hold, maxHold: d.hold, step: 0, beaten: false })
+  say(r, `${d.name} arrives.`)
+  for (const h of d.arrives ?? []) applyHit(r, h, d.name)
+}
+
+/** Turns until a liability's next arrival, for the screen. */
+export function spawnIn(r: PRun, t: PThreat): number | null {
+  const s = PTHREATS[t.kind].spawn
+  if (!s || t.beaten) return null
+  return s.every - (r.turn % s.every)
 }
 
 function drawCards(r: PRun, n: number) {
@@ -319,6 +334,13 @@ function endTurn(r: PRun) {
     })
     t.nda = false
     t.step++
+  }
+  // 3b · some liabilities bring others: the Class Action adds a Claimant every 3rd turn
+  for (const t of liveThreats(r)) {
+    const s = PTHREATS[t.kind].spawn
+    if (!s || r.turn % s.every !== 0) continue
+    if (liveThreats(r).filter(x => x.kind === s.kind).length >= s.max) continue
+    arrive(r, s.kind)
   }
   // 4 · everything ages; expired patents leave a Generic
   r.factories = r.factories.map(p => {
