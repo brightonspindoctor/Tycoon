@@ -13,6 +13,7 @@ import { CardGallery } from './ui/CardGallery'
 import { SoundBoard } from './ui/SoundBoard'
 import { MobileGame } from './ui/MobileGame'
 import { PharmaGame } from './ui/PharmaGame'
+import type { PRun } from './engine/pharma/engine'
 import { SettingsPanel } from './ui/Settings'
 import { InstallPrompt } from './ui/InstallPrompt'
 import { ShopScreen } from './ui/ShopScreen'
@@ -104,6 +105,14 @@ export default function App() {
     if (a.type === 'buyCard' || a.type === 'buyProspect' || a.type === 'buyBucket' || a.type === 'buyItem' || a.type === 'skim' || a.type === 'payDividends' || (a.type === 'upgradeCard' && nextRun.upgradeCost > run.upgradeCost)) play('coin')
     setRun(nextRun)
   }
+
+  // ?pharma=busy | boss | spoils | shop | won | lost opens a Pharmaceutical screen in an awkward state (admins only)
+  const [pharmaPreview, setPharmaPreview] = useState<PRun | null>(null)
+  useEffect(() => {
+    const want = new URLSearchParams(location.search).get('pharma')
+    if (!want || !admin) return
+    void import('../tools/pharma-preview').then(({ pharmaPreview }) => { setPharmaPreview(pharmaPreview(want)); setScreen('pharma') })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ?preview=summary | crash | complete | shop | bossshop | round3 | boss jumps to a screen (for design checks);
   // add &stage=2 or &stage=3 to find it in a later stage, or use incorporate | complete2 | crash2 | multinational | complete3 | crash3
@@ -304,7 +313,7 @@ export default function App() {
   if (previewPage === 'cards') body = <CardGallery />
   else if (previewPage === 'sounds') body = <SoundBoard />
   else if (screen === 'intro') body = <Intro live={live ? { stage: live.run.stage, round: live.run.round, gold: live.run.gold, saved: live.saved } : null} onContinue={resume} onBegin={() => setScreen('motto')} onHistory={() => setScreen('history')} onAbout={() => setScreen('about')} onScoreboard={() => setScreen('scoreboard')} onAchievements={() => setScreen('achievements')} admin={admin} onAdminStart={startAdmin} onPharma={admin ? () => setScreen('pharma') : undefined} />
-  else if (screen === 'pharma') body = <PharmaGame onMenu={() => setScreen('intro')} />
+  else if (screen === 'pharma') body = <PharmaGame key={pharmaPreview ? 'preview' : 'run'} initial={pharmaPreview ?? undefined} onMenu={() => { setPharmaPreview(null); setScreen('intro') }} />
   else if (screen === 'motto') body = <Motto onDone={() => setScreen(s => (s === 'motto' ? 'bonus' : s))} />
   else if (screen === 'achievements') body = <Achievements onBack={() => setScreen('intro')} />
   else if (screen === 'cabinet') body = <TrophyCabinet onBack={() => setScreen('scoreboard')} />

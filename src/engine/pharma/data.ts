@@ -38,12 +38,12 @@ export const isRemedy = (k: PCardKey): k is RemedyKey => k in REMEDIES
 
 const remedyText = (k: RemedyKey) => {
   const d = REMEDIES[k]
-  const risk = d.caseChance >= 0.35 ? ' High risk of Patient Cases.' : d.caseChance > 0 ? ' Can cause Patient Cases.' : ''
-  return `Pays ${d.pays.map(p => `$${p}`).join(', ')}.${risk}${d.produceTrust ? ` ${d.produceTrust} Trust when produced.` : ''}`
+  const risk = d.caseChance >= 0.35 ? 'High risk of Patient Cases.' : d.caseChance > 0 ? 'Can cause Patient Cases.' : 'Safe.'
+  return `${risk}${d.produceTrust ? ` ${d.produceTrust} Trust when produced.` : ''}`
 }
 
 export const PCARDS: Record<PCardKey, PCardDef> = {
-  produce: { name: 'Produce', ap: 1, family: 'Production', price: 6, icon: 'produce', text: 'Put a remedy from your hand into an empty factory. It goes live.' },
+  produce: { name: 'Produce', ap: 1, family: 'Production', price: 6, icon: 'produce', text: 'Put a remedy from your hand into an empty factory.' },
   salesman: { name: 'Travelling Salesman', ap: 1, family: 'Dirty', power: 3, uses: 3, price: 3, icon: 'salesman', text: 'Remove 3 Hold.' },
   kickback: { name: 'Kickback', ap: 1, family: 'Dirty', power: 5, trust: -1, price: 4, icon: 'kickback', text: 'Remove 5 Hold. −1 Trust.' },
   expertWitness: { name: 'Expert Witness', ap: 1, cost: 1, family: 'Legal', power: 4, price: 4, icon: 'expertWitness', text: 'Pay $1. Remove 4 Hold.' },
@@ -51,7 +51,7 @@ export const PCARDS: Record<PCardKey, PCardDef> = {
   freeSamples: { name: 'Free Samples', ap: 1, family: 'Fortune', trust: 1, price: 3, icon: 'freeSamples', text: '+1 Trust. Live remedies pay $1 more this turn.' },
   charityGala: { name: 'Charity Gala', ap: 1, cost: 2, family: 'Fortune', trust: 2, price: 4, icon: 'charityGala', text: 'Pay $2. +2 Trust.' },
   hireSalesmen: { name: 'Hire Salesmen', ap: 1, family: 'Tempo', price: 4, icon: 'hireSalesmen', text: 'Add 2 Travelling Salesmen to your hand.' },
-  medicineShow: { name: 'Medicine Show', ap: 1, family: 'Dirty', power: 2, trust: 1, price: 5, icon: 'medicineShow', text: 'Remove 2 Hold. +1 Trust. Add a Travelling Salesman to your hand.' },
+  medicineShow: { name: 'Medicine Show', ap: 1, family: 'Dirty', power: 2, trust: 1, price: 5, icon: 'medicineShow', text: 'Remove 2 Hold. +1 Trust. Add a Salesman to your hand.' },
   biopiracy: { name: 'Biopiracy', ap: 1, family: 'Production', trust: -1, price: 4, icon: 'biopiracy', text: 'Add a remedy to your hand. −1 Trust.' },
   inventAilment: { name: 'Invent an Ailment', ap: 1, family: 'Production', price: 4, icon: 'inventAilment', text: 'Your next Research gives two remedies.' },
   testimonials: { name: 'Testimonials', ap: 1, family: 'Fortune', trust: 2, price: 3, icon: 'testimonials', text: '+2 Trust, −1 for each open Patient Case.' },

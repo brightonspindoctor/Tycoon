@@ -418,7 +418,7 @@ Supabase project **tycoon** (London, eu-west-2), separate from brighton-weekend 
 - Settings → Share anonymous play data (on by default; the About page explains it). Admin playtests are never sent.
 
 ## Pharmaceutical (admin playtest, stage 1 built)
-Sealed for players (`PHARMA_READY` in `src/ui/MenuScreens.tsx`); admins can play stage 1 from the front page. Once released it opens when you beat the Oil stage 3 boss. Rules in `src/engine/pharma/`, numbers in `PHARMA` in `src/engine/config.ts`, screens in `src/ui/PharmaGame.tsx`. Nothing is saved or recorded yet. Balance: `npm run sim:pharma`.
+Sealed for players (`PHARMA_READY` in `src/ui/MenuScreens.tsx`); admins can play stage 1 from the front page. Once released it opens when you beat the Oil stage 3 boss. Rules in `src/engine/pharma/`, numbers in `PHARMA` in `src/engine/config.ts`, screens in `src/ui/PharmaGame.tsx`. Nothing is saved or recorded yet. Balance: `npm run sim:pharma`. Layout checks: with admin on, `?pharma=busy | boss | spoils | shop | won | lost` opens a screen in an awkward state (six factories, three cases, four liabilities, a full hand). On phones the fight uses Oil's phone layout: Capital in a box at the top, the liabilities and factories scrolling in the middle, Research, AP and End turn above the hand at the bottom.
 
 The four stages (only 1 built): **Patent Medicines** (1880s–1900s, boss The Great American Fraud) · **Wonder Drugs** (1930s–50s, boss Thalidomide / the Kefauver Hearings) · **Blockbusters** (1970s–90s, boss The Patent Cliff; items unlock Evergreening and OTC Switch) · **Big Pharma** (2000s–20s, the Truth clock comes back). Each stage is 4 rounds; round 4 is the boss.
 

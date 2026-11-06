@@ -1099,8 +1099,12 @@ button.m-threat { cursor: pointer; }
 .live-run__buttons { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
 
 /* ---------- Pharmaceutical (stage 1, admin playtest) ---------- */
-.ph__grid { display: grid; grid-template-columns: 300px minmax(0, 1fr) 270px; gap: 20px; flex: 1; min-height: 0; }
-.ph__middle { display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow-y: auto; }
+.ph__grid { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 20px; flex: 1; min-height: 0; }
+.ph__threats { overflow-y: auto; min-height: 0; }
+.ph-capital { display: flex; flex-direction: column; align-items: flex-end; border: 2px solid var(--ink); border-radius: var(--radius-1860); background: var(--paper-raised); padding: 8px 14px; min-width: 150px; }
+.ph-capital b { font-size: 30px; line-height: 32px; }
+.ph-capital__next { font-size: 12px; color: var(--gain); }
+.ph__middle { display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow-y: auto; padding-right: 4px; }
 .ph__money { gap: 12px; }
 .ph__money .cl-ledger { width: 100%; }
 .ph-nda { font-size: 12px; font-weight: 700; }
@@ -1116,18 +1120,19 @@ button.m-threat { cursor: pointer; }
 .ph-trust__cell.is-neg { background: color-mix(in srgb, var(--loss) 10%, transparent); }
 .ph-trust__cell.is-pos { background: color-mix(in srgb, var(--gain) 10%, transparent); }
 .ph-trust__cell.is-zero { border-color: var(--ink); }
-.ph-trust__cell.is-skull { background: var(--ink); color: var(--paper-raised); border-color: var(--ink); }
+.ph-trust__cell.is-skull { background: var(--ink); color: var(--paper-raised); border-color: var(--ink); display: flex; align-items: center; justify-content: center; }
 .ph-trust__cell.is-now { color: var(--paper-raised); font-weight: 700; transform: scale(1.12); border-color: var(--ink); background: var(--ink-muted); }
 .ph-trust__cell.is-now.is-neg { background: var(--loss); border-color: var(--loss); }
 .ph-trust__cell.is-now.is-pos { background: var(--gain); border-color: var(--gain); }
 
 .ph-factories { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.ph-factory { position: relative; border: 1.5px dashed var(--ink-muted); border-radius: var(--radius-1860); background: var(--paper-raised); padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.ph-factory { position: relative; border: 1.5px dashed var(--ink-muted); border-radius: var(--radius-1860); background: var(--paper-raised); padding: 8px 10px; display: flex; align-items: center; gap: 10px; }
+.ph-factory__body { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
 .ph-factory.is-live { border: 1.5px solid var(--ink); animation: rise .4s ease-out; }
 .ph-factory .plot__flag { position: static; transform: none; }
-.ph-factory__icon { width: 64px; height: 64px; }
-.ph-factory__name { font-family: var(--font-display-1860); font-size: 17px; line-height: 20px; }
-.ph-factory__pays { font-weight: 700; color: var(--gain); }
+.ph-factory__icon { width: 52px; height: 52px; flex: none; }
+.ph-factory__name { font-family: var(--font-display-1860); font-size: 16px; line-height: 19px; }
+.ph-factory__pays { font-weight: 700; color: var(--gain); font-size: 12px; }
 .ph-track { display: inline-flex; gap: 3px; }
 .ph-track i { font-style: normal; font-family: var(--font-figures); font-size: 10px; min-width: 16px; padding: 1px 3px; border: 1px solid var(--ink-muted); color: var(--ink-muted); text-align: center; }
 .ph-track i.is-now { background: var(--gain); border-color: var(--gain); color: var(--paper-raised); font-weight: 700; }
@@ -1156,29 +1161,31 @@ button.m-threat { cursor: pointer; }
 .ph-row--wrap { flex-wrap: wrap; }
 .ph-spoils { background: var(--paper-raised); border: 3px double var(--ink); padding: 20px; display: flex; flex-direction: column; gap: 12px; align-items: center; max-width: 640px; }
 .ph-shop { overflow-y: auto; }
+.ph-shop .ph-factory { flex-direction: column; align-items: center; text-align: center; }
 .ph-shop__extras { display: flex; gap: 14px; }
 .ph-shop__extras .ph-factory { width: 260px; }
 .ph-shop__foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .ph-end { justify-content: center; align-items: flex-start; gap: 16px; }
 .ph-end p { margin: 0; font-size: 18px; }
 
-/* phones: one scrolling column, the hand scrolls sideways */
-.m .ph__grid { display: flex; flex-direction: column; gap: 14px; }
-.m .ph__middle { overflow: visible; }
-.m .ph__threats { overflow: visible; }
-.m .ph-factories { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.ph-end-m { display: none; }
-.m .ph-end-m { display: inline-flex; margin-left: auto; }
-.m .ph .game__foot { position: sticky; bottom: 0; z-index: 4; background: var(--paper); margin: 0 -16px calc(-20px - env(safe-area-inset-bottom)); padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); border-top: 3px double var(--ink); gap: 6px; }
-.m .ph .action-strip { border-top: none; padding-top: 0; gap: 8px; }
-.m .ph .ap-coin { width: 18px; height: 18px; }
-.m .ph-research { margin-left: 0; padding: 6px 10px; gap: 8px; }
-.m .ph-research img { width: 32px; height: 32px; }
-.m .ph-research b { font-size: 14px; }
-.m .ph-research .res-note { display: none; }
-.m .ph-research b { white-space: nowrap; }
-.m .ph-hand { justify-content: flex-start; overflow-x: auto; min-height: 176px; scrollbar-width: none; }
-.m .ph .card, .m .ph-spoils .card { flex: none; width: 112px; height: 172px; padding: 7px; gap: 3px; }
+/* phones: Oil's phone layout (the hud, a scrolling middle, the dock); shop and spoils scroll as one column */
+.ph.m-game .m-main > .ph__threats { overflow: visible; display: flex; flex-direction: column; gap: 10px; }
+.ph.m-game .ph__middle { overflow: visible; }
+.ph.m-game .ph-factories { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ph.m-game .ap .cl-label { display: none; }
+.ph.m-game .ap-coin { width: 18px; height: 18px; }
+.ph.m-game .ph-research { margin-left: 0; padding: 4px 10px; gap: 8px; }
+.ph.m-game .ph-research img { width: 30px; height: 30px; }
+.ph.m-game .ph-research b { font-size: 14px; white-space: nowrap; }
+.ph.m-game .ph-research .res-note { display: none; }
+.ph.m-game .ph-end-m { margin-left: auto; }
+.ph.m-game .ph-capital { padding: 6px 10px; }
+.ph.m-game .ph-capital b { font-size: 22px; line-height: 24px; }
+.ph.m-game .ph-capital__next { font-size: 10.5px; }
+.ph.m-game .ph-trust .res-note { font-size: 11px; }
+.ph.m-game .ph-trust__cell { font-size: 10.5px; padding: 4px 0; }
+.ph.m-game .ph-factory__icon { width: 40px; height: 40px; }
+.m .ph .card, .m .ph-spoils .card { flex: none; width: 112px; height: 172px; padding: 7px; gap: 3px; overflow: hidden; }
 .m .ph .card .cl-card__art img, .m .ph-spoils .card .cl-card__art img { width: 40px; height: 40px; }
 .m .ph .card .cl-card__name, .m .ph-spoils .card .cl-card__name { font-size: 13px; line-height: 15px; }
 .m .ph .card .cl-card__cost, .m .ph-spoils .card .cl-card__cost { width: 22px; height: 22px; font-size: 13px; }
@@ -1187,16 +1194,50 @@ button.m-threat { cursor: pointer; }
 .m .ph .card .cl-card__band, .m .ph-spoils .card .cl-card__band { font-size: 8px; padding: 2px 0; }
 .m .ph .sold { width: 112px; height: 172px; flex: none; }
 .m .ph-spoils { padding: 14px; max-width: 100%; }
-.m .ph-spoils .ph-row { gap: 6px; max-width: 100%; }
-.ph-cap-m { display: none; font-weight: 700; font-size: 18px; }
-.m .ph-cap-m { display: inline; }
-.m .ph .ap .cl-label { display: none; }
-.m .ph .action-strip { flex-wrap: nowrap; }
-.m .ph-hand { padding-left: 2px; }
-.m .ph .pile { display: none; }
-.m .ph .pile-col { display: none; }
-.m .ph .hand-row { gap: 0; }
+.m .ph-spoils .ph-row { gap: 6px; max-width: 100%; overflow-x: auto; }
 .m .ph-row { overflow-x: auto; }
 .m .ph-row--wrap { overflow: visible; }
 .m .ph-shop__extras { flex-direction: column; }
 .m .ph-shop__extras .ph-factory { width: auto; }
+.m .ph-shop .game__head { flex-wrap: wrap; gap: 8px; }
+.ph.m-game .m-main > * { flex: none; }
+.ph.m-game .ph-trust__scale { gap: 2px; }
+.ph.m-game .ph-trust__cell { min-width: 0; }
+.ph.m-game .ph-track--big i { min-width: 0; font-size: 11px; padding: 1px 4px; }
+.ph.m-game .ph-factory { padding: 6px 8px; gap: 8px; min-width: 0; }
+.ph.m-game .ph-factory__name { font-size: 14px; line-height: 16px; overflow-wrap: anywhere; }
+.ph.m-game .ph-factory .plot__flag { white-space: normal; }
+.ph.m-game .ph-case { flex-wrap: wrap; }
+.ph.m-game .ph-case .cl-btn { margin-left: auto; }
+.ph.m-game .events p { overflow-wrap: anywhere; }
+/* short phones: smaller cards so the board isn't all dock */
+@media (max-height: 700px) {
+  .ph.m-game .m-hand { min-height: 0; padding-top: 4px; }
+  .ph.m-game .m-hand .card { width: 100px; height: 148px; }
+  .ph.m-game .m-hand .card .cl-card__art img { width: 32px; height: 32px; }
+  .ph.m-game .m-hand .card .cl-card__effect { font-size: 10.5px; line-height: 13px; }
+  .ph.m-game .m-actions { min-height: 40px; }
+}
+.ph.m-game .m-actions { gap: 8px; }
+.ph.m-game .ap { gap: 4px; }
+.ph.m-game .ap-coin { width: 14px; height: 14px; }
+.ph.m-game .ph-research { padding: 4px 8px; gap: 6px; }
+.ph.m-game .ph-research img { width: 24px; height: 24px; }
+.ph.m-game .ph-research b { font-size: 13px; }
+.ph.m-game .ph-end-m { padding: 8px 10px; font-size: 13px; }
+/* small cards: the art gives way so the words fit */
+.m .ph .card .cl-card__art, .m .ph-spoils .card .cl-card__art, .ph.m-game .m-hand .card .cl-card__art { flex: none; height: 34px; min-height: 0; }
+.m .ph .card .cl-card__art img, .m .ph-spoils .card .cl-card__art img, .ph.m-game .m-hand .card .cl-card__art img { width: 32px; height: 32px; }
+.m .ph .card .cl-card__effect, .m .ph-spoils .card .cl-card__effect, .ph.m-game .m-hand .card .cl-card__effect { flex: 1; min-height: 0; overflow: hidden; font-size: 10.5px; line-height: 13px; }
+.m .ph-spoils .card { width: 100px; }
+@media (max-width: 350px) {
+  .ph.m-game .ap .cl-num { display: none; }
+  .ph.m-game .ph-research img { display: none; }
+  .ph.m-game .ph-capital__next { display: none; }
+}
+.m .ph-card--remedy .card-why, .ph.m-game .ph-card--remedy .card-why { display: none; }
+.ph-shop .shop__head-right { display: flex; align-items: center; gap: 12px; }
+.ph-shop section > .cl-label { display: block; margin-bottom: 14px; }
+.m .ph-shop .ph-capital { padding: 6px 10px; }
+.m .ph-shop .ph-capital b { font-size: 22px; line-height: 24px; }
+.m .ph-row { padding-top: 10px; }
