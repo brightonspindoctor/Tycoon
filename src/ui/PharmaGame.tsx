@@ -160,7 +160,7 @@ function Fight({ run, dispatch }: { run: PRun; dispatch: (a: PAction) => void })
                     <b>{PCARDS[c.remedy].name}</b>
                     <span className="ph-ladder">{CASE_STEPS.map((s, i) => <i key={s} className={i < c.step ? 'is-gone' : i === c.step ? 'is-now' : i === 3 ? 'is-death' : ''}>{s}</i>)}</span>
                   </div>
-                  <button type="button" className="cl-btn cl-btn--small" disabled={run.capital < settleCost(c)} onClick={() => dispatch({ type: 'settle', caseId: c.id })}>Settle · {money(settleCost(c))}</button>
+                  <button type="button" className="cl-btn cl-btn--small" disabled={run.capital < settleCost(c) || run.ap < C.settleAP} onClick={() => dispatch({ type: 'settle', caseId: c.id })}>Settle · {C.settleAP} AP · {money(settleCost(c))}</button>
                 </div>
               ))}
               <span className="res-note">A death costs {money(C.deathCapital)} and {C.deathTrust} Trust. Critical costs {C.criticalTrust} Trust.</span>

@@ -354,8 +354,8 @@ export function pact(prev: PRun, a: PAction): PRun {
       const c = r.cases.find(x => x.id === a.caseId)
       if (!c || r.phase !== 'turn') break
       const cost = C.settle[c.step]
-      if (r.capital < cost) break
-      pay(r, cost); r.stats.settled++
+      if (r.capital < cost || r.ap < C.settleAP) break
+      pay(r, cost); r.ap -= C.settleAP; r.stats.settled++
       r.cases = r.cases.filter(x => x.id !== c.id)
       say(r, `Settled out of court for $${cost}.`)
       break

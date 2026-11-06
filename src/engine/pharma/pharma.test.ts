@@ -67,6 +67,7 @@ describe('Pharmaceutical stage 1', () => {
     r = pact(r, { type: 'play', cardId: r.hand[0].id })
     r = pact(r, { type: 'endTurn' })
     expect(r.trust).toBe(-1)
+    expect(r.capital).toBe(14) // an NDA costs $1
   })
 
   it('weakness doubles damage, resistance halves it', () => {
@@ -104,6 +105,19 @@ describe('Pharmaceutical stage 1', () => {
     r = pact(r, { type: 'endTurn' })
     expect(r.trust).toBe(-5)
     expect(r.phase).toBe('turn')
+  })
+
+  it('settling a case costs 1 AP as well as Capital', () => {
+    let r = setUp([], 'customer')
+    r.cases = [{ id: 999, remedy: 'soothingSyrup', step: 0 }]
+    r.ap = 0
+    r = pact(r, { type: 'settle', caseId: 999 })
+    expect(r.cases.length).toBe(1)
+    r.ap = 2
+    r = pact(r, { type: 'settle', caseId: 999 })
+    expect(r.cases.length).toBe(0)
+    expect(r.ap).toBe(2 - C.settleAP)
+    expect(r.capital).toBe(15 - C.settle[0])
   })
 
   it('Patient Cases worsen each turn and a death costs Capital and Trust', () => {

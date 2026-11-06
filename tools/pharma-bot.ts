@@ -23,7 +23,7 @@ export function pharmaBot(start: PRun, onStep?: (r: PRun) => void): PRun {
     // a turn
     const free = r.factories.some(f => !f)
     const remedies = r.hand.filter(c => isRemedy(c.key))
-    const cs = r.cases.find(c => c.step >= 1 && r.capital >= settleCost(c) + 3)
+    const cs = r.ap >= C.settleAP ? r.cases.find(c => c.step >= 1 && r.capital >= settleCost(c) + 3) : undefined
     if (cs) { r = pact(r, { type: 'settle', caseId: cs.id }); continue }
     if (canResearch(r).ok && free && !remedies.length && r.capital >= researchCost(r) + 3) { r = pact(r, { type: 'research' }); continue }
     const playable = r.hand.filter(c => canPlay(r, c).ok)

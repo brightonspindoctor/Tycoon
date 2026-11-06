@@ -47,7 +47,7 @@ export const PCARDS: Record<PCardKey, PCardDef> = {
   salesman: { name: 'Travelling Salesman', ap: 1, family: 'Dirty', power: 3, uses: 3, price: 3, icon: 'salesman', text: 'Remove 3 Hold.' },
   kickback: { name: 'Kickback', ap: 1, family: 'Dirty', power: 5, trust: -1, price: 4, icon: 'kickback', text: 'Remove 5 Hold. −1 Trust.' },
   expertWitness: { name: 'Expert Witness', ap: 1, cost: 1, family: 'Legal', power: 4, price: 4, icon: 'expertWitness', text: 'Pay $1. Remove 4 Hold.' },
-  nda: { name: 'NDA', ap: 1, family: 'Bury', price: 4, icon: 'nda', text: "Cancel the first hit of a liability's next move." },
+  nda: { name: 'NDA', ap: 1, cost: 1, family: 'Bury', price: 4, icon: 'nda', text: "Pay $1. Cancel the first hit of a liability's next move." },
   freeSamples: { name: 'Free Samples', ap: 1, family: 'Fortune', trust: 1, price: 3, icon: 'freeSamples', text: '+1 Trust. Live remedies pay $1 more this turn.' },
   charityGala: { name: 'Charity Gala', ap: 1, cost: 2, family: 'Fortune', trust: 2, price: 4, icon: 'charityGala', text: 'Pay $2. +2 Trust.' },
   hireSalesmen: { name: 'Hire Salesmen', ap: 1, family: 'Tempo', price: 4, icon: 'hireSalesmen', text: 'Add 2 Travelling Salesmen to your hand.' },

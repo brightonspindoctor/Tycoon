@@ -223,6 +223,7 @@ export const PHARMA = {
   factoryPrices: [10, 12, 14, 15], // each extra factory; the last price repeats
   // Patient Cases: Complaint → Hospitalised → Critical → Death
   settle: [1, 2, 4], // $ to settle a case at each step before Death
+  settleAP: 1,
   criticalTrust: 1, // Trust lost when a case turns Critical
   deathCapital: 6,
   deathTrust: 2,
