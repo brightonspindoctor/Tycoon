@@ -100,12 +100,12 @@ export const PTHREATS: Record<PThreatKind, PThreatDef> = {
     moves: [{ name: 'Lawsuit', hits: [{ k: 'cash', n: 2 }, { k: 'widow', n: 2 }] }, { name: 'Tells the Papers', hits: [{ k: 'trust', n: 1 }, { k: 'cash', n: 2 }] }] },
   rivalQuack: { name: 'The Rival Quack', hold: 14, weak: 'Legal', portrait: 'ph-rivalQuack',
     moves: [{ name: 'Knock-off', hits: [{ k: 'copy' }, { k: 'cash', n: 2 }] }, { name: 'Undercut', hits: [{ k: 'cash', n: 2 }, { k: 'cash', n: 2 }] }] },
-  classAction: { name: 'The Class Action', hold: 10, weak: 'Legal', resist: 'Dirty', portrait: 'ph-widow',
+  classAction: { name: 'The Class Action', hold: 10, weak: 'Legal', resist: 'Dirty', portrait: 'ph-classAction',
     arrives: [{ k: 'case' }],
     spawn: { every: 3, kind: 'claimant', max: 3 },
     moves: [{ name: 'Discovery', hits: [{ k: 'trust', n: 1 }, { k: 'cash', n: 2 }] }, { name: 'Depositions', hits: [{ k: 'cash', n: 1 }, { k: 'cash', n: 1 }] }] },
   // joins the Class Action every 3rd turn
-  claimant: { name: 'A Claimant', hold: 4, weak: 'Legal', portrait: 'ph-customer', moves: [{ name: 'Damages', hits: [{ k: 'cash', n: 1 }] }] },
+  claimant: { name: 'A Claimant', hold: 4, weak: 'Legal', portrait: 'ph-claimant', moves: [{ name: 'Damages', hits: [{ k: 'cash', n: 1 }] }] },
   // the weak ones: they come in packs, one hit a move
   reporter: { name: 'The Penny Paper Reporter', hold: 5, weak: 'Legal', portrait: 'ph-reporter', moves: [{ name: 'Column', hits: [{ k: 'trust', n: 1 }] }] },
   customer: { name: 'The Disgruntled Customer', hold: 5, weak: 'Legal', portrait: 'ph-customer', moves: [{ name: 'Refund', hits: [{ k: 'cash', n: 2 }] }] },

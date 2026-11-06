@@ -442,4 +442,4 @@ The four stages (only 1 built): **Patent Medicines** (1880s–1900s, boss The Gr
 
 **Tactics still to place**: Sponsored Education, Seeding Trial (stage 2) · Offshore Trials, Citizen Petition, Formulary Rebate, Patent Box (stage 3) · Buy and Hike, Drop the Antibiotic, Pay-for-Delay (stage 4). Marketing (attack cards that earn Capital) to be worked out.
 
-**Art**: every stage 1 card has its icon and every liability its portrait (`public/art/enemies/ph-*.jpg`), except the Class Action (borrows the Grieving Widow) and the Claimant (borrows the Disgruntled Customer).
+**Art**: every stage 1 card has its icon and every liability its portrait (`public/art/enemies/ph-*.jpg`).
