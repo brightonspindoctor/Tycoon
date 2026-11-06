@@ -1,6 +1,6 @@
 // Pharmaceutical, stage 1: the fight, the round's spoils, the shop and the end. Admin-only while it's built.
 // One layout for both sizes: the 1440×900 board on a wide screen, a single scrolling column on a phone.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { PHARMA as C } from '../engine/config'
 import { CASE_STEPS, PCARDS, PTHREATS, REMEDIES, isRemedy, moveText, type PCardKey, type RemedyKey } from '../engine/pharma/data'
 import {
@@ -8,6 +8,7 @@ import {
   type PAction, type PCard, type PRun,
 } from '../engine/pharma/engine'
 import { findPharmaTerms } from '../terms'
+import { patented } from '../telemetry'
 import { play } from '../sound'
 import { iconUrl as baseIconUrl } from './icons'
 import { Portrait } from './Portrait'
@@ -346,6 +347,12 @@ function End({ run, onAgain, onMenu }: { run: PRun; onAgain: () => void; onMenu:
 export function PharmaGame({ onMenu, initial }: { onMenu: () => void; initial?: PRun }) {
   const [run, setRun] = useState(() => initial ?? newPharmaRun(Math.floor(Math.random() * 2 ** 31)))
   const dispatch = (a: PAction) => setRun(r => pact(r, a))
+  // patents go to the front-page total as each round ends (previews don't count)
+  const sent = useRef(initial ? Infinity : 0)
+  useEffect(() => {
+    if (run.phase === 'turn' || run.phase === 'shop') return
+    if (run.stats.patented > sent.current) { patented(run.stats.patented - sent.current); sent.current = run.stats.patented }
+  }, [run.phase, run.stats.patented])
   useEffect(() => { findPharmaTerms(allCards(run).map(c => c.key)) }, [run.draw.length, run.discard.length, run.hand.length]) // eslint-disable-line react-hooks/exhaustive-deps
   if (run.phase === 'won' || run.phase === 'lost') return <End run={run} onAgain={() => setRun(newPharmaRun(Math.floor(Math.random() * 2 ** 31)))} onMenu={onMenu} />
   if (run.phase === 'shop') return <Shop run={run} dispatch={dispatch} />

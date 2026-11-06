@@ -125,4 +125,7 @@ export async function submitScore(runId: string, name: string): Promise<boolean>
 }
 /** Every barrel pumped by every player who shares play data. */
 export const loadOilTotal = () => call<number>('tycoon_oil_total', {}, { always: true })
+/** Remedies patented in Pharmaceutical runs, sent at the end of each round. */
+export function patented(n: number) { if (n > 0) void call('tycoon_patents', { p_player: playerId(), p_n: Math.min(n, 50) }, { keepalive: true }) }
+export const loadPatentTotal = () => call<number>('tycoon_patent_total', {}, { always: true })
 export const loadGlobalScores = (limit = 50) => call<GlobalScore[]>('tycoon_scoreboard', { p_limit: limit }, { always: true })

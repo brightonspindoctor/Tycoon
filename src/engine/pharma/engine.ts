@@ -40,7 +40,7 @@ export interface PRun {
   spoils: PCardKey[] // after a round: pick one, or take the cash
   events: string[]
   loss?: { reason: PLoss; by?: string }
-  stats: { earned: number; researched: number; produced: number; deaths: number; settled: number }
+  stats: { earned: number; researched: number; patented: number; produced: number; deaths: number; settled: number }
 }
 
 export type PAction =
@@ -144,7 +144,7 @@ export function newPharmaRun(seed: number): PRun {
     draw: [], hand: [], discard: [], benched: [], factories: Array(C.startFactories).fill(null), threats: [], cases: [],
     researched: false, doubleResearch: false, samples: 0, factoryPrice: 0, destroyCost: C.destroyCost,
     shop: { cards: [], destroyed: false }, spoils: [], events: [],
-    stats: { earned: 0, researched: 0, produced: 0, deaths: 0, settled: 0 },
+    stats: { earned: 0, researched: 0, patented: 0, produced: 0, deaths: 0, settled: 0 },
   }
   r.draw = PSTARTER.map(k => card(r, k))
   startRound(r, 1)
@@ -206,6 +206,7 @@ function research(r: PRun) {
     const c = card(r, pick(r, REMEDY_KEYS))
     r.hand.push(c)
     r.stats.researched++
+    r.stats.patented++
     say(r, `Research: ${PCARDS[c.key].name}.`)
   }
 }
@@ -238,7 +239,7 @@ function play(r: PRun, c: PCard, target?: number) {
     case 'freeSamples': r.samples += 1; break
     case 'hireSalesmen': r.hand.push(card(r, 'salesman'), card(r, 'salesman')); break
     case 'medicineShow': r.hand.push(card(r, 'salesman')); break
-    case 'biopiracy': { const x = card(r, pick(r, REMEDY_KEYS)); r.hand.push(x); say(r, `Biopiracy: ${PCARDS[x.key].name}.`); break }
+    case 'biopiracy': { const x = card(r, pick(r, REMEDY_KEYS)); r.hand.push(x); r.stats.patented++; say(r, `Biopiracy: ${PCARDS[x.key].name}.`); break }
     case 'inventAilment': r.doubleResearch = true; break
     case 'testimonials': addTrust(r, (d.trust ?? 0) - r.cases.length); break
   }

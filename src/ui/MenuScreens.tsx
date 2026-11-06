@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { loadGlobalScores, loadOilTotal, type GlobalScore } from '../telemetry'
+import { loadGlobalScores, loadOilTotal, loadPatentTotal, type GlobalScore } from '../telemetry'
 import { BONUSES, type BonusKey } from '../engine/data'
 import { ACHIEVEMENTS, ACHIEVEMENT_KEYS } from '../engine/achievements'
 import { bestScore, completedIndustries, loadAchieved, loadRuns, loadUnlocks, trustFundOffered, type RunRecord } from '../storage'
@@ -61,6 +61,8 @@ export function Intro({ live, onContinue, onBegin, onHistory, onAbout, onScorebo
   useEffect(() => { if (live && window.innerWidth <= 760) liveBox.current?.scrollIntoView({ block: 'center' }) }, []) // eslint-disable-line react-hooks/exhaustive-deps -- on a phone the cover fills the screen: bring the run into view
   const [oil, setOil] = useState<number | null>(null) // every barrel every player has pumped
   useEffect(() => { let on = true; void loadOilTotal().then(n => { if (on && typeof n === 'number') setOil(n) }); return () => { on = false } }, [])
+  const [patents, setPatents] = useState<number | null>(null) // every remedy every player has patented
+  useEffect(() => { let on = true; void loadPatentTotal().then(n => { if (on && typeof n === 'number') setPatents(n) }); return () => { on = false } }, [])
   // each industry is revealed when the one before it is finished; three tiles on the page
   const shown = INDUSTRIES.slice(0, 3)
   const unlocks = loadUnlocks()
@@ -106,6 +108,12 @@ export function Intro({ live, onContinue, onBegin, onHistory, onAbout, onScorebo
           <div className="oil-total" aria-label={`${oil} barrels pumped by every player so far`}>
             <span className="cl-label">Pumped by every tycoon so far</span>
             <b className="cl-num">{oil.toLocaleString('en-GB')}</b><span className="res-note">barrels</span>
+          </div>
+        )}
+        {patents !== null && open.includes('Pharmaceutical') && (
+          <div className="oil-total" aria-label={`${patents} remedies patented by every player so far`}>
+            <span className="cl-label">Patented by every tycoon so far</span>
+            <b className="cl-num">{patents.toLocaleString('en-GB')}</b><span className="res-note">{patents === 1 ? 'remedy' : 'remedies'}</span>
           </div>
         )}
         <button type="button" className="intro-feats" onClick={() => { play('click'); onAchievements() }} aria-label={`Achievements: ${feats} of ${ACHIEVEMENT_KEYS.length}. See them all`}>

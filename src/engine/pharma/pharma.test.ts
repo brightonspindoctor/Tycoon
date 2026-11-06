@@ -31,6 +31,7 @@ describe('Pharmaceutical stage 1', () => {
     r = pact(r, { type: 'research' })
     expect(r.capital).toBe(15 - cost)
     expect(r.hand.length).toBe(6)
+    expect(r.stats.patented).toBe(1)
     r = pact(r, { type: 'research' })
     expect(r.hand.length).toBe(6)
   })
