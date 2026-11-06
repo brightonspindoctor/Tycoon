@@ -1241,3 +1241,8 @@ button.m-threat { cursor: pointer; }
 .m .ph-shop .ph-capital { padding: 6px 10px; }
 .m .ph-shop .ph-capital b { font-size: 22px; line-height: 24px; }
 .m .ph-row { padding-top: 10px; }
+/* shop on phones: price tags sit on the card's corner, so the card can't clip them; cards wrap instead of scrolling sideways */
+.m .ph .card:has(> .card-price) { overflow: visible; }
+.m .ph-shop .ph-row { flex-wrap: wrap; overflow: visible; row-gap: 18px; padding-top: 12px; }
+.m .ph-shop .ph-row { column-gap: 8px; }
+.m .ph-shop .ph-row { row-gap: 22px; }
