@@ -16,6 +16,9 @@ export interface PCardDef {
   power?: number // Hold removed
   all?: boolean // hits every liability
   trust?: number // Trust gained (or lost) when played
+  gain?: number // $ earned when played
+  draw?: number // cards drawn
+  addAP?: number // AP gained
   uses?: number // played this many times, then gone
   oncePerFight?: boolean
   price?: number // in the shop
@@ -44,15 +47,15 @@ const remedyText = (k: RemedyKey) => {
 
 export const PCARDS: Record<PCardKey, PCardDef> = {
   produce: { name: 'Produce', ap: 1, family: 'Production', price: 6, icon: 'produce', text: 'Put a remedy from your hand into an empty factory.' },
-  salesman: { name: 'Travelling Salesman', ap: 1, family: 'Dirty', power: 3, uses: 3, price: 3, icon: 'salesman', text: 'Remove 3 Hold.' },
+  salesman: { name: 'Travelling Salesman', ap: 1, family: 'Dirty', power: 3, gain: 1, uses: 3, price: 3, icon: 'salesman', text: 'Remove 3 Hold. +$1.' },
   kickback: { name: 'Kickback', ap: 1, family: 'Dirty', power: 5, trust: -1, price: 4, icon: 'kickback', text: 'Remove 5 Hold. −1 Trust.' },
   expertWitness: { name: 'Expert Witness', ap: 1, cost: 1, family: 'Legal', power: 4, price: 4, icon: 'expertWitness', text: 'Pay $1. Remove 4 Hold.' },
-  nda: { name: 'NDA', ap: 1, cost: 1, family: 'Bury', price: 4, icon: 'nda', text: "Pay $1. Cancel the first hit of a liability's next move." },
+  nda: { name: 'NDA', ap: 1, cost: 1, family: 'Defence', price: 4, icon: 'nda', text: "Pay $1. Cancel the first hit of a liability's next move." },
   freeSamples: { name: 'Free Samples', ap: 1, family: 'Fortune', trust: 1, price: 3, icon: 'freeSamples', text: '+1 Trust. Live remedies pay $1 more this turn.' },
   charityGala: { name: 'Charity Gala', ap: 1, cost: 2, family: 'Fortune', trust: 2, price: 4, icon: 'charityGala', text: 'Pay $2. +2 Trust.' },
   hireSalesmen: { name: 'Hire Salesmen', ap: 1, family: 'Tempo', price: 4, icon: 'hireSalesmen', text: 'Add 2 Travelling Salesmen to your hand.' },
   medicineShow: { name: 'Medicine Show', ap: 1, family: 'Dirty', power: 2, trust: 1, price: 5, icon: 'medicineShow', text: 'Remove 2 Hold. +1 Trust. Add a Salesman to your hand.' },
-  biopiracy: { name: 'Biopiracy', ap: 1, family: 'Production', trust: -1, price: 4, icon: 'biopiracy', text: 'Add a remedy to your hand. −1 Trust.' },
+  biopiracy: { name: 'Biopiracy', ap: 0, family: 'Tempo', draw: 1, addAP: 1, oncePerFight: true, price: 4, icon: 'biopiracy', text: 'Draw a card. +1 AP.' },
   inventAilment: { name: 'Invent an Ailment', ap: 1, family: 'Production', price: 4, icon: 'inventAilment', text: 'Your next Research gives two remedies.' },
   testimonials: { name: 'Testimonials', ap: 1, family: 'Fortune', trust: 2, price: 3, icon: 'testimonials', text: '+2 Trust, −1 for each open Patient Case.' },
   smearCampaign: { name: 'Smear Campaign', ap: 1, family: 'Bury', power: 2, all: true, price: 5, icon: 'smearCampaign', text: 'Remove 2 Hold from every liability.' },

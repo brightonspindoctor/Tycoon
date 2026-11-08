@@ -1246,3 +1246,4 @@ button.m-threat { cursor: pointer; }
 .m .ph-shop .ph-row { flex-wrap: wrap; overflow: visible; row-gap: 18px; padding-top: 12px; }
 .m .ph-shop .ph-row { column-gap: 8px; }
 .m .ph-shop .ph-row { row-gap: 22px; }
+.m .ph-leave-top { display: none; }

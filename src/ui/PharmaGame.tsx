@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PHARMA as C } from '../engine/config'
 import { CASE_STEPS, PCARDS, PTHREATS, REMEDIES, isRemedy, moveText, type PCardKey, type RemedyKey } from '../engine/pharma/data'
 import {
-  allCards, canPlay, canResearch, currentMove, damageFor, newPharmaRun, nextFactoryPrice, pact, patentPays, researchCost, settleCost, spawnIn, targetsFor, trustBand,
+  allCards, canPlay, canResearch, currentMove, damageFor, newPharmaRun, nextFactoryPrice, pact, patentPays, researchCost, settleCost, skimRate, spawnIn, targetsFor, trustBand,
   type PAction, type PCard, type PRun,
 } from '../engine/pharma/engine'
 import { findPharmaTerms } from '../terms'
@@ -288,8 +288,9 @@ function Shop({ run, dispatch }: { run: PRun; dispatch: (a: PAction) => void }) 
       <header className="game__head">
         <div><span className="cl-label">Pharmaceutical · After round {run.round}</span><h1 className="cl-display game__title">The Apothecary's Wholesaler</h1></div>
         <div className="shop__head-right">
-          <div className="ph-capital"><span className="cl-label">Capital</span><b className="cl-num">{money(run.capital)}</b><span className="cl-num ph-capital__next">Trust {run.trust > 0 ? `+${run.trust}` : run.trust}</span></div>
+          <div className="ph-capital"><span className="cl-label">Capital</span><b className="cl-num">{money(run.capital)}</b><span className="cl-num ph-capital__next">Trust {run.trust > 0 ? `+${run.trust}` : run.trust} · {run.gold} gold</span></div>
           <GlossaryButton /><SettingsButton />
+          <button type="button" className="cl-btn cl-btn--primary ph-leave-top" onClick={() => dispatch({ type: 'leaveShop' })}>On to round {run.round + 1}</button>
         </div>
       </header>
       <section>
@@ -313,17 +314,24 @@ function Shop({ run, dispatch }: { run: PRun; dispatch: (a: PAction) => void }) 
           <span className="res-note">Generics {money(C.genericDestroy)}, as many as you like. Any other card {money(run.destroyCost)}, once a visit.</span>
           <button type="button" className="cl-btn" onClick={() => setDestroying(!destroying)}>{destroying ? 'Done' : 'Choose a card'}</button>
         </div>
+        <div className="ph-factory fortune--skim">
+          <img className="ph-factory__icon" src={iconUrl('charityGala')} alt="" />
+          <b className="ph-factory__name">Your fortune · {run.gold} gold</b>
+          <span className="res-note">Skim Capital into your own pocket at {money(skimRate(run))} a gold. Gold is your score.</span>
+          <div className="skim-buttons">{[1, 2, 3].map(g => <button key={g} type="button" className="cl-btn cl-btn--skim" disabled={run.capital - g * skimRate(run) < 1} onClick={() => dispatch({ type: 'skim', gold: g })}>{g} gold · {money(g * skimRate(run))}</button>)}</div>
+        </div>
       </section>
-      {destroying && <section>
-        <span className="cl-label">Your deck · tap a card to destroy it</span>
+      <section>
+        <span className="cl-label">Your cards · {deck.length}{destroying ? ' · tap a card to destroy it' : ''}</span>
         <div className="ph-row ph-row--wrap">
           {deck.map(c => {
+            if (!destroying) return <PCardView key={c.id} card={c} />
             const cost = c.key === 'generic' ? C.genericDestroy : run.destroyCost
             const ok = run.capital >= cost && (c.key === 'generic' || !run.shop.destroyed)
             return <PCardView key={c.id} card={c} marked playable={ok} price={money(cost)} why={ok ? undefined : 'Not now'} onClick={() => dispatch({ type: 'destroy', cardId: c.id })} />
           })}
         </div>
-      </section>}
+      </section>
       <div className="ph-shop__foot"><span className="res-note">{run.round + 1 === 4 ? 'Next: the boss, The Great American Fraud.' : `Next: round ${run.round + 1}.`}</span><button type="button" className="cl-btn cl-btn--primary" onClick={() => dispatch({ type: 'leaveShop' })}>On to round {run.round + 1}</button></div>
     </div>
   )
@@ -336,7 +344,7 @@ function End({ run, onAgain, onMenu }: { run: PRun; onAgain: () => void; onMenu:
     <div className="screen ph ph-end" data-theme="victorian">
       <span className="cl-label">Pharmaceutical · Stage 1 · Admin playtest</span>
       <h1 className="cl-display game__title">{won ? 'The Pure Food and Drug Act passes. You adapt.' : why}</h1>
-      <p>{won ? `Stage 1 cleared with ${money(run.capital)} in Capital and Trust at ${run.trust}.` : `Lost in round ${run.round}, turn ${run.turn}.`}</p>
+      <p>{won ? `Stage 1 cleared with ${money(run.capital)} in Capital, ${run.gold} gold and Trust at ${run.trust}.` : `Lost in round ${run.round}, turn ${run.turn}, with ${run.gold} gold.`}</p>
       <p className="res-note">{run.stats.researched} researched · {run.stats.produced} produced · {money(run.stats.earned)} earned · {run.stats.settled} settled · {run.stats.deaths} {run.stats.deaths === 1 ? 'death' : 'deaths'}</p>
       <div className="ph-row"><button type="button" className="cl-btn cl-btn--primary" onClick={onAgain}>Play again</button><button type="button" className="cl-btn" onClick={onMenu}>Front page</button></div>
     </div>

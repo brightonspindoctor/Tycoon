@@ -21,6 +21,7 @@ export interface PRun {
   round: number
   turn: number
   capital: number
+  gold: number // the personal fortune: skimmed in the shop, the score
   trust: number
   ap: number
   nextId: number
@@ -40,7 +41,7 @@ export interface PRun {
   spoils: PCardKey[] // after a round: pick one, or take the cash
   events: string[]
   loss?: { reason: PLoss; by?: string }
-  stats: { earned: number; researched: number; patented: number; produced: number; deaths: number; settled: number }
+  stats: { earned: number; researched: number; patented: number; produced: number; deaths: number; settled: number; skims: number }
 }
 
 export type PAction =
@@ -52,6 +53,7 @@ export type PAction =
   | { type: 'buy'; slot: number }
   | { type: 'buyFactory' }
   | { type: 'destroy'; cardId: number }
+  | { type: 'skim'; gold: number }
   | { type: 'leaveShop' }
 
 const say = (r: PRun, s: string) => { r.events.unshift(s); r.events.length = Math.min(r.events.length, 12) }
@@ -140,11 +142,11 @@ function startTurn(r: PRun) {
 
 export function newPharmaRun(seed: number): PRun {
   const r: PRun = {
-    seed, rng: seed, phase: 'turn', round: 0, turn: 0, capital: C.startCapital, trust: 0, ap: C.baseAP, nextId: 1,
+    seed, rng: seed, phase: 'turn', round: 0, turn: 0, capital: C.startCapital, gold: 0, trust: 0, ap: C.baseAP, nextId: 1,
     draw: [], hand: [], discard: [], benched: [], factories: Array(C.startFactories).fill(null), threats: [], cases: [],
     researched: false, doubleResearch: false, samples: 0, factoryPrice: 0, destroyCost: C.destroyCost,
     shop: { cards: [], destroyed: false }, spoils: [], events: [],
-    stats: { earned: 0, researched: 0, patented: 0, produced: 0, deaths: 0, settled: 0 },
+    stats: { earned: 0, researched: 0, patented: 0, produced: 0, deaths: 0, settled: 0, skims: 0 },
   }
   r.draw = PSTARTER.map(k => card(r, k))
   startRound(r, 1)
@@ -239,10 +241,12 @@ function play(r: PRun, c: PCard, target?: number) {
     case 'freeSamples': r.samples += 1; break
     case 'hireSalesmen': r.hand.push(card(r, 'salesman'), card(r, 'salesman')); break
     case 'medicineShow': r.hand.push(card(r, 'salesman')); break
-    case 'biopiracy': { const x = card(r, pick(r, REMEDY_KEYS)); r.hand.push(x); r.stats.patented++; say(r, `Biopiracy: ${PCARDS[x.key].name}.`); break }
     case 'inventAilment': r.doubleResearch = true; break
     case 'testimonials': addTrust(r, (d.trust ?? 0) - r.cases.length); break
   }
+  if (d.gain) earn(r, d.gain)
+  if (d.addAP) r.ap += d.addAP
+  if (d.draw) drawCards(r, d.draw)
   if (d.power) {
     if (d.all) for (const t of liveThreats(r)) hitThreat(r, t, d.family, d.power)
     else { const t = r.threats.find(x => x.id === tgt); if (t) hitThreat(r, t, d.family, d.power) }
@@ -367,6 +371,8 @@ function openShop(r: PRun) {
   r.shop = { cards: shuffle(r, [...PSHOP_POOL]).slice(0, C.shopCards), destroyed: false }
 }
 
+export const skimRate = (r: PRun) => C.skimRate[r.round] ?? C.skimRate[3]
+
 /** Takes an action and returns the new run. The run passed in is never changed. */
 export function pact(prev: PRun, a: PAction): PRun {
   const r: PRun = structuredClone(prev)
@@ -414,6 +420,13 @@ export function pact(prev: PRun, a: PAction): PRun {
       if (c.key !== 'generic') r.destroyCost++
       r.draw = r.draw.filter(x => x.id !== c.id); r.discard = r.discard.filter(x => x.id !== c.id); r.hand = r.hand.filter(x => x.id !== c.id); r.benched = r.benched.filter(x => x.id !== c.id)
       if (c.key !== 'generic') r.shop.destroyed = true
+      break
+    }
+    case 'skim': {
+      const cost = a.gold * skimRate(r)
+      if (r.phase !== 'shop' || a.gold < 1 || r.capital - cost < 1) break // the company keeps at least $1
+      pay(r, cost); r.gold += a.gold; r.stats.skims += a.gold
+      say(r, `Skimmed ${a.gold} gold.`)
       break
     }
     case 'leaveShop': if (r.phase === 'shop') startRound(r, r.round + 1); break

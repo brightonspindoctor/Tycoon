@@ -228,6 +228,7 @@ export const PHARMA = {
   deathCapital: 6,
   deathTrust: 2,
   // the shop
+  skimRate: { 1: 1, 2: 2, 3: 3 } as Record<number, number>, // $ per gold in the shop after each round (as Oil stage 1)
   destroyCost: 3, // destroy a card; +1 each time
   genericDestroy: 1, // a Generic is cheaper to get rid of
   spoilsCash: 3, // turning down the card offered after a round

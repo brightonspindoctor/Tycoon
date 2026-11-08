@@ -92,6 +92,33 @@ describe('Pharmaceutical stage 1', () => {
     expect(allCards(r).some(c => c.id === id)).toBe(false)
   })
 
+  it('a Travelling Salesman earns $1 each time', () => {
+    let r = setUp(['salesman'], 'fraud')
+    r = pact(r, { type: 'play', cardId: r.hand[0].id })
+    expect(r.capital).toBe(16)
+  })
+
+  it('Biopiracy costs no AP, draws a card, gives +1 AP, and is once a fight', () => {
+    let r = setUp(['biopiracy'])
+    r.draw = [{ id: 777, key: 'kickback' }]
+    r = pact(r, { type: 'play', cardId: r.hand[0].id })
+    expect(r.ap).toBe(3)
+    expect(r.hand.map(c => c.key)).toEqual(['kickback'])
+    expect(r.benched.map(c => c.key)).toEqual(['biopiracy'])
+  })
+
+  it('skimming in the shop turns Capital into gold, leaving the company at least $1', () => {
+    let r = setUp(['kickback'], 'customer')
+    r = pact(r, { type: 'play', cardId: r.hand[0].id })
+    r = pact(r, { type: 'spoils', key: null })
+    r.capital = 4
+    r = pact(r, { type: 'skim', gold: 3 })
+    expect(r.gold).toBe(3)
+    expect(r.capital).toBe(1)
+    r = pact(r, { type: 'skim', gold: 1 })
+    expect(r.gold).toBe(3)
+  })
+
   it('a liability with several hits plays them all; Trust at −6 is Disgraced', () => {
     let r = setUp([], 'temperance')
     r.trust = -4
