@@ -903,8 +903,8 @@ function endRound(r: Run) {
     if (!feats(r).scratched && r.stage >= 3) feats(r).cleanFight = true // stage 3 and 4 moves all cost something: only Cover keeps them off
     if (r.phase === 'stageComplete' && r.turn <= 1) feats(r).quickBoss = true
     if (r.phase === 'stageComplete') grantReward(r)
-    // a card to take, or turn down for cash. After stage 2's first fight, it's the Expense Account: skimming from now on
-    else r.spoils = r.stage === 2 && r.round === 1 && !r.deck.some(c => c.key === 'expenseAccount') ? 'expenseAccount' : weightedCard(r, [...poolFor(r)])
+    // a card to take, or turn down for cash. In stage 2 it's the Expense Account (skimming from now on) after every fight until you own one
+    else r.spoils = r.stage === 2 && !r.deck.some(c => c.key === 'expenseAccount') ? 'expenseAccount' : weightedCard(r, [...poolFor(r)])
     r.plots.forEach(w => w && (w.unstable = false))
   }
 }

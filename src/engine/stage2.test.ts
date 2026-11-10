@@ -76,6 +76,20 @@ describe('incorporation (stage 1 → 2)', () => {
     expect(r.shop.cards.length).toBe(3)
   })
 
+  it('offers the Expense Account again after the next stage 2 fight if you turned it down', () => {
+    let r = act(afterBaron(), { type: 'continue' })
+    r = act(act(r, { type: 'pickCard', key: 'derrick' }), { type: 'pickCard', key: 'payDividend' })
+    r = act(r, { type: 'leaveShop' })
+    r.admin = true
+    r = act(r, { type: 'admin', op: 'winRound' })
+    expect(r.spoils).toBe('expenseAccount')
+    r = act(act(r, { type: 'sellSpoils' }), { type: 'continue' })
+    r = act(r, { type: 'leaveShop' })
+    r = act(r, { type: 'admin', op: 'winRound' })
+    expect(r.phase).toBe('roundWon')
+    expect(r.spoils).toBe('expenseAccount')
+  })
+
   it('offers a 10K loan that adds 1K a turn to Bank Debt, once', () => {
     let r = act(afterBaron(), { type: 'continue' })
     const cap = r.capital, debt = r.debt
