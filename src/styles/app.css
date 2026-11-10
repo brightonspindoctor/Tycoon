@@ -1248,7 +1248,6 @@ button.m-threat { cursor: pointer; }
 .ph-trust--low .ph-dial__value { fill: var(--loss); }
 .ph-trust--high .ph-dial__value { fill: var(--gain); }
 @media (prefers-reduced-motion: reduce) { .ph-dial__needle { transition: none; } }
-.ph__grid .ph-trust { flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+.ph__grid .ph-trust { flex-direction: row; align-items: center; gap: 24px; }
 .ph__grid .ph-trust .ph-dial { max-width: 190px; margin: 0; }
-.ph__grid .ph-trust > .res-note { max-width: 240px; text-align: right; }
-.ph.m-game .ph-trust > .res-note { text-align: center; }
+.ph__grid .ph-trust { align-self: flex-start; padding-right: 24px; }

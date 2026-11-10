@@ -79,7 +79,6 @@ function TrustDial({ trust }: { trust: number }) {
         <circle cx={cx} cy={cy} r="5" className="ph-dial__hub" />
         <text x={cx} y={cy + 30} className="ph-dial__value">{trust > 0 ? `+${trust}` : trust}</text>
       </svg>
-      <span className="res-note">Research {money(C.research.low)} at −3 or less · {money(C.research.mid)} · {money(C.research.high)} at +3 or more.</span>
     </section>
   )
 }
