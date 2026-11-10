@@ -1110,20 +1110,6 @@ button.m-threat { cursor: pointer; }
 .ph-nda { font-size: 12px; font-weight: 700; }
 
 .ph-trust { border: 2px solid var(--ink); border-radius: var(--radius-1860); background: var(--paper-raised); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
-.ph-trust__head { display: flex; align-items: center; gap: 8px; }
-.ph-trust__head img { width: 34px; height: 34px; }
-.ph-trust__head b { margin-left: auto; font-size: 26px; }
-.ph-trust--low .ph-trust__head b { color: var(--loss); }
-.ph-trust--high .ph-trust__head b { color: var(--gain); }
-.ph-trust__scale { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
-.ph-trust__cell { font-family: var(--font-figures); font-size: 12px; text-align: center; padding: 5px 0; border: 1.5px solid var(--rule); color: var(--ink-muted); transition: background .25s, color .25s, transform .25s; }
-.ph-trust__cell.is-neg { background: color-mix(in srgb, var(--loss) 10%, transparent); }
-.ph-trust__cell.is-pos { background: color-mix(in srgb, var(--gain) 10%, transparent); }
-.ph-trust__cell.is-zero { border-color: var(--ink); }
-.ph-trust__cell.is-skull { background: var(--ink); color: var(--paper-raised); border-color: var(--ink); display: flex; align-items: center; justify-content: center; }
-.ph-trust__cell.is-now { color: var(--paper-raised); font-weight: 700; transform: scale(1.12); border-color: var(--ink); background: var(--ink-muted); }
-.ph-trust__cell.is-now.is-neg { background: var(--loss); border-color: var(--loss); }
-.ph-trust__cell.is-now.is-pos { background: var(--gain); border-color: var(--gain); }
 
 .ph-factories { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .ph-factory { position: relative; border: 1.5px dashed var(--ink-muted); border-radius: var(--radius-1860); background: var(--paper-raised); padding: 8px 10px; display: flex; align-items: center; gap: 10px; }
@@ -1183,7 +1169,6 @@ button.m-threat { cursor: pointer; }
 .ph.m-game .ph-capital b { font-size: 22px; line-height: 24px; }
 .ph.m-game .ph-capital__next { font-size: 10.5px; }
 .ph.m-game .ph-trust .res-note { font-size: 11px; }
-.ph.m-game .ph-trust__cell { font-size: 10.5px; padding: 4px 0; }
 .ph.m-game .ph-factory__icon { width: 40px; height: 40px; }
 .m .ph .card, .m .ph-spoils .card { flex: none; width: 112px; height: 172px; padding: 7px; gap: 3px; overflow: hidden; }
 .m .ph .card .cl-card__art img, .m .ph-spoils .card .cl-card__art img { width: 40px; height: 40px; }
@@ -1201,8 +1186,6 @@ button.m-threat { cursor: pointer; }
 .m .ph-shop__extras .ph-factory { width: auto; }
 .m .ph-shop .game__head { flex-wrap: wrap; gap: 8px; }
 .ph.m-game .m-main > * { flex: none; }
-.ph.m-game .ph-trust__scale { gap: 2px; }
-.ph.m-game .ph-trust__cell { min-width: 0; }
 .ph.m-game .ph-track--big i { min-width: 0; font-size: 11px; padding: 1px 4px; }
 .ph.m-game .ph-factory { padding: 6px 8px; gap: 8px; min-width: 0; }
 .ph.m-game .ph-factory__name { font-size: 14px; line-height: 16px; overflow-wrap: anywhere; }
@@ -1248,29 +1231,24 @@ button.m-threat { cursor: pointer; }
 .m .ph-shop .ph-row { row-gap: 22px; }
 .m .ph-leave-top { display: none; }
 
-/* the Trust dial: brass, Victorian */
-.ph-dial { width: 100%; max-width: 360px; align-self: center; display: block; --brass: #a8822f; --brass-dark: #6e5410; }
-.ph-dial__rim { fill: none; stroke: var(--brass); stroke-width: 3; }
-.ph-dial__band { fill: none; stroke-width: 12; }
-.ph-dial__band--low { stroke: color-mix(in srgb, var(--loss) 70%, transparent); }
-.ph-dial__band--mid { stroke: color-mix(in srgb, var(--rule) 45%, transparent); }
-.ph-dial__band--high { stroke: color-mix(in srgb, var(--gain) 70%, transparent); }
-.ph-dial__tick { stroke: var(--ink); stroke-width: 1.5; }
-.ph-dial__tick.is-zero { stroke-width: 3; }
-.ph-dial__num { font-family: var(--font-figures); font-size: 11px; fill: var(--ink-muted); text-anchor: middle; }
-.ph-dial__num.is-now { fill: var(--ink); font-weight: 700; font-size: 13px; }
+/* the Trust dial: brass, plain */
+.ph-trust { align-items: center; text-align: center; }
+.ph-trust__label { align-self: flex-start; }
+.ph-dial { width: 100%; max-width: 240px; display: block; margin: 0 auto; --brass: #a8822f; }
+.ph-dial__track { fill: none; stroke: color-mix(in srgb, var(--rule) 40%, transparent); stroke-width: 8; stroke-linecap: round; }
+.ph-dial__zone { fill: none; stroke-width: 8; }
+.ph-dial__zone--low { stroke: var(--loss); stroke-linecap: round; }
+.ph-dial__zone--high { stroke: var(--gain); stroke-linecap: round; }
+.ph-dial__end { font-family: var(--font-figures); font-size: 11px; fill: var(--ink-muted); text-anchor: middle; }
 .ph-dial__skull { color: var(--loss); }
-.ph-dial__needle { fill: var(--ink); transition: transform .6s cubic-bezier(.3, 1.6, .5, 1); }
-.ph-dial__hub { fill: var(--brass); stroke: var(--brass-dark); stroke-width: 2; }
-.ph-dial__pin { fill: var(--brass-dark); }
-.ph-trust--low .ph-dial__needle { fill: var(--loss); }
+.ph-dial__needle line { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.ph-dial__needle { transition: transform .6s cubic-bezier(.3, 1.4, .5, 1); }
+.ph-dial__hub { fill: var(--brass); }
+.ph-dial__value { font-family: var(--font-figures); font-size: 26px; font-weight: 700; fill: var(--ink); text-anchor: middle; }
+.ph-trust--low .ph-dial__value { fill: var(--loss); }
+.ph-trust--high .ph-dial__value { fill: var(--gain); }
 @media (prefers-reduced-motion: reduce) { .ph-dial__needle { transition: none; } }
-.ph.m-game .ph-dial { max-width: 280px; }
-.ph__middle .ph-trust { display: grid; grid-template-columns: 250px minmax(0, 1fr); grid-template-areas: "dial head" "dial note"; column-gap: 16px; align-items: center; }
-.ph__middle .ph-trust .ph-dial { grid-area: dial; }
-.ph__middle .ph-trust .ph-trust__head { grid-area: head; align-self: end; }
-.ph__middle .ph-trust .ph-trust__head b { margin-left: 12px; }
-.ph__middle .ph-trust > .res-note { grid-area: note; align-self: start; }
-.ph.m-game .ph__middle .ph-trust { display: flex; }
-.ph.m-game .ph__middle .ph-trust .ph-trust__head b { margin-left: auto; }
-.ph.m-game .ph__middle .ph-trust .ph-trust__head { align-self: stretch; }
+.ph__grid .ph-trust { flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+.ph__grid .ph-trust .ph-dial { max-width: 190px; margin: 0; }
+.ph__grid .ph-trust > .res-note { max-width: 240px; text-align: right; }
+.ph.m-game .ph-trust > .res-note { text-align: center; }

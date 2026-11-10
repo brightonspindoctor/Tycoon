@@ -54,40 +54,32 @@ const Skull = () => (
   </svg>
 )
 
-/** Trust as a brass dial: the needle runs from the skull (Disgraced, −6) round to +5. */
+/** Trust as a brass dial: one needle, from the skull (Disgraced, −6) round to +5. Kept plain on purpose. */
 function TrustDial({ trust }: { trust: number }) {
   const lo = C.disgraceAt, hi = C.trustMax
-  const cx = 120, cy = 118, R = 96
-  const at = (v: number) => { const a = Math.PI * (1 - (v - lo) / (hi - lo)); return [cx + Math.cos(a), cy - Math.sin(a)] as const }
-  const pt = (v: number, r: number) => { const [x, y] = at(v); return [cx + (x - cx) * r, cy + (y - cy) * r] as const }
+  const cx = 100, cy = 100, R = 76
+  const pt = (v: number, r: number) => { const a = Math.PI * (1 - (v - lo) / (hi - lo)); return [cx + Math.cos(a) * r, cy - Math.sin(a) * r] as const }
   const arc = (from: number, to: number, r: number) => { const [x1, y1] = pt(from, r); const [x2, y2] = pt(to, r); return `M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}` }
   const shown = Math.max(lo, Math.min(hi, trust))
   const turn = ((shown - lo) / (hi - lo)) * 180
-  const ticks = Array.from({ length: hi - lo + 1 }, (_, i) => lo + i)
+  const [sx, sy] = pt(lo, R + 14), [zx, zy] = pt(0, R + 10), [hx, hy] = pt(hi, R + 14)
   return (
     <section className={`ph-trust ph-trust--${trustBand(trust)}`} aria-label={`Trust ${trust}, from ${C.trustMin} to +${C.trustMax}. Disgraced at ${C.disgraceAt}.`}>
-      <div className="ph-trust__head"><img src={iconUrl('trust')} alt="" /><span className="cl-label">Trust</span><b className="cl-num">{trust > 0 ? `+${trust}` : trust}</b></div>
-      <svg className="ph-dial" viewBox="0 0 240 132" aria-hidden="true">
-        <path d={arc(lo - 0.45, hi + 0.45, R + 8)} className="ph-dial__rim" />
-        <path d={arc(lo, -3, R)} className="ph-dial__band ph-dial__band--low" />
-        <path d={arc(-3, 3, R)} className="ph-dial__band ph-dial__band--mid" />
-        <path d={arc(3, hi, R)} className="ph-dial__band ph-dial__band--high" />
-        {ticks.map(v => {
-          const [x1, y1] = pt(v, R - 7); const [x2, y2] = pt(v, R + 3); const [lx, ly] = pt(v, R - 24)
-          return <g key={v}>
-            <line x1={x1} y1={y1} x2={x2} y2={y2} className={`ph-dial__tick ${v === 0 ? 'is-zero' : ''}`} />
-            {v === lo
-              ? <g transform={`translate(${lx - 8} ${ly - 8})`} className="ph-dial__skull"><Skull /></g>
-              : <text x={lx} y={ly + 4} className={`ph-dial__num ${v === trust ? 'is-now' : ''}`}>{v > 0 ? `+${v}` : v}</text>}
-          </g>
-        })}
+      <span className="cl-label ph-trust__label">Trust</span>
+      <svg className="ph-dial" viewBox="0 0 200 136" aria-hidden="true">
+        <path d={arc(lo, hi, R)} className="ph-dial__track" />
+        <path d={arc(lo, -3, R)} className="ph-dial__zone ph-dial__zone--low" />
+        <path d={arc(3, hi, R)} className="ph-dial__zone ph-dial__zone--high" />
+        <g transform={`translate(${sx - 8} ${sy - 4})`} className="ph-dial__skull"><Skull /></g>
+        <text x={zx} y={zy} className="ph-dial__end">0</text>
+        <text x={hx + 2} y={hy + 10} className="ph-dial__end">+5</text>
         <g className="ph-dial__needle" style={{ transform: `rotate(${turn}deg)`, transformOrigin: `${cx}px ${cy}px` }}>
-          <path d={`M${cx - R + 14} ${cy} L${cx + 4} ${cy - 4} L${cx + 14} ${cy} L${cx + 4} ${cy + 4} Z`} />
+          <line x1={cx} y1={cy} x2={cx - R + 6} y2={cy} />
         </g>
-        <circle cx={cx} cy={cy} r="9" className="ph-dial__hub" />
-        <circle cx={cx} cy={cy} r="3.5" className="ph-dial__pin" />
+        <circle cx={cx} cy={cy} r="5" className="ph-dial__hub" />
+        <text x={cx} y={cy + 30} className="ph-dial__value">{trust > 0 ? `+${trust}` : trust}</text>
       </svg>
-      <span className="res-note">Research {money(C.research.low)} at −3 or less · {money(C.research.mid)} · {money(C.research.high)} at +3 or more. Disgraced at {C.disgraceAt}.</span>
+      <span className="res-note">Research {money(C.research.low)} at −3 or less · {money(C.research.mid)} · {money(C.research.high)} at +3 or more.</span>
     </section>
   )
 }

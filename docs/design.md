@@ -430,7 +430,7 @@ The four stages (only 1 built): **Patent Medicines** (1880s–1900s, boss The Gr
 - **Factories**: start with 1, up to 6. Each extra costs $10, $12, $14, then $15.
 - Stage 1 remedies: Snake Oil Liniment ($1 2 2 3, safe) · Vegetable Compound ($1 1 2 2 3, safe) · Cocaine Tonic ($2 3 5, 25% Patient Case a turn) · Soothing Syrup ($2 4 6, 40%) · Heroin Cough Syrup ($1 3 5 7, 30%, −1 Trust when produced).
 
-**Trust** runs −5 to +5 for the whole run (no reset between rounds), shown as a brass dial whose needle swings from the skull and crossbones (−6) round to +5. At −6 you're **Disgraced** and the run ends. Negative Trust is allowed: it makes Research dearer. Beating a liability gives +1 Trust. Later: the stage 3 boss can raise the Disgraced line (e.g. to −4); items can raise the top above +5.
+**Trust** runs −5 to +5 for the whole run (no reset between rounds), shown as a plain brass dial: one needle from the skull and crossbones (−6) round to +5, red and green at the ends, the number underneath. At −6 you're **Disgraced** and the run ends. Negative Trust is allowed: it makes Research dearer. Beating a liability gives +1 Trust. Later: the stage 3 boss can raise the Disgraced line (e.g. to −4); items can raise the top above +5.
 
 **Patient Cases**: a risky live remedy can cause one as your turn ends; some liabilities add them. Each turn a case climbs Complaint → Hospitalised → Critical (−1 Trust) → Death (−$6, −2 Trust). Settle any time for 1 AP plus $1 / $2 / $4.
 
