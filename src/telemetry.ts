@@ -112,9 +112,13 @@ export interface GlobalScore { name: string; gold: number; tactic: string | null
 /** Puts a won game on the global scoreboard. This one goes even with play data off: the player asked for it. */
 let last: { id: string; bonus: string; args: Record<string, unknown> } | null = null
 export async function submitScore(runId: string, name: string): Promise<boolean> {
-  // with play data off, the won game itself still has to reach the scoreboard
-  if (!sharing() && last?.id === runId) {
-    await call('tycoon_hello', { p_player: playerId(), p_platform: platform(), p_version: VERSION, p_installed: isInstalled() }, { always: true })
+  // The run-start and run-end calls above are normally fire-and-forget. Re-send
+  // them in order here so a fast score submission cannot reach Postgres before
+  // the run is marked as won (tycoon_submit_score otherwise silently does nothing).
+  if (last?.id === runId) {
+    if (!sharing()) {
+      await call('tycoon_hello', { p_player: playerId(), p_platform: platform(), p_version: VERSION, p_installed: isInstalled() }, { always: true })
+    }
     await call('tycoon_run_start', { p_run: runId, p_player: playerId(), p_bonus: last.bonus }, { always: true })
     await call('tycoon_run_end', last.args, { always: true })
   }
